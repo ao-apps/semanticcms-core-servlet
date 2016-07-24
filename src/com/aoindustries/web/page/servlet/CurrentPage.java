@@ -44,6 +44,9 @@ public class CurrentPage {
 		request.setAttribute(CURRENT_PAGE_REQUEST_ATTRIBUTE_NAME, page);
 	}
 
+	/**
+	 * Make no instances.
+	 */
 	private CurrentPage() {
 	}
 }

@@ -41,6 +41,9 @@ public class CurrentNode {
 		request.setAttribute(CURRENT_NODE_REQUEST_ATTRIBUTE_NAME, node);
 	}
 
+	/**
+	 * Make no instances.
+	 */
 	private CurrentNode() {
 	}
 }
