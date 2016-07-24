@@ -44,7 +44,7 @@ public enum CaptureLevel {
 	 */
 	BODY;
 
-	static final String CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME = CaptureLevel.class.getName()+".captureLevel";
+	private static final String CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME = CaptureLevel.class.getName()+".captureLevel";
 
 	/**
 	 * Gets the capture level or <code>BODY</code> if none occurring.
@@ -52,5 +52,9 @@ public enum CaptureLevel {
 	public static CaptureLevel getCaptureLevel(ServletRequest request) {
 		CaptureLevel captureLevel = (CaptureLevel)request.getAttribute(CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME);
 		return captureLevel == null ? BODY : captureLevel;
+	}
+
+	static void setCaptureLevel(ServletRequest request, CaptureLevel level) {
+		request.setAttribute(CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME, level);
 	}
 }

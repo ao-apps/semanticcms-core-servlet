@@ -137,7 +137,7 @@ public class CapturePage {
 				CapturePage oldCaptureContext = CapturePage.getCaptureContext(request);
 				try {
 					// Set new capture context
-					request.setAttribute(CaptureLevel.CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME, level);
+					CaptureLevel.setCaptureLevel(request, level);
 					CapturePage captureContext = new CapturePage();
 					request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, captureContext);
 					// Include the page resource, discarding any direct output
@@ -166,7 +166,7 @@ public class CapturePage {
 					if(capturedPage==null) throw new ServletException("No page captured, page=" + capturePath);
 				} finally {
 					// Restore previous capture context
-					request.setAttribute(CaptureLevel.CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME, oldCaptureLevel);
+					CaptureLevel.setCaptureLevel(request, oldCaptureLevel);
 					request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, oldCaptureContext);
 				}
 			} finally {
