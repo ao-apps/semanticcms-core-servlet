@@ -28,7 +28,7 @@ import javax.servlet.ServletRequest;
 /**
  * Tracking of the current node during request processing and capturing.
  */
-public class CurrentNode {
+final public class CurrentNode {
 
 	// Cleared and restored on request in CapturePage
 	private static final String CURRENT_NODE_REQUEST_ATTRIBUTE_NAME = "currentNode";

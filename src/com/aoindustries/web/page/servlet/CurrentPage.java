@@ -28,7 +28,7 @@ import javax.servlet.ServletRequest;
 /**
  * Tracking of the current page during request processing and capturing.
  */
-public class CurrentPage {
+final public class CurrentPage {
 
 	// Cleared and restored on request in CapturePage
 	private static final String CURRENT_PAGE_REQUEST_ATTRIBUTE_NAME = /*PageTag.class.getName()+".*/ "currentPage";
