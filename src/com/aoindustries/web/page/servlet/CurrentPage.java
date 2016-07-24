@@ -26,7 +26,7 @@ import com.aoindustries.web.page.Page;
 import javax.servlet.ServletRequest;
 
 /**
- * Tracking of the current node during request processing and capturing.
+ * Tracking of the current page during request processing and capturing.
  */
 public class CurrentPage {
 
