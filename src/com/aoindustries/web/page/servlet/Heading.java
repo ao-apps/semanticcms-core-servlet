@@ -32,7 +32,6 @@ import com.aoindustries.web.page.Page;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,51 +39,13 @@ import javax.servlet.jsp.SkipPageException;
 
 public class Heading extends Element<com.aoindustries.web.page.Heading> {
 
-	public Heading(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String label,
-		String id,
-		ElementBody<? super com.aoindustries.web.page.Heading> body
-	) throws ServletException, IOException, SkipPageException {
-		super(
-			servletContext,
-			request,
-			response,
-			new com.aoindustries.web.page.Heading(label),
-			id,
-			body
-		);
+	public Heading(String label, String id) {
+		super(new com.aoindustries.web.page.Heading(), id);
+		element.setLabel(label);
 	}
 
-	public Heading(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String label,
-		ElementBody<? super com.aoindustries.web.page.Heading> body
-	) throws ServletException, IOException, SkipPageException {
-		this(servletContext, request, response, label, null, body);
-	}
-
-	public Heading(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String label,
-		String id
-	) throws ServletException, IOException, SkipPageException {
-		this(servletContext, request, response, label, id, null);
-	}
-
-	public Heading(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String label
-	) throws ServletException, IOException, SkipPageException {
-		this(servletContext, request, response, label, null, null);
+	public Heading(String label) {
+		this(label, null);
 	}
 
 	private PageIndex pageIndex;

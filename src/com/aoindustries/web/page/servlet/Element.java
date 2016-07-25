@@ -51,23 +51,27 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 
 	protected final E element;
 
+	protected Element(
+		E element,
+		String id
+	) {
+		this.element = element;
+		if(id != null && !id.isEmpty()) {
+			element.setId(id);
+		}
+	}
+
 	/**
 	 * Adds this element to the current page, if part of a page.
 	 * Sets this element as the current element.
 	 * Then, if not capturing or capturing META or higher, calls {@link #doBody}
 	 */
-	protected Element(
+	public void doElement(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		E element,
-		String id,
 		ElementBody<? super E> body
 	) throws ServletException, IOException, SkipPageException {
-		this.element = element;
-		if(id != null && !id.isEmpty()) {
-			element.setId(id);
-		}
 		// Get the current capture state
 		CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
@@ -107,33 +111,15 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 		}
 	}
 
-	protected Element(
+	/**
+	 * @see  #doElement(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.aoindustries.web.page.servlet.Element.ElementBody)
+	 */
+	public void doElement(
 		ServletContext servletContext,
 		HttpServletRequest request,
-		HttpServletResponse response,
-		E element,
-		ElementBody<? super E> body
+		HttpServletResponse response
 	) throws ServletException, IOException, SkipPageException {
-		this(servletContext, request, response, element, null, body);
-	}
-
-	protected Element(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		E element,
-		String id
-	) throws ServletException, IOException, SkipPageException {
-		this(servletContext, request, response, element, id, null);
-	}
-
-	protected Element(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		E element
-	) throws ServletException, IOException, SkipPageException {
-		this(servletContext, request, response, element, null, null);
+		doElement(servletContext, request, response, null);
 	}
 
 	/**
