@@ -31,29 +31,36 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-import javax.servlet.jsp.PageContext;
 
 /**
- * An ElementContext that is a PageContext.
+ * An ElementContext that is a ServletContext.
  */
-public class PageElementContext implements ElementContext {
+public class ServletElementContext implements ElementContext {
 
-	private final PageContext pageContext;
+	private final ServletContext servletContext;
+	private final HttpServletRequest request;
+	private final HttpServletResponse response;
 
-	public PageElementContext(PageContext pageContext) {
-		this.pageContext = pageContext;
+	public ServletElementContext(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response
+	) {
+		this.servletContext = servletContext;
+		this.request = request;
+		this.response = response;
 	}
 
 	@Override
 	public void include(String resource, Writer out) throws IOException {
 		try {
-			ServletContext servletContext = pageContext.getServletContext();
 			RequestDispatcher dispatcher = servletContext.getRequestDispatcher(resource);
 			dispatcher.include(
-				pageContext.getRequest(),
-				new HttpServletResponseWrapper((HttpServletResponse)pageContext.getResponse()) {
+				request,
+				new HttpServletResponseWrapper(response) {
 					@Override
 					public PrintWriter getWriter() throws IOException {
 						if(out instanceof PrintWriter) return (PrintWriter)out;

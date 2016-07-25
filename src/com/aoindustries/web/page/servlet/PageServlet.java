@@ -193,7 +193,7 @@ abstract public class PageServlet extends HttpServlet {
 		);
 	}
 
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp, Page currentPage) throws ServletException, IOException, SkipPageException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
@@ -207,7 +207,7 @@ abstract public class PageServlet extends HttpServlet {
 		);
 	}
 
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp, Page currentPage) throws ServletException, IOException, SkipPageException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
@@ -221,7 +221,7 @@ abstract public class PageServlet extends HttpServlet {
 		);
 	}
 
-	protected void doPut(HttpServletRequest req, HttpServletResponse resp, Page currentPage) throws ServletException, IOException, SkipPageException {
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
@@ -235,7 +235,7 @@ abstract public class PageServlet extends HttpServlet {
 		);
 	}
 
-	protected void doDelete(HttpServletRequest req, HttpServletResponse resp, Page currentPage) throws ServletException, IOException, SkipPageException {
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
@@ -249,7 +249,7 @@ abstract public class PageServlet extends HttpServlet {
 		);
 	}
 
-	protected void doOptions(HttpServletRequest req, HttpServletResponse resp, Page currentPage) throws ServletException, IOException, SkipPageException {
+	protected void doOptions(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		ServletUtil.doOptions(
 			resp,
 			PageServlet.class,
