@@ -72,10 +72,10 @@ abstract public class PageServlet extends HttpServlet {
 	}
 
 	private static interface DoMethodCallable {
-		void doMethodPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
+		void doMethod(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException;
 	}
 
-	private void doMethod(DoMethodCallable method, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	private void callInPage(DoMethodCallable method, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		final ServletContext servletContext = getServletContext();
 		try {
 			final Page page = new Page();
@@ -109,7 +109,7 @@ abstract public class PageServlet extends HttpServlet {
 							BufferWriter capturedOut = new SegmentedWriter();
 							try {
 								try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
-									method.doMethodPage(
+									method.doMethod(
 										req,
 										new HttpServletResponseWrapper(resp) {
 											@Override
@@ -120,7 +120,8 @@ abstract public class PageServlet extends HttpServlet {
 											public ServletOutputStream getOutputStream() {
 												throw new NotImplementedException();
 											}
-										}
+										},
+										page
 									);
 								}
 							} finally {
@@ -129,7 +130,7 @@ abstract public class PageServlet extends HttpServlet {
 							page.setBody(capturedOut.getResult().trim());
 						} else {
 							// Invoke page body, discarding output
-							method.doMethodPage(
+							method.doMethod(
 								req,
 								new HttpServletResponseWrapper(resp) {
 									@Override
@@ -140,7 +141,8 @@ abstract public class PageServlet extends HttpServlet {
 									public ServletOutputStream getOutputStream() {
 										throw new NotImplementedException();
 									}
-								}
+								},
+								page
 							);
 						}
 					} finally {
@@ -184,56 +186,56 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		doMethod(
-			(req1, resp1) -> doGetPage(req1, resp1),
+		callInPage(
+			(req1, resp1, page) -> doGet(req1, resp1, page),
 			req,
 			resp
 		);
 	}
 
-	protected void doGetPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
 
 	@Override
 	final protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		doMethod(
-			(req1, resp1) -> doPostPage(req1, resp1),
+		callInPage(
+			(req1, resp1, page) -> doPost(req1, resp1, page),
 			req,
 			resp
 		);
 	}
 
-	protected void doPostPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
 
 	@Override
 	final protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		doMethod(
-			(req1, resp1) -> doPutPage(req1, resp1),
+		callInPage(
+			(req1, resp1, page) -> doPut(req1, resp1, page),
 			req,
 			resp
 		);
 	}
 
-	protected void doPutPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException {
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
 
 	@Override
 	final protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		doMethod(
-			(req1, resp1) -> doDeletePage(req1, resp1),
+		callInPage(
+			(req1, resp1, page) -> doDelete(req1, resp1, page),
 			req,
 			resp
 		);
 	}
 
-	protected void doDeletePage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException {
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
@@ -244,13 +246,14 @@ abstract public class PageServlet extends HttpServlet {
 			resp,
 			PageServlet.class,
 			this.getClass(),
-			"doGetPage",
-			"doPostPage",
-			"doPutPage",
-			"doDeletePage",
+			"doGet",
+			"doPost",
+			"doPut",
+			"doDelete",
 			new Class<?>[] {
 				HttpServletRequest.class,
-				HttpServletResponse.class
+				HttpServletResponse.class,
+				Page.class
 			}
 		);
 	}
