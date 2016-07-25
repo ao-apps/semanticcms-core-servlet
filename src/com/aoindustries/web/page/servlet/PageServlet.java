@@ -241,7 +241,15 @@ abstract public class PageServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	final protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		callInPage(
+			(req1, resp1, page) -> doOptions(req1, resp1, page),
+			req,
+			resp
+		);
+	}
+
+	protected void doOptions(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
 		ServletUtil.doOptions(
 			resp,
 			PageServlet.class,
