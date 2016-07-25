@@ -53,34 +53,42 @@ public class Heading extends Element<com.aoindustries.web.page.Heading> {
 	protected void doBody(HttpServletRequest request, HttpServletResponse response, CaptureLevel captureLevel, ElementBody<? super com.aoindustries.web.page.Heading> body) throws ServletException, IOException, SkipPageException {
 		pageIndex = PageIndex.getCurrentPageIndex(request);
 		super.doBody(request, response, captureLevel, body);
+		doAfterBody(element);
+	}
+
+	public static void doAfterBody(com.aoindustries.web.page.Heading heading) {
 		// Add to any parent heading
-		com.aoindustries.web.page.Element parent = element.getParentElement();
+		com.aoindustries.web.page.Element parent = heading.getParentElement();
 		while(parent != null) {
 			if(parent instanceof com.aoindustries.web.page.Heading) {
 				com.aoindustries.web.page.Heading parentHeading = (com.aoindustries.web.page.Heading)parent;
-				parentHeading.addChildHeading(element);
+				parentHeading.addChildHeading(heading);
 				return;
 			}
 			parent = parent.getParentElement();
 		}
 		// No parent heading, add as top-level heading to page
-		Page page = element.getPage();
-		if(page != null) page.addTopLevelHeading(element);
+		Page page = heading.getPage();
+		if(page != null) page.addTopLevelHeading(heading);
 	}
 
 	@Override
 	public void writeTo(Writer out, ElementContext context) throws IOException {
+		writeHeading(out, context, element, pageIndex);
+	}
+
+	public static void writeHeading(Writer out, ElementContext context, com.aoindustries.web.page.Heading heading, PageIndex pageIndex) throws IOException {
 		// If this is the first heading in the page, write the table of contents
-		Page page = element.getPage();
+		Page page = heading.getPage();
 		if(page != null) {
 			List<com.aoindustries.web.page.Heading> topLevelHeadings = page.getTopLevelHeadings();
-			if(!topLevelHeadings.isEmpty() && topLevelHeadings.get(0) == element) {
+			if(!topLevelHeadings.isEmpty() && topLevelHeadings.get(0) == heading) {
 				context.include("/lib/docs/toc.inc.jsp", out);
 			}
 		}
 		// Count the heading level by finding all headings in the parent elements
 		int headingLevel = 2; // <h1> is reserved for page titles
-		com.aoindustries.web.page.Element parentElement = element.getParentElement();
+		com.aoindustries.web.page.Element parentElement = heading.getParentElement();
 		while(parentElement != null) {
 			if(parentElement instanceof com.aoindustries.web.page.Heading) headingLevel++;
 			parentElement = parentElement.getParentElement();
@@ -91,28 +99,28 @@ public class Heading extends Element<com.aoindustries.web.page.Heading> {
 		out.write("<section><h");
 		char headingLevelChar = (char)('0' + headingLevel);
 		out.write(headingLevelChar);
-		String id = element.getId();
+		String id = heading.getId();
 		if(id != null) {
 			out.write(" id=\"");
 			PageIndex.appendIdInPage(
 				pageIndex,
-				element.getPage(),
+				heading.getPage(),
 				id,
 				new MediaWriter(textInXhtmlAttributeEncoder, out)
 			);
 			out.write('"');
 		}
 		out.write('>');
-		encodeTextInXhtml(element.getLabel(), out);
+		encodeTextInXhtml(heading.getLabel(), out);
 		out.write("</h");
 		out.write(headingLevelChar);
 		out.write('>');
-		BufferResult body = element.getBody();
+		BufferResult body = heading.getBody();
 		if(body.getLength() > 0) {
 			out.write("<div class=\"h");
 			out.write(headingLevelChar);
 			out.write("Content\">");
-			body.writeTo(new NodeBodyWriter(element, out, context));
+			body.writeTo(new NodeBodyWriter(heading, out, context));
 			out.write("</div>");
 		}
 		out.write("</section>");
