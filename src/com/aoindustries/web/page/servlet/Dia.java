@@ -29,17 +29,45 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-final public class Dia {
+public class Dia {
 
-	public static void writeDia(
+	private final ServletContext servletContext;
+	private final HttpServletRequest request;
+	private final HttpServletResponse response;
+	private final String path;
+
+	private String book;
+	private int width;
+	private int height;
+
+	public Dia(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		String book,
-		String path,
-		int width,
-		int height
-	) throws ServletException, IOException {
+		String path
+	) {
+		this.servletContext = servletContext;
+		this.request = request;
+		this.response = response;
+		this.path = path;
+	}
+
+	public Dia book(String book) {
+		this.book = book;
+		return this;
+	}
+
+	public Dia width(int width) {
+		this.width = width;
+		return this;
+	}
+
+	public Dia height(int height) {
+		this.height = height;
+		return this;
+	}
+
+	public void writeDia() throws ServletException, IOException {
 		DiaImpl.writeDiaImpl(
 			servletContext,
 			request,
@@ -50,11 +78,5 @@ final public class Dia {
 			width,
 			height
 		);
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private Dia() {
 	}
 }
