@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 final public class FileImpl {
 
 	public static interface FileBody<E extends Throwable> {
-		void doBody() throws E, IOException;
+		void doBody(boolean discard) throws E, IOException;
 	}
 
 	public static <E extends Throwable> void writeFileLink(
@@ -131,7 +131,7 @@ final public class FileImpl {
 				if(isDirectory) encodeTextInXhtml('/', out);
 			}
 		} else {
-			body.doBody();
+			body.doBody(false);
 		}
 		out.append("</a>");
 		if(body == null && resourceFile != null && !isDirectory) {
