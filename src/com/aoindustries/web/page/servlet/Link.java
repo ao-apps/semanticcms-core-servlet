@@ -32,22 +32,64 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
-final public class Link {
+public class Link {
 
 	public static interface LinkBody {
 		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
 	}
 
-	public static void writeLink(
+	private final ServletContext servletContext;
+	private final HttpServletRequest request;
+	private final HttpServletResponse response;
+
+	private String book;
+	private String page;
+	private String element;
+	private String view;
+	private HttpParameters params;
+	private String clazz;
+
+	public Link(
 		ServletContext servletContext,
 		HttpServletRequest request,
-		HttpServletResponse response,
-		String book,
-		String page,
-		String element,
-		String view,
-	    HttpParameters params,
-		String clazz,
+		HttpServletResponse response
+	) {
+		this.servletContext = servletContext;
+		this.request = request;
+		this.response = response;
+	}
+
+	public Link book(String book) {
+		this.book = book;
+		return this;
+	}
+
+	public Link page(String page) {
+		this.page = page;
+		return this;
+	}
+
+	public Link element(String element) {
+		this.element = element;
+		return this;
+	}
+
+	public Link view(String view) {
+		this.view = view;
+		return this;
+	}
+
+	public Link params(HttpParameters params) {
+		this.params = params;
+		return this;
+	}
+
+	public Link clazz(String clazz) {
+		this.clazz = clazz;
+		return this;
+	}
+
+	public void writeLink(
 		LinkBody body
 	) throws ServletException, IOException, SkipPageException {
 		LinkImpl.writeLinkImpl(
@@ -77,9 +119,7 @@ final public class Link {
 		);
 	}
 
-	/**
-	 * Make no instances.
-	 */
-	private Link() {
+	public void writeLink() throws ServletException, IOException, SkipPageException {
+		writeLink(null);
 	}
 }
