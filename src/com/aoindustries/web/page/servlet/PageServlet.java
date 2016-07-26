@@ -22,12 +22,12 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.io.NullPrintWriter;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.SegmentedWriter;
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.Includer;
+import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.web.page.Node;
 import com.aoindustries.web.page.Page;
@@ -132,16 +132,7 @@ abstract public class PageServlet extends HttpServlet {
 							// Invoke page body, discarding output
 							method.doMethod(
 								req,
-								new HttpServletResponseWrapper(resp) {
-									@Override
-									public PrintWriter getWriter() throws IOException {
-										return NullPrintWriter.getInstance();
-									}
-									@Override
-									public ServletOutputStream getOutputStream() {
-										throw new NotImplementedException();
-									}
-								},
+								new NullHttpServletResponseWrapper(resp),
 								page
 							);
 						}

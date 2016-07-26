@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ao-web-page-servlet.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.web.page.servlet;
+package com.aoindustries.web.page.servlet.impl;
 
 import static com.aoindustries.encoding.JavaScriptInXhtmlAttributeEncoder.encodeJavaScriptInXhtmlAttribute;
 import com.aoindustries.encoding.NewEncodingUtils;
@@ -29,17 +29,61 @@ import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import com.aoindustries.net.UrlUtils;
 import com.aoindustries.servlet.http.LastModifiedServlet;
 import com.aoindustries.util.StringUtility;
+import com.aoindustries.web.page.Node;
 import com.aoindustries.web.page.PageRef;
+import com.aoindustries.web.page.servlet.CaptureLevel;
+import com.aoindustries.web.page.servlet.CurrentNode;
+import com.aoindustries.web.page.servlet.Headers;
+import com.aoindustries.web.page.servlet.LinkImpl;
+import com.aoindustries.web.page.servlet.OpenFile;
+import com.aoindustries.web.page.servlet.PageRefResolver;
 import java.io.File;
 import java.io.IOException;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.SkipPageException;
 
 final public class FileImpl {
 
-	public static interface FileBody<E extends Throwable> {
-		void doBody(boolean discard) throws E, IOException;
+	public static interface FileImplBody<E extends Throwable> {
+		void doBody(boolean discard) throws E, IOException, SkipPageException;
+	}
+
+	public static <E extends Throwable> void writeFile(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Appendable out,
+		String book,
+		String path,
+		boolean hidden,
+		FileImplBody<E> body
+	) throws E, ServletException, IOException, SkipPageException {
+		// Get the current capture state
+		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
+			PageRef file = PageRefResolver.getPageRef(servletContext, request, book, path);
+			// If we have a parent node, associate this file with the node
+			final Node currentNode = CurrentNode.getCurrentNode(request);
+			if(currentNode != null && !hidden) currentNode.addFile(file);
+
+			if(captureLevel == CaptureLevel.BODY) {
+				// Write a link to the file
+				writeFileLink(
+					servletContext,
+					request,
+					response,
+					out,
+					body,
+					file
+				);
+			} else {
+				// Invoke body for any meta data, but discard any output
+				if(body != null) body.doBody(true);
+			}
+		}
 	}
 
 	public static <E extends Throwable> void writeFileLink(
@@ -47,9 +91,9 @@ final public class FileImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Appendable out,
-		FileBody<E> body,
+		FileImplBody<E> body,
 		PageRef file
-	) throws E, IOException {
+	) throws E, IOException, SkipPageException {
 		// Determine if local file opening is allowed
 		final boolean isAllowed = OpenFile.isAllowed(servletContext, request);
 		final boolean isExporting = Headers.EXPORTING_HEADER_VALUE.equalsIgnoreCase(request.getHeader(Headers.EXPORTING_HEADER));

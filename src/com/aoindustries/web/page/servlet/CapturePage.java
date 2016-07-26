@@ -22,10 +22,9 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.io.NullPrintWriter;
 import com.aoindustries.lang.NullArgumentException;
-import com.aoindustries.servlet.NullServletOutputStream;
 import com.aoindustries.servlet.http.Dispatcher;
+import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.web.page.Node;
 import com.aoindustries.web.page.Page;
 import com.aoindustries.web.page.PageRef;
@@ -37,7 +36,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.jsp.SkipPageException;
 
 public class CapturePage {
@@ -147,16 +145,7 @@ public class CapturePage {
 							servletContext,
 							capturePath,
 							request,
-							new HttpServletResponseWrapper(response) {
-								@Override
-								public NullServletOutputStream getOutputStream() {
-									return NullServletOutputStream.getInstance();
-								}
-								@Override
-								public NullPrintWriter getWriter() throws IOException {
-									return NullPrintWriter.getInstance();
-								}
-							}
+							new NullHttpServletResponseWrapper(response)
 						);
 					} catch(SkipPageException e) {
 						// An individual page may throw SkipPageException which only terminates

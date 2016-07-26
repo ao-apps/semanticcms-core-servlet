@@ -54,6 +54,8 @@ final public class File {
 			book,
 			path,
 			hidden,
+			// Lamdba version not working with generic exceptions:
+			// discard -> body.doBody(request, discard ? new NullHttpServletResponseWrapper(response) : response)
 			new FileImpl.FileImplBody<ServletException>() {
 				@Override
 				public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {

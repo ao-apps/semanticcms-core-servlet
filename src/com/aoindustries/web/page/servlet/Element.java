@@ -22,10 +22,10 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.io.NullPrintWriter;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.SegmentedWriter;
 import com.aoindustries.lang.NotImplementedException;
+import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.web.page.ElementWriter;
 import com.aoindustries.web.page.Node;
 import com.aoindustries.web.page.NodeBodyWriter;
@@ -161,16 +161,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 				// Invoke body for any meta data, but discard any output
 				body.doBody(
 					request,
-					new HttpServletResponseWrapper(response) {
-						@Override
-						public PrintWriter getWriter() throws IOException {
-							return NullPrintWriter.getInstance();
-						}
-						@Override
-						public ServletOutputStream getOutputStream() {
-							throw new NotImplementedException();
-						}
-					},
+					new NullHttpServletResponseWrapper(response),
 					element
 				);
 			} else {
