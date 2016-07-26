@@ -45,7 +45,7 @@ final public class DiaImpl {
 	private static final int MISSING_IMAGE_WIDTH = 225;
 	private static final int MISSING_IMAGE_HEIGHT = 224;
 
-	public static void writeDia(
+	public static void writeDiaImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,

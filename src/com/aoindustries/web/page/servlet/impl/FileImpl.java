@@ -51,7 +51,7 @@ final public class FileImpl {
 		void doBody(boolean discard) throws E, IOException, SkipPageException;
 	}
 
-	public static <E extends Throwable> void writeFile(
+	public static <E extends Throwable> void writeFileImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -71,7 +71,7 @@ final public class FileImpl {
 
 			if(captureLevel == CaptureLevel.BODY) {
 				// Write a link to the file
-				writeFileLink(
+				writeFileLinkImpl(
 					servletContext,
 					request,
 					response,
@@ -86,7 +86,7 @@ final public class FileImpl {
 		}
 	}
 
-	public static <E extends Throwable> void writeFileLink(
+	public static <E extends Throwable> void writeFileLinkImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,

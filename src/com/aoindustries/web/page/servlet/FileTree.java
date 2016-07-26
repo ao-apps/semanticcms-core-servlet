@@ -1,6 +1,6 @@
 /*
  * ao-web-page-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2014, 2015, 2016  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,39 +22,37 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.web.page.servlet.impl.DiaImpl;
+import com.aoindustries.web.page.Node;
+import com.aoindustries.web.page.servlet.impl.FileTreeImpl;
 import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.SkipPageException;
 
-final public class Dia {
+final public class FileTree {
 
-	public static void writeDia(
+	public static void writeFileTree(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		String book,
-		String path,
-		int width,
-		int height
-	) throws ServletException, IOException {
-		DiaImpl.writeDiaImpl(
+		Node root,
+		boolean includeElements
+	) throws ServletException, IOException, SkipPageException {
+		FileTreeImpl.writeFileTreeImpl(
 			servletContext,
 			request,
 			response,
 			response.getWriter(),
-			book,
-			path,
-			width,
-			height
+			root,
+			includeElements
 		);
 	}
 
 	/**
 	 * Make no instances.
 	 */
-	private Dia() {
+	private FileTree() {
 	}
 }

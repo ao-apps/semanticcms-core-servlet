@@ -46,7 +46,7 @@ final public class File {
 		boolean hidden,
 		FileBody body
 	) throws ServletException, IOException, SkipPageException {
-		FileImpl.writeFile(
+		FileImpl.writeFileImpl(
 			servletContext,
 			request,
 			response,
