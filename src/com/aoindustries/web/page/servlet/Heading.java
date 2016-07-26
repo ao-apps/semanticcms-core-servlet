@@ -23,6 +23,7 @@
 package com.aoindustries.web.page.servlet;
 
 import com.aoindustries.web.page.ElementContext;
+import com.aoindustries.web.page.servlet.impl.HeadingImpl;
 import java.io.IOException;
 import java.io.Writer;
 import javax.servlet.ServletException;
@@ -32,13 +33,15 @@ import javax.servlet.jsp.SkipPageException;
 
 public class Heading extends Element<com.aoindustries.web.page.Heading> {
 
-	public Heading(String label, String id) {
-		super(new com.aoindustries.web.page.Heading(), id);
+	public Heading(String label) {
+		super(new com.aoindustries.web.page.Heading());
 		element.setLabel(label);
 	}
 
-	public Heading(String label) {
-		this(label, null);
+	@Override
+	public Heading id(String id) {
+		super.id(id);
+		return this;
 	}
 
 	private PageIndex pageIndex;

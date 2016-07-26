@@ -51,14 +51,13 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 
 	protected final E element;
 
-	protected Element(
-		E element,
-		String id
-	) {
+	protected Element(E element) {
 		this.element = element;
-		if(id != null && !id.isEmpty()) {
-			element.setId(id);
-		}
+	}
+
+	public Element<E> id(String id) {
+		this.element.setId(id);
+		return this;
 	}
 
 	/**

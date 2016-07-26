@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ao-web-page-servlet.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aoindustries.web.page.servlet;
+package com.aoindustries.web.page.servlet.impl;
 
 import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
@@ -29,6 +29,7 @@ import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.web.page.ElementContext;
 import com.aoindustries.web.page.NodeBodyWriter;
 import com.aoindustries.web.page.Page;
+import com.aoindustries.web.page.servlet.PageIndex;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
