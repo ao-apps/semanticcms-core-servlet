@@ -49,9 +49,20 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 		void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException;
 	}
 
+	private final ServletContext servletContext;
+	private final HttpServletRequest request;
+	private final HttpServletResponse response;
 	protected final E element;
 
-	protected Element(E element) {
+	protected Element(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		E element
+	) {
+		this.servletContext = servletContext;
+		this.request = request;
+		this.response = response;
 		this.element = element;
 	}
 
@@ -65,10 +76,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 	 * Sets this element as the current element.
 	 * Then, if not capturing or capturing META or higher, calls {@link #doBody}
 	 */
-	public void doElement(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
+	public void invoke(
 		ElementBody<? super E> body
 	) throws ServletException, IOException, SkipPageException {
 		// Get the current capture state
@@ -111,14 +119,10 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 	}
 
 	/**
-	 * @see  #doElement(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.aoindustries.web.page.servlet.Element.ElementBody)
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Element.ElementBody)
 	 */
-	public void doElement(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response
-	) throws ServletException, IOException, SkipPageException {
-		doElement(servletContext, request, response, null);
+	public void invoke() throws ServletException, IOException, SkipPageException {
+		invoke(null);
 	}
 
 	/**

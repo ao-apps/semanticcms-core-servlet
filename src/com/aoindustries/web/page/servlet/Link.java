@@ -89,9 +89,7 @@ public class Link {
 		return this;
 	}
 
-	public void writeLink(
-		LinkBody body
-	) throws ServletException, IOException, SkipPageException {
+	public void invoke(LinkBody body) throws ServletException, IOException, SkipPageException {
 		LinkImpl.writeLinkImpl(
 			servletContext,
 			request,
@@ -119,7 +117,7 @@ public class Link {
 		);
 	}
 
-	public void writeLink() throws ServletException, IOException, SkipPageException {
-		writeLink(null);
+	public void invoke() throws ServletException, IOException, SkipPageException {
+		invoke(null);
 	}
 }

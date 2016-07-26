@@ -26,6 +26,7 @@ import com.aoindustries.web.page.ElementContext;
 import com.aoindustries.web.page.servlet.impl.HeadingImpl;
 import java.io.IOException;
 import java.io.Writer;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,8 +34,18 @@ import javax.servlet.jsp.SkipPageException;
 
 public class Heading extends Element<com.aoindustries.web.page.Heading> {
 
-	public Heading(String label) {
-		super(new com.aoindustries.web.page.Heading());
+	public Heading(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String label
+	) {
+		super(
+			servletContext,
+			request,
+			response,
+			new com.aoindustries.web.page.Heading()
+		);
 		element.setLabel(label);
 	}
 

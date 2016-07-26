@@ -67,7 +67,7 @@ public class Dia {
 		return this;
 	}
 
-	public void writeDia() throws ServletException, IOException {
+	public void invoke() throws ServletException, IOException {
 		DiaImpl.writeDiaImpl(
 			servletContext,
 			request,
