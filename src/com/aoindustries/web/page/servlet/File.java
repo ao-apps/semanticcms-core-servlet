@@ -31,21 +31,43 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
-final public class File {
+public class File {
 
 	public static interface FileBody {
 		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
 	}
 
-	public static void writeFile(
+	private final ServletContext servletContext;
+	private final HttpServletRequest request;
+	private final HttpServletResponse response;
+	private final String path;
+
+	private String book;
+	private boolean hidden;
+
+	public File(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		String book,
-		String path,
-		boolean hidden,
-		FileBody body
-	) throws ServletException, IOException, SkipPageException {
+		String path
+	) {
+		this.servletContext = servletContext;
+		this.request = request;
+		this.response = response;
+		this.path = path;
+	}
+
+	public File book(String book) {
+		this.book = book;
+		return this;
+	}
+
+	public File hidden(boolean hidden) {
+		this.hidden = hidden;
+		return this;
+	}
+
+	public void invoke(FileBody body) throws ServletException, IOException, SkipPageException {
 		FileImpl.writeFileImpl(
 			servletContext,
 			request,
@@ -54,23 +76,23 @@ final public class File {
 			book,
 			path,
 			hidden,
-			// Lamdba version not working with generic exceptions:
-			// discard -> body.doBody(request, discard ? new NullHttpServletResponseWrapper(response) : response)
-			new FileImpl.FileImplBody<ServletException>() {
-				@Override
-				public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {
-					body.doBody(
-						request,
-						discard ? new NullHttpServletResponseWrapper(response) : response
-					);
+			body == null
+				? null
+				// Lamdba version not working with generic exceptions:
+				// discard -> body.doBody(request, discard ? new NullHttpServletResponseWrapper(response) : response)
+				: new FileImpl.FileImplBody<ServletException>() {
+					@Override
+					public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {
+						body.doBody(
+							request,
+							discard ? new NullHttpServletResponseWrapper(response) : response
+						);
+					}
 				}
-			}
 		);
 	}
 
-	/**
-	 * Make no instances.
-	 */
-	private File() {
+	public void invoke() throws ServletException, IOException, SkipPageException {
+		invoke(null);
 	}
 }
