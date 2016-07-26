@@ -26,39 +26,38 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextIn
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import com.aoindustries.web.page.PageRef;
 import java.io.IOException;
-import java.io.Writer;
 
 final public class LinkImpl {
 
 	/**
 	 * Writes a broken path reference as "¿/book/path{#targetId}?", encoding for XHTML.
 	 */
-	public static void writeBrokenPathInXhtml(PageRef pageRef, String targetId, Writer out) throws IOException {
-		out.write("¿");
+	public static void writeBrokenPathInXhtml(PageRef pageRef, String targetId, Appendable out) throws IOException {
+		out.append('¿');
 		encodeTextInXhtml(pageRef.getBookPrefix(), out);
 		encodeTextInXhtml(pageRef.getPath(), out);
 		if(targetId != null) {
-			encodeTextInXhtml('#', out);
+			out.append('#');
 			encodeTextInXhtml(targetId, out);
 		}
-		out.write('?');
+		out.append('?');
 	}
 
 	/**
 	 * Writes a broken path reference as "¿/book/path?", encoding for XHTML.
 	 */
-	public static void writeBrokenPathInXhtml(PageRef pageRef, Writer out) throws IOException {
+	public static void writeBrokenPathInXhtml(PageRef pageRef, Appendable out) throws IOException {
 		writeBrokenPathInXhtml(pageRef, null, out);
 	}
 
 	/**
 	 * Writes a broken path reference as "¿/book/path?", encoding for XML attribute.
 	 */
-	public static void writeBrokenPathInXhtmlAttribute(PageRef pageRef, Writer out) throws IOException {
-		out.write("¿");
+	public static void writeBrokenPathInXhtmlAttribute(PageRef pageRef, Appendable out) throws IOException {
+		out.append('¿');
 		encodeTextInXhtmlAttribute(pageRef.getBookPrefix(), out);
 		encodeTextInXhtmlAttribute(pageRef.getPath(), out);
-		out.write('?');
+		out.append('?');
 	}
 
 	/**

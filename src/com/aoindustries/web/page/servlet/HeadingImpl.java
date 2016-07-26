@@ -51,7 +51,12 @@ final public class HeadingImpl {
 		if(page != null) page.addTopLevelHeading(heading);
 	}
 
-	public static void writeHeading(Writer out, ElementContext context, com.aoindustries.web.page.Heading heading, PageIndex pageIndex) throws IOException {
+	public static void writeHeading(
+		Writer out,
+		ElementContext context,
+		com.aoindustries.web.page.Heading heading,
+		PageIndex pageIndex
+	) throws IOException {
 		// If this is the first heading in the page, write the table of contents
 		Page page = heading.getPage();
 		if(page != null) {
