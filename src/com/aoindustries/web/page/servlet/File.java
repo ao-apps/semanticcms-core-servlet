@@ -22,49 +22,48 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.web.page.Node;
-import com.aoindustries.web.page.PageRef;
+import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
+import com.aoindustries.web.page.servlet.impl.FileImpl;
 import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.SkipPageException;
 
 final public class File {
 
-	public static <E extends Throwable> void writeFile(
+	public static interface FileBody {
+		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
+	}
+
+	public static void writeFile(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Appendable out,
 		String book,
 		String path,
 		boolean hidden,
-		FileImpl.FileBody<E> body
-	) throws E, ServletException, IOException {
-		// Get the current capture state
-		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
-		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
-			PageRef file = PageRefResolver.getPageRef(servletContext, request, book, path);
-			// If we have a parent node, associate this file with the node
-			final Node currentNode = CurrentNode.getCurrentNode(request);
-			if(currentNode != null && !hidden) currentNode.addFile(file);
-
-			if(captureLevel == CaptureLevel.BODY) {
-				// Write a link to the file
-				FileImpl.writeFileLink(
-					servletContext,
-					request,
-					response,
-					out,
-					body,
-					file
-				);
-			} else {
-				// Invoke body for any meta data, but discard any output
-				if(body != null) body.doBody(true);
+		FileBody body
+	) throws ServletException, IOException, SkipPageException {
+		FileImpl.writeFile(
+			servletContext,
+			request,
+			response,
+			response.getWriter(),
+			book,
+			path,
+			hidden,
+			new FileImpl.FileImplBody<ServletException>() {
+				@Override
+				public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {
+					body.doBody(
+						request,
+						discard ? new NullHttpServletResponseWrapper(response) : response
+					);
+				}
 			}
-		}
+		);
 	}
 
 	/**
