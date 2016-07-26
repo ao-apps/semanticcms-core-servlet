@@ -31,15 +31,33 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
-final public class FileTree {
+public class FileTree {
 
-	public static void writeFileTree(
+	private final ServletContext servletContext;
+	private final HttpServletRequest request;
+	private final HttpServletResponse response;
+	private final Node root;
+
+	private boolean includeElements;
+
+	public FileTree(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Node root,
-		boolean includeElements
-	) throws ServletException, IOException, SkipPageException {
+		Node root
+	) {
+		this.servletContext = servletContext;
+		this.request = request;
+		this.response = response;
+		this.root = root;
+	}
+
+	public FileTree includeElements(boolean includeElements) {
+		this.includeElements = includeElements;
+		return this;
+	}
+
+	public void invoke() throws ServletException, IOException, SkipPageException {
 		FileTreeImpl.writeFileTreeImpl(
 			servletContext,
 			request,
@@ -48,11 +66,5 @@ final public class FileTree {
 			root,
 			includeElements
 		);
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private FileTree() {
 	}
 }
