@@ -81,7 +81,8 @@ final public class DiaImpl {
 					StringBuilder urlPathSB = new StringBuilder();
 					urlPathSB
 						.append(request.getContextPath())
-						.append("/ao-web-page-servlet/dia-export?book=")
+						.append(DiaExportServlet.SERVLET_PATH)
+						.append("?book=")
 						.append(URLEncoder.encode(pageRef.getBookName(), responseEncoding))
 						.append("&path=")
 						.append(URLEncoder.encode(pageRef.getPath(), responseEncoding));

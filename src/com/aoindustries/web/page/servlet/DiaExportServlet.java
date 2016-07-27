@@ -30,13 +30,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@WebServlet(DiaExportServlet.SERVLET_PATH)
 public class DiaExportServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String SERVLET_PATH = "/ao-web-page-servlet/dia-export";
 
 	public static final int DEFAULT_WIDTH = 200;
 

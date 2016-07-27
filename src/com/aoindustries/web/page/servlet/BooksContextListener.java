@@ -36,11 +36,10 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * Exposes all the configured Books as an application-scope map "books".
- */
+@WebListener("Exposes all the configured Books as an application-scope map \"books\".")
 public class BooksContextListener implements ServletContextListener {
 
 	private static final String BOOKS_ATTRIBUTE_NAME = "books";

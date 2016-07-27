@@ -26,13 +26,14 @@ import com.aoindustries.web.page.servlet.OpenFile;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
 /**
- * Opens the file provided in the path parameter.  This file
+ * Opens the file provided in the book and path parameters.  This file
  * must reside within this application and be of a supported type.
  * This is to be called by the JavaScript function openFile.
  *
@@ -40,9 +41,12 @@ import javax.servlet.jsp.SkipPageException;
  *   book  The name of the book of the file to open
  *   path  The book-relative path of the file to open
  */
+@WebServlet(OpenFileServlet.SERVLET_PATH)
 public class OpenFileServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String SERVLET_PATH = "/ao-web-page-servlet/ajax/open-file";
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
