@@ -52,6 +52,17 @@ public class Dia {
 		this.path = path;
 	}
 
+	public Dia(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String book,
+		String path
+	) {
+		this(servletContext, request, response, path);
+		this.book = book;
+	}
+
 	public Dia book(String book) {
 		this.book = book;
 		return this;

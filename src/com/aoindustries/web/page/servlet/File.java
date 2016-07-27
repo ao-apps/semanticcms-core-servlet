@@ -57,6 +57,17 @@ public class File {
 		this.path = path;
 	}
 
+	public File(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String book,
+		String path
+	) {
+		this(servletContext, request, response, path);
+		this.book = book;
+	}
+
 	public File book(String book) {
 		this.book = book;
 		return this;

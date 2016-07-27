@@ -59,6 +59,39 @@ public class Link {
 		this.response = response;
 	}
 
+	public Link(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String page
+	) {
+		this(servletContext, request, response);
+		this.page = page;
+	}
+
+	public Link(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String book,
+		String page
+	) {
+		this(servletContext, request, response, page);
+		this.book = book;
+	}
+
+	public Link(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		String book,
+		String page,
+		String element
+	) {
+		this(servletContext, request, response, book, page);
+		this.element = element;
+	}
+
 	public Link book(String book) {
 		this.book = book;
 		return this;

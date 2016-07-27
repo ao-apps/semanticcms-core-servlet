@@ -52,6 +52,17 @@ public class FileTree {
 		this.root = root;
 	}
 
+	public FileTree(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Node root,
+		boolean includeElements
+	) {
+		this(servletContext, request, response, root);
+		this.includeElements = includeElements;
+	}
+
 	public FileTree includeElements(boolean includeElements) {
 		this.includeElements = includeElements;
 		return this;
