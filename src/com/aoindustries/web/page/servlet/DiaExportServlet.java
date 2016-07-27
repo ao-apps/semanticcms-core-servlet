@@ -46,7 +46,10 @@ public class DiaExportServlet extends HttpServlet {
 
 	public static final int DEFAULT_WIDTH = 200;
 
-	/** Performing an oversampling for high-resolution devices and zoom */
+	/**
+	 * Performing an oversampling for high-resolution devices and zoom 
+	 * TODO: Get from devicePixelRatio?: http://stackoverflow.com/questions/15234519/detect-retina-display-in-php
+	 */
 	public static final int OVERSAMPLING = 1; // Was 2, but clearer on a typical browser at 1
 
 	/**
