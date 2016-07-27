@@ -32,7 +32,7 @@ import com.aoindustries.web.page.servlet.DiaExportServlet;
 import com.aoindustries.web.page.servlet.PageRefResolver;
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
+import java.rmi.ServerException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +43,11 @@ final public class DiaImpl {
 	private static final String MISSING_IMAGE_PATH = "/ao-web-page-servlet/images/missing-image.jpg";
 	private static final int MISSING_IMAGE_WIDTH = 225;
 	private static final int MISSING_IMAGE_HEIGHT = 224;
+
+	public static final char SIZE_SEPARATOR = '-';
+	public static final char EMPTY_SIZE = '_';
+	public static final char DIMENSION_SEPARATOR = 'x';
+	public static final String PNG_EXTENSION = ".png";
 
 	public static void writeDiaImpl(
 		ServletContext servletContext,
@@ -78,30 +83,33 @@ final public class DiaImpl {
 				out.append("<img src=\"");
 				final String urlPath;
 				if(thumbnail != null) {
+					String diaPath = pageRef.getPath();
+					// Strip extension
+					if(!diaPath.endsWith(DiaExport.DIA_EXTENSION)) throw new ServerException("Unexpected file extension for diagram: " + diaPath);
+					diaPath = diaPath.substring(0, diaPath.length() - DiaExport.DIA_EXTENSION.length());
 					StringBuilder urlPathSB = new StringBuilder();
 					urlPathSB
 						.append(request.getContextPath())
 						.append(DiaExportServlet.SERVLET_PATH)
-						.append("?book=")
-						.append(URLEncoder.encode(pageRef.getBookName(), responseEncoding))
-						.append("&path=")
-						.append(URLEncoder.encode(pageRef.getPath(), responseEncoding));
-					if(width != 0) {
-						urlPathSB
-							.append("&width=")
-							.append(width * DiaExportServlet.OVERSAMPLING)
-						;
+						.append(pageRef.getBookPrefix())
+						.append(diaPath)
+						.append(SIZE_SEPARATOR);
+					if(width == 0) {
+						urlPathSB.append(EMPTY_SIZE);
+					} else {
+						urlPathSB.append(width * DiaExportServlet.OVERSAMPLING);
 					}
-					if(height != 0) {
-						urlPathSB
-							.append("&height=")
-							.append(height * DiaExportServlet.OVERSAMPLING)
-						;
+					urlPathSB.append(DIMENSION_SEPARATOR);
+					if(height == 0) {
+						urlPathSB.append(EMPTY_SIZE);
+					} else {
+						urlPathSB.append(height * DiaExportServlet.OVERSAMPLING);
 					}
+					urlPathSB.append(PNG_EXTENSION);
 					// Check for header disabling auto last modified
 					if(!"false".equalsIgnoreCase(request.getHeader(LastModifiedServlet.LAST_MODIFIED_HEADER_NAME))) {
 						urlPathSB
-							.append('&')
+							.append('?')
 							.append(LastModifiedServlet.LAST_MODIFIED_PARAMETER_NAME)
 							.append('=')
 							.append(LastModifiedServlet.encodeLastModified(thumbnail.getTmpFile().lastModified()))

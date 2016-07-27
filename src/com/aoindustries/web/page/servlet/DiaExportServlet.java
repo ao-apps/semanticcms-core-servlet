@@ -26,7 +26,9 @@ import com.aoindustries.io.FileUtils;
 import com.aoindustries.web.page.Book;
 import com.aoindustries.web.page.DiaExport;
 import com.aoindustries.web.page.PageRef;
+import com.aoindustries.web.page.servlet.impl.DiaImpl;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletException;
@@ -35,7 +37,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(DiaExportServlet.SERVLET_PATH)
+@WebServlet(DiaExportServlet.SERVLET_PATH+"/*")
 public class DiaExportServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -47,30 +49,84 @@ public class DiaExportServlet extends HttpServlet {
 	/** Performing an oversampling for high-resolution devices and zoom */
 	public static final int OVERSAMPLING = 1; // Was 2, but clearer on a typical browser at 1
 
+	/**
+	 * Gets the dia export or null when not found.
+	 */
 	private DiaExport getThumbnail(HttpServletRequest request) throws IOException, ServletException {
-		String bookName = request.getParameter("book");
-		Book book = BooksContextListener.getBooks(getServletContext()).get(bookName);
-		if(book==null) throw new IOException("Book not found: " + bookName);
-		PageRef pageRef = new PageRef(book, request.getParameter("path"));
-		Integer width = request.getParameter("width")==null ? null : Integer.valueOf(request.getParameter("width"));
-		Integer height = request.getParameter("height")==null ? null : Integer.valueOf(request.getParameter("height"));
+		// pathInfo must be present
+		String pathInfo = request.getPathInfo();
+		if(pathInfo == null) return null;
+		// Must end in expected extension
+		if(!pathInfo.endsWith(DiaImpl.PNG_EXTENSION)) return null;
+		// Find height
+		int dimSepPos = pathInfo.lastIndexOf(DiaImpl.DIMENSION_SEPARATOR, pathInfo.length() - DiaImpl.PNG_EXTENSION.length() - 1);
+		if(dimSepPos == -1) return null;
+		String heightStr = pathInfo.substring(dimSepPos+1, pathInfo.length() - DiaImpl.PNG_EXTENSION.length());
+		//log("heightStr=" +heightStr);
+		Integer height;
+		if(heightStr.length()==1 && heightStr.charAt(0) == DiaImpl.EMPTY_SIZE) {
+			height = null;
+		} else {
+			try {
+				height = Integer.parseInt(heightStr);
+			} catch(NumberFormatException e) {
+				return null;
+			}
+		}
+		//log("height=" +height);
+		// Find width
+		int sizeSepPos = pathInfo.lastIndexOf(DiaImpl.SIZE_SEPARATOR, dimSepPos-1);
+		if(sizeSepPos == -1) return null;
+		String widthStr = pathInfo.substring(sizeSepPos+1, dimSepPos);
+		//log("widthStr=" +widthStr);
+		Integer width;
+		if(widthStr.length()==1 && widthStr.charAt(0) == DiaImpl.EMPTY_SIZE) {
+			width = null;
+		} else {
+			try {
+				width = Integer.parseInt(widthStr);
+			} catch(NumberFormatException e) {
+				return null;
+			}
+		}
+		//log("width=" +width);
+		// Find book and path
+		PageRef pageRef;
+		{
+			String combinedPath = pathInfo.substring(0, sizeSepPos) + DiaExport.DIA_EXTENSION;
+			Book book = BooksContextListener.getBook(getServletContext(), combinedPath);
+			if(book == null) return null;
+			pageRef = new PageRef(
+				book,
+				combinedPath.substring(book.getPathPrefix().length())
+			);
+		}
+
 		// Use default width when neither provided
 		if(width==null && height==null) width = DEFAULT_WIDTH * OVERSAMPLING;
 		// Get the thumbnail image
-		return DiaExport.exportDiagram(
-			pageRef,
-			width,
-			height,
-			(File)getServletContext().getAttribute("javax.servlet.context.tempdir" /*ServletContext.TEMPDIR*/)
-		);
+		try {
+			return DiaExport.exportDiagram(
+				pageRef,
+				width,
+				height,
+				(File)getServletContext().getAttribute("javax.servlet.context.tempdir" /*ServletContext.TEMPDIR*/)
+			);
+		} catch(FileNotFoundException e) {
+			return null;
+		}
 	}
 
 	@Override
 	protected long getLastModified(HttpServletRequest request) {
 		try {
 			DiaExport thumbnail = getThumbnail(request);
-			long lastModified = thumbnail.getTmpFile().lastModified();
-			return lastModified==0 ? -1 : lastModified;
+			if(thumbnail == null) {
+				return -1;
+			} else {
+				long lastModified = thumbnail.getTmpFile().lastModified();
+				return lastModified==0 ? -1 : lastModified;
+			}
 		} catch(IOException|ServletException e) {
 			getServletContext().log(null, e);
 			return -1;
@@ -80,13 +136,17 @@ public class DiaExportServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		DiaExport thumbnail = getThumbnail(request);
-		// Write output
-		response.reset();
-		response.setContentType("image/png");
-		long length = thumbnail.getTmpFile().length();
-		if(length>0 && length<=Integer.MAX_VALUE) response.setContentLength((int)length);
-		try (OutputStream out = response.getOutputStream()) {
-			FileUtils.copy(thumbnail.getTmpFile(), out);
+		if(thumbnail == null) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+		} else {
+			// Write output
+			response.reset();
+			response.setContentType("image/png");
+			long length = thumbnail.getTmpFile().length();
+			if(length>0 && length<=Integer.MAX_VALUE) response.setContentLength((int)length);
+			try (OutputStream out = response.getOutputStream()) {
+				FileUtils.copy(thumbnail.getTmpFile(), out);
+			}
 		}
 	}
 }
