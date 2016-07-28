@@ -119,7 +119,7 @@ public class Page {
 						if(discard) {
 							HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 							// Set PageContext
-							PageContext.newPageContext(
+							PageContext.newPageContextSkip(
 								servletContext,
 								request,
 								newResponse,
@@ -141,7 +141,7 @@ public class Page {
 										}
 									};
 									// Set PageContext
-									PageContext.newPageContext(
+									PageContext.newPageContextSkip(
 										servletContext,
 										request,
 										newResponse,

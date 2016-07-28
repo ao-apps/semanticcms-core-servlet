@@ -30,6 +30,7 @@ import com.aoindustries.web.page.servlet.CaptureLevel;
 import com.aoindustries.web.page.servlet.CapturePage;
 import com.aoindustries.web.page.servlet.CurrentNode;
 import com.aoindustries.web.page.servlet.CurrentPage;
+import com.aoindustries.web.page.servlet.PageContext;
 import com.aoindustries.web.page.servlet.PageRefResolver;
 import java.io.IOException;
 import javax.servlet.ServletContext;
@@ -113,11 +114,17 @@ final public class PageImpl {
 			try {
 				// Pass PAGE_REQUEST_ATTRIBUTE attribute
 				request.setAttribute(PAGE_REQUEST_ATTRIBUTE, page);
-				Dispatcher.forward(
-					servletContext,
-					PAGE_TEMPLATE_JSP_PATH,
-					request,
-					response
+				// Clear PageContext on include
+				PageContext.newPageContext(
+					null,
+					null,
+					null,
+					() -> Dispatcher.forward(
+						servletContext,
+						PAGE_TEMPLATE_JSP_PATH,
+						request,
+						response
+					)
 				);
 			} finally {
 				// Restore old value of PAGE_REQUEST_ATTRIBUTE attribute

@@ -128,7 +128,7 @@ public class File {
 						if(discard) {
 							HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 							// Set PageContext
-							PageContext.newPageContext(
+							PageContext.newPageContextSkip(
 								servletContext,
 								request,
 								newResponse,

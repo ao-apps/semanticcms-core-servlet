@@ -147,21 +147,27 @@ public class CapturePage {
 					// Include the page resource, discarding any direct output
 					String capturePath = pageRef.getServletPath();
 					try {
-						Dispatcher.include(
-							servletContext,
-							capturePath,
-							// Always capture as "GET" request
-							ServletUtil.METHOD_GET.equals(request.getMethod())
-								// Is already "GET"
-								? request
-								// Wrap to make "GET"
-								: new HttpServletRequestWrapper(request) {
-									@Override
-									public String getMethod() {
-										return ServletUtil.METHOD_GET;
-									}
-								},
-							new NullHttpServletResponseWrapper(response)
+						// Clear PageContext on include
+						PageContext.newPageContextSkip(
+							null,
+							null,
+							null,
+							() -> Dispatcher.include(
+								servletContext,
+								capturePath,
+								// Always capture as "GET" request
+								ServletUtil.METHOD_GET.equals(request.getMethod())
+									// Is already "GET"
+									? request
+									// Wrap to make "GET"
+									: new HttpServletRequestWrapper(request) {
+										@Override
+										public String getMethod() {
+											return ServletUtil.METHOD_GET;
+										}
+									},
+								new NullHttpServletResponseWrapper(response)
+							)
 						);
 					} catch(SkipPageException e) {
 						// An individual page may throw SkipPageException which only terminates

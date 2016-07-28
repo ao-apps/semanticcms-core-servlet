@@ -57,20 +57,28 @@ public class ServletElementContext implements ElementContext {
 	@Override
 	public void include(String resource, Writer out) throws IOException {
 		try {
+			PrintWriter pw;
+			if(out instanceof PrintWriter) pw = (PrintWriter)out;
+			else pw = new PrintWriter(out);
 			RequestDispatcher dispatcher = servletContext.getRequestDispatcher(resource);
-			dispatcher.include(
-				request,
-				new HttpServletResponseWrapper(response) {
-					@Override
-					public PrintWriter getWriter() throws IOException {
-						if(out instanceof PrintWriter) return (PrintWriter)out;
-						return new PrintWriter(out);
+			// Clear PageContext on include
+			PageContext.newPageContext(
+				null,
+				null,
+				null,
+				() -> dispatcher.include(
+					request,
+					new HttpServletResponseWrapper(response) {
+						@Override
+						public PrintWriter getWriter() {
+							return pw;
+						}
+						@Override
+						public ServletOutputStream getOutputStream() {
+							throw new NotImplementedException();
+						}
 					}
-					@Override
-					public ServletOutputStream getOutputStream() throws IOException {
-						throw new NotImplementedException();
-					}
-				}
+				)
 			);
 		} catch(ServletException e) {
 			throw new IOException(e);

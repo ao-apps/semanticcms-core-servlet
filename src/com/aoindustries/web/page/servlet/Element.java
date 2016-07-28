@@ -187,7 +187,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 							}
 						};
 						// Set PageContext
-						PageContext.newPageContext(
+						PageContext.newPageContextSkip(
 							servletContext,
 							request,
 							newResponse,
@@ -202,7 +202,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 				// Invoke body for any meta data, but discard any output
 				HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 				// Set PageContext
-				PageContext.newPageContext(
+				PageContext.newPageContextSkip(
 					servletContext,
 					request,
 					newResponse,

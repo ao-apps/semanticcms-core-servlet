@@ -56,6 +56,34 @@ final public class PageContext {
 	private static final ThreadLocal<PrintWriter> out = new ThreadLocal<>();
 
 	public static interface PageContextCallable {
+		void call() throws ServletException, IOException;
+	}
+
+	public static void newPageContext(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallable target) throws ServletException, IOException {
+		final ServletContext oldServletContext = servletContext.get();
+		final HttpServletRequest oldRequest = request.get();
+		final HttpServletResponse oldResponse = response.get();
+		final PrintWriter oldOut = out.get();
+		PrintWriter newOut = null;
+		try {
+			if(newServletContext != oldServletContext) servletContext.set(newServletContext);
+			if(newRequest != oldRequest) request.set(newRequest);
+			if(newResponse != oldResponse) {
+				response.set(newResponse);
+				out.set(null);
+			} else {
+				newOut = oldOut;
+			}
+			target.call();
+		} finally {
+			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
+			if(newRequest != oldRequest) request.set(oldRequest);
+			if(newResponse != oldResponse) response.set(oldResponse);
+			if(newOut != oldOut) out.set(oldOut);
+		}
+	}
+
+	public static interface PageContextCallableSkip {
 		void call() throws ServletException, IOException, SkipPageException;
 	}
 
@@ -66,7 +94,7 @@ final public class PageContext {
 	 * 
 	 * @see  Page#invoke(com.aoindustries.web.page.servlet.Page.Body)
 	 */
-	public static void newPageContext(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallable target) throws ServletException, IOException, SkipPageException {
+	public static void newPageContextSkip(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallableSkip target) throws ServletException, IOException, SkipPageException {
 		final ServletContext oldServletContext = servletContext.get();
 		final HttpServletRequest oldRequest = request.get();
 		final HttpServletResponse oldResponse = response.get();
@@ -90,11 +118,11 @@ final public class PageContext {
 		}
 	}
 
-	public static interface PageContextCallableE<E extends Throwable> {
+	public static interface PageContextCallableSkipE<E extends Throwable> {
 		void call() throws E, ServletException, IOException, SkipPageException;
 	}
 
-	public static <E extends Throwable> void newPageContextE(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallableE<E> target) throws E, ServletException, IOException, SkipPageException {
+	public static <E extends Throwable> void newPageContextSkipE(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallableSkipE<E> target) throws E, ServletException, IOException, SkipPageException {
 		final ServletContext oldServletContext = servletContext.get();
 		final HttpServletRequest oldRequest = request.get();
 		final HttpServletResponse oldResponse = response.get();
@@ -118,11 +146,11 @@ final public class PageContext {
 		}
 	}
 
-	public static interface PageContextCallableEE<E1 extends Throwable, E2 extends Throwable> {
+	public static interface PageContextCallableSkipEE<E1 extends Throwable, E2 extends Throwable> {
 		void call() throws E1, E2, ServletException, IOException, SkipPageException;
 	}
 
-	public static <E1 extends Throwable, E2 extends Throwable> void newPageContextEE(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallableEE<E1,E2> target) throws E1, E2, ServletException, IOException, SkipPageException {
+	public static <E1 extends Throwable, E2 extends Throwable> void newPageContextSkipEE(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallableSkipEE<E1,E2> target) throws E1, E2, ServletException, IOException, SkipPageException {
 		final ServletContext oldServletContext = servletContext.get();
 		final HttpServletRequest oldRequest = request.get();
 		final HttpServletResponse oldResponse = response.get();
