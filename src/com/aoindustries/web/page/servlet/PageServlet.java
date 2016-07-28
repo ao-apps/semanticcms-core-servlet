@@ -33,6 +33,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
+/**
+ * Automatically sets up the Page and the PageContext.
+ *
+ * @see  Page
+ * @see  PageContext
+ */
 abstract public class PageServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
@@ -60,7 +66,7 @@ abstract public class PageServlet extends HttpServlet {
 	}
 
 	private static interface DoMethodCallable {
-		void doMethod(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException;
+		void doMethod(Page page) throws ServletException, IOException, SkipPageException;
 	}
 
 	private void callInPage(DoMethodCallable method, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -70,7 +76,7 @@ abstract public class PageServlet extends HttpServlet {
 				.toc(getToc())
 				.tocLevels(getTocLevels())
 				.invoke(
-					(req1, resp1, page) -> method.doMethod(req1, resp1, page)
+					page -> method.doMethod(page)
 				)
 			;
 		} catch(SkipPageException e) {
@@ -81,71 +87,86 @@ abstract public class PageServlet extends HttpServlet {
 	@Override
 	final protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(
-			(req1, resp1, page) -> doGet(req1, resp1, page),
+			page -> doGet(page),
 			req,
 			resp
 		);
 	}
 
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
-		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+	/**
+	 * Page and the PageContext are already setup.
+	 */
+	protected void doGet(Page page) throws ServletException, IOException, SkipPageException {
+		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
 
 	@Override
 	final protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(
-			(req1, resp1, page) -> doPost(req1, resp1, page),
+			page -> doPost(page),
 			req,
 			resp
 		);
 	}
 
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
-		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+	/**
+	 * Page and the PageContext are already setup.
+	 */
+	protected void doPost(Page page) throws ServletException, IOException, SkipPageException {
+		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
 
 	@Override
 	final protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(
-			(req1, resp1, page) -> doPut(req1, resp1, page),
+			page -> doPut(page),
 			req,
 			resp
 		);
 	}
 
-	protected void doPut(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
-		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+	/**
+	 * Page and the PageContext are already setup.
+	 */
+	protected void doPut(Page page) throws ServletException, IOException, SkipPageException {
+		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
 
 	@Override
 	final protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(
-			(req1, resp1, page) -> doDelete(req1, resp1, page),
+			page -> doDelete(page),
 			req,
 			resp
 		);
 	}
 
-	protected void doDelete(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
-		Includer.sendError(req, resp, HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+	/**
+	 * Page and the PageContext are already setup.
+	 */
+	protected void doDelete(Page page) throws ServletException, IOException, SkipPageException {
+		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw new SkipPageException();
 	}
 
 	@Override
 	final protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(
-			(req1, resp1, page) -> doOptions(req1, resp1, page),
+			page -> doOptions(page),
 			req,
 			resp
 		);
 	}
 
-	protected void doOptions(HttpServletRequest req, HttpServletResponse resp, Page page) throws ServletException, IOException, SkipPageException {
+	/**
+	 * Page and the PageContext are already setup.
+	 */
+	protected void doOptions(Page page) throws ServletException, IOException, SkipPageException {
 		ServletUtil.doOptions(
-			resp,
+			PageContext.getResponse(),
 			PageServlet.class,
 			this.getClass(),
 			"doGet",
@@ -153,8 +174,6 @@ abstract public class PageServlet extends HttpServlet {
 			"doPut",
 			"doDelete",
 			new Class<?>[] {
-				HttpServletRequest.class,
-				HttpServletResponse.class,
 				Page.class
 			}
 		);
