@@ -80,6 +80,7 @@ public class ServletElementContext implements ElementContext {
 					}
 				)
 			);
+			if(pw.checkError()) throw new IOException("Error on include PrintWriter");
 		} catch(ServletException e) {
 			throw new IOException(e);
 		}

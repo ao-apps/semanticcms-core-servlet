@@ -22,9 +22,11 @@
  */
 package com.aoindustries.web.page.servlet;
 
+import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.SegmentedWriter;
 import com.aoindustries.lang.NotImplementedException;
+import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.web.page.ElementWriter;
 import com.aoindustries.web.page.Node;
@@ -172,9 +174,10 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 		if(body != null) {
 			if(captureLevel == CaptureLevel.BODY) {
 				// Invoke tag body, capturing output
-				// TODO: Auto temp file here and other places
 				BufferWriter capturedOut = new SegmentedWriter();
 				try {
+					// Enable temp files if temp file context active
+					capturedOut = TempFileContext.wrapTempFileList(capturedOut, request, AutoTempFileWriter::new);
 					try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
 						HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
 							@Override
@@ -193,6 +196,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 							newResponse,
 							() -> body.doBody(request, newResponse, element)
 						);
+						if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
 					}
 				} finally {
 					capturedOut.close();
