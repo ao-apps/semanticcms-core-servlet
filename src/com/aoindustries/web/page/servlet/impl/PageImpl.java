@@ -40,6 +40,9 @@ import javax.servlet.jsp.SkipPageException;
 
 final public class PageImpl {
 
+	private static final String PAGE_TEMPLATE_JSP_PATH = "/lib/docs/page.inc.jsp";
+	private static final String PAGE_REQUEST_ATTRIBUTE = "page";
+
 	public static interface PageImplBody<E extends Throwable> {
 		BufferResult doBody(boolean discard, Page page) throws E, IOException, SkipPageException;
 	}
@@ -68,17 +71,17 @@ final public class PageImpl {
 		page.setToc(toc);
 		page.setTocLevels(tocLevels);
 
-		// Set currentNode
-		CurrentNode.setCurrentNode(request, page);
+		// Freeze page once body done
 		try {
-			// Set currentPage
-			CurrentPage.setCurrentPage(request, page);
-			try {
-				// Freeze page once body done
+			// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
+			// is done to catch childen.
+			if(body != null) {
+				// Set currentNode
+				CurrentNode.setCurrentNode(request, page);
 				try {
-					// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
-					// is done to catch childen.
-					if(body != null) {
+					// Set currentPage
+					CurrentPage.setCurrentPage(request, page);
+					try {
 						final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
 						if(captureLevel == CaptureLevel.BODY) {
 							// Invoke page body, capturing output
@@ -87,17 +90,17 @@ final public class PageImpl {
 							// Invoke page body, discarding output
 							body.doBody(true, page);
 						}
+					} finally {
+						// Restore previous currentPage
+						CurrentPage.setCurrentPage(request, null);
 					}
 				} finally {
-					page.freeze();
+					// Restore previous currentNode
+					CurrentNode.setCurrentNode(request, null);
 				}
-			} finally {
-				// Restore previous currentPage
-				CurrentPage.setCurrentPage(request, null);
 			}
 		} finally {
-			// Restore previous currentNode
-			CurrentNode.setCurrentNode(request, null);
+			page.freeze();
 		}
 		CapturePage capture = CapturePage.getCaptureContext(request);
 		if(capture != null) {
@@ -106,19 +109,19 @@ final public class PageImpl {
 		} else {
 			// Display page directly
 			// Forward to PAGE_TEMPLATE_JSP_PATH, passing PAGE_REQUEST_ATTRIBUTE request attribute
-			Object oldValue = request.getAttribute(com.aoindustries.web.page.servlet.Page.PAGE_REQUEST_ATTRIBUTE);
+			Object oldValue = request.getAttribute(PAGE_REQUEST_ATTRIBUTE);
 			try {
 				// Pass PAGE_REQUEST_ATTRIBUTE attribute
-				request.setAttribute(com.aoindustries.web.page.servlet.Page.PAGE_REQUEST_ATTRIBUTE, page);
+				request.setAttribute(PAGE_REQUEST_ATTRIBUTE, page);
 				Dispatcher.forward(
 					servletContext,
-					com.aoindustries.web.page.servlet.Page.PAGE_TEMPLATE_JSP_PATH,
+					PAGE_TEMPLATE_JSP_PATH,
 					request,
 					response
 				);
 			} finally {
 				// Restore old value of PAGE_REQUEST_ATTRIBUTE attribute
-				request.setAttribute(com.aoindustries.web.page.servlet.Page.PAGE_REQUEST_ATTRIBUTE, oldValue);
+				request.setAttribute(PAGE_REQUEST_ATTRIBUTE, oldValue);
 			}
 			throw new SkipPageException();
 		}

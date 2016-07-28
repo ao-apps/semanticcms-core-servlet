@@ -41,9 +41,6 @@ import javax.servlet.jsp.SkipPageException;
 
 public class Page {
 
-	public static final String PAGE_TEMPLATE_JSP_PATH="/lib/docs/page.inc.jsp";
-	public static final String PAGE_REQUEST_ATTRIBUTE = "page";
-
 	public static interface PageBody {
 		void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException;
 	}
@@ -78,6 +75,12 @@ public class Page {
 		return this;
 	}
 
+	/**
+	 * Sets request attribute "page" to the current page, and restores the previous "page"
+	 * attribute once completed.
+	 *
+	 * @see  PageImpl#PAGE_REQUEST_ATTRIBUTE
+	 */
 	public void invoke(PageBody body) throws ServletException, IOException, SkipPageException {
 		PageImpl.doPageImpl(
 			servletContext,
