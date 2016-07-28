@@ -26,7 +26,6 @@ import com.aoindustries.servlet.http.Includer;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.web.page.Page;
 import java.io.IOException;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -69,14 +68,17 @@ abstract public class PageServlet extends HttpServlet {
 		void doMethod(Page page) throws ServletException, IOException, SkipPageException;
 	}
 
-	private void callInPage(DoMethodCallable method, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		final ServletContext servletContext = getServletContext();
+	private void callInPage(HttpServletRequest req, HttpServletResponse resp, DoMethodCallable method) throws ServletException, IOException {
 		try {
-			new com.aoindustries.web.page.servlet.Page(servletContext, req, resp, getTitle())
+			new com.aoindustries.web.page.servlet.Page(getServletContext(), req, resp, getTitle())
 				.toc(getToc())
 				.tocLevels(getTocLevels())
 				.invoke(
-					page -> method.doMethod(page)
+					(req1, resp1, page) -> {
+						resp1.setContentType("application/xhtml+xml");
+						resp1.setCharacterEncoding("UTF-8");
+						method.doMethod(page);
+					}
 				)
 			;
 		} catch(SkipPageException e) {
@@ -86,15 +88,13 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(
-			page -> doGet(page),
-			req,
-			resp
-		);
+		callInPage(req, resp, this::doGet);
 	}
 
 	/**
 	 * Page and the PageContext are already setup.
+	 * The response content type has been set to application/xhtml+xml.
+	 * The response character encoding has been set to UTF-8.
 	 */
 	protected void doGet(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -103,15 +103,13 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(
-			page -> doPost(page),
-			req,
-			resp
-		);
+		callInPage(req, resp, this::doPost);
 	}
 
 	/**
 	 * Page and the PageContext are already setup.
+	 * The response content type has been set to application/xhtml+xml.
+	 * The response character encoding has been set to UTF-8.
 	 */
 	protected void doPost(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -120,15 +118,13 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(
-			page -> doPut(page),
-			req,
-			resp
-		);
+		callInPage(req, resp, this::doPut);
 	}
 
 	/**
 	 * Page and the PageContext are already setup.
+	 * The response content type has been set to application/xhtml+xml.
+	 * The response character encoding has been set to UTF-8.
 	 */
 	protected void doPut(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -137,15 +133,13 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(
-			page -> doDelete(page),
-			req,
-			resp
-		);
+		callInPage(req, resp, this::doDelete);
 	}
 
 	/**
 	 * Page and the PageContext are already setup.
+	 * The response content type has been set to application/xhtml+xml.
+	 * The response character encoding has been set to UTF-8.
 	 */
 	protected void doDelete(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -154,15 +148,13 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(
-			page -> doOptions(page),
-			req,
-			resp
-		);
+		callInPage(req, resp, this::doOptions);
 	}
 
 	/**
 	 * Page and the PageContext are already setup.
+	 * The response content type has been set to application/xhtml+xml.
+	 * The response character encoding has been set to UTF-8.
 	 */
 	protected void doOptions(Page page) throws ServletException, IOException, SkipPageException {
 		ServletUtil.doOptions(
