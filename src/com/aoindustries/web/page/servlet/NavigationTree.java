@@ -60,6 +60,20 @@ public class NavigationTree {
 		this.root = root;
 	}
 
+	/**
+	 * Creates a new navigation tree in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public NavigationTree(Page root) {
+		this(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			root
+		);
+	}
+
 	public NavigationTree skipRoot(boolean skipRoot) {
 		this.skipRoot = skipRoot;
 		return this;

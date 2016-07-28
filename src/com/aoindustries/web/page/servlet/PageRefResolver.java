@@ -90,6 +90,21 @@ public class PageRefResolver {
 	}
 
 	/**
+	 * Gets a PageRef in the current page context.
+	 *
+	 * @see  #getPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.String)
+	 * @see  PageContext
+	 */
+	public static PageRef getPageRef(String book, String path) throws ServletException, MalformedURLException {
+		return getPageRef(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			book,
+			path
+		);
+	}
+
+	/**
 	 * Make no instances.
 	 */
 	private PageRefResolver() {

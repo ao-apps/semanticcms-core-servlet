@@ -33,10 +33,6 @@ import javax.servlet.jsp.SkipPageException;
 
 public class File {
 
-	public static interface FileBody {
-		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
-	}
-
 	private final ServletContext servletContext;
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
@@ -68,6 +64,30 @@ public class File {
 		this.book = book;
 	}
 
+	/**
+	 * Creates a new file in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public File(String path) {
+		this(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			path
+		);
+	}
+
+	/**
+	 * Creates a new file in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public File(String book, String path) {
+		this(path);
+		this.book = book;
+	}
+
 	public File book(String book) {
 		this.book = book;
 		return this;
@@ -78,7 +98,18 @@ public class File {
 		return this;
 	}
 
-	public void invoke(FileBody body) throws ServletException, IOException, SkipPageException {
+	public static interface Body {
+		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
+	}
+
+	/**
+	 * <p>
+	 * Also establishes a new {@link PageContext}.
+	 * </p>
+	 *
+	 * @see  PageContext
+	 */
+	public void invoke(Body body) throws ServletException, IOException, SkipPageException {
 		FileImpl.writeFileImpl(
 			servletContext,
 			request,
@@ -94,16 +125,42 @@ public class File {
 				: new FileImpl.FileImplBody<ServletException>() {
 					@Override
 					public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {
-						body.doBody(
-							request,
-							discard ? new NullHttpServletResponseWrapper(response) : response
-						);
+						if(discard) {
+							HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+							// Set PageContext
+							PageContext.newPageContext(
+								servletContext,
+								request,
+								newResponse,
+								() -> body.doBody(request, newResponse)
+							);
+						} else {
+							body.doBody(request, response);
+						}
 					}
 				}
 		);
 	}
 
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.File.Body) 
+	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
-		invoke(null);
+		invoke((Body)null);
+	}
+
+	public static interface PageContextBody {
+		void doBody() throws ServletException, IOException, SkipPageException;
+	}
+
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.File.Body) 
+	 */
+	public void invoke(PageContextBody body) throws ServletException, IOException, SkipPageException {
+		invoke(
+			body == null
+				? null
+				: (req, resp) -> body.doBody()
+		);
 	}
 }

@@ -45,10 +45,6 @@ import javax.servlet.jsp.SkipPageException;
  */
 abstract public class Element<E extends com.aoindustries.web.page.Element> implements ElementWriter {
 
-	public static interface ElementBody<E extends com.aoindustries.web.page.Element> {
-		void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException;
-	}
-
 	private final ServletContext servletContext;
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
@@ -71,14 +67,23 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 		return this;
 	}
 
+	public static interface Body<E extends com.aoindustries.web.page.Element> {
+		void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException;
+	}
+
 	/**
+	 * <p>
 	 * Adds this element to the current page, if part of a page.
 	 * Sets this element as the current element.
 	 * Then, if not capturing or capturing META or higher, calls {@link #doBody}
+	 * </p>
+	 * <p>
+	 * Also establishes a new {@link PageContext}.
+	 * </p>
+	 *
+	 * @see  PageContext
 	 */
-	public void invoke(
-		ElementBody<? super E> body
-	) throws ServletException, IOException, SkipPageException {
+	public void invoke(Body<? super E> body) throws ServletException, IOException, SkipPageException {
 		// Get the current capture state
 		CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
@@ -119,10 +124,40 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 	}
 
 	/**
-	 * @see  #invoke(com.aoindustries.web.page.servlet.Element.ElementBody)
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Element.Body) 
 	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
-		invoke(null);
+		invoke((Body)null);
+	}
+
+	public static interface PageContextBody<E extends com.aoindustries.web.page.Element> {
+		void doBody(E element) throws ServletException, IOException, SkipPageException;
+	}
+
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Element.Body) 
+	 */
+	public void invoke(PageContextBody<? super E> body) throws ServletException, IOException, SkipPageException {
+		invoke(
+			body == null
+				? null
+				: (req, resp, e) -> body.doBody(e)
+		);
+	}
+
+	public static interface PageContextNoElementBody {
+		void doBody() throws ServletException, IOException, SkipPageException;
+	}
+
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Element.Body) 
+	 */
+	public void invoke(PageContextNoElementBody body) throws ServletException, IOException, SkipPageException {
+		invoke(
+			body == null
+				? null
+				: (req, resp, e) -> body.doBody()
+		);
 	}
 
 	/**
@@ -132,7 +167,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 		HttpServletRequest request,
 		HttpServletResponse response,
 		CaptureLevel captureLevel,
-		ElementBody<? super E> body
+		Body<? super E> body
 	) throws ServletException, IOException, SkipPageException {
 		if(body != null) {
 			if(captureLevel == CaptureLevel.BODY) {
@@ -141,19 +176,22 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 				BufferWriter capturedOut = new SegmentedWriter();
 				try {
 					try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
-						body.doBody(
+						HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
+							@Override
+							public PrintWriter getWriter() throws IOException {
+								return capturedPW;
+							}
+							@Override
+							public ServletOutputStream getOutputStream() {
+								throw new NotImplementedException();
+							}
+						};
+						// Set PageContext
+						PageContext.newPageContext(
+							servletContext,
 							request,
-							new HttpServletResponseWrapper(response) {
-								@Override
-								public PrintWriter getWriter() throws IOException {
-									return capturedPW;
-								}
-								@Override
-								public ServletOutputStream getOutputStream() {
-									throw new NotImplementedException();
-								}
-							},
-							element
+							newResponse,
+							() -> body.doBody(request, newResponse, element)
 						);
 					}
 				} finally {
@@ -162,10 +200,13 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 				element.setBody(capturedOut.getResult().trim());
 			} else if(captureLevel == CaptureLevel.META) {
 				// Invoke body for any meta data, but discard any output
-				body.doBody(
+				HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+				// Set PageContext
+				PageContext.newPageContext(
+					servletContext,
 					request,
-					new NullHttpServletResponseWrapper(response),
-					element
+					newResponse,
+					() -> body.doBody(request, newResponse, element)
 				);
 			} else {
 				throw new AssertionError();

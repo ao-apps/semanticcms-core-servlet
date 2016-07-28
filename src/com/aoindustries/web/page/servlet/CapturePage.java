@@ -187,6 +187,22 @@ public class CapturePage {
 		return capturedPage;
 	}
 
+	/**
+	 * Captures a page in the current page context.
+	 *
+	 * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.aoindustries.web.page.PageRef, com.aoindustries.web.page.servlet.CaptureLevel)
+	 * @see  PageContext
+	 */
+	public static Page capturePage(PageRef pageRef, CaptureLevel level) throws ServletException, IOException {
+		return capturePage(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			pageRef,
+			level
+		);
+	}
+
 	private CapturePage() {
 	}
 

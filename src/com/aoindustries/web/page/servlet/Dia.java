@@ -63,6 +63,30 @@ public class Dia {
 		this.book = book;
 	}
 
+	/**
+	 * Creates a new dia in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Dia(String path) {
+		this(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			path
+		);
+	}
+
+	/**
+	 * Creates a new dia in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Dia(String book, String path) {
+		this(path);
+		this.book = book;
+	}
+
 	public Dia book(String book) {
 		this.book = book;
 		return this;

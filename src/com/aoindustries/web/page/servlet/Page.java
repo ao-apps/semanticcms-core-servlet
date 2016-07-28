@@ -41,10 +41,6 @@ import javax.servlet.jsp.SkipPageException;
 
 public class Page {
 
-	public static interface PageBody {
-		void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException;
-	}
-
 	private final ServletContext servletContext;
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
@@ -65,6 +61,20 @@ public class Page {
 		this.title = title;
 	}
 
+	/**
+	 * Creates a new page in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Page(String title) {
+		this(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			title
+		);
+	}
+
 	public Page toc(Boolean toc) {
 		this.toc = toc;
 		return this;
@@ -75,13 +85,23 @@ public class Page {
 		return this;
 	}
 
+	public static interface Body {
+		void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException;
+	}
+
 	/**
+	 * <p>
 	 * Sets request attribute "page" to the current page, and restores the previous "page"
 	 * attribute once completed.
+	 * </p>
+	 * <p>
+	 * Also establishes a new {@link PageContext}.
+	 * </p>
 	 *
+	 * @see  PageContext
 	 * @see  PageImpl#PAGE_REQUEST_ATTRIBUTE
 	 */
-	public void invoke(PageBody body) throws ServletException, IOException, SkipPageException {
+	public void invoke(Body body) throws ServletException, IOException, SkipPageException {
 		PageImpl.doPageImpl(
 			servletContext,
 			request,
@@ -97,29 +117,35 @@ public class Page {
 					@Override
 					public BufferResult doBody(boolean discard, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException {
 						if(discard) {
-							body.doBody(
+							HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+							// Set PageContext
+							PageContext.newPageContext(
+								servletContext,
 								request,
-								new NullHttpServletResponseWrapper(response),
-								page
+								newResponse,
+								() -> body.doBody(request, newResponse, page)
 							);
 							return EmptyResult.getInstance();
 						} else {
 							BufferWriter capturedOut = new SegmentedWriter();
 							try {
 								try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
-									body.doBody(
+									HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
+										@Override
+										public PrintWriter getWriter() throws IOException {
+											return capturedPW;
+										}
+										@Override
+										public ServletOutputStream getOutputStream() {
+											throw new NotImplementedException();
+										}
+									};
+									// Set PageContext
+									PageContext.newPageContext(
+										servletContext,
 										request,
-										new HttpServletResponseWrapper(response) {
-											@Override
-											public PrintWriter getWriter() throws IOException {
-												return capturedPW;
-											}
-											@Override
-											public ServletOutputStream getOutputStream() {
-												throw new NotImplementedException();
-											}
-										},
-										page
+										newResponse,
+										() -> body.doBody(request, newResponse, page)
 									);
 								}
 							} finally {
@@ -132,7 +158,40 @@ public class Page {
 		);
 	}
 
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Page.Body) 
+	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
-		invoke(null);
+		invoke((Body)null);
+	}
+
+	public static interface PageContextBody {
+		void doBody(com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException;
+	}
+
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Page.Body) 
+	 */
+	public void invoke(PageContextBody body) throws ServletException, IOException, SkipPageException {
+		invoke(
+			body == null
+				? null
+				: (req, resp, page) -> body.doBody(page)
+		);
+	}
+
+	public static interface PageContextNoPageBody {
+		void doBody() throws ServletException, IOException, SkipPageException;
+	}
+
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Page.Body) 
+	 */
+	public void invoke(PageContextNoPageBody body) throws ServletException, IOException, SkipPageException {
+		invoke(
+			body == null
+				? null
+				: (req, resp, page) -> body.doBody()
+		);
 	}
 }

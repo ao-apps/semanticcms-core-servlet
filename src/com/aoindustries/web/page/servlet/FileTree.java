@@ -63,6 +63,30 @@ public class FileTree {
 		this.includeElements = includeElements;
 	}
 
+	/**
+	 * Creates a new file tree in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public FileTree(Node root) {
+		this(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			root
+		);
+	}
+
+	/**
+	 * Creates a new file tree in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public FileTree(Node root, boolean includeElements) {
+		this(root);
+		this.includeElements = includeElements;
+	}
+
 	public FileTree includeElements(boolean includeElements) {
 		this.includeElements = includeElements;
 		return this;

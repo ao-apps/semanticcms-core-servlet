@@ -49,6 +49,20 @@ public class Heading extends Element<com.aoindustries.web.page.Heading> {
 		element.setLabel(label);
 	}
 
+	/**
+	 * Creates a new heading in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Heading(String label) {
+		this(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			label
+		);
+	}
+
 	@Override
 	public Heading id(String id) {
 		super.id(id);
@@ -57,7 +71,7 @@ public class Heading extends Element<com.aoindustries.web.page.Heading> {
 
 	private PageIndex pageIndex;
 	@Override
-	protected void doBody(HttpServletRequest request, HttpServletResponse response, CaptureLevel captureLevel, ElementBody<? super com.aoindustries.web.page.Heading> body) throws ServletException, IOException, SkipPageException {
+	protected void doBody(HttpServletRequest request, HttpServletResponse response, CaptureLevel captureLevel, Body<? super com.aoindustries.web.page.Heading> body) throws ServletException, IOException, SkipPageException {
 		pageIndex = PageIndex.getCurrentPageIndex(request);
 		super.doBody(request, response, captureLevel, body);
 		HeadingImpl.doAfterBody(element);

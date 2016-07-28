@@ -34,10 +34,6 @@ import javax.servlet.jsp.SkipPageException;
 
 public class Link {
 
-	public static interface LinkBody {
-		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
-	}
-
 	private final ServletContext servletContext;
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
@@ -92,6 +88,49 @@ public class Link {
 		this.element = element;
 	}
 
+	/**
+	 * Creates a new link in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Link() {
+		this(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse()
+		);
+	}
+
+	/**
+	 * Creates a new link in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Link(String page) {
+		this();
+		this.page = page;
+	}
+
+	/**
+	 * Creates a new link in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Link(String book, String page) {
+		this(page);
+		this.book = book;
+	}
+
+	/**
+	 * Creates a new link in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Link(String book, String page, String element) {
+		this(book, page);
+		this.element = element;
+	}
+
 	public Link book(String book) {
 		this.book = book;
 		return this;
@@ -122,7 +161,18 @@ public class Link {
 		return this;
 	}
 
-	public void invoke(LinkBody body) throws ServletException, IOException, SkipPageException {
+	public static interface Body {
+		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
+	}
+
+	/**
+	 * <p>
+	 * Also establishes a new {@link PageContext}.
+	 * </p>
+	 *
+	 * @see  PageContext
+	 */
+	public void invoke(Body body) throws ServletException, IOException, SkipPageException {
 		LinkImpl.writeLinkImpl(
 			servletContext,
 			request,
@@ -141,16 +191,42 @@ public class Link {
 				: new LinkImpl.LinkImplBody<ServletException>() {
 					@Override
 					public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {
-						body.doBody(
-							request,
-							discard ? new NullHttpServletResponseWrapper(response) : response
-						);
+						if(discard) {
+							HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+							// Set PageContext
+							PageContext.newPageContext(
+								servletContext,
+								request,
+								newResponse,
+								() -> body.doBody(request, newResponse)
+							);
+						} else {
+							body.doBody(request, response);
+						}
 					}
 				}
 		);
 	}
 
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Link.Body)
+	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
-		invoke(null);
+		invoke((Body)null);
+	}
+
+	public static interface PageContextBody {
+		void doBody() throws ServletException, IOException, SkipPageException;
+	}
+
+	/**
+	 * @see  #invoke(com.aoindustries.web.page.servlet.Link.Body)
+	 */
+	public void invoke(PageContextBody body) throws ServletException, IOException, SkipPageException {
+		invoke(
+			body == null
+				? null
+				: (req, resp) -> body.doBody()
+		);
 	}
 }
