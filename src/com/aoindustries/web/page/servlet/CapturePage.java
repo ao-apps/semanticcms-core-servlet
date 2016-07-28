@@ -25,6 +25,7 @@ package com.aoindustries.web.page.servlet;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
+import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.web.page.Node;
 import com.aoindustries.web.page.Page;
 import com.aoindustries.web.page.PageRef;
@@ -35,6 +36,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
@@ -89,6 +91,10 @@ public class CapturePage {
 		}
 	}
 
+	/**
+	 * Captures a page.
+	 * The capture is always done with a request method of "GET", even when the enclosing request is a different method.
+	 */
 	public static Page capturePage(
 		ServletContext servletContext,
 		HttpServletRequest request,
@@ -144,7 +150,17 @@ public class CapturePage {
 						Dispatcher.include(
 							servletContext,
 							capturePath,
-							request,
+							// Always capture as "GET" request
+							ServletUtil.METHOD_GET.equals(request.getMethod())
+								// Is already "GET"
+								? request
+								// Wrap to make "GET"
+								: new HttpServletRequestWrapper(request) {
+									@Override
+									public String getMethod() {
+										return ServletUtil.METHOD_GET;
+									}
+								},
 							new NullHttpServletResponseWrapper(response)
 						);
 					} catch(SkipPageException e) {
