@@ -22,32 +22,20 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.io.buffer.BufferWriter;
-import com.aoindustries.io.buffer.SegmentedWriter;
-import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.Includer;
-import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
-import com.aoindustries.web.page.Node;
 import com.aoindustries.web.page.Page;
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.jsp.SkipPageException;
 
 abstract public class PageServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-
-	public static final String PAGE_TEMPLATE_JSP_PATH="/lib/docs/page.inc.jsp";
-	public static final String PAGE_REQUEST_ATTRIBUTE = "page";
 
 	/**
 	 * @see  Page#getTitle()
@@ -78,98 +66,13 @@ abstract public class PageServlet extends HttpServlet {
 	private void callInPage(DoMethodCallable method, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		final ServletContext servletContext = getServletContext();
 		try {
-			final Page page = new Page();
-			// Find the path to this page
-			page.setPageRef(PageRefResolver.getCurrentPageRef(servletContext, req));
-
-			{
-				// Pages may not be nested within any kind of node
-				Node parentNode = CurrentNode.getCurrentNode(req);
-				if(parentNode != null) throw new ServletException("Pages may not be nested within other nodes: " + page.getPageRef() + " not allowed inside of " + parentNode);
-				assert CurrentPage.getCurrentPage(req) == null : "When no parent node, cannot have a parent page";
-			}
-
-			page.setTitle(getTitle());
-			page.setToc(getToc());
-			page.setTocLevels(getTocLevels());
-
-			// Set currentNode
-			CurrentNode.setCurrentNode(req, page);
-			try {
-				// Set currentPage
-				CurrentPage.setCurrentPage(req, page);
-				try {
-					// Freeze page once body done
-					try {
-						// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
-						// is done to catch childen.
-						final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(req);
-						if(captureLevel == CaptureLevel.BODY) {
-							// Invoke page body, capturing output
-							BufferWriter capturedOut = new SegmentedWriter();
-							try {
-								try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
-									method.doMethod(
-										req,
-										new HttpServletResponseWrapper(resp) {
-											@Override
-											public PrintWriter getWriter() throws IOException {
-												return capturedPW;
-											}
-											@Override
-											public ServletOutputStream getOutputStream() {
-												throw new NotImplementedException();
-											}
-										},
-										page
-									);
-								}
-							} finally {
-								capturedOut.close();
-							}
-							page.setBody(capturedOut.getResult().trim());
-						} else {
-							// Invoke page body, discarding output
-							method.doMethod(
-								req,
-								new NullHttpServletResponseWrapper(resp),
-								page
-							);
-						}
-					} finally {
-						page.freeze();
-					}
-				} finally {
-					// Restore previous currentPage
-					CurrentPage.setCurrentPage(req, null);
-				}
-			} finally {
-				// Restore previous currentNode
-				CurrentNode.setCurrentNode(req, null);
-			}
-			CapturePage capture = CapturePage.getCaptureContext(req);
-			if(capture != null) {
-				// Capturing, add to capture
-				capture.setCapturedPage(page);
-			} else {
-				// Display page directly
-				// Forward to PAGE_TEMPLATE_JSP_PATH, passing PAGE_REQUEST_ATTRIBUTE request attribute
-				Object oldValue = req.getAttribute(PAGE_REQUEST_ATTRIBUTE);
-				try {
-					// Pass PAGE_REQUEST_ATTRIBUTE attribute
-					req.setAttribute(PAGE_REQUEST_ATTRIBUTE, page);
-					Dispatcher.forward(
-						servletContext,
-						PAGE_TEMPLATE_JSP_PATH,
-						req,
-						resp
-					);
-				} finally {
-					// Restore old value of PAGE_REQUEST_ATTRIBUTE attribute
-					req.setAttribute(PAGE_REQUEST_ATTRIBUTE, oldValue);
-				}
-				Includer.setPageSkipped(req);
-			}
+			new com.aoindustries.web.page.servlet.Page(servletContext, req, resp, getTitle())
+				.toc(getToc())
+				.tocLevels(getTocLevels())
+				.invoke(
+					(req1, resp1, page) -> method.doMethod(req1, resp1, page)
+				)
+			;
 		} catch(SkipPageException e) {
 			Includer.setPageSkipped(req);
 		}
