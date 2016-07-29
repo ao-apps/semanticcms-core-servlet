@@ -50,6 +50,8 @@ public class Page {
 
 	private Boolean toc;
 	private int tocLevels = com.aoindustries.web.page.Page.DEFAULT_TOC_LEVELS;
+	private boolean allowParentMismatch;
+	private boolean allowChildMismatch;
 
 	public Page(
 		ServletContext servletContext,
@@ -87,6 +89,16 @@ public class Page {
 		return this;
 	}
 
+	public Page allowParentMismatch(boolean allowParentMismatch) {
+		this.allowParentMismatch = allowParentMismatch;
+		return this;
+	}
+
+	public Page allowChildMismatch(boolean allowChildMismatch) {
+		this.allowChildMismatch = allowChildMismatch;
+		return this;
+	}
+
 	public static interface Body {
 		void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException;
 	}
@@ -111,6 +123,8 @@ public class Page {
 			title,
 			toc,
 			tocLevels,
+			allowParentMismatch,
+			allowChildMismatch,
 			body == null
 				? null
 				// Lamdba version not working with generic exceptions:

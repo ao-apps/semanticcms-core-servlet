@@ -55,6 +55,8 @@ final public class PageImpl {
 		String title,
 		Boolean toc,
 		int tocLevels,
+		boolean allowParentMismatch,
+		boolean allowChildMismatch,
 		PageImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
 		final Page page = new Page();
@@ -71,11 +73,13 @@ final public class PageImpl {
 		page.setTitle(title);
 		page.setToc(toc);
 		page.setTocLevels(tocLevels);
+		page.setAllowParentMismatch(allowParentMismatch);
+		page.setAllowChildMismatch(allowChildMismatch);
 
 		// Freeze page once body done
 		try {
 			// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
-			// is done to catch childen.
+			// is done to catch parents and childen.
 			if(body != null) {
 				// Set currentNode
 				CurrentNode.setCurrentNode(request, page);

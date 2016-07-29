@@ -30,7 +30,7 @@ import javax.servlet.ServletRequest;
 public enum CaptureLevel {
 
 	/**
-	 * Captures page meta data only, such as title and children.
+	 * Captures page meta data only, such as title, parents, and children.
 	 */
 	PAGE,
 
