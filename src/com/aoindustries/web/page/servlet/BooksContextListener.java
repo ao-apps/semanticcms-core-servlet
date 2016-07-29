@@ -25,12 +25,12 @@ package com.aoindustries.web.page.servlet;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.PropertiesUtils;
-import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.WrappedException;
 import com.aoindustries.web.page.Book;
 import com.aoindustries.web.page.PageRef;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -56,53 +56,66 @@ public class BooksContextListener implements ServletContextListener {
 	static final String MISSING_BOOKS_ATTRIBUTE_NAME = "missingBooks";
 	static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
 
+	private static String getProperty(Properties booksProps, Set<Object> usedKeys, String key) {
+		usedKeys.add(key);
+		return booksProps.getProperty(key);
+	}
+
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		try {
 			ServletContext servletContext = event.getServletContext();
 			Properties booksProps = PropertiesUtils.loadFromResource(servletContext, BOOKS_PROPERTIES_RESOURCE);
+			Set<Object> booksPropsKeys = booksProps.keySet();
+
+			// Tracks each properties key used, will throw exception if any key exists in the properties file that is not used
+			Set<Object> usedKeys = new HashSet<>(booksPropsKeys.size() * 4/3 + 1);
 
 			// Load missingBooks
 			Set<String> missingBooks = new LinkedHashSet<>();
-			for(String name : StringUtility.splitStringCommaSpace(booksProps.getProperty(MISSING_BOOKS_ATTRIBUTE_NAME))) {
-				if(!name.isEmpty()) {
-					missingBooks.add(name);
-				}
+			for(int missingBookNum=1; missingBookNum<Integer.MAX_VALUE; missingBookNum++) {
+				String key =  MISSING_BOOKS_ATTRIBUTE_NAME + "." + missingBookNum;
+				String name = getProperty(booksProps, usedKeys, key);
+				if(name == null) break;
+				if(!missingBooks.add(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate value for \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + key + "=" + name);
 			}
+
 			// Load books
-			String rootBookName = booksProps.getProperty(ROOT_BOOK_ATTRIBUTE_NAME);
-			if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException('"' + ROOT_BOOK_ATTRIBUTE_NAME + "\" not provided");
+			String rootBookName = getProperty(booksProps, usedKeys, ROOT_BOOK_ATTRIBUTE_NAME);
+			if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
 			Map<String,Book> books = new LinkedHashMap<>();
-			for(String name : StringUtility.splitStringCommaSpace(booksProps.getProperty(BOOKS_ATTRIBUTE_NAME))) {
-				if(!name.isEmpty()) {
-					if(missingBooks.contains(name)) throw new IllegalStateException("Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
-					String cvsworkDirectoryAttribute = "book." + name + ".cvsworkDirectory";
-					String cvsworkDirectory = booksProps.getProperty(cvsworkDirectoryAttribute);
-					if(cvsworkDirectory == null) throw new IllegalStateException("Required context parameter not present: " + cvsworkDirectoryAttribute);
-					List<PageRef> parentPages = new ArrayList<>();
-					for(int i=1; i<Integer.MAX_VALUE; i++) {
-						String parentBookNameAttribute = "book." + name + ".parent." + i + ".book";
-						String parentBookName = booksProps.getProperty(parentBookNameAttribute);
-						String parentPageAttribute = "book." + name + ".parent." + i + ".page";
-						String parentPage = booksProps.getProperty(parentPageAttribute);
-						// Stop on the first not found
-						if(parentBookName == null && parentPage == null) break;
-						if(parentBookName == null) throw new IllegalArgumentException("parent book required when parent page provided: " + parentPageAttribute + " = " + parentPage);
-						if(parentPage == null) throw new IllegalArgumentException("parent page required when parent book provided: " + parentBookNameAttribute + " = " + parentBookName);
-						if(missingBooks.contains(parentBookName)) throw new IllegalStateException("parent book may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + parentBookNameAttribute + " = " + parentBookName);
-						Book parentBook = books.get(parentBookName);
-						if(parentBook == null) throw new IllegalStateException("parent book not found (loading order currently matters): " + parentBookNameAttribute + " = " + parentBookName);
-						parentPages.add(new PageRef(parentBook, parentPage));
+			for(int bookNum=1; bookNum<Integer.MAX_VALUE; bookNum++) {
+				String name = getProperty(booksProps, usedKeys, "books." + bookNum + ".name");
+				if(name == null) break;
+				if(missingBooks.contains(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
+				String cvsworkDirectoryAttribute = "books." + bookNum + ".cvsworkDirectory";
+				String cvsworkDirectory = getProperty(booksProps, usedKeys, cvsworkDirectoryAttribute);
+				if(cvsworkDirectory == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Required parameter not present: " + cvsworkDirectoryAttribute);
+				List<PageRef> parentPages = new ArrayList<>();
+				for(int parentNum=1; parentNum<Integer.MAX_VALUE; parentNum++) {
+					String parentBookNameAttribute = "books." + bookNum + ".parents." + parentNum + ".book";
+					String parentBookName = getProperty(booksProps, usedKeys, parentBookNameAttribute);
+					String parentPageAttribute = "books." + bookNum + ".parents." + parentNum + ".page";
+					String parentPage = getProperty(booksProps, usedKeys, parentPageAttribute);
+					// Stop on the first not found
+					if(parentBookName == null && parentPage == null) break;
+					if(parentBookName == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent book required when parent page provided: " + parentPageAttribute + "=" + parentPage);
+					if(parentPage == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent page required when parent book provided: " + parentBookNameAttribute + "=" + parentBookName);
+					if(missingBooks.contains(parentBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + parentBookNameAttribute + "=" + parentBookName);
+					Book parentBook = books.get(parentBookName);
+					if(parentBook == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookNameAttribute + "=" + parentBookName);
+					parentPages.add(new PageRef(parentBook, parentPage));
+				}
+				if(name.equals(rootBookName)) {
+					if(!parentPages.isEmpty()) {
+						throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookName);
 					}
-					if(name.equals(rootBookName)) {
-						if(!parentPages.isEmpty()) {
-							throw new IllegalStateException('"' + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookName);
-						}
-					} else {
-						if(parentPages.isEmpty()) {
-							throw new IllegalStateException("Non-root books must have at least one parent: " + name);
-						}
+				} else {
+					if(parentPages.isEmpty()) {
+						throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Non-root books must have at least one parent: " + name);
 					}
+				}
+				if(
 					books.put(
 						name,
 						new Book(
@@ -111,13 +124,24 @@ public class BooksContextListener implements ServletContextListener {
 							parentPages,
 							PropertiesUtils.loadFromResource(servletContext, ("/".equals(name) ? "" : name) + "/book.properties")
 						)
-					);
+					) != null
+				) {
+					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate book: " + name);
 				}
 			}
+
 			// Load rootBook
-			if(missingBooks.contains(rootBookName)) throw new IllegalStateException('"' + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
+			if(missingBooks.contains(rootBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
 			Book rootBook = books.get(rootBookName);
-			if(rootBook == null) throw new IllegalStateException('"' + ROOT_BOOK_ATTRIBUTE_NAME + "\" is not found in \"" + BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
+			if(rootBook == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" is not found in \"" + BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
+
+			// Make sure all keys used
+			Set<Object> unusedKeys = new HashSet<>();
+			for(Object key : booksPropsKeys) {
+				if(!usedKeys.contains(key)) unusedKeys.add(key);
+			}
+			if(!unusedKeys.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Unused keys: " + unusedKeys);
+
 			// Successful startup
 			if(servletContext.getAttribute(BOOKS_ATTRIBUTE_NAME)!=null) throw new IllegalStateException("Application-scope attribute already present: " + BOOKS_ATTRIBUTE_NAME);
 			servletContext.setAttribute(BOOKS_ATTRIBUTE_NAME, AoCollections.optimalUnmodifiableMap(books));
