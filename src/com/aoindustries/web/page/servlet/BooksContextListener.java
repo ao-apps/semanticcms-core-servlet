@@ -36,6 +36,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,6 +45,7 @@ public class BooksContextListener implements ServletContextListener {
 
 	private static final String BOOKS_ATTRIBUTE_NAME = "books";
 	private static final String MISSING_BOOKS_ATTRIBUTE_NAME = "missingBooks";
+	private static final String ROOT_BOOK = "rootBook";
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
@@ -102,12 +104,6 @@ public class BooksContextListener implements ServletContextListener {
 		return missingBooks;
 	}
 
-	@Override
-	public void contextDestroyed(ServletContextEvent event) {
-		ServletContext servletContext = event.getServletContext();
-		servletContext.removeAttribute(BOOKS_ATTRIBUTE_NAME);
-	}
-
 	/**
 	 * Gets the book for the provided context-relative servlet path or <code>null</code> if no book configured at that path.
 	 * The book with the longest prefix match is used.
@@ -136,5 +132,21 @@ public class BooksContextListener implements ServletContextListener {
 	 */
 	public static Book getBook(ServletContext servletContext, HttpServletRequest request) {
 		return getBook(servletContext, Dispatcher.getCurrentPagePath(request));
+	}
+
+	/**
+	 * Gets the root book as configured in web.xml
+	 */
+	public static Book getRootBook(ServletContext servletContext) throws ServletException {
+		String rootBookName = servletContext.getInitParameter(ROOT_BOOK);
+		Book rootBook = BooksContextListener.getBooks(servletContext).get(rootBookName);
+		if(rootBook == null) throw new ServletException("Root book not found: " + rootBookName);
+		return rootBook;
+	}
+
+	@Override
+	public void contextDestroyed(ServletContextEvent event) {
+		ServletContext servletContext = event.getServletContext();
+		servletContext.removeAttribute(BOOKS_ATTRIBUTE_NAME);
 	}
 }
