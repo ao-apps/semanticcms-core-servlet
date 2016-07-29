@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -49,6 +50,8 @@ import javax.servlet.http.HttpServletRequest;
 )
 public class BooksContextListener implements ServletContextListener {
 
+	private static final String BOOKS_PROPERTIES_RESOURCE = "/WEB-INF/books.properties";
+
 	static final String BOOKS_ATTRIBUTE_NAME = "books";
 	static final String MISSING_BOOKS_ATTRIBUTE_NAME = "missingBooks";
 	static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
@@ -57,29 +60,31 @@ public class BooksContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent event) {
 		try {
 			ServletContext servletContext = event.getServletContext();
+			Properties booksProps = PropertiesUtils.loadFromResource(servletContext, BOOKS_PROPERTIES_RESOURCE);
+
 			// Load missingBooks
 			Set<String> missingBooks = new LinkedHashSet<>();
-			for(String name : StringUtility.splitStringCommaSpace(servletContext.getInitParameter(MISSING_BOOKS_ATTRIBUTE_NAME))) {
+			for(String name : StringUtility.splitStringCommaSpace(booksProps.getProperty(MISSING_BOOKS_ATTRIBUTE_NAME))) {
 				if(!name.isEmpty()) {
 					missingBooks.add(name);
 				}
 			}
 			// Load books
-			String rootBookName = servletContext.getInitParameter(ROOT_BOOK_ATTRIBUTE_NAME);
+			String rootBookName = booksProps.getProperty(ROOT_BOOK_ATTRIBUTE_NAME);
 			if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException('"' + ROOT_BOOK_ATTRIBUTE_NAME + "\" not provided");
 			Map<String,Book> books = new LinkedHashMap<>();
-			for(String name : StringUtility.splitStringCommaSpace(servletContext.getInitParameter(BOOKS_ATTRIBUTE_NAME))) {
+			for(String name : StringUtility.splitStringCommaSpace(booksProps.getProperty(BOOKS_ATTRIBUTE_NAME))) {
 				if(!name.isEmpty()) {
 					if(missingBooks.contains(name)) throw new IllegalStateException("Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
 					String cvsworkDirectoryAttribute = "book." + name + ".cvsworkDirectory";
-					String cvsworkDirectory = servletContext.getInitParameter(cvsworkDirectoryAttribute);
+					String cvsworkDirectory = booksProps.getProperty(cvsworkDirectoryAttribute);
 					if(cvsworkDirectory == null) throw new IllegalStateException("Required context parameter not present: " + cvsworkDirectoryAttribute);
 					List<PageRef> parentPages = new ArrayList<>();
 					for(int i=1; i<Integer.MAX_VALUE; i++) {
 						String parentBookNameAttribute = "book." + name + ".parent." + i + ".book";
-						String parentBookName = servletContext.getInitParameter(parentBookNameAttribute);
+						String parentBookName = booksProps.getProperty(parentBookNameAttribute);
 						String parentPageAttribute = "book." + name + ".parent." + i + ".page";
-						String parentPage = servletContext.getInitParameter(parentPageAttribute);
+						String parentPage = booksProps.getProperty(parentPageAttribute);
 						// Stop on the first not found
 						if(parentBookName == null && parentPage == null) break;
 						if(parentBookName == null) throw new IllegalArgumentException("parent book required when parent page provided: " + parentPageAttribute + " = " + parentPage);
@@ -140,7 +145,7 @@ public class BooksContextListener implements ServletContextListener {
 	}
 
 	/**
-	 * Gets the root book as configured in web.xml
+	 * Gets the root book as configured in /WEB-INF/books.properties
 	 */
 	public static Book getRootBook(ServletContext servletContext) throws IllegalStateException {
 		Book rootBook = (Book)servletContext.getAttribute(ROOT_BOOK_ATTRIBUTE_NAME);
