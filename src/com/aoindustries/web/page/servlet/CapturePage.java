@@ -219,8 +219,7 @@ public class CapturePage {
 									+ parentRef
 							);
 						}
-						// Verify parent's children that happened to already be cached since captures can happen in any order?
-						// I can't create any scenario where this catches something not already caught by the one-level check
+						// Verify parent's children that happened to already be cached since captures can happen in any order.
 						/*
 						if(!parentPage.getAllowChildMismatch()) {
 							for(PageRef childRef : parentPage.getChildPages()) {
@@ -241,7 +240,8 @@ public class CapturePage {
 									}
 								}
 							}
-						}*/
+						}
+						 */
 					}
 				}
 			}
@@ -263,8 +263,28 @@ public class CapturePage {
 									+ childRef
 							);
 						}
-						// Verify children's parents that happened to already be cached since captures can happen in any order?
-						// I can't create any scenario where this catches something not already caught by the one-level check
+						// Verify children's parents that happened to already be cached since captures can happen in any order.
+						/*
+						if(!childPage.getAllowParentMismatch()) {
+							for(PageRef parentRef : childPage.getParentPages()) {
+								// Can't verify parent reference to missing book
+								if(parentRef.getBook() != null) {
+									// Check if parent in cache
+									Page parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.PAGE));
+									if(parentPage == null) parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.META));
+									if(parentPage != null) {
+										if(!parentPage.getChildPages().contains(childRef)) {
+											throw new ServletException(
+												"The parent page does not have this as a child.  this="
+													+ childRef
+													+ ", parent="
+													+ parentRef
+											);
+										}
+									}
+								}
+							}
+						}*/
 					}
 				}
 			}
