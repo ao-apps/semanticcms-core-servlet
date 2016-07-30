@@ -122,8 +122,15 @@ final public class PageImpl {
 					// Can't verify parent reference to missing book
 					if(parentRef.getBook() != null) {
 						Page parentPage = CapturePage.capturePage(servletContext, request, response, parentRef, CaptureLevel.PAGE);
-						if(!parentPage.getChildPages().contains(page.getPageRef())) {
-							// TODO
+						// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
+						PageRef pageRef = page.getPageRef();
+						if(!parentPage.getChildPages().contains(pageRef)) {
+							throw new ServletException(
+								"The parent page does not have this as a child.  this="
+									+ pageRef
+									+ ", parent="
+									+ parentPage.getPageRef()
+							);
 						}
 					}
 				}
@@ -134,8 +141,15 @@ final public class PageImpl {
 					// Can't verify child reference to missing book
 					if(childRef.getBook() != null) {
 						Page childPage = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.PAGE);
-						if(!childPage.getParentPages().contains(page.getPageRef())) {
-							// TODO
+						// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
+						PageRef pageRef = page.getPageRef();
+						if(!childPage.getParentPages().contains(pageRef)) {
+							throw new ServletException(
+								"The child page does not have this as a parent.  this="
+									+ pageRef
+									+ ", child="
+									+ childPage.getPageRef()
+							);
 						}
 					}
 				}
