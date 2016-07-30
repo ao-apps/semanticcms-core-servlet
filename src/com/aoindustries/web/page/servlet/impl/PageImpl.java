@@ -24,9 +24,11 @@ package com.aoindustries.web.page.servlet.impl;
 
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.servlet.http.Dispatcher;
+import com.aoindustries.web.page.Book;
 import com.aoindustries.web.page.Node;
 import com.aoindustries.web.page.Page;
 import com.aoindustries.web.page.PageRef;
+import com.aoindustries.web.page.servlet.BooksContextListener;
 import com.aoindustries.web.page.servlet.CaptureLevel;
 import com.aoindustries.web.page.servlet.CapturePage;
 import com.aoindustries.web.page.servlet.CurrentNode;
@@ -61,8 +63,9 @@ final public class PageImpl {
 		PageImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
 		final Page page = new Page();
-		// Find the path to this page
-		page.setPageRef(PageRefResolver.getCurrentPageRef(servletContext, request));
+		// Find the default path to this page, this might be changed during page processing
+		final PageRef defaultPageRef = PageRefResolver.getCurrentPageRef(servletContext, request);
+		page.setPageRef(defaultPageRef);
 
 		{
 			// Pages may not be nested within any kind of node
@@ -96,6 +99,16 @@ final public class PageImpl {
 							// Invoke page body, discarding output
 							body.doBody(true, page);
 						}
+						// Page may not move itself to a different book
+						PageRef newPageRef = page.getPageRef();
+						if(!newPageRef.getBook().equals(defaultPageRef.getBook())) {
+							throw new ServletException(
+								"Page may not move itself into a different book.  defaultPageRef="
+									+ defaultPageRef
+									+ ", newPageRef="
+									+ newPageRef
+							);
+						}
 					} finally {
 						// Restore previous currentPage
 						CurrentPage.setCurrentPage(request, null);
@@ -106,7 +119,54 @@ final public class PageImpl {
 				}
 			}
 			if(page.getParentPages().isEmpty()) {
-				// TOOD: auto parents here
+				// Auto parents
+
+				// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
+				PageRef pageRef = page.getPageRef();
+
+				// If this page is the "content.root" of a book, include all parents configured when book imported.
+				boolean addedBookParents = false;
+				for(Book book : BooksContextListener.getBooks(servletContext).values()) {
+					if(book.getContentRoot().equals(pageRef)) {
+						for(PageRef bookParentPage : book.getParentPages()) {
+							page.addParentPage(bookParentPage);
+						}
+						addedBookParents = true;
+						break;
+					}
+				}
+				if(!addedBookParents) {
+					Book pageBook = pageRef.getBook();
+					assert pageBook != null;
+					String pagePath = pageRef.getPath();
+					if(pagePath.endsWith("/") || pagePath.endsWith("/index.jsp")) {
+						// If this page URL ends in "/" or "/index.jsp", look for JSP page at "../index.jsp" then asssume "../", error if outside book.
+						int lastSlash = pagePath.lastIndexOf('/');
+						if(lastSlash == -1) throw new AssertionError();
+						int nextLastSlash = pagePath.lastIndexOf('/', lastSlash-1);
+						if(nextLastSlash == -1) {
+							throw new ServletException("Auto parent of page would be outside book: " + pageRef);
+						}
+						String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
+						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
+						if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
+							page.addParentPage(indexJspPageRef);
+						} else {
+							page.addParentPage(new PageRef(pageBook, endSlashPath));
+						}
+					} else {
+						// Look for page at "./index.jsp" then assume "./".
+						int lastSlash = pagePath.lastIndexOf('/');
+						if(lastSlash == -1) throw new AssertionError();
+						String endSlashPath = pagePath.substring(0, lastSlash + 1);
+						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
+						if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
+							page.addParentPage(indexJspPageRef);
+						} else {
+							page.addParentPage(new PageRef(pageBook, endSlashPath));
+						}
+					}
+				}
 			}
 		} finally {
 			page.freeze();
@@ -115,6 +175,8 @@ final public class PageImpl {
 		if(capture != null) {
 			// Capturing, add to capture
 			capture.setCapturedPage(page);
+			// TODO: Can we verify parents and children during captures, for when parent and child both happened to be captured?
+			// TODO: This would catch problems sooner with little added computation, instead of having to specifically view the problem page.
 		} else {
 			// Verify parents
 			if(!page.getAllowParentMismatch()) {
