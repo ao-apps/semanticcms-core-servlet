@@ -70,6 +70,7 @@ public class CapturePage {
 			CaptureLevel level
 		) {
 			this.pageRef = pageRef;
+			assert level != CaptureLevel.BODY : "Body captures are not cached";
 			this.level = level;
 		}
 
@@ -94,6 +95,7 @@ public class CapturePage {
 	/**
 	 * Captures a page.
 	 * The capture is always done with a request method of "GET", even when the enclosing request is a different method.
+	 * Also validates parent-child and child-parent relationships if the other related pages happened to already be captured and cached.
 	 */
 	public static Page capturePage(
 		ServletContext servletContext,
@@ -107,30 +109,28 @@ public class CapturePage {
 		// Don't use cache for full body captures
 		final boolean useCache = level != CaptureLevel.BODY;
 
-		final Map<CapturePageCacheKey,Page> cache;
-		final CapturePageCacheKey cacheKey;
-		if(useCache) {
-			// Get or create the cache
-			@SuppressWarnings("unchecked")
-			Map<CapturePageCacheKey,Page> existingCache = (Map<CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
-			if(existingCache == null) {
-				cache = new HashMap<>();
-				request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
-			} else {
-				cache = existingCache;
-			}
-			// Check the cache
-			cacheKey = new CapturePageCacheKey(pageRef, level);
-			Page cachedPage = cache.get(cacheKey);
-			if(cachedPage != null) return cachedPage;
-		} else {
-			cache = null;
-			cacheKey = null;
+		// Get the cache
+		@SuppressWarnings("unchecked")
+		Map<CapturePageCacheKey,Page> cache = (Map<CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
+		if(cache == null) {
+			cache = new HashMap<>();
+			request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
 		}
 
-		// Perform new capture
+		// cacheKey will be null when this capture is not to be cached
+		final CapturePageCacheKey cacheKey;
 		Page capturedPage;
-		{
+		if(useCache) {
+			// Check the cache
+			cacheKey = new CapturePageCacheKey(pageRef, level);
+			capturedPage = cache.get(cacheKey);
+		} else {
+			cacheKey = null;
+			capturedPage = null;
+		}
+
+		if(capturedPage == null) {
+			// Perform new capture
 			Node oldNode = CurrentNode.getCurrentNode(request);
 			Page oldPage = CurrentPage.getCurrentPage(request);
 			try {
@@ -192,10 +192,54 @@ public class CapturePage {
 				if(oldPage != null) CurrentPage.setCurrentPage(request, oldPage);
 			}
 		}
+		assert capturedPage != null;
 		if(useCache) {
 			// Add to cache
-			assert cache!=null : "cache is always non-null when using caches";
 			cache.put(cacheKey, capturedPage);
+		}
+		// Verify parents that happened to already be cached
+		if(!capturedPage.getAllowParentMismatch()) {
+			for(PageRef parentRef : capturedPage.getParentPages()) {
+				// Can't verify parent reference to missing book
+				if(parentRef.getBook() != null) {
+					// Check if parent in cache
+					Page parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.PAGE));
+					if(parentPage == null) parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.META));
+					if(parentPage != null) {
+						if(!parentPage.getChildPages().contains(pageRef)) {
+							throw new ServletException(
+								"The parent page does not have this as a child.  this="
+									+ pageRef
+									+ ", parent="
+									+ parentRef
+							);
+						}
+						// TODO: Verify parent's children since captures can happen in any order?
+					}
+				}
+			}
+		}
+		// Verify children that happened to already be cached
+		if(!capturedPage.getAllowChildMismatch()) {
+			for(PageRef childRef : capturedPage.getChildPages()) {
+				// Can't verify child reference to missing book
+				if(childRef.getBook() != null) {
+					// Check if child in cache
+					Page childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.PAGE));
+					if(childPage == null) childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
+					if(childPage != null) {
+						if(!childPage.getParentPages().contains(pageRef)) {
+							throw new ServletException(
+								"The child page does not have this as a parent.  this="
+									+ pageRef
+									+ ", child="
+									+ childRef
+							);
+						}
+						// TODO: Verify child's parents since captures can happen in any order?
+					}
+				}
+			}
 		}
 		return capturedPage;
 	}

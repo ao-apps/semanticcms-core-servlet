@@ -175,8 +175,6 @@ final public class PageImpl {
 		if(capture != null) {
 			// Capturing, add to capture
 			capture.setCapturedPage(page);
-			// TODO: Can we verify parents and children during captures, for when parent and child both happened to be captured?
-			// TODO: This would catch problems sooner with little added computation, instead of having to specifically view the problem page.
 		} else {
 			// Verify parents
 			if(!page.getAllowParentMismatch()) {
@@ -191,7 +189,7 @@ final public class PageImpl {
 								"The parent page does not have this as a child.  this="
 									+ pageRef
 									+ ", parent="
-									+ parentPage.getPageRef()
+									+ parentRef
 							);
 						}
 					}
@@ -210,7 +208,7 @@ final public class PageImpl {
 								"The child page does not have this as a parent.  this="
 									+ pageRef
 									+ ", child="
-									+ childPage.getPageRef()
+									+ childRef
 							);
 						}
 					}
