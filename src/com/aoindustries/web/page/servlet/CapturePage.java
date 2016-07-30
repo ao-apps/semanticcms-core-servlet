@@ -175,6 +175,13 @@ public class CapturePage {
 					}
 					capturedPage = captureContext.getCapturedPage();
 					if(capturedPage==null) throw new ServletException("No page captured, page=" + capturePath);
+					PageRef capturedPageRef = capturedPage.getPageRef();
+					if(!capturedPageRef.equals(pageRef)) throw new ServletException(
+						"Captured page has unexpected pageRef.  Expected "
+							+ pageRef
+							+ " but got "
+							+ capturedPageRef
+					);
 				} finally {
 					// Restore previous capture context
 					CaptureLevel.setCaptureLevel(request, oldCaptureLevel);
