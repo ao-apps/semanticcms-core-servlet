@@ -26,6 +26,7 @@ import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.web.page.Node;
 import com.aoindustries.web.page.Page;
+import com.aoindustries.web.page.PageRef;
 import com.aoindustries.web.page.servlet.CaptureLevel;
 import com.aoindustries.web.page.servlet.CapturePage;
 import com.aoindustries.web.page.servlet.CurrentNode;
@@ -104,6 +105,9 @@ final public class PageImpl {
 					CurrentNode.setCurrentNode(request, null);
 				}
 			}
+			if(page.getParentPages().isEmpty()) {
+				// TOOD: auto parents here
+			}
 		} finally {
 			page.freeze();
 		}
@@ -112,6 +116,18 @@ final public class PageImpl {
 			// Capturing, add to capture
 			capture.setCapturedPage(page);
 		} else {
+			// Verify parents
+			if(!page.getAllowParentMismatch()) {
+				for(PageRef parentRef : page.getParentPages()) {
+					Page parentPage = CapturePage.capturePage(servletContext, request, response, parentRef, CaptureLevel.PAGE);
+					// TODO
+				}
+			}
+			// Verify children
+			if(!page.getAllowChildMismatch()) {
+				// TODO
+			}
+
 			// Display page directly
 			// Forward to PAGE_TEMPLATE_JSP_PATH, passing PAGE_REQUEST_ATTRIBUTE request attribute
 			Object oldValue = request.getAttribute(PAGE_REQUEST_ATTRIBUTE);
