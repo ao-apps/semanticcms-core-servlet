@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,9 +53,9 @@ import javax.servlet.http.HttpServletResponse;
 
 final public class NavigationTreeImpl {
 
-	public static <T> List<T> filterChildren(List<T> children, Set<T> pagesToInclude) {
+	public static <T> List<T> filterChildren(Collection<T> children, Set<T> pagesToInclude) {
 		int size = children.size();
-		if(size == 0) return children;
+		if(size == 0) return Collections.emptyList();
 		List<T> filtered = new ArrayList<>(size);
 		for(T child : children) {
 			if(pagesToInclude.contains(child)) {
@@ -73,7 +75,7 @@ final public class NavigationTreeImpl {
 	) throws ServletException, IOException {
 		// Both elements and pages are child nodes
 		List<Element> childElements = includeElements ? node.getChildElements() : null;
-		List<PageRef> childPages = (node instanceof Page) ? ((Page)node).getChildPages() : null;
+		Set<PageRef> childPages = (node instanceof Page) ? ((Page)node).getChildPages() : null;
 		List<Node> childNodes = new ArrayList<>(
 			(childElements==null ? 0 : childElements.size())
 			+ (childPages==null ? 0 : childPages.size())

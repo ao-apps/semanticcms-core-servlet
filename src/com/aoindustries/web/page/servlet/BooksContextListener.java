@@ -29,11 +29,9 @@ import com.aoindustries.util.WrappedException;
 import com.aoindustries.web.page.Book;
 import com.aoindustries.web.page.PageRef;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -91,7 +89,7 @@ public class BooksContextListener implements ServletContextListener {
 				String cvsworkDirectoryAttribute = "books." + bookNum + ".cvsworkDirectory";
 				String cvsworkDirectory = getProperty(booksProps, usedKeys, cvsworkDirectoryAttribute);
 				if(cvsworkDirectory == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Required parameter not present: " + cvsworkDirectoryAttribute);
-				List<PageRef> parentPages = new ArrayList<>();
+				Set<PageRef> parentPages = new LinkedHashSet<>();
 				for(int parentNum=1; parentNum<Integer.MAX_VALUE; parentNum++) {
 					String parentBookNameAttribute = "books." + bookNum + ".parents." + parentNum + ".book";
 					String parentBookName = getProperty(booksProps, usedKeys, parentBookNameAttribute);
@@ -103,8 +101,12 @@ public class BooksContextListener implements ServletContextListener {
 					if(parentPage == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent page required when parent book provided: " + parentBookNameAttribute + "=" + parentBookName);
 					if(missingBooks.contains(parentBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + parentBookNameAttribute + "=" + parentBookName);
 					Book parentBook = books.get(parentBookName);
-					if(parentBook == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookNameAttribute + "=" + parentBookName);
-					parentPages.add(new PageRef(parentBook, parentPage));
+					if(parentBook == null) {
+						throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookNameAttribute + "=" + parentBookName);
+					}
+					if(!parentPages.add(new PageRef(parentBook, parentPage))) {
+						throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate parent: " + parentPageAttribute + "=" + parentPage);
+					}
 				}
 				if(name.equals(rootBookName)) {
 					if(!parentPages.isEmpty()) {
