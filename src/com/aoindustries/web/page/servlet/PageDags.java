@@ -73,7 +73,12 @@ final public class PageDags {
 		seenPages.add(page.getPageRef());
 		list.add(page);
 		for(PageRef childRef : page.getChildPages()) {
-			if(!seenPages.contains(childRef)) {
+			if(
+				// Child not in missing book
+				childRef.getBook() != null
+				// Not already seen
+				&& !seenPages.contains(childRef)
+			) {
 				Page child = CapturePage.capturePage(servletContext, request, response, childRef, level);
 				addPage(servletContext, request, response, child, level, seenPages, list);
 			}

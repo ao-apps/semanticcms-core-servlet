@@ -119,13 +119,22 @@ final public class PageImpl {
 			// Verify parents
 			if(!page.getAllowParentMismatch()) {
 				for(PageRef parentRef : page.getParentPages()) {
-					Page parentPage = CapturePage.capturePage(servletContext, request, response, parentRef, CaptureLevel.PAGE);
-					// TODO
+					// Can't verify parent reference to missing book
+					if(parentRef.getBook() != null) {
+						Page parentPage = CapturePage.capturePage(servletContext, request, response, parentRef, CaptureLevel.PAGE);
+						// TODO
+					}
 				}
 			}
 			// Verify children
 			if(!page.getAllowChildMismatch()) {
-				// TODO
+				for(PageRef childRef : page.getChildPages()) {
+					// Can't verify child reference to missing book
+					if(childRef.getBook() != null) {
+						Page childPage = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.PAGE);
+						// TODO
+					}
+				}
 			}
 
 			// Display page directly

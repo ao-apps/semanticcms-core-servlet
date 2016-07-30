@@ -83,8 +83,11 @@ final public class NavigationTreeImpl {
 		}
 		if(childPages != null) {
 			for(PageRef childRef : childPages) {
-				Page childPage = CapturePage.capturePage(servletContext, request, response, childRef, includeElements || metaCapture ? CaptureLevel.META : CaptureLevel.PAGE);
-				childNodes.add(childPage);
+				// Child not in missing book
+				if(childRef.getBook() != null) {
+					Page childPage = CapturePage.capturePage(servletContext, request, response, childRef, includeElements || metaCapture ? CaptureLevel.META : CaptureLevel.PAGE);
+					childNodes.add(childPage);
+				}
 			}
 		}
 		return childNodes;
@@ -125,9 +128,12 @@ final public class NavigationTreeImpl {
 		}
 		if(node instanceof Page) {
 			for(PageRef childRef : ((Page)node).getChildPages()) {
-				Page child = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.META);
-				if(findLinks(servletContext, request, response, linksTo, nodesWithLinks, nodesWithChildLinks, child, includeElements)) {
-					hasChildLink = true;
+				// Child not in missing book
+				if(childRef.getBook() != null) {
+					Page child = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.META);
+					if(findLinks(servletContext, request, response, linksTo, nodesWithLinks, nodesWithChildLinks, child, includeElements)) {
+						hasChildLink = true;
+					}
 				}
 			}
 		}

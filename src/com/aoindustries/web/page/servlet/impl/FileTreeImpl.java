@@ -80,9 +80,12 @@ final public class FileTreeImpl {
 		}
 		if(node instanceof Page) {
 			for(PageRef childRef : ((Page)node).getChildPages()) {
-				Page child = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.META);
-				if(findFiles(servletContext, request, response, nodesWithFiles, child, includeElements)) {
-					hasFile = true;
+				// Child not in missing book
+				if(childRef.getBook() != null) {
+					Page child = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.META);
+					if(findFiles(servletContext, request, response, nodesWithFiles, child, includeElements)) {
+						hasFile = true;
+					}
 				}
 			}
 		}
