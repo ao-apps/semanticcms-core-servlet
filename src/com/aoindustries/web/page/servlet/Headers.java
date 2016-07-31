@@ -22,6 +22,8 @@
  */
 package com.aoindustries.web.page.servlet;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Provides static access to the client-provided headers.
  */
@@ -30,12 +32,19 @@ public class Headers {
 	/**
 	 * A client may include this header to indicate it is in export mode.
 	 */
-	public static final String EXPORTING_HEADER = "X-com-aoindustries-web-page-exporting";
+	private static final String EXPORTING_HEADER = "X-com-aoindustries-web-page-exporting";
 
 	/**
 	 * The value to pass in the header.
 	 */
-	public static final String EXPORTING_HEADER_VALUE = "true";
+	private static final String EXPORTING_HEADER_VALUE = "true";
+
+	/**
+	 * Checks if the request is for an export.
+	 */
+	public static boolean isExporting(HttpServletRequest request) {
+		return EXPORTING_HEADER_VALUE.equalsIgnoreCase(request.getHeader(EXPORTING_HEADER));
+	}
 
 	/**
 	 * Make no instances.

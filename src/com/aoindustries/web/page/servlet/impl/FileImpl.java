@@ -95,7 +95,7 @@ final public class FileImpl {
 	) throws E, IOException, SkipPageException {
 		// Determine if local file opening is allowed
 		final boolean isAllowed = OpenFile.isAllowed(servletContext, request);
-		final boolean isExporting = Headers.EXPORTING_HEADER_VALUE.equalsIgnoreCase(request.getHeader(Headers.EXPORTING_HEADER));
+		final boolean isExporting = Headers.isExporting(request);
 
 		// Find the local file, assuming relative to CVSWORK directory
 		File resourceFile = file.getResourceFile(false, true);

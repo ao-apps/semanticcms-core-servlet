@@ -47,6 +47,18 @@ public class CapturePage {
 	private static final String CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME = CapturePage.class.getName()+".capturePageCache";
 
 	/**
+	 * To speed up an export, the elements are cached between requests.
+	 * The first non-exporting request will clear this cache, and it will also
+	 * be remover after a given number of seconds.
+	 */
+	private static final String EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME = CapturePage.class.getName()+".exportCapturePageCache";
+	
+	/**
+	 * The number of milliseconds after the export cache is no longer considered valid.
+	 */
+	private static final long EXPORT_CAPTURE_PAGE_CACHE_TTL = 60 * 1000; // one minute
+
+	/**
 	 * Gets the capture context or <code>null</code> if none occurring.
 	 */
 	public static CapturePage getCaptureContext(ServletRequest request) {
@@ -97,6 +109,55 @@ public class CapturePage {
 		}
 	}
 
+	// TODO: Consider consequences of caching once we have a security model applied
+	static class ExportPageCache {
+	
+		private final Object lock = new Object();
+
+		/**
+		 * The time the cache will expire.
+		 */
+		private long cacheStart;
+		
+		/**
+		 * The currently active cache.
+		 */
+		private Map<CapturePageCacheKey,Page> cache;
+
+		/**
+		 * Invalidates the page cache if it has exceeded its TTL.
+		 */
+		void invalidateCache(long currentTime) {
+			synchronized(lock) {
+				if(
+					cache != null
+					&& (
+						currentTime >= (cacheStart + EXPORT_CAPTURE_PAGE_CACHE_TTL)
+						// Handle system time changes
+						|| currentTime <= (cacheStart - EXPORT_CAPTURE_PAGE_CACHE_TTL)
+					)
+				) {
+					cache = null;
+				}
+			}
+		}
+
+		/**
+		 * Invalidates the cache, if needed, then gets the resulting cache.
+		 */
+		Map<CapturePageCacheKey,Page> getCache(long currentTime) {
+			synchronized(lock) {
+				invalidateCache(currentTime);
+				if(cache == null) {
+					cacheStart = currentTime;
+					cache = new HashMap<>();
+					
+				}
+				return cache;
+			}
+		}
+	}
+
 	/**
 	 * Captures a page.
 	 * The capture is always done with a request method of "GET", even when the enclosing request is a different method.
@@ -114,12 +175,33 @@ public class CapturePage {
 		// Don't use cache for full body captures
 		final boolean useCache = level != CaptureLevel.BODY;
 
-		// Get the cache
-		@SuppressWarnings("unchecked")
-		Map<CapturePageCacheKey,Page> cache = (Map<CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
-		if(cache == null) {
-			cache = new HashMap<>();
-			request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
+		// Find the cache to use
+		Map<CapturePageCacheKey,Page> cache;
+		{
+			ExportPageCache exportCache = (ExportPageCache)servletContext.getAttribute(EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME);
+			if(Headers.isExporting(request)) {
+				// No harm done if two threads create two different caches inbetween check and set
+				if(exportCache == null) {
+					exportCache = new ExportPageCache();
+					servletContext.setAttribute(EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME, exportCache);
+				}
+				cache = exportCache.getCache(System.currentTimeMillis());
+			} else {
+				// Clean-up stale export cache
+				if(exportCache != null) {
+					exportCache.invalidateCache(System.currentTimeMillis());
+				}
+				// Request-level cache when not exporting
+				{
+					@SuppressWarnings("unchecked")
+					Map<CapturePageCacheKey,Page> reqCache = (Map<CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
+					cache = reqCache;
+				}
+				if(cache == null) {
+					cache = new HashMap<>();
+					request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
+				}
+			}
 		}
 
 		// cacheKey will be null when this capture is not to be cached
