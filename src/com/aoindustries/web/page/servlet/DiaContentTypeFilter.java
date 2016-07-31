@@ -22,6 +22,7 @@
  */
 package com.aoindustries.web.page.servlet;
 
+import com.aoindustries.web.page.DiaExport;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -32,8 +33,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 
 @WebFilter(
-	urlPatterns = "*.dia",
-	description = "Filter to add the missing content type for .dia files."
+	urlPatterns = "*" + DiaExport.DIA_EXTENSION,
+	description = "Filter to add the missing content type for " + DiaExport.DIA_EXTENSION + " files."
 )
 public class DiaContentTypeFilter implements Filter {
 
