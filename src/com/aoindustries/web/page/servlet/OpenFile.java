@@ -24,11 +24,12 @@ package com.aoindustries.web.page.servlet;
 
 import com.aoindustries.io.FileUtils;
 import com.aoindustries.lang.ProcessResult;
-import com.aoindustries.web.page.DiaExport;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
@@ -43,6 +44,8 @@ final public class OpenFile {
 	private static final Logger logger = Logger.getLogger(OpenFile.class.getName());
 
 	private static final String ENABLE_INIT_PARAM = OpenFile.class.getName() + ".enabled";
+
+	private static final String FILE_OPENERS_REQUEST_ATTRIBUTE_NAME = OpenFile.class.getName()+".fileOpeners";
 
 	/**
 	 * Checks if the given host address is allowed to open files on the server.
@@ -75,6 +78,65 @@ final public class OpenFile {
 		return "/opt/jdk1.8.0";
 	}
 
+	public static boolean isWindows() {
+		String osName = System.getProperty("os.name");
+		return osName!=null && osName.toLowerCase(Locale.ROOT).contains("windows");
+	}
+
+	/**
+	 * Additional file openers may be registered to the application context.
+	 */
+	public static interface FileOpener {
+		/**
+		 * Gets the command that will open the given file.
+		 *
+		 * @return  The command or null to fall-through to default behavior.
+		 */
+		String[] getCommand(java.io.File resourceFile) throws IOException;
+	}
+
+	private static final Object fileOpenersLock = new Object();
+
+	/**
+	 * Registers a file opener.
+	 * 
+	 * @param  extensions  The simple extensions, in lowercase, not including the dot, such as "dia"
+	 */
+	public static void addFileOpener(ServletContext servletContext, FileOpener fileOpener, String ... extensions) {
+		synchronized(fileOpenersLock) {
+			@SuppressWarnings("unchecked")
+			Map<String,FileOpener> fileOpeners = (Map<String,FileOpener>)servletContext.getAttribute(FILE_OPENERS_REQUEST_ATTRIBUTE_NAME);
+			if(fileOpeners == null) {
+				fileOpeners = new HashMap<>();
+				servletContext.setAttribute(FILE_OPENERS_REQUEST_ATTRIBUTE_NAME, fileOpeners);
+			}
+			for(String extension : extensions) {
+				if(fileOpeners.containsKey(extension)) throw new IllegalStateException("File opener already registered: " + extension);
+				fileOpeners.put(extension, fileOpener);
+			}
+		}
+	}
+
+	/**
+	 * Removes file openers.
+	 * 
+	 * @param  extensions  The simple extensions, in lowercase, not including the dot, such as "dia"
+	 */
+	public static void removeFileOpener(ServletContext servletContext, String ... extensions) {
+		synchronized(fileOpenersLock) {
+			@SuppressWarnings("unchecked")
+			Map<String,FileOpener> fileOpeners = (Map<String,FileOpener>)servletContext.getAttribute(FILE_OPENERS_REQUEST_ATTRIBUTE_NAME);
+			if(fileOpeners != null) {
+				for(String extension : extensions) {
+					fileOpeners.remove(extension);
+				}
+				if(fileOpeners.isEmpty()) {
+					servletContext.removeAttribute(FILE_OPENERS_REQUEST_ATTRIBUTE_NAME);
+				}
+			}
+		}
+	}
+
 	public static void openFile(
 		ServletContext servletContext,
 		HttpServletRequest request,
@@ -92,7 +154,7 @@ final public class OpenFile {
 			if(resourceFile.isDirectory()) {
 				command = new String[] {
 					// TODO: What is good windows path?
-					//DiaExport.isWindows()
+					//isWindows()
 					//	? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
 					"/usr/bin/konqueror",
 					resourceFile.getCanonicalPath()
@@ -100,105 +162,115 @@ final public class OpenFile {
 			} else {
 				// Open the file with the appropriate application based on extension
 				String extension = FileUtils.getExtension(resourceFile.getName()).toLowerCase(Locale.ROOT);
-				switch(extension) {
-					case "dia" :
-						command = new String[] {
-							DiaExport.getDiaOpenPath(),
-							resourceFile.getCanonicalPath()
-						};
-						break;
-					case "gif" :
-					case "jpg" :
-					case "jpeg" :
-					case "png" :
-						command = new String[] {
-							DiaExport.isWindows()
-								? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
-								: "/usr/bin/gwenview",
-							resourceFile.getCanonicalPath()
-						};
-						break;
-					case "doc" :
-					case "odt" :
-						command = new String[] {
-							DiaExport.isWindows()
-								? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
-								: "/usr/bin/libreoffice",
-							"--writer",
-							resourceFile.getCanonicalPath()
-						};
-						break;
-					case "csv" :
-					case "ods" :
-					case "sxc" :
-					case "xls" :
-						command = new String[] {
-							DiaExport.isWindows()
-								? "C:\\Program Files (x86)\\OpenOffice 4\\program\\scalc.exe"
-								: "/usr/bin/libreoffice",
-							"--calc",
-							resourceFile.getCanonicalPath()
-						};
-						break;
-					case "pdf" :
-						command = new String[] {
-							DiaExport.isWindows()
-								? "C:\\Program Files (x86)\\Adobe\\Reader 11.0\\Reader\\AcroRd32.exe"
-								: "/usr/bin/okular",
-							resourceFile.getCanonicalPath()
-						};
-						break;
-					//case "sh" :
-					//	command = new String[] {
-					//		"/usr/bin/kwrite",
-					//		resourceFile.getCanonicalPath()
-					//	};
-					//	break;
-					case "java" :
-					case "jsp" :
-					case "sh" :
-					case "txt" :
-					case "xml" :
-						if(DiaExport.isWindows()) {
+				// Check registered file openers first
+				FileOpener fileOpener;
+				synchronized(fileOpenersLock) {
+					@SuppressWarnings("unchecked")
+					Map<String,FileOpener> fileOpeners = (Map<String,FileOpener>)servletContext.getAttribute(FILE_OPENERS_REQUEST_ATTRIBUTE_NAME);
+					if(fileOpeners != null) {
+						fileOpener = fileOpeners.get(extension);
+					} else {
+						fileOpener = null;
+					}
+				}
+				if(fileOpener != null) {
+					command = fileOpener.getCommand(resourceFile);
+				} else {
+					// Use default behavior
+					switch(extension) {
+						case "gif" :
+						case "jpg" :
+						case "jpeg" :
+						case "png" :
 							command = new String[] {
-								"C:\\Program Files\\NetBeans 7.4\\bin\\netbeans64.exe",
-								"--open",
+								isWindows()
+									? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
+									: "/usr/bin/gwenview",
 								resourceFile.getCanonicalPath()
 							};
-						} else {
+							break;
+						case "doc" :
+						case "odt" :
 							command = new String[] {
-								//"/usr/bin/kwrite",
-								"/opt/netbeans-8.0.2/bin/netbeans",
-								"--jdkhome",
-								getJdkPath(),
-								"--open",
+								isWindows()
+									? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
+									: "/usr/bin/libreoffice",
+								"--writer",
 								resourceFile.getCanonicalPath()
 							};
-						}
-						break;
-					case "zip" :
-						if(DiaExport.isWindows()) {
+							break;
+						case "csv" :
+						case "ods" :
+						case "sxc" :
+						case "xls" :
 							command = new String[] {
+								isWindows()
+									? "C:\\Program Files (x86)\\OpenOffice 4\\program\\scalc.exe"
+									: "/usr/bin/libreoffice",
+								"--calc",
 								resourceFile.getCanonicalPath()
 							};
-						} else {
+							break;
+						case "pdf" :
 							command = new String[] {
-								"/usr/bin/konqueror",
+								isWindows()
+									? "C:\\Program Files (x86)\\Adobe\\Reader 11.0\\Reader\\AcroRd32.exe"
+									: "/usr/bin/okular",
 								resourceFile.getCanonicalPath()
 							};
-						}
-						break;
-					case "mp3" :
-					case "wma" :
-						command = new String[] {
-							DiaExport.isWindows()
-								? "C:\\Program Files\\VideoLAN\\VLC.exe"
-								: "/usr/bin/vlc",
-							resourceFile.getCanonicalPath()
-						};
-						break;
-					default :
-						throw new IllegalArgumentException("Unsupprted file type by extension: " + extension);
+							break;
+						//case "sh" :
+						//	command = new String[] {
+						//		"/usr/bin/kwrite",
+						//		resourceFile.getCanonicalPath()
+						//	};
+						//	break;
+						case "java" :
+						case "jsp" :
+						case "sh" :
+						case "txt" :
+						case "xml" :
+							if(isWindows()) {
+								command = new String[] {
+									"C:\\Program Files\\NetBeans 7.4\\bin\\netbeans64.exe",
+									"--open",
+									resourceFile.getCanonicalPath()
+								};
+							} else {
+								command = new String[] {
+									//"/usr/bin/kwrite",
+									"/opt/netbeans-8.0.2/bin/netbeans",
+									"--jdkhome",
+									getJdkPath(),
+									"--open",
+									resourceFile.getCanonicalPath()
+								};
+							}
+							break;
+						case "zip" :
+							if(isWindows()) {
+								command = new String[] {
+									resourceFile.getCanonicalPath()
+								};
+							} else {
+								command = new String[] {
+									"/usr/bin/konqueror",
+									resourceFile.getCanonicalPath()
+								};
+							}
+							break;
+						case "mp3" :
+						case "wma" :
+							command = new String[] {
+								isWindows()
+									? "C:\\Program Files\\VideoLAN\\VLC.exe"
+									: "/usr/bin/vlc",
+								resourceFile.getCanonicalPath()
+							};
+							break;
+						default :
+							throw new IllegalArgumentException("Unsupprted file type by extension: " + extension);
+					}
 				}
 			}
 			// Start the process
