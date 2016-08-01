@@ -99,7 +99,7 @@ final public class OpenFile {
 				};
 			} else {
 				// Open the file with the appropriate application based on extension
-				String extension = FileUtils.getExtension(resourceFile.getName()).toLowerCase(Locale.ENGLISH); // TODO: Use Locale.ROOT here and everywhere for this
+				String extension = FileUtils.getExtension(resourceFile.getName()).toLowerCase(Locale.ROOT);
 				switch(extension) {
 					case "dia" :
 						command = new String[] {
