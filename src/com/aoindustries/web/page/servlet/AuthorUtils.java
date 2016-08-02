@@ -75,6 +75,7 @@ public class AuthorUtils {
 	 * Checks that both the iterables have equal objects in iteration order.
 	 */
 	private static boolean exactMatch(Iterable<?> iterable1, Iterable<?> iterable2) {
+		if(iterable1 == iterable2) return true;
 		Iterator<?> iter1 = iterable1.iterator();
 		Iterator<?> iter2 = iterable2.iterator();
 		while(iter1.hasNext() && iter2.hasNext()) {
