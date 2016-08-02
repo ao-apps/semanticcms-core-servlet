@@ -56,6 +56,7 @@ final public class PageImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		String title,
+		String shortTitle,
 		String description,
 		String keywords,
 		Boolean toc,
@@ -77,6 +78,7 @@ final public class PageImpl {
 		}
 
 		page.setTitle(title);
+		page.setShortTitle(shortTitle);
 		page.setDescription(description);
 		page.setKeywords(keywords);
 		page.setToc(toc);

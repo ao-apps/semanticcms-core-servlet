@@ -48,6 +48,7 @@ public class Page {
 	private final HttpServletResponse response;
 	private final String title;
 
+	private String shortTitle;
 	private String description;
 	private String keywords;
 	private Boolean toc;
@@ -79,6 +80,11 @@ public class Page {
 			PageContext.getResponse(),
 			title
 		);
+	}
+
+	public Page shortTitle(String shortTitle) {
+		this.shortTitle = shortTitle;
+		return this;
 	}
 
 	public Page description(String description) {
@@ -133,6 +139,7 @@ public class Page {
 			request,
 			response,
 			title,
+			shortTitle,
 			description,
 			keywords,
 			toc,

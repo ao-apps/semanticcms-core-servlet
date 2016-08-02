@@ -48,6 +48,13 @@ abstract public class PageServlet extends HttpServlet {
 	abstract public String getTitle();
 
 	/**
+	 * @see  Page#getShortTitle()
+	 */
+	public String getShortTitle() {
+		return null;
+	}
+
+	/**
 	 * @see  Page#getDescription()
 	 */
 	public String getDescription() {
@@ -85,6 +92,7 @@ abstract public class PageServlet extends HttpServlet {
 	private void callInPage(HttpServletRequest req, HttpServletResponse resp, DoMethodCallable method) throws ServletException, IOException {
 		try {
 			new com.aoindustries.web.page.servlet.Page(getServletContext(), req, resp, getTitle())
+				.shortTitle(getShortTitle())
 				.description(getDescription())
 				.keywords(getKeywords())
 				.toc(getToc())
