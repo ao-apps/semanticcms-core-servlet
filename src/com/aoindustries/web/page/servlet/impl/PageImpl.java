@@ -56,6 +56,8 @@ final public class PageImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		String title,
+		String description,
+		String keywords,
 		Boolean toc,
 		int tocLevels,
 		boolean allowParentMismatch,
@@ -75,6 +77,8 @@ final public class PageImpl {
 		}
 
 		page.setTitle(title);
+		page.setDescription(description);
+		page.setKeywords(keywords);
 		page.setToc(toc);
 		page.setTocLevels(tocLevels);
 		page.setAllowParentMismatch(allowParentMismatch);

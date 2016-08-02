@@ -48,6 +48,20 @@ abstract public class PageServlet extends HttpServlet {
 	abstract public String getTitle();
 
 	/**
+	 * @see  Page#getDescription()
+	 */
+	public String getDescription() {
+		return null;
+	}
+
+	/**
+	 * @see  Page#getKeywords()
+	 */
+	public String getKeywords() {
+		return null;
+	}
+
+	/**
 	 * Defaults to null for "auto".
 	 *
 	 * @see  Page#getToc()
@@ -71,6 +85,8 @@ abstract public class PageServlet extends HttpServlet {
 	private void callInPage(HttpServletRequest req, HttpServletResponse resp, DoMethodCallable method) throws ServletException, IOException {
 		try {
 			new com.aoindustries.web.page.servlet.Page(getServletContext(), req, resp, getTitle())
+				.description(getDescription())
+				.keywords(getKeywords())
 				.toc(getToc())
 				.tocLevels(getTocLevels())
 				.invoke(

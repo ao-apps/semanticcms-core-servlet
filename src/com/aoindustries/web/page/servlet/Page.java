@@ -48,6 +48,8 @@ public class Page {
 	private final HttpServletResponse response;
 	private final String title;
 
+	private String description;
+	private String keywords;
 	private Boolean toc;
 	private int tocLevels = com.aoindustries.web.page.Page.DEFAULT_TOC_LEVELS;
 	private boolean allowParentMismatch;
@@ -77,6 +79,16 @@ public class Page {
 			PageContext.getResponse(),
 			title
 		);
+	}
+
+	public Page description(String description) {
+		this.description = description;
+		return this;
+	}
+
+	public Page keywords(String keywords) {
+		this.keywords = keywords;
+		return this;
 	}
 
 	public Page toc(Boolean toc) {
@@ -121,6 +133,8 @@ public class Page {
 			request,
 			response,
 			title,
+			description,
+			keywords,
 			toc,
 			tocLevels,
 			allowParentMismatch,
