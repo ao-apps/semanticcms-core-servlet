@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Page processing utilities.
+ * Author processing utilities.
  */
 public class AuthorUtils {
 
@@ -98,7 +98,7 @@ public class AuthorUtils {
 		// Use directly set authors first
 		Set<Author> pageAuthors = page.getAuthors();
 		if(pageAuthors.isEmpty()) {
-			// Use the authors of any parents in the same book
+			// Use the authors of all parents in the same book
 			pageAuthors = null;
 			Book book = pageRef.getBook();
 			for(PageRef parentRef : page.getParentPages()) {

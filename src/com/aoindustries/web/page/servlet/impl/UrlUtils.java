@@ -33,8 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Helper utility for handling URLs.
- *
- * @author  AO Industries, Inc.
  */
 final public class UrlUtils {
 
