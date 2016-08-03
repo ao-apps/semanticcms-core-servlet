@@ -168,8 +168,8 @@ public class CopyrightUtils {
 				pageDateCopyrighted = parentsDateCopyrighted;
 			}
 			pageCopyright = new Copyright(pageRightsHolder, pageRights, pageDateCopyrighted);
-			if(pageCopyright.isEmpty()) pageCopyright = null;
 		}
+		if(pageCopyright.isEmpty()) pageCopyright = null;
 		// Store in finished
 		finished.put(pageRef, pageCopyright);
 		return pageCopyright;
