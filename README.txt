@@ -1,4 +1,6 @@
-To provide patches or gain CVS access, please contact:
+Java API for modeling web page content and relationships in a Servlet environment.
+
+For questions or support, please contact:
 
     AO Industries, Inc.
     7262 Bull Pen Cir

@@ -129,7 +129,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 	 * @see  #invoke(com.aoindustries.web.page.servlet.Element.Body) 
 	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
-		invoke((Body)null);
+		invoke((Body<? super E>)null);
 	}
 
 	public static interface PageContextBody<E extends com.aoindustries.web.page.Element> {
