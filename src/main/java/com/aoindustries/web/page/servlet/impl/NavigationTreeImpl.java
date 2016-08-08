@@ -27,6 +27,7 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextIn
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
+import com.aoindustries.nio.charset.Charsets;
 import com.aoindustries.util.StringUtility;
 import com.aoindustries.web.page.Element;
 import com.aoindustries.web.page.Node;
@@ -39,7 +40,6 @@ import com.aoindustries.web.page.servlet.PageIndex;
 import com.aoindustries.web.page.servlet.PageRefResolver;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -147,7 +147,7 @@ final public class NavigationTreeImpl {
 
 	public static String encodeHexData(String data) {
 		// Note: This is always UTF-8 encoded and does not depend on response encoding
-		return StringUtility.convertToHex(data.getBytes(StandardCharsets.UTF_8));
+		return StringUtility.convertToHex(data.getBytes(Charsets.UTF_8));
 	}
 
 	private static boolean writeNode(
