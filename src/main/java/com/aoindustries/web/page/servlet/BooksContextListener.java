@@ -97,10 +97,10 @@ public class BooksContextListener implements ServletContextListener {
 		Set<Object> booksPropsKeys = booksProps.keySet();
 
 		// Tracks each properties key used, will throw exception if any key exists in the properties file that is not used
-		Set<Object> usedKeys = new HashSet<>(booksPropsKeys.size() * 4/3 + 1);
+		Set<Object> usedKeys = new HashSet<Object>(booksPropsKeys.size() * 4/3 + 1);
 
 		// Load missingBooks
-		Set<String> missingBooks = new LinkedHashSet<>();
+		Set<String> missingBooks = new LinkedHashSet<String>();
 		for(int missingBookNum=1; missingBookNum<Integer.MAX_VALUE; missingBookNum++) {
 			String key =  MISSING_BOOKS_ATTRIBUTE_NAME + "." + missingBookNum;
 			String name = getProperty(booksProps, usedKeys, key);
@@ -111,7 +111,7 @@ public class BooksContextListener implements ServletContextListener {
 		// Load books
 		String rootBookName = getProperty(booksProps, usedKeys, ROOT_BOOK_ATTRIBUTE_NAME);
 		if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
-		Map<String,Book> books = new LinkedHashMap<>();
+		Map<String,Book> books = new LinkedHashMap<String,Book>();
 		for(int bookNum=1; bookNum<Integer.MAX_VALUE; bookNum++) {
 			String name = getProperty(booksProps, usedKeys, "books." + bookNum + ".name");
 			if(name == null) break;
@@ -119,7 +119,7 @@ public class BooksContextListener implements ServletContextListener {
 			String cvsworkDirectoryAttribute = "books." + bookNum + ".cvsworkDirectory";
 			String cvsworkDirectory = getProperty(booksProps, usedKeys, cvsworkDirectoryAttribute);
 			if(cvsworkDirectory == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Required parameter not present: " + cvsworkDirectoryAttribute);
-			Set<PageRef> parentPages = new LinkedHashSet<>();
+			Set<PageRef> parentPages = new LinkedHashSet<PageRef>();
 			for(int parentNum=1; parentNum<Integer.MAX_VALUE; parentNum++) {
 				String parentBookNameAttribute = "books." + bookNum + ".parents." + parentNum + ".book";
 				String parentBookName = getProperty(booksProps, usedKeys, parentBookNameAttribute);
@@ -168,7 +168,7 @@ public class BooksContextListener implements ServletContextListener {
 		if(rootBook == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" is not found in \"" + BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
 
 		// Make sure all keys used
-		Set<Object> unusedKeys = new HashSet<>();
+		Set<Object> unusedKeys = new HashSet<Object>();
 		for(Object key : booksPropsKeys) {
 			if(!usedKeys.contains(key)) unusedKeys.add(key);
 		}

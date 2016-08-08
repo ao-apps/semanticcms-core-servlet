@@ -89,7 +89,7 @@ abstract public class PageServlet extends HttpServlet {
 		void doMethod(Page page) throws ServletException, IOException, SkipPageException;
 	}
 
-	private void callInPage(HttpServletRequest req, HttpServletResponse resp, DoMethodCallable method) throws ServletException, IOException {
+	private void callInPage(HttpServletRequest req, HttpServletResponse resp, final DoMethodCallable method) throws ServletException, IOException {
 		try {
 			new com.aoindustries.web.page.servlet.Page(getServletContext(), req, resp, getTitle())
 				.shortTitle(getShortTitle())
@@ -98,10 +98,14 @@ abstract public class PageServlet extends HttpServlet {
 				.toc(getToc())
 				.tocLevels(getTocLevels())
 				.invoke(
-					(req1, resp1, page) -> {
-						resp1.setContentType("application/xhtml+xml");
-						resp1.setCharacterEncoding("UTF-8");
-						method.doMethod(page);
+					// Java 1.8: Lambda
+					new com.aoindustries.web.page.servlet.Page.Body() {
+						@Override
+						public void doBody(HttpServletRequest req1, HttpServletResponse resp1, Page page) throws ServletException, IOException, SkipPageException {
+							resp1.setContentType("application/xhtml+xml");
+							resp1.setCharacterEncoding("UTF-8");
+							method.doMethod(page);
+						}
 					}
 				)
 			;
@@ -112,7 +116,17 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doGet);
+		// Java 1.8: callInPage(req, resp, this::doGet);
+		callInPage(
+			req,
+			resp,
+			new DoMethodCallable() {
+				@Override
+				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+					doGet(page);
+				}
+			}
+		);
 	}
 
 	/**
@@ -127,7 +141,17 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doPost);
+		// Java 1.8: callInPage(req, resp, this::doPost);
+		callInPage(
+			req,
+			resp,
+			new DoMethodCallable() {
+				@Override
+				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+					doPost(page);
+				}
+			}
+		);
 	}
 
 	/**
@@ -142,7 +166,17 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doPut);
+		// Java 1.8: callInPage(req, resp, this::doPut);
+		callInPage(
+			req,
+			resp,
+			new DoMethodCallable() {
+				@Override
+				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+					doPut(page);
+				}
+			}
+		);
 	}
 
 	/**
@@ -157,7 +191,17 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doDelete);
+		// Java 1.8: callInPage(req, resp, this::doDelete);
+		callInPage(
+			req,
+			resp,
+			new DoMethodCallable() {
+				@Override
+				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+					doDelete(page);
+				}
+			}
+		);
 	}
 
 	/**
@@ -172,7 +216,17 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doOptions);
+		// Java 1.8: callInPage(req, resp, this::doOptions);
+		callInPage(
+			req,
+			resp,
+			new DoMethodCallable() {
+				@Override
+				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+					doOptions(page);
+				}
+			}
+		);
 	}
 
 	/**

@@ -47,13 +47,13 @@ import javax.servlet.jsp.SkipPageException;
  */
 final public class PageContext {
 
-	private static final ThreadLocal<ServletContext> servletContext = new ThreadLocal<>();
+	private static final ThreadLocal<ServletContext> servletContext = new ThreadLocal<ServletContext>();
 
-	private static final ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
+	private static final ThreadLocal<HttpServletRequest> request = new ThreadLocal<HttpServletRequest>();
 
-	private static final ThreadLocal<HttpServletResponse> response = new ThreadLocal<>();
+	private static final ThreadLocal<HttpServletResponse> response = new ThreadLocal<HttpServletResponse>();
 
-	private static final ThreadLocal<PrintWriter> out = new ThreadLocal<>();
+	private static final ThreadLocal<PrintWriter> out = new ThreadLocal<PrintWriter>();
 
 	public static interface PageContextCallable {
 		void call() throws ServletException, IOException;
