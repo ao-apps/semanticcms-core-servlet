@@ -56,7 +56,7 @@ final public class NavigationTreeImpl {
 	public static <T> List<T> filterChildren(Collection<T> children, Set<T> pagesToInclude) {
 		int size = children.size();
 		if(size == 0) return Collections.emptyList();
-		List<T> filtered = new ArrayList<>(size);
+		List<T> filtered = new ArrayList<T>(size);
 		for(T child : children) {
 			if(pagesToInclude.contains(child)) {
 				filtered.add(child);
@@ -76,7 +76,7 @@ final public class NavigationTreeImpl {
 		// Both elements and pages are child nodes
 		List<Element> childElements = includeElements ? node.getChildElements() : null;
 		Set<PageRef> childPages = (node instanceof Page) ? ((Page)node).getChildPages() : null;
-		List<Node> childNodes = new ArrayList<>(
+		List<Node> childNodes = new ArrayList<Node>(
 			(childElements==null ? 0 : childElements.size())
 			+ (childPages==null ? 0 : childPages.size())
 		);
@@ -338,8 +338,8 @@ final public class NavigationTreeImpl {
 			} else {
 				// Find all nodes in the navigation tree that link to the linksToPage
 				PageRef linksTo = PageRefResolver.getPageRef(servletContext, request, linksToBook, linksToPage);
-				nodesWithLinks = new HashSet<>();
-				nodesWithChildLinks = new HashSet<>();
+				nodesWithLinks = new HashSet<Node>();
+				nodesWithChildLinks = new HashSet<Node>();
 				findLinks(servletContext, request, response, linksTo, nodesWithLinks, nodesWithChildLinks, root, includeElements);
 			}
 

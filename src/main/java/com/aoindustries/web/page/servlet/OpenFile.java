@@ -107,7 +107,7 @@ final public class OpenFile {
 			@SuppressWarnings("unchecked")
 			Map<String,FileOpener> fileOpeners = (Map<String,FileOpener>)servletContext.getAttribute(FILE_OPENERS_REQUEST_ATTRIBUTE_NAME);
 			if(fileOpeners == null) {
-				fileOpeners = new HashMap<>();
+				fileOpeners = new HashMap<String,FileOpener>();
 				servletContext.setAttribute(FILE_OPENERS_REQUEST_ATTRIBUTE_NAME, fileOpeners);
 			}
 			for(String extension : extensions) {
@@ -142,7 +142,7 @@ final public class OpenFile {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		String book,
-		String path
+		final String path
 	) throws ServletException, IOException, SkipPageException {
 		// Only allow from localhost and when open enabled
 		if(!isAllowed(servletContext, request)) {
@@ -177,126 +177,140 @@ final public class OpenFile {
 					command = fileOpener.getCommand(resourceFile);
 				} else {
 					// Use default behavior
-					switch(extension) {
-						case "gif" :
-						case "jpg" :
-						case "jpeg" :
-						case "png" :
+					// Java 1.7: switch(extension)
+					if(
+						"gif".equals(extension)
+						|| "jpg".equals(extension)
+						|| "jpeg".equals(extension)
+						|| "png".equals(extension)
+					) {
+						command = new String[] {
+							isWindows()
+								? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
+								: "/usr/bin/gwenview",
+							resourceFile.getCanonicalPath()
+						};
+					} else if(
+						"doc".equals(extension)
+						|| "odt".equals(extension)
+					) {
+						command = new String[] {
+							isWindows()
+								? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
+								: "/usr/bin/libreoffice",
+							"--writer",
+							resourceFile.getCanonicalPath()
+						};
+					} else if(
+						"csv".equals(extension)
+						|| "ods".equals(extension)
+						|| "sxc".equals(extension)
+						|| "xls".equals(extension)
+					) {
+						command = new String[] {
+							isWindows()
+								? "C:\\Program Files (x86)\\OpenOffice 4\\program\\scalc.exe"
+								: "/usr/bin/libreoffice",
+							"--calc",
+							resourceFile.getCanonicalPath()
+						};
+					} else if(
+						"pdf".equals(extension)
+					) {
+						command = new String[] {
+							isWindows()
+								? "C:\\Program Files (x86)\\Adobe\\Reader 11.0\\Reader\\AcroRd32.exe"
+								: "/usr/bin/okular",
+							resourceFile.getCanonicalPath()
+						};
+					//} else if(
+					//	"sh".equals(extension)
+					//) {
+						//command = new String[] {
+						//	"/usr/bin/kwrite",
+						//	resourceFile.getCanonicalPath()
+						//};
+					} else if(
+						"java".equals(extension)
+						|| "jsp".equals(extension)
+						|| "sh".equals(extension)
+						|| "txt".equals(extension)
+						|| "xml".equals(extension)
+					) {
+						if(isWindows()) {
 							command = new String[] {
-								isWindows()
-									? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
-									: "/usr/bin/gwenview",
+								"C:\\Program Files\\NetBeans 7.4\\bin\\netbeans64.exe",
+								"--open",
 								resourceFile.getCanonicalPath()
 							};
-							break;
-						case "doc" :
-						case "odt" :
+						} else {
 							command = new String[] {
-								isWindows()
-									? "C:\\Program Files (x86)\\OpenOffice 4\\program\\swriter.exe"
-									: "/usr/bin/libreoffice",
-								"--writer",
+								//"/usr/bin/kwrite",
+								"/opt/netbeans-8.0.2/bin/netbeans",
+								"--jdkhome",
+								getJdkPath(),
+								"--open",
 								resourceFile.getCanonicalPath()
 							};
-							break;
-						case "csv" :
-						case "ods" :
-						case "sxc" :
-						case "xls" :
+						}
+					} else if(
+						"zip".equals(extension)
+					) {
+						if(isWindows()) {
 							command = new String[] {
-								isWindows()
-									? "C:\\Program Files (x86)\\OpenOffice 4\\program\\scalc.exe"
-									: "/usr/bin/libreoffice",
-								"--calc",
 								resourceFile.getCanonicalPath()
 							};
-							break;
-						case "pdf" :
+						} else {
 							command = new String[] {
-								isWindows()
-									? "C:\\Program Files (x86)\\Adobe\\Reader 11.0\\Reader\\AcroRd32.exe"
-									: "/usr/bin/okular",
+								"/usr/bin/konqueror",
 								resourceFile.getCanonicalPath()
 							};
-							break;
-						//case "sh" :
-						//	command = new String[] {
-						//		"/usr/bin/kwrite",
-						//		resourceFile.getCanonicalPath()
-						//	};
-						//	break;
-						case "java" :
-						case "jsp" :
-						case "sh" :
-						case "txt" :
-						case "xml" :
-							if(isWindows()) {
-								command = new String[] {
-									"C:\\Program Files\\NetBeans 7.4\\bin\\netbeans64.exe",
-									"--open",
-									resourceFile.getCanonicalPath()
-								};
-							} else {
-								command = new String[] {
-									//"/usr/bin/kwrite",
-									"/opt/netbeans-8.0.2/bin/netbeans",
-									"--jdkhome",
-									getJdkPath(),
-									"--open",
-									resourceFile.getCanonicalPath()
-								};
-							}
-							break;
-						case "zip" :
-							if(isWindows()) {
-								command = new String[] {
-									resourceFile.getCanonicalPath()
-								};
-							} else {
-								command = new String[] {
-									"/usr/bin/konqueror",
-									resourceFile.getCanonicalPath()
-								};
-							}
-							break;
-						case "mp3" :
-						case "wma" :
-							command = new String[] {
-								isWindows()
-									? "C:\\Program Files\\VideoLAN\\VLC.exe"
-									: "/usr/bin/vlc",
-								resourceFile.getCanonicalPath()
-							};
-							break;
-						default :
-							throw new IllegalArgumentException("Unsupprted file type by extension: " + extension);
+						}
+					} else if(
+						"mp3".equals(extension)
+						|| "wma".equals(extension)
+					) {
+						command = new String[] {
+							isWindows()
+								? "C:\\Program Files\\VideoLAN\\VLC.exe"
+								: "/usr/bin/vlc",
+							resourceFile.getCanonicalPath()
+						};
+					} else {
+						throw new IllegalArgumentException("Unsupprted file type by extension: " + extension);
 					}
 				}
 			}
 			// Start the process
 			final Process process = Runtime.getRuntime().exec(command);
 			// Result is watched in the background only
-			new Thread(() -> {
-				try {
-					final ProcessResult result = ProcessResult.getProcessResult(process);
-					int exitVal = result.getExitVal();
-					if(exitVal != 0) {
-						logger.log(Level.SEVERE, "Non-zero exit status from \"{0}\": {1}", new Object[]{path, exitVal});
-					}
-					String stdErr = result.getStderr();
-					if(!stdErr.isEmpty()) {
-						logger.log(Level.SEVERE, "Standard error from \"{0}\":\n{1}", new Object[]{path, stdErr});
-					}
-					if(logger.isLoggable(Level.INFO)) {
-						String stdOut = result.getStdout();
-						if(!stdOut.isEmpty()) {
-							logger.log(Level.INFO, "Standard output from \"{0}\":\n{1}", new Object[]{path, stdOut});
+			// Java 1.8: Lambda
+			new Thread(
+				new Runnable() {
+					@Override
+					public void run() {
+						try {
+							final ProcessResult result = ProcessResult.getProcessResult(process);
+							int exitVal = result.getExitVal();
+							if(exitVal != 0) {
+								logger.log(Level.SEVERE, "Non-zero exit status from \"{0}\": {1}", new Object[]{path, exitVal});
+							}
+							String stdErr = result.getStderr();
+							if(!stdErr.isEmpty()) {
+								logger.log(Level.SEVERE, "Standard error from \"{0}\":\n{1}", new Object[]{path, stdErr});
+							}
+							if(logger.isLoggable(Level.INFO)) {
+								String stdOut = result.getStdout();
+								if(!stdOut.isEmpty()) {
+									logger.log(Level.INFO, "Standard output from \"{0}\":\n{1}", new Object[]{path, stdOut});
+								}
+							}
+						} catch(IOException e) {
+							logger.log(Level.SEVERE, null, e);
 						}
 					}
-				} catch(IOException e) {
-					logger.log(Level.SEVERE, null, e);
 				}
-			}).start();
+			).start();
 		}
 	}
 

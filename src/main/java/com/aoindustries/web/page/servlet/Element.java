@@ -22,6 +22,7 @@
  */
 package com.aoindustries.web.page.servlet;
 
+import com.aoindustries.io.TempFileList;
 import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.SegmentedWriter;
@@ -139,11 +140,17 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 	/**
 	 * @see  #invoke(com.aoindustries.web.page.servlet.Element.Body) 
 	 */
-	public void invoke(PageContextBody<? super E> body) throws ServletException, IOException, SkipPageException {
+	public void invoke(final PageContextBody<? super E> body) throws ServletException, IOException, SkipPageException {
 		invoke(
 			body == null
 				? null
-				: (req, resp, e) -> body.doBody(e)
+				// Java 1.8: (req, resp, e) -> body.doBody(e)
+				: new Body<E>() {
+					@Override
+					public void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException {
+						body.doBody(element);
+					}
+				}
 		);
 	}
 
@@ -154,11 +161,17 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 	/**
 	 * @see  #invoke(com.aoindustries.web.page.servlet.Element.Body) 
 	 */
-	public void invoke(PageContextNoElementBody body) throws ServletException, IOException, SkipPageException {
+	public void invoke(final PageContextNoElementBody body) throws ServletException, IOException, SkipPageException {
 		invoke(
 			body == null
 				? null
-				: (req, resp, e) -> body.doBody()
+				// Java 1.8: : (req, resp, e) -> body.doBody()
+				: new Body<E>() {
+					@Override
+					public void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException {
+						body.doBody();
+					}
+				}
 		);
 	}
 
@@ -166,10 +179,10 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 	 * Only called at capture level of META and higher.
 	 */
 	protected void doBody(
-		HttpServletRequest request,
+		final HttpServletRequest request,
 		HttpServletResponse response,
 		CaptureLevel captureLevel,
-		Body<? super E> body
+		final Body<? super E> body
 	) throws ServletException, IOException, SkipPageException {
 		if(body != null) {
 			if(captureLevel == CaptureLevel.BODY) {
@@ -177,9 +190,20 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 				BufferWriter capturedOut = new SegmentedWriter();
 				try {
 					// Enable temp files if temp file context active
-					capturedOut = TempFileContext.wrapTempFileList(capturedOut, request, AutoTempFileWriter::new);
-					try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
-						HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
+					capturedOut = TempFileContext.wrapTempFileList(
+						capturedOut,
+						request,
+						// Java 1.8: AutoTempFileWriter::new
+						new TempFileContext.Wrapper<BufferWriter>() {
+							@Override
+							public BufferWriter call(BufferWriter original, TempFileList tempFileList) {
+								return new AutoTempFileWriter(original, tempFileList);
+							}
+						}
+					);
+					final PrintWriter capturedPW = new PrintWriter(capturedOut);
+					try {
+						final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
 							@Override
 							public PrintWriter getWriter() throws IOException {
 								return capturedPW;
@@ -194,9 +218,17 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 							servletContext,
 							request,
 							newResponse,
-							() -> body.doBody(request, newResponse, element)
+							// Java 1.8: () -> body.doBody(request, newResponse, element)
+							new PageContext.PageContextCallableSkip() {
+								@Override
+								public void call() throws ServletException, IOException, SkipPageException {
+									body.doBody(request, newResponse, element);
+								}
+							}
 						);
 						if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
+					} finally {
+						capturedPW.close();
 					}
 				} finally {
 					capturedOut.close();
@@ -204,13 +236,19 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 				element.setBody(capturedOut.getResult().trim());
 			} else if(captureLevel == CaptureLevel.META) {
 				// Invoke body for any meta data, but discard any output
-				HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+				final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 				// Set PageContext
 				PageContext.newPageContextSkip(
 					servletContext,
 					request,
 					newResponse,
-					() -> body.doBody(request, newResponse, element)
+					// Java 1.8: () -> body.doBody(request, newResponse, element)
+					new PageContext.PageContextCallableSkip() {
+						@Override
+						public void call() throws ServletException, IOException, SkipPageException {
+							body.doBody(request, newResponse, element);
+						}
+					}
 				);
 			} else {
 				throw new AssertionError();

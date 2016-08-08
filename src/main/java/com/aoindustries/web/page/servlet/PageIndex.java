@@ -227,7 +227,7 @@ public class PageIndex {
 		);
 		int size = pageList.size();
 		// Index pages
-		Map<PageRef,Integer> newPageIndexes = new HashMap<>(size*4/3+1);
+		Map<PageRef,Integer> newPageIndexes = new HashMap<PageRef,Integer>(size*4/3+1);
 		for(int i=0; i<size; i++) {
 			newPageIndexes.put(pageList.get(i).getPageRef(), i);
 		}

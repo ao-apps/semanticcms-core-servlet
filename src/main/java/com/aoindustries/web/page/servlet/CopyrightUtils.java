@@ -68,7 +68,7 @@ public class CopyrightUtils {
 			request,
 			response,
 			page,
-			new HashMap<>()
+			new HashMap<PageRef,Copyright>()
 		);
 		assert copyright==null || !copyright.isEmpty();
 		return copyright;
