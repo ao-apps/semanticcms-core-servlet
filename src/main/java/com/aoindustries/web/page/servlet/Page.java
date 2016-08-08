@@ -22,6 +22,7 @@
  */
 package com.aoindustries.web.page.servlet;
 
+import com.aoindustries.io.TempFileList;
 import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.io.buffer.BufferWriter;
@@ -133,7 +134,7 @@ public class Page {
 	 * @see  PageContext
 	 * @see  PageImpl#PAGE_REQUEST_ATTRIBUTE
 	 */
-	public void invoke(Body body) throws ServletException, IOException, SkipPageException {
+	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
 		PageImpl.doPageImpl(
 			servletContext,
 			request,
@@ -152,24 +153,41 @@ public class Page {
 				// discard -> body.doBody(request, discard ? new NullHttpServletResponseWrapper(response) : response)
 				: new PageImpl.PageImplBody<ServletException>() {
 					@Override
-					public BufferResult doBody(boolean discard, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException {
+					public BufferResult doBody(boolean discard, final com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException {
 						if(discard) {
-							HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+							final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 							// Set PageContext
 							PageContext.newPageContextSkip(
 								servletContext,
 								request,
 								newResponse,
-								() -> body.doBody(request, newResponse, page)
+								// Java 1.8: () -> body.doBody(request, newResponse, page)
+								new PageContext.PageContextCallableSkip() {
+									@Override
+									public void call() throws ServletException, IOException, SkipPageException {
+										body.doBody(request, newResponse, page);
+									}
+								}
 							);
 							return EmptyResult.getInstance();
 						} else {
 							BufferWriter capturedOut = new SegmentedWriter();
 							try {
 								// Enable temp files if temp file context active
-								capturedOut = TempFileContext.wrapTempFileList(capturedOut, request, AutoTempFileWriter::new);
-								try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
-									HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
+								capturedOut = TempFileContext.wrapTempFileList(
+									capturedOut,
+									request,
+									// Java 1.8: AutoTempFileWriter::new
+									new TempFileContext.Wrapper<BufferWriter>() {
+										@Override
+										public BufferWriter call(BufferWriter original, TempFileList tempFileList) {
+											return new AutoTempFileWriter(original, tempFileList);
+										}
+									}
+								);
+								final PrintWriter capturedPW = new PrintWriter(capturedOut);
+								try {
+									final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
 										@Override
 										public PrintWriter getWriter() throws IOException {
 											return capturedPW;
@@ -184,9 +202,17 @@ public class Page {
 										servletContext,
 										request,
 										newResponse,
-										() -> body.doBody(request, newResponse, page)
+										// Java 1.8: () -> body.doBody(request, newResponse, page)
+										new PageContext.PageContextCallableSkip() {
+											@Override
+											public void call() throws ServletException, IOException, SkipPageException {
+												body.doBody(request, newResponse, page);
+											}
+										}
 									);
 									if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
+								} finally {
+									capturedPW.close();
 								}
 							} finally {
 								capturedOut.close();
@@ -212,11 +238,17 @@ public class Page {
 	/**
 	 * @see  #invoke(com.aoindustries.web.page.servlet.Page.Body) 
 	 */
-	public void invoke(PageContextBody body) throws ServletException, IOException, SkipPageException {
+	public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
 		invoke(
 			body == null
 				? null
-				: (req, resp, page) -> body.doBody(page)
+				// Java 1.8: (req, resp, page) -> body.doBody(page)
+				: new Body() {
+					@Override
+					public void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException {
+						body.doBody(page);
+					}
+				}
 		);
 	}
 
@@ -227,11 +259,17 @@ public class Page {
 	/**
 	 * @see  #invoke(com.aoindustries.web.page.servlet.Page.Body) 
 	 */
-	public void invoke(PageContextNoPageBody body) throws ServletException, IOException, SkipPageException {
+	public void invoke(final PageContextNoPageBody body) throws ServletException, IOException, SkipPageException {
 		invoke(
 			body == null
 				? null
-				: (req, resp, page) -> body.doBody()
+				// Java 1.8: (req, resp, page) -> body.doBody()
+				: new Body() {
+					@Override
+					public void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException {
+						body.doBody();
+					}
+				}
 		);
 	}
 }

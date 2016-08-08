@@ -47,8 +47,8 @@ final public class PageDags {
 		Page rootPage,
 		CaptureLevel level
 	) throws ServletException, IOException {
-		Set<PageRef> seenPages = new HashSet<>();
-		List<Page> list = new ArrayList<>();
+		Set<PageRef> seenPages = new HashSet<PageRef>();
+		List<Page> list = new ArrayList<Page>();
 		addPage(
 			servletContext,
 			request,

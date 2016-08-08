@@ -150,7 +150,7 @@ public class CapturePage {
 				invalidateCache(currentTime);
 				if(cache == null) {
 					cacheStart = currentTime;
-					cache = new HashMap<>();
+					cache = new HashMap<CapturePageCacheKey,Page>();
 					
 				}
 				return cache;
@@ -164,9 +164,9 @@ public class CapturePage {
 	 * Also validates parent-child and child-parent relationships if the other related pages happened to already be captured and cached.
 	 */
 	public static Page capturePage(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
+		final ServletContext servletContext,
+		final HttpServletRequest request,
+		final HttpServletResponse response,
 		PageRef pageRef,
 		CaptureLevel level
 	) throws ServletException, IOException {
@@ -198,7 +198,7 @@ public class CapturePage {
 					cache = reqCache;
 				}
 				if(cache == null) {
-					cache = new HashMap<>();
+					cache = new HashMap<CapturePageCacheKey,Page>();
 					request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
 				}
 			}
@@ -232,29 +232,34 @@ public class CapturePage {
 					CapturePage captureContext = new CapturePage();
 					request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, captureContext);
 					// Include the page resource, discarding any direct output
-					String capturePath = pageRef.getServletPath();
+					final String capturePath = pageRef.getServletPath();
 					try {
 						// Clear PageContext on include
 						PageContext.newPageContextSkip(
 							null,
 							null,
 							null,
-							() -> Dispatcher.include(
-								servletContext,
-								capturePath,
-								// Always capture as "GET" request
-								ServletUtil.METHOD_GET.equals(request.getMethod())
-									// Is already "GET"
-									? request
-									// Wrap to make "GET"
-									: new HttpServletRequestWrapper(request) {
-										@Override
-										public String getMethod() {
-											return ServletUtil.METHOD_GET;
-										}
-									},
-								new NullHttpServletResponseWrapper(response)
-							)
+							new PageContext.PageContextCallableSkip() {
+								@Override
+								public void call() throws ServletException, IOException, SkipPageException {
+									Dispatcher.include(
+										servletContext,
+										capturePath,
+										// Always capture as "GET" request
+										ServletUtil.METHOD_GET.equals(request.getMethod())
+											// Is already "GET"
+											? request
+											// Wrap to make "GET"
+											: new HttpServletRequestWrapper(request) {
+												@Override
+												public String getMethod() {
+													return ServletUtil.METHOD_GET;
+												}
+											},
+										new NullHttpServletResponseWrapper(response)
+									);
+								}
+							}
 						);
 					} catch(SkipPageException e) {
 						// An individual page may throw SkipPageException which only terminates

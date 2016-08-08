@@ -67,7 +67,7 @@ public class AuthorUtils {
 			request,
 			response,
 			page,
-			new HashMap<>()
+			new HashMap<PageRef,Set<Author>>()
 		);
 	}
 

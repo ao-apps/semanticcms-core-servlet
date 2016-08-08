@@ -109,7 +109,7 @@ public class File {
 	 *
 	 * @see  PageContext
 	 */
-	public void invoke(Body body) throws ServletException, IOException, SkipPageException {
+	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
 		FileImpl.writeFileImpl(
 			servletContext,
 			request,
@@ -126,13 +126,19 @@ public class File {
 					@Override
 					public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {
 						if(discard) {
-							HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+							final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 							// Set PageContext
 							PageContext.newPageContextSkip(
 								servletContext,
 								request,
 								newResponse,
-								() -> body.doBody(request, newResponse)
+								// Java 1.8: () -> body.doBody(request, newResponse)
+								new PageContext.PageContextCallableSkip() {
+									@Override
+									public void call() throws ServletException, IOException, SkipPageException {
+										body.doBody(request, newResponse);
+									}
+								}
 							);
 						} else {
 							body.doBody(request, response);
@@ -156,11 +162,17 @@ public class File {
 	/**
 	 * @see  #invoke(com.aoindustries.web.page.servlet.File.Body) 
 	 */
-	public void invoke(PageContextBody body) throws ServletException, IOException, SkipPageException {
+	public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
 		invoke(
 			body == null
 				? null
-				: (req, resp) -> body.doBody()
+				// Java 1.8: (req, resp) -> body.doBody()
+				: new Body() {
+					@Override
+					public void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException {
+						body.doBody();
+					}
+				}
 		);
 	}
 }

@@ -52,9 +52,9 @@ final public class PageImpl {
 	}
 
 	public static <E extends Throwable> void doPageImpl(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
+		final ServletContext servletContext,
+		final HttpServletRequest request,
+		final HttpServletResponse response,
 		String title,
 		String shortTitle,
 		String description,
@@ -232,12 +232,18 @@ final public class PageImpl {
 					null,
 					null,
 					null,
-					() -> Dispatcher.forward(
-						servletContext,
-						PAGE_TEMPLATE_JSP_PATH,
-						request,
-						response
-					)
+					// Java 1.8: Lambda
+					new PageContext.PageContextCallable() {
+						@Override
+						public void call() throws ServletException, IOException {
+							Dispatcher.forward(
+								servletContext,
+								PAGE_TEMPLATE_JSP_PATH,
+								request,
+								response
+							);
+						}
+					}
 				);
 			} finally {
 				// Restore old value of PAGE_REQUEST_ATTRIBUTE attribute

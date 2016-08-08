@@ -61,10 +61,9 @@ public class OpenFileServlet extends HttpServlet {
 			// Write output
 			response.reset();
 			response.setContentType("application/xml");
-			try (PrintWriter out = response.getWriter()) {
-				out.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>");
-				out.println("<success>true</success>");
-			}
+			PrintWriter out = response.getWriter();
+			out.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?>");
+			out.println("<success>true</success>");
 		} catch(SkipPageException e) {
 			// Nothing to do
 		}

@@ -176,7 +176,7 @@ final public class FileTreeImpl {
 			} else {
 				assert node == page;
 				// Gather all files referenced by the page or any of its elements
-				files = new LinkedHashSet<>();
+				files = new LinkedHashSet<PageRef>();
 				files.addAll(page.getFiles());
 				for(Element e : page.getElements()) {
 					files.addAll(e.getFiles());
@@ -189,7 +189,7 @@ final public class FileTreeImpl {
 					request,
 					response,
 					out,
-					null,
+					(FileImpl.FileImplBody<ServletException>)null,
 					file
 				);
 				out.write("</div>");
@@ -223,7 +223,7 @@ final public class FileTreeImpl {
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			final Node currentNode = CurrentNode.getCurrentNode(request);
 			// Filter by has files
-			final Set<Node> nodesWithFiles = new HashSet<>();
+			final Set<Node> nodesWithFiles = new HashSet<Node>();
 			findFiles(servletContext, request, response, nodesWithFiles, root, includeElements);
 
 			if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
