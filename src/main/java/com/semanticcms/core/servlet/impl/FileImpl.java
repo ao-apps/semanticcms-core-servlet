@@ -110,7 +110,7 @@ final public class FileImpl {
 		out.append("<a");
 		if(body == null) {
 			out.append(" class=\"");
-			out.append(isDirectory ? "ao-web-page-directory-link" : "ao-web-page-file-link");
+			out.append(isDirectory ? "semanticcms-core-directory-link" : "semanticcms-core-file-link");
 			out.append('"');
 		}
 		out.append(" href=\"");

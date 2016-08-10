@@ -206,7 +206,7 @@ final public class NavigationTreeImpl {
 				out.write("\"}'");
 			}
 			String listItemCssClass = node.getListItemCssClass();
-			if(listItemCssClass == null) listItemCssClass = "ao-web-page-list-item-none";
+			if(listItemCssClass == null) listItemCssClass = "semanticcms-core-list-item-none";
 			out.write(" class=\"");
 			encodeTextInXhtmlAttribute(listItemCssClass, out);
 			if(level==1) out.write(" expanded");
@@ -216,7 +216,7 @@ final public class NavigationTreeImpl {
 		boolean thisPageClass = false;
 		if(pageRef.equals(thisPageRef) && element == null) {
 			if(!foundThisPage) {
-				if(out != null) out.write(" id=\"ao-web-page-tree-this-page\"");
+				if(out != null) out.write(" id=\"semanticcms-core-tree-this-page\"");
 				foundThisPage = true;
 			}
 			thisPageClass = true;
@@ -226,11 +226,11 @@ final public class NavigationTreeImpl {
 		if(out != null && (thisPageClass || linksToPageClass)) {
 			out.write(" class=\"");
 			if(thisPageClass && nodesWithLinks!=null && !linksToPageClass) {
-				out.write("ao-web-page-no-link-to-this-page");
+				out.write("semanticcms-core-no-link-to-this-page");
 			} else if(thisPageClass) {
-				out.write("ao-web-page-tree-this-page");
+				out.write("semanticcms-core-tree-this-page");
 			} else if(linksToPageClass) {
-				out.write("ao-web-page-links-to-page");
+				out.write("semanticcms-core-links-to-page");
 			} else {
 				throw new AssertionError();
 			}
