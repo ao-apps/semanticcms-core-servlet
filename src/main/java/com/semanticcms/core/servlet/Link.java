@@ -215,7 +215,7 @@ public class Link {
 	}
 
 	/**
-	 * @see  #invoke(com.aoindustries.web.page.servlet.Link.Body)
+	 * @see  #invoke(com.semanticcms.core.servlet.Link.Body)
 	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
 		invoke((Body)null);
@@ -226,7 +226,7 @@ public class Link {
 	}
 
 	/**
-	 * @see  #invoke(com.aoindustries.web.page.servlet.Link.Body)
+	 * @see  #invoke(com.semanticcms.core.servlet.Link.Body)
 	 */
 	public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
 		invoke(

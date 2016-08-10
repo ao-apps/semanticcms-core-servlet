@@ -382,7 +382,7 @@ public class CapturePage {
 	/**
 	 * Captures a page in the current page context.
 	 *
-	 * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.PageRef, com.aoindustries.web.page.servlet.CaptureLevel)
+	 * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.PageRef, com.semanticcms.core.servlet.CaptureLevel)
 	 * @see  PageContext
 	 */
 	public static Page capturePage(PageRef pageRef, CaptureLevel level) throws ServletException, IOException {
