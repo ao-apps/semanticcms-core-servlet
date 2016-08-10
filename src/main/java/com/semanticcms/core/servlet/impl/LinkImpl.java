@@ -150,6 +150,7 @@ final public class LinkImpl {
 				if(element != null && targetPage != null) {
 					targetElement = targetPage.getElementsById().get(element);
 					if(targetElement == null) throw new ServletException("Element not found in target page: " + element);
+					if(targetPage.getGeneratedIds().contains(element)) throw new ServletException("Not allowed to link to a generated element id, set an explicit id on the target element: " + element);
 				} else {
 					targetElement = null;
 				}
