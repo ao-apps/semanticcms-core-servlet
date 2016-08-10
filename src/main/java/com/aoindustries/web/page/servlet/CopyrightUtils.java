@@ -22,9 +22,9 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.web.page.Book;
-import com.aoindustries.web.page.Copyright;
-import com.aoindustries.web.page.PageRef;
+import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.Copyright;
+import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +61,7 @@ public class CopyrightUtils {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		com.aoindustries.web.page.Page page
+		com.semanticcms.core.model.Page page
 	) throws ServletException, IOException {
 		Copyright copyright = findCopyrightRecursive(
 			servletContext,
@@ -78,7 +78,7 @@ public class CopyrightUtils {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		com.aoindustries.web.page.Page page,
+		com.semanticcms.core.model.Page page,
 		Map<PageRef,Copyright> finished
 	) throws ServletException, IOException {
 		PageRef pageRef = page.getPageRef();

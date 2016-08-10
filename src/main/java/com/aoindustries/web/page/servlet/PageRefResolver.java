@@ -24,8 +24,8 @@ package com.aoindustries.web.page.servlet;
 
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.ServletUtil;
-import com.aoindustries.web.page.Book;
-import com.aoindustries.web.page.PageRef;
+import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.PageRef;
 import java.net.MalformedURLException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

@@ -22,9 +22,9 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.web.page.Author;
-import com.aoindustries.web.page.Book;
-import com.aoindustries.web.page.PageRef;
+import com.semanticcms.core.model.Author;
+import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,7 +60,7 @@ public class AuthorUtils {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		com.aoindustries.web.page.Page page
+		com.semanticcms.core.model.Page page
 	) throws ServletException, IOException {
 		return findAuthorsRecursive(
 			servletContext,
@@ -90,7 +90,7 @@ public class AuthorUtils {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		com.aoindustries.web.page.Page page,
+		com.semanticcms.core.model.Page page,
 		Map<PageRef,Set<Author>> finished
 	) throws ServletException, IOException {
 		PageRef pageRef = page.getPageRef();

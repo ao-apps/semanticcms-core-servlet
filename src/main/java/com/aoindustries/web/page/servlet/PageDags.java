@@ -22,8 +22,8 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.web.page.Page;
-import com.aoindustries.web.page.PageRef;
+import com.semanticcms.core.model.Page;
+import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;

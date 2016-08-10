@@ -23,7 +23,7 @@
 package com.aoindustries.web.page.servlet;
 
 import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.web.page.ElementContext;
+import com.semanticcms.core.model.ElementContext;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
