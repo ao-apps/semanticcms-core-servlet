@@ -26,9 +26,9 @@ import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
-import com.aoindustries.web.page.Node;
-import com.aoindustries.web.page.Page;
-import com.aoindustries.web.page.PageRef;
+import com.semanticcms.core.model.Node;
+import com.semanticcms.core.model.Page;
+import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -382,7 +382,7 @@ public class CapturePage {
 	/**
 	 * Captures a page in the current page context.
 	 *
-	 * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.aoindustries.web.page.PageRef, com.aoindustries.web.page.servlet.CaptureLevel)
+	 * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.PageRef, com.aoindustries.web.page.servlet.CaptureLevel)
 	 * @see  PageContext
 	 */
 	public static Page capturePage(PageRef pageRef, CaptureLevel level) throws ServletException, IOException {

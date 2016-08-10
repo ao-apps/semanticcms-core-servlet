@@ -28,14 +28,14 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlA
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.net.UrlUtils;
-import com.aoindustries.web.page.Element;
-import com.aoindustries.web.page.Node;
-import com.aoindustries.web.page.Page;
-import com.aoindustries.web.page.PageRef;
 import com.aoindustries.web.page.servlet.CaptureLevel;
 import com.aoindustries.web.page.servlet.CapturePage;
 import com.aoindustries.web.page.servlet.CurrentNode;
 import com.aoindustries.web.page.servlet.PageIndex;
+import com.semanticcms.core.model.Element;
+import com.semanticcms.core.model.Node;
+import com.semanticcms.core.model.Page;
+import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;

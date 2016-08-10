@@ -53,7 +53,7 @@ public class Page {
 	private String description;
 	private String keywords;
 	private Boolean toc;
-	private int tocLevels = com.aoindustries.web.page.Page.DEFAULT_TOC_LEVELS;
+	private int tocLevels = com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
 	private boolean allowParentMismatch;
 	private boolean allowChildMismatch;
 
@@ -119,7 +119,7 @@ public class Page {
 	}
 
 	public static interface Body {
-		void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException;
+		void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
 	}
 
 	/**
@@ -153,7 +153,7 @@ public class Page {
 				// discard -> body.doBody(request, discard ? new NullHttpServletResponseWrapper(response) : response)
 				: new PageImpl.PageImplBody<ServletException>() {
 					@Override
-					public BufferResult doBody(boolean discard, final com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException {
+					public BufferResult doBody(boolean discard, final com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 						if(discard) {
 							final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 							// Set PageContext
@@ -232,7 +232,7 @@ public class Page {
 	}
 
 	public static interface PageContextBody {
-		void doBody(com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException;
+		void doBody(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
 	}
 
 	/**
@@ -245,7 +245,7 @@ public class Page {
 				// Java 1.8: (req, resp, page) -> body.doBody(page)
 				: new Body() {
 					@Override
-					public void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException {
+					public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 						body.doBody(page);
 					}
 				}
@@ -266,7 +266,7 @@ public class Page {
 				// Java 1.8: (req, resp, page) -> body.doBody()
 				: new Body() {
 					@Override
-					public void doBody(HttpServletRequest req, HttpServletResponse resp, com.aoindustries.web.page.Page page) throws ServletException, IOException, SkipPageException {
+					public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 						body.doBody();
 					}
 				}
