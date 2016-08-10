@@ -22,7 +22,7 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.web.page.Node;
+import com.semanticcms.core.model.Node;
 import javax.servlet.ServletRequest;
 
 /**

@@ -22,8 +22,8 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.web.page.ElementContext;
 import com.aoindustries.web.page.servlet.impl.HeadingImpl;
+import com.semanticcms.core.model.ElementContext;
 import java.io.IOException;
 import java.io.Writer;
 import javax.servlet.ServletContext;
@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
-public class Heading extends Element<com.aoindustries.web.page.Heading> {
+public class Heading extends Element<com.semanticcms.core.model.Heading> {
 
 	public Heading(
 		ServletContext servletContext,
@@ -44,7 +44,7 @@ public class Heading extends Element<com.aoindustries.web.page.Heading> {
 			servletContext,
 			request,
 			response,
-			new com.aoindustries.web.page.Heading()
+			new com.semanticcms.core.model.Heading()
 		);
 		element.setLabel(label);
 	}
@@ -71,7 +71,7 @@ public class Heading extends Element<com.aoindustries.web.page.Heading> {
 
 	private PageIndex pageIndex;
 	@Override
-	protected void doBody(HttpServletRequest request, HttpServletResponse response, CaptureLevel captureLevel, Body<? super com.aoindustries.web.page.Heading> body) throws ServletException, IOException, SkipPageException {
+	protected void doBody(HttpServletRequest request, HttpServletResponse response, CaptureLevel captureLevel, Body<? super com.semanticcms.core.model.Heading> body) throws ServletException, IOException, SkipPageException {
 		pageIndex = PageIndex.getCurrentPageIndex(request);
 		super.doBody(request, response, captureLevel, body);
 		HeadingImpl.doAfterBody(element);

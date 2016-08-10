@@ -24,7 +24,7 @@ package com.aoindustries.web.page.servlet;
 
 import com.aoindustries.servlet.http.Includer;
 import com.aoindustries.servlet.http.ServletUtil;
-import com.aoindustries.web.page.Page;
+import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

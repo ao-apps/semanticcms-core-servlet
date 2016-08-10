@@ -29,10 +29,10 @@ import com.aoindustries.io.buffer.SegmentedWriter;
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
-import com.aoindustries.web.page.ElementWriter;
-import com.aoindustries.web.page.Node;
-import com.aoindustries.web.page.NodeBodyWriter;
-import com.aoindustries.web.page.Page;
+import com.semanticcms.core.model.ElementWriter;
+import com.semanticcms.core.model.Node;
+import com.semanticcms.core.model.NodeBodyWriter;
+import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletContext;
@@ -46,7 +46,7 @@ import javax.servlet.jsp.SkipPageException;
 /**
  * The base for capturing elements.
  */
-abstract public class Element<E extends com.aoindustries.web.page.Element> implements ElementWriter {
+abstract public class Element<E extends com.semanticcms.core.model.Element> implements ElementWriter {
 
 	private final ServletContext servletContext;
 	private final HttpServletRequest request;
@@ -70,7 +70,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 		return this;
 	}
 
-	public static interface Body<E extends com.aoindustries.web.page.Element> {
+	public static interface Body<E extends com.semanticcms.core.model.Element> {
 		void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException;
 	}
 
@@ -133,7 +133,7 @@ abstract public class Element<E extends com.aoindustries.web.page.Element> imple
 		invoke((Body<? super E>)null);
 	}
 
-	public static interface PageContextBody<E extends com.aoindustries.web.page.Element> {
+	public static interface PageContextBody<E extends com.semanticcms.core.model.Element> {
 		void doBody(E element) throws ServletException, IOException, SkipPageException;
 	}
 

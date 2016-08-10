@@ -22,8 +22,8 @@
  */
 package com.aoindustries.web.page.servlet;
 
-import com.aoindustries.web.page.Page;
 import com.aoindustries.web.page.servlet.impl.NavigationTreeImpl;
+import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

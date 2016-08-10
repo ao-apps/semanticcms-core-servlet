@@ -23,8 +23,8 @@
 package com.aoindustries.web.page.servlet;
 
 import com.aoindustries.lang.NullArgumentException;
-import com.aoindustries.web.page.Page;
-import com.aoindustries.web.page.PageRef;
+import com.semanticcms.core.model.Page;
+import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -149,7 +149,7 @@ public class PageIndex {
 	 *
 	 * @param  id  optional, id not added when null or empty
 	 *
-	 * @see  #appendIdInPage(com.aoindustries.web.page.servlet.PageIndex, com.aoindustries.web.page.Page, java.lang.String, java.lang.Appendable)
+	 * @see  #appendIdInPage(com.aoindustries.web.page.servlet.PageIndex, com.semanticcms.core.model.Page, java.lang.String, java.lang.Appendable)
 	 */
 	public static String getRefIdInPage(
 		ServletContext servletContext,
@@ -193,7 +193,7 @@ public class PageIndex {
 	 *
 	 * @param  id  optional, id not added when null or empty
 	 *
-	 * @see  #getRefIdInPage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.aoindustries.web.page.Page, java.lang.String)
+	 * @see  #getRefIdInPage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.model.Page, java.lang.String)
 	 */
 	public static void appendIdInPage(PageIndex pageIndex, Page page, String id, Appendable out) throws IOException {
 		if(pageIndex != null && page != null) {

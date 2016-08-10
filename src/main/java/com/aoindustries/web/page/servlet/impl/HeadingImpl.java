@@ -26,22 +26,22 @@ import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import com.aoindustries.io.buffer.BufferResult;
-import com.aoindustries.web.page.ElementContext;
-import com.aoindustries.web.page.NodeBodyWriter;
-import com.aoindustries.web.page.Page;
 import com.aoindustries.web.page.servlet.PageIndex;
+import com.semanticcms.core.model.ElementContext;
+import com.semanticcms.core.model.NodeBodyWriter;
+import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
 final public class HeadingImpl {
 
-	public static void doAfterBody(com.aoindustries.web.page.Heading heading) {
+	public static void doAfterBody(com.semanticcms.core.model.Heading heading) {
 		// Add to any parent heading
-		com.aoindustries.web.page.Element parent = heading.getParentElement();
+		com.semanticcms.core.model.Element parent = heading.getParentElement();
 		while(parent != null) {
-			if(parent instanceof com.aoindustries.web.page.Heading) {
-				com.aoindustries.web.page.Heading parentHeading = (com.aoindustries.web.page.Heading)parent;
+			if(parent instanceof com.semanticcms.core.model.Heading) {
+				com.semanticcms.core.model.Heading parentHeading = (com.semanticcms.core.model.Heading)parent;
 				parentHeading.addChildHeading(heading);
 				return;
 			}
@@ -55,22 +55,22 @@ final public class HeadingImpl {
 	public static void writeHeading(
 		Writer out,
 		ElementContext context,
-		com.aoindustries.web.page.Heading heading,
+		com.semanticcms.core.model.Heading heading,
 		PageIndex pageIndex
 	) throws IOException {
 		// If this is the first heading in the page, write the table of contents
 		Page page = heading.getPage();
 		if(page != null) {
-			List<com.aoindustries.web.page.Heading> topLevelHeadings = page.getTopLevelHeadings();
+			List<com.semanticcms.core.model.Heading> topLevelHeadings = page.getTopLevelHeadings();
 			if(!topLevelHeadings.isEmpty() && topLevelHeadings.get(0) == heading) {
 				context.include("/lib/docs/toc.inc.jsp", out);
 			}
 		}
 		// Count the heading level by finding all headings in the parent elements
 		int headingLevel = 2; // <h1> is reserved for page titles
-		com.aoindustries.web.page.Element parentElement = heading.getParentElement();
+		com.semanticcms.core.model.Element parentElement = heading.getParentElement();
 		while(parentElement != null) {
-			if(parentElement instanceof com.aoindustries.web.page.Heading) headingLevel++;
+			if(parentElement instanceof com.semanticcms.core.model.Heading) headingLevel++;
 			parentElement = parentElement.getParentElement();
 		}
 		// Highest tag is <h6>
