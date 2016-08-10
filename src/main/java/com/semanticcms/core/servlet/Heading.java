@@ -71,9 +71,9 @@ public class Heading extends Element<com.semanticcms.core.model.Heading> {
 
 	private PageIndex pageIndex;
 	@Override
-	protected void doBody(HttpServletRequest request, HttpServletResponse response, CaptureLevel captureLevel, Body<? super com.semanticcms.core.model.Heading> body) throws ServletException, IOException, SkipPageException {
+	protected void doBody(CaptureLevel captureLevel, Body<? super com.semanticcms.core.model.Heading> body) throws ServletException, IOException, SkipPageException {
 		pageIndex = PageIndex.getCurrentPageIndex(request);
-		super.doBody(request, response, captureLevel, body);
+		super.doBody(captureLevel, body);
 		HeadingImpl.doAfterBody(element);
 	}
 

@@ -48,9 +48,9 @@ import javax.servlet.jsp.SkipPageException;
  */
 abstract public class Element<E extends com.semanticcms.core.model.Element> implements ElementWriter {
 
-	private final ServletContext servletContext;
-	private final HttpServletRequest request;
-	private final HttpServletResponse response;
+	protected final ServletContext servletContext;
+	protected final HttpServletRequest request;
+	protected final HttpServletResponse response;
 	protected final E element;
 
 	protected Element(
@@ -103,12 +103,10 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 				else elementKey = null;
 				// Freeze element once body done
 				try {
-					doBody(request, response, captureLevel, body);
+					doBody(captureLevel, body);
 				} finally {
-					// Note: Page freezes all of its elements after setting missing ids
-					if(currentPage == null || element.getId() != null) {
-						element.freeze();
-					}
+					// Note: Page freezes all of its elements
+					if(currentPage == null) element.freeze();
 				}
 				PrintWriter out = response.getWriter();
 				if(elementKey == null) {
@@ -178,12 +176,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 	/**
 	 * Only called at capture level of META and higher.
 	 */
-	protected void doBody(
-		final HttpServletRequest request,
-		HttpServletResponse response,
-		CaptureLevel captureLevel,
-		final Body<? super E> body
-	) throws ServletException, IOException, SkipPageException {
+	protected void doBody(CaptureLevel captureLevel, final Body<? super E> body) throws ServletException, IOException, SkipPageException {
 		if(body != null) {
 			if(captureLevel == CaptureLevel.BODY) {
 				// Invoke tag body, capturing output
