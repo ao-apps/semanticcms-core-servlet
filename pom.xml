@@ -26,7 +26,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 
 	<groupId>com.semanticcms</groupId>
 	<artifactId>semanticcms-core-servlet</artifactId>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
 	<packaging>jar</packaging>
 
 	<name>SemanticCMS Core Servlet</name>
@@ -53,7 +53,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<connection>scm:git:git://github.com/aoindustries/semanticcms-core-servlet.git</connection>
 		<developerConnection>scm:git:git@github.com:aoindustries/semanticcms-core-servlet.git</developerConnection>
 		<url>http://github.com/aoindustries/semanticcms-core-servlet</url>
-		<tag>HEAD</tag>
+		<tag>semanticcms-core-servlet-1.2</tag>
 	</scm>
 
 	<repositories>
