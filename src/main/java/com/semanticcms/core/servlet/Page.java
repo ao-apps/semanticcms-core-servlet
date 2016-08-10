@@ -225,7 +225,7 @@ public class Page {
 	}
 
 	/**
-	 * @see  #invoke(com.aoindustries.web.page.servlet.Page.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body) 
 	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
 		invoke((Body)null);
@@ -236,7 +236,7 @@ public class Page {
 	}
 
 	/**
-	 * @see  #invoke(com.aoindustries.web.page.servlet.Page.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body) 
 	 */
 	public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
 		invoke(
@@ -257,7 +257,7 @@ public class Page {
 	}
 
 	/**
-	 * @see  #invoke(com.aoindustries.web.page.servlet.Page.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body) 
 	 */
 	public void invoke(final PageContextNoPageBody body) throws ServletException, IOException, SkipPageException {
 		invoke(

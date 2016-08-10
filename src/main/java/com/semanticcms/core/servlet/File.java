@@ -149,7 +149,7 @@ public class File {
 	}
 
 	/**
-	 * @see  #invoke(com.aoindustries.web.page.servlet.File.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.File.Body) 
 	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
 		invoke((Body)null);
@@ -160,7 +160,7 @@ public class File {
 	}
 
 	/**
-	 * @see  #invoke(com.aoindustries.web.page.servlet.File.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.File.Body) 
 	 */
 	public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
 		invoke(

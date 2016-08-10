@@ -149,7 +149,7 @@ public class PageIndex {
 	 *
 	 * @param  id  optional, id not added when null or empty
 	 *
-	 * @see  #appendIdInPage(com.aoindustries.web.page.servlet.PageIndex, com.semanticcms.core.model.Page, java.lang.String, java.lang.Appendable)
+	 * @see  #appendIdInPage(com.semanticcms.core.servlet.PageIndex, com.semanticcms.core.model.Page, java.lang.String, java.lang.Appendable)
 	 */
 	public static String getRefIdInPage(
 		ServletContext servletContext,
