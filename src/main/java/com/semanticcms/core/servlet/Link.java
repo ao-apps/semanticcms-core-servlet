@@ -41,6 +41,7 @@ public class Link {
 	private String book;
 	private String page;
 	private String element;
+	private boolean allowGeneratedElement;
 	private String view;
 	private HttpParameters params;
 	private String clazz;
@@ -146,6 +147,11 @@ public class Link {
 		return this;
 	}
 
+	public Link allowGeneratedElement(boolean allowGeneratedElement) {
+		this.allowGeneratedElement = allowGeneratedElement;
+		return this;
+	}
+
 	public Link view(String view) {
 		this.view = view;
 		return this;
@@ -181,6 +187,7 @@ public class Link {
 			book,
 			page,
 			element,
+			allowGeneratedElement,
 			view,
 			params,
 			clazz,

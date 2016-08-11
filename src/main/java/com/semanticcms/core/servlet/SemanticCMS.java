@@ -23,76 +23,90 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.servlet.http.Dispatcher;
-import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.PropertiesUtils;
 import com.aoindustries.util.WrappedException;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 
-@WebListener(
-	"Exposes all the configured books as an application-scope Map<String,Book> \"" + BooksContextListener.BOOKS_ATTRIBUTE_NAME + "\".\n"
-	+ "Exposes all the configured missing book names as an application-scope Set<String> \"" + BooksContextListener.MISSING_BOOKS_ATTRIBUTE_NAME+ "\".\n"
-	+ "Exposes the configured root book as an application-scope Book \"" + BooksContextListener.ROOT_BOOK_ATTRIBUTE_NAME+ "\"."
-)
-public class BooksContextListener implements ServletContextListener {
+/**
+ * The SemanticCMS application context.
+ */
+public class SemanticCMS {
+
+	static final String ATTRIBUTE_NAME = "semanticCMS";
 
 	private static final String BOOKS_PROPERTIES_RESOURCE = "/WEB-INF/books.properties";
 
-	static final String BOOKS_ATTRIBUTE_NAME = "books";
-	static final String MISSING_BOOKS_ATTRIBUTE_NAME = "missingBooks";
-	static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
+	private static final String BOOKS_ATTRIBUTE_NAME = "books";
+	private static final String MISSING_BOOKS_ATTRIBUTE_NAME = "missingBooks";
+	private static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
 
 	private static String getProperty(Properties booksProps, Set<Object> usedKeys, String key) {
 		usedKeys.add(key);
 		return booksProps.getProperty(key);
 	}
 
-	public static class LoadedBooks {
-		private final Map<String,Book> books;
-		private final Set<String> missingBooks;
-		private final Book rootBook;
-	
-		private LoadedBooks(
-			Map<String,Book> books,
-			Set<String> missingBooks,
-			Book rootBook
-		) {
-			this.books = books;
-			this.missingBooks = missingBooks;
-			this.rootBook = rootBook;
-		}
+	private static final Object instanceLock = new Object();
 
-		public Map<String,Book> getBooks() {
-			return books;
-		}
-
-		public Set<String> getMissingBooks() {
-			return missingBooks;
-		}
-
-		public Book getRootBook() {
-			return rootBook;
+	/**
+	 * Gets the SemanticCMS instance, creating it if necessary.
+	 */
+	public static SemanticCMS getInstance(ServletContext servletContext) {
+		try {
+			synchronized(instanceLock) {
+				SemanticCMS semanticCMS = (SemanticCMS)servletContext.getAttribute(SemanticCMS.ATTRIBUTE_NAME);
+				if(semanticCMS == null) {
+					semanticCMS = new SemanticCMS(servletContext);
+					servletContext.setAttribute(SemanticCMS.ATTRIBUTE_NAME, semanticCMS);
+				}
+				return semanticCMS;
+			}
+		} catch(IOException e) {
+			throw new WrappedException(e);
 		}
 	}
 
+	private final Map<String,Book> books;
+	private final Set<String> missingBooks;
+	private final Book rootBook;
+
+	private final Object viewsLock = new Object();
+
 	/**
-	 * The books may be needed before application initialization has completed, this
-	 * loads the books directly.  This should only be used for application initialization,
-	 * as it does not cache results.
+	 * The views by name in order added.
 	 */
-	public static LoadedBooks loadBooks(ServletContext servletContext) throws IOException {
+	private final Map<String,View> viewsByName = new LinkedHashMap<String, View>();
+
+	/**
+	 * The views in order.
+	 */
+	private final SortedMap<String,View> views = new TreeMap<String, View>(
+		new Comparator<String>() {
+			@Override
+			public int compare(String name1, String name2) {
+				View v1 = viewsByName.get(name1);
+				if(v1 == null) throw new AssertionError("View not found: " + name1);
+				View v2 = viewsByName.get(name2);
+				if(v2 == null) throw new AssertionError("View not found: " + name2);
+				return v1.compareTo(v2);
+			}
+		}
+	);
+
+	SemanticCMS(ServletContext servletContext) throws IOException {
 		Properties booksProps = PropertiesUtils.loadFromResource(servletContext, BOOKS_PROPERTIES_RESOURCE);
 		Set<Object> booksPropsKeys = booksProps.keySet();
 
@@ -100,22 +114,22 @@ public class BooksContextListener implements ServletContextListener {
 		Set<Object> usedKeys = new HashSet<Object>(booksPropsKeys.size() * 4/3 + 1);
 
 		// Load missingBooks
-		Set<String> missingBooks = new LinkedHashSet<String>();
+		Set<String> newMissingBooks = new LinkedHashSet<String>();
 		for(int missingBookNum=1; missingBookNum<Integer.MAX_VALUE; missingBookNum++) {
 			String key =  MISSING_BOOKS_ATTRIBUTE_NAME + "." + missingBookNum;
 			String name = getProperty(booksProps, usedKeys, key);
 			if(name == null) break;
-			if(!missingBooks.add(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate value for \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + key + "=" + name);
+			if(!newMissingBooks.add(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate value for \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + key + "=" + name);
 		}
 
 		// Load books
 		String rootBookName = getProperty(booksProps, usedKeys, ROOT_BOOK_ATTRIBUTE_NAME);
 		if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
-		Map<String,Book> books = new LinkedHashMap<String,Book>();
+		Map<String,Book> newBooks = new LinkedHashMap<String,Book>();
 		for(int bookNum=1; bookNum<Integer.MAX_VALUE; bookNum++) {
 			String name = getProperty(booksProps, usedKeys, "books." + bookNum + ".name");
 			if(name == null) break;
-			if(missingBooks.contains(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
+			if(newMissingBooks.contains(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
 			String cvsworkDirectoryAttribute = "books." + bookNum + ".cvsworkDirectory";
 			String cvsworkDirectory = getProperty(booksProps, usedKeys, cvsworkDirectoryAttribute);
 			if(cvsworkDirectory == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Required parameter not present: " + cvsworkDirectoryAttribute);
@@ -129,8 +143,8 @@ public class BooksContextListener implements ServletContextListener {
 				if(parentBookName == null && parentPage == null) break;
 				if(parentBookName == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent book required when parent page provided: " + parentPageAttribute + "=" + parentPage);
 				if(parentPage == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent page required when parent book provided: " + parentBookNameAttribute + "=" + parentBookName);
-				if(missingBooks.contains(parentBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + parentBookNameAttribute + "=" + parentBookName);
-				Book parentBook = books.get(parentBookName);
+				if(newMissingBooks.contains(parentBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + parentBookNameAttribute + "=" + parentBookName);
+				Book parentBook = newBooks.get(parentBookName);
 				if(parentBook == null) {
 					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookNameAttribute + "=" + parentBookName);
 				}
@@ -148,7 +162,7 @@ public class BooksContextListener implements ServletContextListener {
 				}
 			}
 			if(
-				books.put(
+				newBooks.put(
 					name,
 					new Book(
 						name,
@@ -163,9 +177,9 @@ public class BooksContextListener implements ServletContextListener {
 		}
 
 		// Load rootBook
-		if(missingBooks.contains(rootBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
-		Book rootBook = books.get(rootBookName);
-		if(rootBook == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" is not found in \"" + BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
+		if(newMissingBooks.contains(rootBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
+		Book newRootBook = newBooks.get(rootBookName);
+		if(newRootBook == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" is not found in \"" + BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
 
 		// Make sure all keys used
 		Set<Object> unusedKeys = new HashSet<Object>();
@@ -175,50 +189,23 @@ public class BooksContextListener implements ServletContextListener {
 		if(!unusedKeys.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Unused keys: " + unusedKeys);
 
 		// Successful load
-		return new LoadedBooks(
-			AoCollections.optimalUnmodifiableMap(books),
-			AoCollections.optimalUnmodifiableSet(missingBooks),
-			rootBook
-		);
+		this.books = newBooks;
+		this.missingBooks = newMissingBooks;
+		this.rootBook = newRootBook;
 	}
 
-	@Override
-	public void contextInitialized(ServletContextEvent event) {
-		try {
-			ServletContext servletContext = event.getServletContext();
-			LoadedBooks loadedBooks = loadBooks(servletContext);
-			// Successful startup
-			if(servletContext.getAttribute(BOOKS_ATTRIBUTE_NAME)!=null) throw new IllegalStateException("Application-scope attribute already present: " + BOOKS_ATTRIBUTE_NAME);
-			servletContext.setAttribute(BOOKS_ATTRIBUTE_NAME, loadedBooks.getBooks());
-			if(servletContext.getAttribute(MISSING_BOOKS_ATTRIBUTE_NAME)!=null) throw new IllegalStateException("Application-scope attribute already present: " + MISSING_BOOKS_ATTRIBUTE_NAME);
-			servletContext.setAttribute(MISSING_BOOKS_ATTRIBUTE_NAME, loadedBooks.getMissingBooks());
-			if(servletContext.getAttribute(ROOT_BOOK_ATTRIBUTE_NAME)!=null) throw new IllegalStateException("Application-scope attribute already present: " + ROOT_BOOK_ATTRIBUTE_NAME);
-			servletContext.setAttribute(ROOT_BOOK_ATTRIBUTE_NAME, loadedBooks.getRootBook());
-		} catch(IOException e) {
-			throw new WrappedException(e);
-		}
+	public Map<String,Book> getBooks() {
+		return Collections.unmodifiableMap(books);
 	}
 
-	public static Map<String,Book> getBooks(ServletContext servletContext) {
-		@SuppressWarnings("unchecked")
-		Map<String,Book> books = (Map)servletContext.getAttribute(BOOKS_ATTRIBUTE_NAME);
-		if(books == null) throw new IllegalStateException("Application-scope attribute not found: " + BOOKS_ATTRIBUTE_NAME);
-		return books;
-	}
-
-	public static Set<String> getMissingBooks(ServletContext servletContext) {
-		@SuppressWarnings("unchecked")
-		Set<String> missingBooks = (Set)servletContext.getAttribute(MISSING_BOOKS_ATTRIBUTE_NAME);
-		if(missingBooks == null) throw new IllegalStateException("Application-scope attribute not found: " + MISSING_BOOKS_ATTRIBUTE_NAME);
-		return missingBooks;
+	public Set<String> getMissingBooks() {
+		return Collections.unmodifiableSet(missingBooks);
 	}
 
 	/**
 	 * Gets the root book as configured in /WEB-INF/books.properties
 	 */
-	public static Book getRootBook(ServletContext servletContext) throws IllegalStateException {
-		Book rootBook = (Book)servletContext.getAttribute(ROOT_BOOK_ATTRIBUTE_NAME);
-		if(rootBook == null) throw new IllegalStateException("Application-scope attribute not found: " + ROOT_BOOK_ATTRIBUTE_NAME);
+	public Book getRootBook() {
 		return rootBook;
 	}
 
@@ -227,11 +214,11 @@ public class BooksContextListener implements ServletContextListener {
 	 * The book with the longest prefix match is used.
 	 * The servlet path must begin with a slash (/).
 	 */
-	public static Book getBook(ServletContext servletContext, String servletPath) {
+	public Book getBook(String servletPath) {
 		if(servletPath.charAt(0) != '/') throw new IllegalArgumentException("Invalid servletPath: " + servletPath);
 		Book longestPrefixBook = null;
 		int longestPrefixLen = -1;
-		for(Book book : getBooks(servletContext).values()) {
+		for(Book book : getBooks().values()) {
 			String prefix = book.getPathPrefix();
 			int prefixLen = prefix.length();
 			if(
@@ -248,13 +235,30 @@ public class BooksContextListener implements ServletContextListener {
 	/**
 	 * Gets the book for the provided request or <code>null</code> if no book configured at the current request path.
 	 */
-	public static Book getBook(ServletContext servletContext, HttpServletRequest request) {
-		return getBook(servletContext, Dispatcher.getCurrentPagePath(request));
+	public Book getBook(HttpServletRequest request) {
+		return getBook(Dispatcher.getCurrentPagePath(request));
 	}
 
-	@Override
-	public void contextDestroyed(ServletContextEvent event) {
-		ServletContext servletContext = event.getServletContext();
-		servletContext.removeAttribute(BOOKS_ATTRIBUTE_NAME);
+	/**
+	 * Gets the views, ordered by view group then display.
+	 *
+	 * @see  View#compareTo(com.semanticcms.core.servlet.View)
+	 */
+	public SortedMap<String,View> getViews() {
+		return Collections.unmodifiableSortedMap(views);
+	}
+
+	/**
+	 * Adds a new view.
+	 *
+	 * @throws  IllegalStateException  if a view is already registered with the name.
+	 */
+	public void addView(View view) throws IllegalStateException {
+		String name = view.getName();
+		synchronized(viewsLock) {
+			if(viewsByName.containsKey(name)) throw new IllegalStateException("View already registered: " + name);
+			if(viewsByName.put(name, view) != null) throw new AssertionError();
+			if(views.put(name, view) != null) throw new AssertionError();
+		}
 	}
 }

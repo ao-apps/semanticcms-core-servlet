@@ -28,13 +28,13 @@ import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
-import com.semanticcms.core.servlet.BooksContextListener;
 import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageContext;
 import com.semanticcms.core.servlet.PageRefResolver;
+import com.semanticcms.core.servlet.SemanticCMS;
 import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -132,7 +132,7 @@ final public class PageImpl {
 
 				// If this page is the "content.root" of a book, include all parents configured when book imported.
 				boolean addedBookParents = false;
-				for(Book book : BooksContextListener.getBooks(servletContext).values()) {
+				for(Book book : SemanticCMS.getInstance(servletContext).getBooks().values()) {
 					if(book.getContentRoot().equals(pageRef)) {
 						for(PageRef bookParentPage : book.getParentPages()) {
 							page.addParentPage(bookParentPage);
