@@ -233,6 +233,7 @@ final public class OpenFile {
 					} else if(
 						"java".equals(extension)
 						|| "jsp".equals(extension)
+						|| "jspx".equals(extension)
 						|| "sh".equals(extension)
 						|| "txt".equals(extension)
 						|| "xml".equals(extension)
