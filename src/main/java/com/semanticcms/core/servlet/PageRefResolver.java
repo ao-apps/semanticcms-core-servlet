@@ -42,7 +42,7 @@ public class PageRefResolver {
 	 */
 	public static PageRef getCurrentPageRef(ServletContext servletContext, HttpServletRequest request) throws ServletException {
 		String pagePath = Dispatcher.getCurrentPagePath(request);
-		Book book = BooksContextListener.getBook(servletContext, pagePath);
+		Book book = SemanticCMS.getInstance(servletContext).getBook(pagePath);
 		if(book == null) throw new ServletException("Book not found for pagePath: " + pagePath);
 		String bookPrefix = book.getPathPrefix();
 		if(!pagePath.startsWith(bookPrefix)) throw new AssertionError();
@@ -62,9 +62,10 @@ public class PageRefResolver {
 	 * @throws ServletException If no book provided and the current page is not within a book's content.
 	 */
 	public static PageRef getPageRef(ServletContext servletContext, HttpServletRequest request, String book, String path) throws ServletException, MalformedURLException {
+		SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 		if(book == null) {
 			String currentPagePath = Dispatcher.getCurrentPagePath(request);
-			Book currentBook = BooksContextListener.getBook(servletContext, currentPagePath);
+			Book currentBook = semanticCMS.getBook(currentPagePath);
 			if(currentBook == null) throw new ServletException("book attribute required when not in a book's content");
 			// When book not provided, path is relative to current page
 			return new PageRef(
@@ -76,12 +77,12 @@ public class PageRefResolver {
 			);
 		} else {
 			if(!path.startsWith("/")) throw new ServletException("When book provided, path must begin with a slash (/): " + path);
-			Book foundBook = BooksContextListener.getBooks(servletContext).get(book);
+			Book foundBook = semanticCMS.getBooks().get(book);
 			if(foundBook != null) {
 				return new PageRef(foundBook, path);
 			} else {
 				// Missing book
-				if(!BooksContextListener.getMissingBooks(servletContext).contains(book)) {
+				if(!semanticCMS.getMissingBooks().contains(book)) {
 					throw new ServletException("Reference to missing book not allowed: " + book);
 				}
 				return new PageRef(book, path);
