@@ -43,21 +43,13 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * The SemanticCMS application context.
+ * 
+ * TODO: Consider custom EL resolver for this variable: http://stackoverflow.com/questions/5016965/how-to-add-a-custom-variableresolver-in-pure-jsp
  */
 public class SemanticCMS {
 
+	// <editor-fold defaultstate="collapsed" desc="Singleton Instance (per application)">
 	static final String ATTRIBUTE_NAME = "semanticCMS";
-
-	private static final String BOOKS_PROPERTIES_RESOURCE = "/WEB-INF/books.properties";
-
-	private static final String BOOKS_ATTRIBUTE_NAME = "books";
-	private static final String MISSING_BOOKS_ATTRIBUTE_NAME = "missingBooks";
-	private static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
-
-	private static String getProperty(Properties booksProps, Set<Object> usedKeys, String key) {
-		usedKeys.add(key);
-		return booksProps.getProperty(key);
-	}
 
 	private static final Object instanceLock = new Object();
 
@@ -79,34 +71,28 @@ public class SemanticCMS {
 		}
 	}
 
-	private final Map<String,Book> books;
-	private final Set<String> missingBooks;
+	private SemanticCMS(ServletContext servletContext) throws IOException {
+		this.rootBook = initBooks(servletContext);
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Books">
+	private static final String BOOKS_PROPERTIES_RESOURCE = "/WEB-INF/books.properties";
+
+	private static final String BOOKS_ATTRIBUTE_NAME = "books";
+	private static final String MISSING_BOOKS_ATTRIBUTE_NAME = "missingBooks";
+	private static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
+
+	private static String getProperty(Properties booksProps, Set<Object> usedKeys, String key) {
+		usedKeys.add(key);
+		return booksProps.getProperty(key);
+	}
+
+	private final Map<String,Book> books = new LinkedHashMap<String,Book>();
+	private final Set<String> missingBooks = new LinkedHashSet<String>();
 	private final Book rootBook;
 
-	private final Object viewsLock = new Object();
-
-	/**
-	 * The views by name in order added.
-	 */
-	private final Map<String,View> viewsByName = new LinkedHashMap<String, View>();
-
-	/**
-	 * The views in order.
-	 */
-	private final SortedMap<String,View> views = new TreeMap<String, View>(
-		new Comparator<String>() {
-			@Override
-			public int compare(String name1, String name2) {
-				View v1 = viewsByName.get(name1);
-				if(v1 == null) throw new AssertionError("View not found: " + name1);
-				View v2 = viewsByName.get(name2);
-				if(v2 == null) throw new AssertionError("View not found: " + name2);
-				return v1.compareTo(v2);
-			}
-		}
-	);
-
-	SemanticCMS(ServletContext servletContext) throws IOException {
+	private Book initBooks(ServletContext servletContext) throws IOException {
 		Properties booksProps = PropertiesUtils.loadFromResource(servletContext, BOOKS_PROPERTIES_RESOURCE);
 		Set<Object> booksPropsKeys = booksProps.keySet();
 
@@ -114,22 +100,20 @@ public class SemanticCMS {
 		Set<Object> usedKeys = new HashSet<Object>(booksPropsKeys.size() * 4/3 + 1);
 
 		// Load missingBooks
-		Set<String> newMissingBooks = new LinkedHashSet<String>();
 		for(int missingBookNum=1; missingBookNum<Integer.MAX_VALUE; missingBookNum++) {
 			String key =  MISSING_BOOKS_ATTRIBUTE_NAME + "." + missingBookNum;
 			String name = getProperty(booksProps, usedKeys, key);
 			if(name == null) break;
-			if(!newMissingBooks.add(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate value for \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + key + "=" + name);
+			if(!missingBooks.add(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate value for \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + key + "=" + name);
 		}
 
 		// Load books
 		String rootBookName = getProperty(booksProps, usedKeys, ROOT_BOOK_ATTRIBUTE_NAME);
 		if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
-		Map<String,Book> newBooks = new LinkedHashMap<String,Book>();
 		for(int bookNum=1; bookNum<Integer.MAX_VALUE; bookNum++) {
 			String name = getProperty(booksProps, usedKeys, "books." + bookNum + ".name");
 			if(name == null) break;
-			if(newMissingBooks.contains(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
+			if(missingBooks.contains(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
 			String cvsworkDirectoryAttribute = "books." + bookNum + ".cvsworkDirectory";
 			String cvsworkDirectory = getProperty(booksProps, usedKeys, cvsworkDirectoryAttribute);
 			if(cvsworkDirectory == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Required parameter not present: " + cvsworkDirectoryAttribute);
@@ -143,8 +127,8 @@ public class SemanticCMS {
 				if(parentBookName == null && parentPage == null) break;
 				if(parentBookName == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent book required when parent page provided: " + parentPageAttribute + "=" + parentPage);
 				if(parentPage == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent page required when parent book provided: " + parentBookNameAttribute + "=" + parentBookName);
-				if(newMissingBooks.contains(parentBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + parentBookNameAttribute + "=" + parentBookName);
-				Book parentBook = newBooks.get(parentBookName);
+				if(missingBooks.contains(parentBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + parentBookNameAttribute + "=" + parentBookName);
+				Book parentBook = books.get(parentBookName);
 				if(parentBook == null) {
 					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookNameAttribute + "=" + parentBookName);
 				}
@@ -162,7 +146,7 @@ public class SemanticCMS {
 				}
 			}
 			if(
-				newBooks.put(
+				books.put(
 					name,
 					new Book(
 						name,
@@ -177,8 +161,8 @@ public class SemanticCMS {
 		}
 
 		// Load rootBook
-		if(newMissingBooks.contains(rootBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
-		Book newRootBook = newBooks.get(rootBookName);
+		if(missingBooks.contains(rootBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
+		Book newRootBook = books.get(rootBookName);
 		if(newRootBook == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" is not found in \"" + BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
 
 		// Make sure all keys used
@@ -188,10 +172,8 @@ public class SemanticCMS {
 		}
 		if(!unusedKeys.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Unused keys: " + unusedKeys);
 
-		// Successful load
-		this.books = newBooks;
-		this.missingBooks = newMissingBooks;
-		this.rootBook = newRootBook;
+		// Successful book load
+		return newRootBook;
 	}
 
 	public Map<String,Book> getBooks() {
@@ -238,6 +220,31 @@ public class SemanticCMS {
 	public Book getBook(HttpServletRequest request) {
 		return getBook(Dispatcher.getCurrentPagePath(request));
 	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Views">
+	private final Object viewsLock = new Object();
+
+	/**
+	 * The views by name in order added.
+	 */
+	private final Map<String,View> viewsByName = new LinkedHashMap<String,View>();
+
+	/**
+	 * The views in order.
+	 */
+	private final SortedMap<String,View> views = new TreeMap<String,View>(
+		new Comparator<String>() {
+			@Override
+			public int compare(String name1, String name2) {
+				View v1 = viewsByName.get(name1);
+				if(v1 == null) throw new AssertionError("View not found: " + name1);
+				View v2 = viewsByName.get(name2);
+				if(v2 == null) throw new AssertionError("View not found: " + name2);
+				return v1.compareTo(v2);
+			}
+		}
+	);
 
 	/**
 	 * Gets the views, ordered by view group then display.
@@ -249,7 +256,7 @@ public class SemanticCMS {
 	}
 
 	/**
-	 * Adds a new view.
+	 * Registers a new view.
 	 *
 	 * @throws  IllegalStateException  if a view is already registered with the name.
 	 */
@@ -261,4 +268,34 @@ public class SemanticCMS {
 			if(views.put(name, view) != null) throw new AssertionError();
 		}
 	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Themes">
+	private final Object themesLock = new Object();
+
+	/**
+	 * The themes in order added.
+	 */
+	private final Map<String,Theme> themes = new LinkedHashMap<String,Theme>();
+
+	/**
+	 * Gets the themes, in the order added.
+	 */
+	public Map<String,Theme> getThemes() {
+		return Collections.unmodifiableMap(themes);
+	}
+
+	/**
+	 * Registers a new theme.
+	 *
+	 * @throws  IllegalStateException  if a theme is already registered with the name.
+	 */
+	public void addTheme(Theme theme) throws IllegalStateException {
+		String name = theme.getName();
+		synchronized(themesLock) {
+			if(themes.containsKey(name)) throw new IllegalStateException("Theme already registered: " + name);
+			if(themes.put(name, theme) != null) throw new AssertionError();
+		}
+	}
+	// </editor-fold>
 }
