@@ -22,6 +22,17 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.semanticcms.core.model.Author;
+import com.semanticcms.core.model.Copyright;
+import com.semanticcms.core.model.Page;
+import java.io.IOException;
+import java.util.Set;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.SkipPageException;
+
 /**
  * A site may provide multiple views of the data.  Except the default content view,
  * views will typically show something about the current page and all of its children.
@@ -29,9 +40,20 @@ package com.semanticcms.core.servlet;
 abstract public class View implements Comparable<View> {
 
 	/**
+	 * The separator used between segments of the title.
+	 * Should this be provided by the template?
+	 */
+	protected static final String TITLE_SEPARATOR = " - ";
+
+	/**
 	 * View groupings, in order.
 	 */
 	public enum Group {
+		/**
+		 * Things that should be placed absolutely first.
+		 */
+		FIRST,
+
 		/**
 		 * The first set of views are those that are more fixed - typically displayed on every page.
 		 */
@@ -85,15 +107,72 @@ abstract public class View implements Comparable<View> {
 	/**
 	 * Gets the grouping for this view.
 	 */
-	abstract Group getGroup();
+	abstract public Group getGroup();
 
 	/**
 	 * Gets the display name for this view.
 	 */
-	abstract String getDisplay();
+	abstract public String getDisplay();
 
 	/**
 	 * Gets the unique name of this view.
 	 */
-	abstract String getName();
+	abstract public String getName();
+
+	/**
+	 * Gets the copyright information for the view on the given page.
+	 * 
+	 * @see  CopyrightUtils#findCopyright(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page)
+	 */
+	public Copyright getCopyright(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException {
+		return CopyrightUtils.findCopyright(servletContext, request, response, page);
+	}
+
+	/**
+	 * Gets the author(s) for the view on the given page.
+	 *
+	 * @see  AuthorUtils#findAuthors(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page)
+	 */
+	public Set<Author> getAuthors(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException {
+		return AuthorUtils.findAuthors(servletContext, request, response, page);
+	}
+
+	/**
+	 * Gets the page title for the view on the given page.
+	 *
+	 * Defaults to: "view.display - page.title - page.pageRef.book.title"
+	 */
+	public String getTitle(Page page) {
+		return getDisplay() + TITLE_SEPARATOR + page.getTitle() + TITLE_SEPARATOR + page.getPageRef().getBook().getTitle();
+	}
+
+	/**
+	 * Gets the description for this view of the given page or {@code null} for none.
+	 */
+	abstract public String getDescription(Page page);
+
+	/**
+	 * Gets the keywords for this view of the given page or {@code null} for none.
+	 */
+	abstract public String getKeywords(Page page);
+
+	/**
+	 * Renders the view.  This is called by the template to fill-out the main content area.
+	 */
+	abstract public void doView(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException, SkipPageException;
 }
