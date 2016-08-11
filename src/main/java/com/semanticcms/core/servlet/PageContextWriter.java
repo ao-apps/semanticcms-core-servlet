@@ -34,11 +34,11 @@ import java.util.Locale;
  */
 final public class PageContextWriter {
 
-    public static void write(int c) throws IOException {
+	public static void write(int c) throws IOException {
 		PageContext.getOut().write(c);
 	}
 
-    public static void write(char cbuf[]) throws IOException {
+	public static void write(char cbuf[]) throws IOException {
 		PageContext.getOut().write(cbuf);
 	}
 
@@ -46,7 +46,7 @@ final public class PageContextWriter {
 		PageContext.getOut().write(cbuf, off, len);
 	}
 
-    public static void write(String str) throws IOException {
+	public static void write(String str) throws IOException {
 		PageContext.getOut().write(str);
 	}
 
@@ -54,7 +54,7 @@ final public class PageContextWriter {
 		PageContext.getOut().write(str, off, len);
 	}
 
-    public static void print(boolean b) throws IOException {
+	public static void print(boolean b) throws IOException {
 		PageContext.getOut().print(b);
 	}
 
@@ -70,15 +70,15 @@ final public class PageContextWriter {
 		PageContext.getOut().print(l);
 	}
 
-    public static void print(float f) throws IOException {
+	public static void print(float f) throws IOException {
 		PageContext.getOut().print(f);
 	}
 
-    public static void print(double d) throws IOException {
+	public static void print(double d) throws IOException {
 		PageContext.getOut().print(d);
 	}
 
-    public static void print(char s[]) throws IOException {
+	public static void print(char s[]) throws IOException {
 		PageContext.getOut().print(s);
 	}
 
@@ -86,39 +86,39 @@ final public class PageContextWriter {
 		PageContext.getOut().print(s);
 	}
 
-    public static void print(Object obj) throws IOException {
+	public static void print(Object obj) throws IOException {
 		PageContext.getOut().print(obj);
 	}
 
-    public static void println() throws IOException {
+	public static void println() throws IOException {
 		PageContext.getOut().println();
 	}
 
-    public static void println(boolean x) throws IOException {
+	public static void println(boolean x) throws IOException {
 		PageContext.getOut().println(x);
 	}
 
-    public static void println(char x) throws IOException {
+	public static void println(char x) throws IOException {
 		PageContext.getOut().println(x);
 	}
 
-    public static void println(int x) throws IOException {
+	public static void println(int x) throws IOException {
 		PageContext.getOut().println(x);
 	}
 
-    public static void println(long x) throws IOException {
+	public static void println(long x) throws IOException {
 		PageContext.getOut().println(x);
 	}
 
-    public static void println(float x) throws IOException {
+	public static void println(float x) throws IOException {
 		PageContext.getOut().println(x);
 	}
 
-    public static void println(double x) throws IOException {
+	public static void println(double x) throws IOException {
 		PageContext.getOut().println(x);
 	}
 
-    public static void println(char x[]) throws IOException {
+	public static void println(char x[]) throws IOException {
 		PageContext.getOut().println(x);
 	}
 
@@ -126,35 +126,35 @@ final public class PageContextWriter {
 		PageContext.getOut().println(x);
 	}
 
-    public static void println(Object x) throws IOException {
+	public static void println(Object x) throws IOException {
 		PageContext.getOut().println(x);
 	}
 
-    public static PrintWriter printf(String format, Object ... args) throws IOException {
+	public static PrintWriter printf(String format, Object ... args) throws IOException {
 		return PageContext.getOut().printf(format, args);
 	}
 
-    public static PrintWriter printf(Locale l, String format, Object ... args) throws IOException {
+	public static PrintWriter printf(Locale l, String format, Object ... args) throws IOException {
 		return PageContext.getOut().printf(l, format, args);
 	}
 
-    public static PrintWriter format(String format, Object ... args) throws IOException {
+	public static PrintWriter format(String format, Object ... args) throws IOException {
 		return PageContext.getOut().format(format, args);
 	}
 
-    public static PrintWriter format(Locale l, String format, Object ... args) throws IOException {
+	public static PrintWriter format(Locale l, String format, Object ... args) throws IOException {
 		return PageContext.getOut().format(l, format, args);
 	}
 
-    public static PrintWriter append(CharSequence csq) throws IOException {
+	public static PrintWriter append(CharSequence csq) throws IOException {
 		return PageContext.getOut().append(csq);
 	}
 
-    public static PrintWriter append(CharSequence csq, int start, int end) throws IOException {
+	public static PrintWriter append(CharSequence csq, int start, int end) throws IOException {
 		return PageContext.getOut().append(csq, start, end);
 	}
 
-    public static PrintWriter append(char c) throws IOException {
+	public static PrintWriter append(char c) throws IOException {
 		return PageContext.getOut().append(c);
 	}
 
