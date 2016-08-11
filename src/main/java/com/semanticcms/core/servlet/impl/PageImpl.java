@@ -145,8 +145,12 @@ final public class PageImpl {
 					Book pageBook = pageRef.getBook();
 					assert pageBook != null;
 					String pagePath = pageRef.getPath();
-					if(pagePath.endsWith("/") || pagePath.endsWith("/index.jsp")) {
-						// If this page URL ends in "/" or "/index.jsp", look for JSP page at "../index.jsp" then asssume "../", error if outside book.
+					if(
+						pagePath.endsWith("/")
+						|| pagePath.endsWith("/index.jspx")
+						|| pagePath.endsWith("/index.jsp")
+					) {
+						// If this page URL ends in "/", "/index.jspx" or "/index.jsp", look for JSP page at "../index.jspx" or "../index.jsp" then asssume "../", error if outside book.
 						int lastSlash = pagePath.lastIndexOf('/');
 						if(lastSlash == -1) throw new AssertionError();
 						int nextLastSlash = pagePath.lastIndexOf('/', lastSlash-1);
@@ -154,22 +158,32 @@ final public class PageImpl {
 							throw new ServletException("Auto parent of page would be outside book: " + pageRef);
 						}
 						String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
-						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
-						if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
-							page.addParentPage(indexJspPageRef);
+						PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
+						if(servletContext.getResource(indexJspxPageRef.getServletPath()) != null) {
+							page.addParentPage(indexJspxPageRef);
 						} else {
-							page.addParentPage(new PageRef(pageBook, endSlashPath));
+							PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
+							if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
+								page.addParentPage(indexJspPageRef);
+							} else {
+								page.addParentPage(new PageRef(pageBook, endSlashPath));
+							}
 						}
 					} else {
-						// Look for page at "./index.jsp" then assume "./".
+						// Look for page at "./index.jspx" or "./index.jsp" then assume "./".
 						int lastSlash = pagePath.lastIndexOf('/');
 						if(lastSlash == -1) throw new AssertionError();
 						String endSlashPath = pagePath.substring(0, lastSlash + 1);
-						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
-						if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
-							page.addParentPage(indexJspPageRef);
+						PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
+						if(servletContext.getResource(indexJspxPageRef.getServletPath()) != null) {
+							page.addParentPage(indexJspxPageRef);
 						} else {
-							page.addParentPage(new PageRef(pageBook, endSlashPath));
+							PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
+							if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
+								page.addParentPage(indexJspPageRef);
+							} else {
+								page.addParentPage(new PageRef(pageBook, endSlashPath));
+							}
 						}
 					}
 				}
