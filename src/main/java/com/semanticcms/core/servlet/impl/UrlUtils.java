@@ -51,8 +51,8 @@ final public class UrlUtils {
 		boolean hrefAbsolute,
 		LastModifiedServlet.AddLastModifiedWhen addLastModified
 	) throws ServletException, IOException {
-        if(href != null) {
-            out.append(" href=\"");
+		if(href != null) {
+			out.append(" href=\"");
 			encodeTextInXhtmlAttribute(
 				com.aoindustries.net.UrlUtils.buildUrl(
 					servletContext,
@@ -65,10 +65,10 @@ final public class UrlUtils {
 				),
 				out
 			);
-            out.append('"');
-        } else {
-            if(params != null) throw new ServletException("parameters provided without href");
-        }
+			out.append('"');
+		} else {
+			if(params != null) throw new ServletException("parameters provided without href");
+		}
 	}
 
 	public static void writeSrc(
@@ -96,8 +96,8 @@ final public class UrlUtils {
 				out
 			);
 			out.append('"');
-        } else {
-            if(params != null) throw new ServletException("parameters provided without src");
+		} else {
+			if(params != null) throw new ServletException("parameters provided without src");
 		}
 	}
 
