@@ -29,15 +29,14 @@ import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -241,28 +240,24 @@ public class SemanticCMS {
 	private final Map<String,View> viewsByName = new LinkedHashMap<String,View>();
 
 	/**
+	 * Gets the views in order added.
+	 */
+	public Map<String,View> getViewsByName() {
+		return Collections.unmodifiableMap(viewsByName);
+	}
+
+	/**
 	 * The views in order.
 	 */
-	private final SortedMap<String,View> views = new TreeMap<String,View>(
-		new Comparator<String>() {
-			@Override
-			public int compare(String name1, String name2) {
-				View v1 = viewsByName.get(name1);
-				if(v1 == null) throw new AssertionError("View not found: " + name1);
-				View v2 = viewsByName.get(name2);
-				if(v2 == null) throw new AssertionError("View not found: " + name2);
-				return v1.compareTo(v2);
-			}
-		}
-	);
+	private final SortedSet<View> views = new TreeSet<View>();
 
 	/**
 	 * Gets the views, ordered by view group then display.
 	 *
 	 * @see  View#compareTo(com.semanticcms.core.servlet.View)
 	 */
-	public SortedMap<String,View> getViews() {
-		return Collections.unmodifiableSortedMap(views);
+	public SortedSet<View> getViews() {
+		return Collections.unmodifiableSortedSet(views);
 	}
 
 	/**
@@ -275,7 +270,7 @@ public class SemanticCMS {
 		synchronized(viewsLock) {
 			if(viewsByName.containsKey(name)) throw new IllegalStateException("View already registered: " + name);
 			if(viewsByName.put(name, view) != null) throw new AssertionError();
-			if(views.put(name, view) != null) throw new AssertionError();
+			if(!views.add(view)) throw new AssertionError();
 		}
 	}
 	// </editor-fold>
