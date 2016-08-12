@@ -44,7 +44,7 @@ import javax.servlet.jsp.SkipPageException;
 
 final public class PageImpl {
 
-	private static final String PAGE_TEMPLATE_JSP_PATH = "/lib/docs/page.inc.jsp";
+	private static final String PAGE_TEMPLATE_JSPX_PATH = "/lib/docs/page.inc.jspx";
 	private static final String PAGE_REQUEST_ATTRIBUTE = "page";
 
 	public static interface PageImplBody<E extends Throwable> {
@@ -252,7 +252,7 @@ final public class PageImpl {
 						public void call() throws ServletException, IOException {
 							Dispatcher.forward(
 								servletContext,
-								PAGE_TEMPLATE_JSP_PATH,
+								PAGE_TEMPLATE_JSPX_PATH,
 								request,
 								response
 							);
