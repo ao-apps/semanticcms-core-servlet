@@ -223,6 +223,16 @@ public class SemanticCMS {
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Views">
+	/**
+	 * The parameter name used for views.
+	 */
+	public static final String VIEW_PARAM = "view";
+
+	/**
+	 * The default view is the content view and will have the empty view name.
+	 */
+	public static final String DEFAULT_VIEW_NAME = "content";
+
 	private final Object viewsLock = new Object();
 
 	/**
