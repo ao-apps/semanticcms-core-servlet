@@ -23,7 +23,6 @@
 package com.semanticcms.core.servlet.impl;
 
 import com.aoindustries.io.buffer.BufferResult;
-import com.aoindustries.servlet.http.Dispatcher;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -32,10 +31,13 @@ import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
-import com.semanticcms.core.servlet.PageContext;
 import com.semanticcms.core.servlet.PageRefResolver;
 import com.semanticcms.core.servlet.SemanticCMS;
+import com.semanticcms.core.servlet.Theme;
+import com.semanticcms.core.servlet.View;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -43,9 +45,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
 final public class PageImpl {
-
-	private static final String PAGE_TEMPLATE_JSPX_PATH = "/lib/docs/page.inc.jspx";
-	private static final String PAGE_REQUEST_ATTRIBUTE = "page";
 
 	public static interface PageImplBody<E extends Throwable> {
 		BufferResult doBody(boolean discard, Page page) throws E, IOException, SkipPageException;
@@ -235,34 +234,37 @@ final public class PageImpl {
 				}
 			}
 
-			// Display page directly
-			// Forward to PAGE_TEMPLATE_JSP_PATH, passing PAGE_REQUEST_ATTRIBUTE request attribute
-			Object oldValue = request.getAttribute(PAGE_REQUEST_ATTRIBUTE);
-			try {
-				// Pass PAGE_REQUEST_ATTRIBUTE attribute
-				request.setAttribute(PAGE_REQUEST_ATTRIBUTE, page);
-				// Clear PageContext on include
-				PageContext.newPageContext(
-					null,
-					null,
-					null,
-					// Java 1.8: Lambda
-					new PageContext.PageContextCallable() {
-						@Override
-						public void call() throws ServletException, IOException {
-							Dispatcher.forward(
-								servletContext,
-								PAGE_TEMPLATE_JSPX_PATH,
-								request,
-								response
-							);
-						}
-					}
-				);
-			} finally {
-				// Restore old value of PAGE_REQUEST_ATTRIBUTE attribute
-				request.setAttribute(PAGE_REQUEST_ATTRIBUTE, oldValue);
+			// Resolve the view
+			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+			View view;
+			{
+				String viewName = request.getParameter(SemanticCMS.VIEW_PARAM);
+				Map<String,View> views = semanticCMS.getViews();
+				if(viewName == null) {
+					view = null;
+				} else {
+					if(SemanticCMS.DEFAULT_VIEW_NAME.equals(viewName)) throw new ServletException(SemanticCMS.VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
+					view = views.get(viewName);
+				}
+				if(view == null) {
+					// Find default
+					view = views.get(SemanticCMS.DEFAULT_VIEW_NAME);
+					if(view == null) throw new ServletException("Default view not found: " + SemanticCMS.DEFAULT_VIEW_NAME);
+				}
 			}
+
+			// Find the theme
+			Theme theme;
+			{
+				// Currently just picks the first theme registered
+				Iterator<Theme> iter = semanticCMS.getThemes().values().iterator();
+				if(!iter.hasNext()) throw new ServletException("No themes registered");
+				theme = iter.next();
+				assert theme != null;
+			}
+
+			// Forward to theme
+			theme.doTheme(servletContext, request, response, view, page);
 			throw new SkipPageException();
 		}
 	}
