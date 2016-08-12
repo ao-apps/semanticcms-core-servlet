@@ -26,6 +26,8 @@ import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -120,6 +122,13 @@ abstract public class View implements Comparable<View> {
 	abstract public String getName();
 
 	/**
+	 * Checks if this is the default view.
+	 */
+	final public boolean isDefault() {
+		return SemanticCMS.DEFAULT_VIEW_NAME.equals(getName());
+	}
+
+	/**
 	 * Gets the copyright information for the view on the given page.
 	 * 
 	 * @see  CopyrightUtils#findCopyright(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page)
@@ -165,6 +174,13 @@ abstract public class View implements Comparable<View> {
 	 * Gets the keywords for this view of the given page or {@code null} for none.
 	 */
 	abstract public String getKeywords(Page page);
+
+	/**
+	 * Gets an optional set of additional CSS resources to include for this view.
+	 */
+	public List<String> getCssLinks() {
+		return Collections.emptyList();
+	}
 
 	/**
 	 * Renders the view.  This is called by the template to fill-out the main content area.
