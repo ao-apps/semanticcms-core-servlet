@@ -117,14 +117,16 @@ final public class NavigationTreeImpl {
 				}
 			}
 		} else {
-			// Not including elements, so any link from an element must be considered a link from the page the element is on
 			assert (node instanceof Page);
-			Page page = (Page)node;
-			for(Element e : page.getElements()) {
-				if(e.getPageLinks().contains(linksTo)) {
-					nodesWithLinks.add(node);
-					hasChildLink = true;
-					break;
+			if(!hasChildLink) {
+				// Not including elements, so any link from an element must be considered a link from the page the element is on
+				Page page = (Page)node;
+				for(Element e : page.getElements()) {
+					if(e.getPageLinks().contains(linksTo)) {
+						nodesWithLinks.add(node);
+						hasChildLink = true;
+						break;
+					}
 				}
 			}
 		}
