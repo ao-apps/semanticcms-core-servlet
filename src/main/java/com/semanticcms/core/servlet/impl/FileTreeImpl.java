@@ -69,12 +69,15 @@ final public class FileTreeImpl {
 				}
 			}
 		} else {
-			// Not including elements, so any file from an element must be considered a file from the page the element is on
 			assert (node instanceof Page);
-			Page page = (Page)node;
-			for(Element e : page.getElements()) {
-				if(!e.getFiles().isEmpty()) {
-					hasFile = true;
+			if(!hasFile) {
+				// Not including elements, so any file from an element must be considered a file from the page the element is on
+				Page page = (Page)node;
+				for(Element e : page.getElements()) {
+					if(!e.getFiles().isEmpty()) {
+						hasFile = true;
+						break;
+					}
 				}
 			}
 		}
