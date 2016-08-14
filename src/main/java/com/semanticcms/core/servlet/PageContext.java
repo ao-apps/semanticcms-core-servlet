@@ -56,10 +56,10 @@ final public class PageContext {
 	private static final ThreadLocal<PrintWriter> out = new ThreadLocal<PrintWriter>();
 
 	public static interface PageContextCallable {
-		void call() throws ServletException, IOException;
+		void call() throws ServletException, IOException, SkipPageException;
 	}
 
-	public static void newPageContext(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallable target) throws ServletException, IOException {
+	public static void newPageContext(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallable target) throws ServletException, IOException, SkipPageException {
 		final ServletContext oldServletContext = servletContext.get();
 		final HttpServletRequest oldRequest = request.get();
 		final HttpServletResponse oldResponse = response.get();
