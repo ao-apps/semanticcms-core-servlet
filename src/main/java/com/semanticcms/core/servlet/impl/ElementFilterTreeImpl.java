@@ -64,12 +64,12 @@ final public class ElementFilterTreeImpl {
 		List<Element> childElements = node.getChildElements();
 		boolean hasMatch;
 		// Add self if is the target type
-		if(elementType.isAssignableFrom(node.getClass())) {
+		if(elementType.isInstance(node)) {
 			hasMatch = true;
 		} else {
 			hasMatch = false;
 			for(Element childElem : childElements) {
-				if(elementType.isAssignableFrom(childElem.getClass())) {
+				if(elementType.isInstance(childElem)) {
 					hasMatch = true;
 					break;
 				}
@@ -87,7 +87,7 @@ final public class ElementFilterTreeImpl {
 				// Not including elements, so any match from an element must be considered a match from the page the element is on
 				Page page = (Page)node;
 				for(Element e : page.getElements()) {
-					if(elementType.isAssignableFrom(e.getClass())) {
+					if(elementType.isInstance(e)) {
 						hasMatch = true;
 						break;
 					}
