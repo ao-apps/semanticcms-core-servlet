@@ -57,7 +57,7 @@ public class ServletElementContext implements ElementContext {
 	}
 
 	@Override
-	public void include(final String resource, Writer out, final Map<String,Object> args) throws IOException, ServletException, SkipPageException {
+	public void include(final String resource, Writer out, final Map<String,?> args) throws IOException, ServletException, SkipPageException {
 		final PrintWriter pw;
 		if(out instanceof PrintWriter) pw = (PrintWriter)out;
 		else pw = new PrintWriter(out);
