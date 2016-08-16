@@ -161,7 +161,12 @@ abstract public class View implements Comparable<View> {
 	 *
 	 * Defaults to: "view.display - page.title - page.pageRef.book.title"
 	 */
-	public String getTitle(Page page) {
+	public String getTitle(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) {
 		return getDisplay() + TITLE_SEPARATOR + page.getTitle() + TITLE_SEPARATOR + page.getPageRef().getBook().getTitle();
 	}
 
