@@ -52,11 +52,39 @@ import javax.servlet.jsp.SkipPageException;
  */
 final public class ElementFilterTreeImpl {
 
+	/**
+	 * A filter to select elements by arbitrary conditions.
+	 */
+	public static interface ElementFilter {
+
+		/**
+		 * Checks if matches.
+		 */
+		boolean matches(Element e);
+	}
+
+	/**
+	 * A filter to select by element class.
+	 */
+	public static class ClassFilter implements ElementFilter {
+
+		private final Class<? extends Element> elementType;
+
+		public ClassFilter(Class<? extends Element> elementType) {
+			this.elementType = elementType;
+		}
+
+		@Override
+		public boolean matches(Element e) {
+			return elementType.isInstance(e);			
+		}
+	}
+
 	private static boolean findElements(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Class<? extends Element> elementType,
+		ElementFilter elementFilter,
 		Set<Node> nodesWithMatches,
 		Node node,
 		boolean includeElements
@@ -64,12 +92,12 @@ final public class ElementFilterTreeImpl {
 		List<Element> childElements = node.getChildElements();
 		boolean hasMatch;
 		// Add self if is the target type
-		if(elementType.isInstance(node)) {
+		if((node instanceof Element) && elementFilter.matches((Element)node)) {
 			hasMatch = true;
 		} else {
 			hasMatch = false;
 			for(Element childElem : childElements) {
-				if(elementType.isInstance(childElem)) {
+				if(elementFilter.matches(childElem)) {
 					hasMatch = true;
 					break;
 				}
@@ -77,7 +105,7 @@ final public class ElementFilterTreeImpl {
 		}
 		if(includeElements) {
 			for(Element childElem : childElements) {
-				if(findElements(servletContext, request, response, elementType, nodesWithMatches, childElem, includeElements)) {
+				if(findElements(servletContext, request, response, elementFilter, nodesWithMatches, childElem, includeElements)) {
 					hasMatch = true;
 				}
 			}
@@ -87,7 +115,7 @@ final public class ElementFilterTreeImpl {
 				// Not including elements, so any match from an element must be considered a match from the page the element is on
 				Page page = (Page)node;
 				for(Element e : page.getElements()) {
-					if(elementType.isInstance(e)) {
+					if(elementFilter.matches(e)) {
 						hasMatch = true;
 						break;
 					}
@@ -99,7 +127,7 @@ final public class ElementFilterTreeImpl {
 				// Child not in missing book
 				if(childRef.getBook() != null) {
 					Page child = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.META);
-					if(findElements(servletContext, request, response, elementType, nodesWithMatches, child, includeElements)) {
+					if(findElements(servletContext, request, response, elementFilter, nodesWithMatches, child, includeElements)) {
 						hasMatch = true;
 					}
 				}
@@ -207,7 +235,7 @@ final public class ElementFilterTreeImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
-		Class<? extends Element> elementType,
+		ElementFilter elementFilter,
 		Node root,
 		boolean includeElements
 	) throws ServletException, IOException, SkipPageException {
@@ -217,7 +245,7 @@ final public class ElementFilterTreeImpl {
 			final Node currentNode = CurrentNode.getCurrentNode(request);
 			// Filter by has files
 			final Set<Node> nodesWithMatches = new HashSet<Node>();
-			findElements(servletContext, request, response, elementType, nodesWithMatches, root, includeElements);
+			findElements(servletContext, request, response, elementFilter, nodesWithMatches, root, includeElements);
 
 			if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
 			writeNode(
@@ -233,6 +261,26 @@ final public class ElementFilterTreeImpl {
 			);
 			if(captureLevel == CaptureLevel.BODY) out.write("</ul>\n");
 		}
+	}
+
+	public static void writeElementFilterTreeImpl(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Writer out,
+		Class<? extends Element> elementType,
+		Node root,
+		boolean includeElements
+	) throws ServletException, IOException, SkipPageException {
+		writeElementFilterTreeImpl(
+			servletContext,
+			request,
+			response,
+			out,
+			new ClassFilter(elementType),
+			root,
+			includeElements
+		);
 	}
 
 	/**
