@@ -300,8 +300,6 @@ public class SemanticCMS {
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Themes">
-	private final Object themesLock = new Object();
-
 	/**
 	 * The themes in order added.
 	 */
@@ -311,7 +309,10 @@ public class SemanticCMS {
 	 * Gets the themes, in the order added.
 	 */
 	public Map<String,Theme> getThemes() {
-		return Collections.unmodifiableMap(themes);
+		synchronized(themes) {
+			// Not returning a copy since themes are normally only registered on app start-up.
+			return Collections.unmodifiableMap(themes);
+		}
 	}
 
 	/**
@@ -321,9 +322,37 @@ public class SemanticCMS {
 	 */
 	public void addTheme(Theme theme) throws IllegalStateException {
 		String name = theme.getName();
-		synchronized(themesLock) {
+		synchronized(themes) {
 			if(themes.containsKey(name)) throw new IllegalStateException("Theme already registered: " + name);
 			if(themes.put(name, theme) != null) throw new AssertionError();
+		}
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="CSS Links">
+	/**
+	 * The CSS links in the added.
+	 */
+	private final Set<String> cssLinks = new LinkedHashSet<String>();
+
+	/**
+	 * Gets the CSS links, in the order added.
+	 */
+	public Set<? extends String> getCssLinks() {
+		synchronized(cssLinks) {
+			// Not returning a copy since CSS links are normally only registered on app start-up.
+			return Collections.unmodifiableSet(cssLinks);
+		}
+	}
+
+	/**
+	 * Registers a new CSS link.
+	 *
+	 * @throws  IllegalStateException  if the link is already registered.
+	 */
+	public void addCssLink(String cssLink) throws IllegalStateException {
+		synchronized(cssLinks) {
+			if(!cssLinks.add(cssLink)) throw new IllegalStateException("CSS link already registered: " + cssLinks);
 		}
 	}
 	// </editor-fold>
