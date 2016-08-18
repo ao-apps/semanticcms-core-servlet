@@ -27,7 +27,6 @@ import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -205,10 +204,11 @@ abstract public class View implements Comparable<View> {
 	abstract public String getKeywords(Page page);
 
 	/**
-	 * Gets an optional set of additional CSS resources to include for this view.
+	 * Gets an optional set of additional CSS resources to include for this view
+	 * in the order they should be added.
 	 */
-	public List<String> getCssLinks() {
-		return Collections.emptyList();
+	public Set<? extends String> getCssLinks() {
+		return Collections.emptySet();
 	}
 
 	/**
