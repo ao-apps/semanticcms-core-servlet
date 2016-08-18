@@ -63,6 +63,7 @@ abstract public class View implements Comparable<View> {
 
 		/**
 		 * The second set of views are those that are hidden when not relevant to the current page or any of its children.
+		 * This often includes the per-element-type views.
 		 */
 		VARIABLE
 	}
