@@ -130,6 +130,15 @@ abstract public class View implements Comparable<View> {
 	}
 
 	/**
+	 * Checks if a view applies in global navigation context.
+	 * 
+	 * @implSpec  returns {@code true} by default
+	 */
+	public boolean getAppliesGlobally() {
+		return true;
+	}
+
+	/**
 	 * Checks if a view is applicable the given page.
 	 * 
 	 * @implSpec  returns {@code true} by default
