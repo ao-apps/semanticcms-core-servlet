@@ -47,6 +47,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
+/**
+ * TODO: Links to views without getAllowRobots add rel="nofollow"
+ */
 final public class LinkImpl {
 
 	public static interface LinkImplBody<E extends Throwable> {

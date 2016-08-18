@@ -129,6 +129,20 @@ abstract public class View implements Comparable<View> {
 	}
 
 	/**
+	 * Checks if a view is applicable the given page.
+	 * 
+	 * @implSpec  returns {@code true} by default
+	 */
+	public boolean isApplicable(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException {
+		return true;
+	}
+
+	/**
 	 * Gets the copyright information for the view on the given page.
 	 * 
 	 * @see  CopyrightUtils#findCopyright(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page)
