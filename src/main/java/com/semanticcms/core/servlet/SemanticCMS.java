@@ -29,6 +29,7 @@ import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -238,6 +239,15 @@ public class SemanticCMS {
 	 * The views by name in order added.
 	 */
 	private final Map<String,View> viewsByName = new LinkedHashMap<String,View>();
+
+	private static final Set<? extends View.Group> viewGroups = Collections.unmodifiableSet(EnumSet.allOf(View.Group.class));
+
+	/**
+	 * Gets all view groups.
+	 */
+	public Set<? extends View.Group> getViewGroups() {
+		return viewGroups;
+	}
 
 	/**
 	 * Gets the views in order added.
