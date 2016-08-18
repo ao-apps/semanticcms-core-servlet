@@ -72,7 +72,21 @@ public class SemanticCMS {
 	}
 
 	private SemanticCMS(ServletContext servletContext) throws IOException {
+		this.demoMode = Boolean.parseBoolean(servletContext.getInitParameter(DEMO_MODE_INIT_PARAM));
 		this.rootBook = initBooks(servletContext);
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Demo Mode">
+	private static final String DEMO_MODE_INIT_PARAM = "com.semanticcms.core.servlet.SemanticCMS.demoMode";
+
+	private final boolean demoMode;
+
+	/**
+	 * When true, a cursory attempt will be made to hide sensitive information for demo mode.
+	 */
+	public boolean getDemoMode() {
+		return demoMode;
 	}
 	// </editor-fold>
 
