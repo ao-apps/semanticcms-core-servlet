@@ -43,6 +43,7 @@ public class Link {
 	private String element;
 	private boolean allowGeneratedElement;
 	private String view;
+	private boolean hyperlink = true;
 	private HttpParameters params;
 	private String clazz;
 
@@ -157,6 +158,23 @@ public class Link {
 		return this;
 	}
 
+	/**
+	 * <p>
+	 * When true, the default, will generate a &lt;a&gt; tag to the target.
+	 * Otherwise, will generate a &lt;span&gt; instead, but still allowing
+	 * automatic CSS class determination and target label substitution into body.
+	 * </p>
+	 * <p>
+	 * In either case, this still counts as a link to the target, but sometimes
+	 * you do not want an actual link for usability, such as a piece of information
+	 * intended for quick copy/paste by the user.
+	 * </p>
+	 */
+	public Link hyperlink(boolean hyperlink) {
+		this.hyperlink = hyperlink;
+		return this;
+	}
+
 	public Link params(HttpParameters params) {
 		this.params = params;
 		return this;
@@ -189,6 +207,7 @@ public class Link {
 			element,
 			allowGeneratedElement,
 			view,
+			hyperlink,
 			params,
 			clazz,
 			body == null
