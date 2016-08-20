@@ -53,11 +53,6 @@ import javax.servlet.jsp.SkipPageException;
  */
 final public class LinkImpl {
 
-	/**
-	 * The text inside the hyperlink for small links.
-	 */
-	private static final String SMALL_LINK_TEXT = "[->]";
-
 	public static interface LinkImplBody<E extends Throwable> {
 		void doBody(boolean discard) throws E, IOException, SkipPageException;
 	}
@@ -264,7 +259,7 @@ final public class LinkImpl {
 					body.doBody(false);
 				}
 				if(small) {
-					out.write("<a");
+					out.write("<sup><a");
 					UrlUtils.writeHref(
 						servletContext,
 						request,
@@ -275,9 +270,7 @@ final public class LinkImpl {
 						false,
 						LastModifiedServlet.AddLastModifiedWhen.FALSE
 					);
-					out.write('>');
-					encodeTextInXhtml(SMALL_LINK_TEXT, out);
-					out.write("</a></span>");
+					out.write(">[link]</a></sup></span>");
 				} else {
 					out.write("</a>");
 				}
