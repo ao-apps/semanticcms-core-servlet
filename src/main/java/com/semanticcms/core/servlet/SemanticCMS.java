@@ -356,4 +356,85 @@ public class SemanticCMS {
 		}
 	}
 	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Links to Elements">
+
+	/**
+	 * Resolves the link CSS class for the given types of elements.
+	 */
+	public static interface LinkCssClassResolver<E extends com.semanticcms.core.model.Element> {
+		/**
+		 * Gets the CSS class to use in links to the given element.
+		 * When null is returned, any resolvers for super classes will also be invoked.
+		 *
+		 * @return  The CSS class name or {@code null} when none configured for the provided element.
+		 */
+		String getCssLinkClass(E element);
+	}
+
+	/**
+	 * The CSS classes used in links.
+	 */
+	private final Map<Class<? extends com.semanticcms.core.model.Element>,LinkCssClassResolver<?>> linkCssClassResolverByElementType = new LinkedHashMap<Class<? extends com.semanticcms.core.model.Element>,LinkCssClassResolver<?>>();
+
+	/**
+	 * Gets the CSS class to use in links to the given element.
+	 * Also looks for match on parent classes up to and including Element itself.
+	 * 
+	 * @return  The CSS class or {@code null} when element is null or no class registered for it or any super class.
+	 *
+	 * @see  #getLinkCssClass(java.lang.Class)
+	 */
+	public <E extends com.semanticcms.core.model.Element> String getLinkCssClass(E element) {
+		if(element == null) return null;
+		Class<? extends com.semanticcms.core.model.Element> elementType = element.getClass();
+		synchronized(linkCssClassResolverByElementType) {
+			while(true) {
+				@SuppressWarnings("unchecked")
+				LinkCssClassResolver<? super E> linkCssClassResolver = (LinkCssClassResolver<? super E>)linkCssClassResolverByElementType.get(elementType);
+				if(linkCssClassResolver != null) {
+					String linkCssClass = linkCssClassResolver.getCssLinkClass(element);
+					if(linkCssClass != null) return linkCssClass;
+				}
+				if(elementType == com.semanticcms.core.model.Element.class) return null;
+				elementType = elementType.getSuperclass().asSubclass(com.semanticcms.core.model.Element.class);
+			}
+		}
+	}
+
+	/**
+	 * Registers a new CSS resolver to use in link to the given type of element.
+	 *
+	 * @throws  IllegalStateException  if the element type is already registered.
+	 */
+	public <E extends com.semanticcms.core.model.Element> void addLinkCssClassResolver(
+		Class<E> elementType,
+		LinkCssClassResolver<? super E> cssLinkClassResolver
+	) throws IllegalStateException {
+		synchronized(linkCssClassResolverByElementType) {
+			if(linkCssClassResolverByElementType.containsKey(elementType)) throw new IllegalStateException("Link CSS class already registered: " + elementType);
+			if(linkCssClassResolverByElementType.put(elementType, cssLinkClassResolver) != null) throw new AssertionError();
+		}
+	}
+
+	/**
+	 * Registers a new CSS class to use in link to the given type of element.
+	 *
+	 * @throws  IllegalStateException  if the element type is already registered.
+	 */
+	public <E extends com.semanticcms.core.model.Element> void addLinkCssClass(
+		Class<E> elementType,
+		final String cssLinkClass
+	) throws IllegalStateException {
+		addLinkCssClassResolver(
+			elementType,
+			new LinkCssClassResolver<E>() {
+				@Override
+				public String getCssLinkClass(E element) {
+					return cssLinkClass;
+				}
+			}
+		);
+	}
+	// </editor-fold>
 }

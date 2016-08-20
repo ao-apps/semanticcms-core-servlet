@@ -38,6 +38,7 @@ import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageIndex;
 import com.semanticcms.core.servlet.PageRefResolver;
+import com.semanticcms.core.servlet.SemanticCMS;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URLEncoder;
@@ -222,7 +223,8 @@ final public class LinkImpl {
 					}
 				} else {
 					if(targetElement != null) {
-						String linkCssClass = targetElement.getLinkCssClass();
+						SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+						String linkCssClass = semanticCMS.getLinkCssClass(targetElement);
 						if(linkCssClass != null) {
 							out.write(" class=\"");
 							encodeTextInXhtmlAttribute(linkCssClass, out);
