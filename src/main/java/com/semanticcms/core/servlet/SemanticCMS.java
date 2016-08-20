@@ -254,12 +254,12 @@ public class SemanticCMS {
 	 */
 	private final Map<String,View> viewsByName = new LinkedHashMap<String,View>();
 
-	private static final Set<? extends View.Group> viewGroups = Collections.unmodifiableSet(EnumSet.allOf(View.Group.class));
+	private static final Set<View.Group> viewGroups = Collections.unmodifiableSet(EnumSet.allOf(View.Group.class));
 
 	/**
 	 * Gets all view groups.
 	 */
-	public Set<? extends View.Group> getViewGroups() {
+	public Set<View.Group> getViewGroups() {
 		return viewGroups;
 	}
 
@@ -338,7 +338,7 @@ public class SemanticCMS {
 	/**
 	 * Gets the CSS links, in the order added.
 	 */
-	public Set<? extends String> getCssLinks() {
+	public Set<String> getCssLinks() {
 		synchronized(cssLinks) {
 			// Not returning a copy since CSS links are normally only registered on app start-up.
 			return Collections.unmodifiableSet(cssLinks);
