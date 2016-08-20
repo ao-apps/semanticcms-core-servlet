@@ -53,6 +53,11 @@ import javax.servlet.jsp.SkipPageException;
  */
 final public class LinkImpl {
 
+	/**
+	 * The text inside the hyperlink for small links.
+	 */
+	private static final String SMALL_LINK_TEXT = "[->]";
+
 	public static interface LinkImplBody<E extends Throwable> {
 		void doBody(boolean discard) throws E, IOException, SkipPageException;
 	}
@@ -98,7 +103,7 @@ final public class LinkImpl {
 		String element,
 		boolean allowGeneratedElement,
 		String view,
-		boolean hyperlink,
+		boolean small,
 	    HttpParameters params,
 		String clazz,
 		LinkImplBody<E> body
@@ -166,47 +171,47 @@ final public class LinkImpl {
 				PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
 				Integer index = pageIndex==null ? null : pageIndex.getPageIndex(targetPageRef);
 
-				out.write(hyperlink ? "<a" : "<span");
-				if(hyperlink) {
-					String href;
-					{
-						if(element == null) {
-							// Link to page
-							if(index != null && view == null) {
-								href = '#' + PageIndex.getRefId(index, null);
-							} else {
-								StringBuilder url = new StringBuilder();
-								targetPageRef.appendServletPath(url);
-								if(view != null) {
-									boolean hasQuestion = url.lastIndexOf("?") != -1;
-									url
-										.append(hasQuestion ? "&view=" : "?view=")
-										.append(URLEncoder.encode(view, responseEncoding));
-								}
-								href = url.toString();
-							}
+				out.write(small ? "<span" : "<a");
+				String href;
+				{
+					if(element == null) {
+						// Link to page
+						if(index != null && view == null) {
+							href = '#' + PageIndex.getRefId(index, null);
 						} else {
-							if(index != null && view == null) {
-								// Link to target in indexed page (view=all mode)
-								href = '#' + PageIndex.getRefId(index, element);
-							} else if(currentPage!=null && currentPage.equals(targetPage) && view == null) {
-								// Link to target on same page
-								href = '#' + element;
-							} else {
-								// Link to target on different page (or same page, different view)
-								StringBuilder url = new StringBuilder();
-								targetPageRef.appendServletPath(url);
-								if(view != null) {
-									boolean hasQuestion = url.lastIndexOf("?") != -1;
-									url
-										.append(hasQuestion ? "&view=" : "?view=")
-										.append(URLEncoder.encode(view, responseEncoding));
-								}
-								url.append('#').append(element);
-								href = url.toString();
+							StringBuilder url = new StringBuilder();
+							targetPageRef.appendServletPath(url);
+							if(view != null) {
+								boolean hasQuestion = url.lastIndexOf("?") != -1;
+								url
+									.append(hasQuestion ? "&view=" : "?view=")
+									.append(URLEncoder.encode(view, responseEncoding));
 							}
+							href = url.toString();
+						}
+					} else {
+						if(index != null && view == null) {
+							// Link to target in indexed page (view=all mode)
+							href = '#' + PageIndex.getRefId(index, element);
+						} else if(currentPage!=null && currentPage.equals(targetPage) && view == null) {
+							// Link to target on same page
+							href = '#' + element;
+						} else {
+							// Link to target on different page (or same page, different view)
+							StringBuilder url = new StringBuilder();
+							targetPageRef.appendServletPath(url);
+							if(view != null) {
+								boolean hasQuestion = url.lastIndexOf("?") != -1;
+								url
+									.append(hasQuestion ? "&view=" : "?view=")
+									.append(URLEncoder.encode(view, responseEncoding));
+							}
+							url.append('#').append(element);
+							href = url.toString();
 						}
 					}
+				}
+				if(!small) {
 					UrlUtils.writeHref(
 						servletContext,
 						request,
@@ -258,7 +263,24 @@ final public class LinkImpl {
 				} else {
 					body.doBody(false);
 				}
-				out.write(hyperlink ? "</a>" : "</span>");
+				if(small) {
+					out.write("<a");
+					UrlUtils.writeHref(
+						servletContext,
+						request,
+						response,
+						out,
+						href,
+						params,
+						false,
+						LastModifiedServlet.AddLastModifiedWhen.FALSE
+					);
+					out.write('>');
+					encodeTextInXhtml(SMALL_LINK_TEXT, out);
+					out.write("</a></span>");
+				} else {
+					out.write("</a>");
+				}
 			} else {
 				// Invoke body for any meta data, but discard any output
 				if(body != null) body.doBody(true);
