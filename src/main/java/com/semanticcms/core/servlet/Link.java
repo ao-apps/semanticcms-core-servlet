@@ -43,7 +43,7 @@ public class Link {
 	private String element;
 	private boolean allowGeneratedElement;
 	private String view;
-	private boolean hyperlink = true;
+	private boolean small;
 	private HttpParameters params;
 	private String clazz;
 
@@ -160,18 +160,17 @@ public class Link {
 
 	/**
 	 * <p>
-	 * When true, the default, will generate a &lt;a&gt; tag to the target.
-	 * Otherwise, will generate a &lt;span&gt; instead, but still allowing
-	 * automatic CSS class determination and target label substitution into body.
+	 * When false, the default, will generate a &lt;a&gt; tag around the entire body.
+	 * Otherwise, will generate a &lt;span&gt; instead, with a small link added to
+	 * the end of the body.
 	 * </p>
 	 * <p>
-	 * In either case, this still counts as a link to the target, but sometimes
-	 * you do not want an actual link for usability, such as a piece of information
-	 * intended for quick copy/paste by the user.
+	 * Use of a small link can be helpful for usability, such as when the body is
+	 * a piece of information intended for quick copy/paste by the user.
 	 * </p>
 	 */
-	public Link hyperlink(boolean hyperlink) {
-		this.hyperlink = hyperlink;
+	public Link small(boolean small) {
+		this.small = small;
 		return this;
 	}
 
@@ -207,7 +206,7 @@ public class Link {
 			element,
 			allowGeneratedElement,
 			view,
-			hyperlink,
+			small,
 			params,
 			clazz,
 			body == null
