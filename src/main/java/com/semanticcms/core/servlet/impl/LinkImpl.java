@@ -98,6 +98,7 @@ final public class LinkImpl {
 		String element,
 		boolean allowGeneratedElement,
 		String view,
+		boolean hyperlink,
 	    HttpParameters params,
 		String clazz,
 		LinkImplBody<E> body
@@ -165,56 +166,58 @@ final public class LinkImpl {
 				PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
 				Integer index = pageIndex==null ? null : pageIndex.getPageIndex(targetPageRef);
 
-				out.write("<a");
-				String href;
-				{
-					if(element == null) {
-						// Link to page
-						if(index != null && view == null) {
-							href = '#' + PageIndex.getRefId(index, null);
-						} else {
-							StringBuilder url = new StringBuilder();
-							targetPageRef.appendServletPath(url);
-							if(view != null) {
-								boolean hasQuestion = url.lastIndexOf("?") != -1;
-								url
-									.append(hasQuestion ? "&view=" : "?view=")
-									.append(URLEncoder.encode(view, responseEncoding));
+				out.write(hyperlink ? "<a" : "<span");
+				if(hyperlink) {
+					String href;
+					{
+						if(element == null) {
+							// Link to page
+							if(index != null && view == null) {
+								href = '#' + PageIndex.getRefId(index, null);
+							} else {
+								StringBuilder url = new StringBuilder();
+								targetPageRef.appendServletPath(url);
+								if(view != null) {
+									boolean hasQuestion = url.lastIndexOf("?") != -1;
+									url
+										.append(hasQuestion ? "&view=" : "?view=")
+										.append(URLEncoder.encode(view, responseEncoding));
+								}
+								href = url.toString();
 							}
-							href = url.toString();
-						}
-					} else {
-						if(index != null && view == null) {
-							// Link to target in indexed page (view=all mode)
-							href = '#' + PageIndex.getRefId(index, element);
-						} else if(currentPage!=null && currentPage.equals(targetPage) && view == null) {
-							// Link to target on same page
-							href = '#' + element;
 						} else {
-							// Link to target on different page (or same page, different view)
-							StringBuilder url = new StringBuilder();
-							targetPageRef.appendServletPath(url);
-							if(view != null) {
-								boolean hasQuestion = url.lastIndexOf("?") != -1;
-								url
-									.append(hasQuestion ? "&view=" : "?view=")
-									.append(URLEncoder.encode(view, responseEncoding));
+							if(index != null && view == null) {
+								// Link to target in indexed page (view=all mode)
+								href = '#' + PageIndex.getRefId(index, element);
+							} else if(currentPage!=null && currentPage.equals(targetPage) && view == null) {
+								// Link to target on same page
+								href = '#' + element;
+							} else {
+								// Link to target on different page (or same page, different view)
+								StringBuilder url = new StringBuilder();
+								targetPageRef.appendServletPath(url);
+								if(view != null) {
+									boolean hasQuestion = url.lastIndexOf("?") != -1;
+									url
+										.append(hasQuestion ? "&view=" : "?view=")
+										.append(URLEncoder.encode(view, responseEncoding));
+								}
+								url.append('#').append(element);
+								href = url.toString();
 							}
-							url.append('#').append(element);
-							href = url.toString();
 						}
 					}
+					UrlUtils.writeHref(
+						servletContext,
+						request,
+						response,
+						out,
+						href,
+						params,
+						false,
+						LastModifiedServlet.AddLastModifiedWhen.FALSE
+					);
 				}
-				UrlUtils.writeHref(
-					servletContext,
-					request,
-					response,
-					out,
-					href,
-					params,
-					false,
-					LastModifiedServlet.AddLastModifiedWhen.FALSE
-				);
 				if(clazz != null) {
 					if(!clazz.isEmpty()) {
 						out.write(" class=\"");
@@ -255,7 +258,7 @@ final public class LinkImpl {
 				} else {
 					body.doBody(false);
 				}
-				out.write("</a>");
+				out.write(hyperlink ? "</a>" : "</span>");
 			} else {
 				// Invoke body for any meta data, but discard any output
 				if(body != null) body.doBody(true);
