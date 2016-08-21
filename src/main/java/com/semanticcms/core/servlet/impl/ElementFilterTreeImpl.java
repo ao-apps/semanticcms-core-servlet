@@ -36,6 +36,7 @@ import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.PageIndex;
+import com.semanticcms.core.servlet.SemanticCMS;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;
@@ -182,11 +183,14 @@ final public class ElementFilterTreeImpl {
 		}
 		if(out != null) {
 			out.write("<li");
-			String listItemCssClass = node.getListItemCssClass();
-			if(listItemCssClass == null) listItemCssClass = "semanticcms-core-list-item-none";
-			out.write(" class=\"");
-			encodeTextInXhtmlAttribute(listItemCssClass, out);
-			out.write("\"><a href=\"");
+			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+			String listItemCssClass = semanticCMS.getListItemCssClass(node);
+			if(listItemCssClass != null) {
+				out.write(" class=\"");
+				encodeTextInXhtmlAttribute(listItemCssClass, out);
+				out.write('"');
+			}
+			out.write("><a href=\"");
 			Integer index = pageIndex==null ? null : pageIndex.getPageIndex(pageRef);
 			if(index != null) {
 				out.write('#');
