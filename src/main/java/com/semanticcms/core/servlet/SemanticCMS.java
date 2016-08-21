@@ -437,4 +437,85 @@ public class SemanticCMS {
 		);
 	}
 	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Lists of Nodes">
+
+	/**
+	 * Resolves the list item CSS class for the given types of nodes.
+	 */
+	public static interface ListItemCssClassResolver<N extends com.semanticcms.core.model.Node> {
+		/**
+		 * Gets the CSS class to use in list items to the given node.
+		 * When null is returned, any resolvers for super classes will also be invoked.
+		 *
+		 * @return  The CSS class name or {@code null} when none configured for the provided node.
+		 */
+		String getListItemCssClass(N node);
+	}
+
+	/**
+	 * The CSS classes used in list items.
+	 */
+	private final Map<Class<? extends com.semanticcms.core.model.Node>,ListItemCssClassResolver<?>> listItemCssClassResolverByNodeType = new LinkedHashMap<Class<? extends com.semanticcms.core.model.Node>,ListItemCssClassResolver<?>>();
+
+	/**
+	 * Gets the CSS class to use in list items to the given node.
+	 * Also looks for match on parent classes up to and including Node itself.
+	 *
+	 * @return  The CSS class or {@code null} when node is null or no class registered for it or any super class.
+	 *
+	 * @see  #getListItemCssClass(java.lang.Class)
+	 */
+	public <N extends com.semanticcms.core.model.Node> String getListItemCssClass(N node) {
+		if(node == null) return null;
+		Class<? extends com.semanticcms.core.model.Node> nodeType = node.getClass();
+		synchronized(listItemCssClassResolverByNodeType) {
+			while(true) {
+				@SuppressWarnings("unchecked")
+				ListItemCssClassResolver<? super N> listItemCssClassResolver = (ListItemCssClassResolver<? super N>)listItemCssClassResolverByNodeType.get(nodeType);
+				if(listItemCssClassResolver != null) {
+					String listItemCssClass = listItemCssClassResolver.getListItemCssClass(node);
+					if(listItemCssClass != null) return listItemCssClass;
+				}
+				if(nodeType == com.semanticcms.core.model.Node.class) return null;
+				nodeType = nodeType.getSuperclass().asSubclass(com.semanticcms.core.model.Node.class);
+			}
+		}
+	}
+
+	/**
+	 * Registers a new CSS resolver to use in list items to the given type of node.
+	 *
+	 * @throws  IllegalStateException  if the node type is already registered.
+	 */
+	public <N extends com.semanticcms.core.model.Node> void addListItemCssClassResolver(
+		Class<N> nodeType,
+		ListItemCssClassResolver<? super N> listItemCssClassResolver
+	) throws IllegalStateException {
+		synchronized(listItemCssClassResolverByNodeType) {
+			if(listItemCssClassResolverByNodeType.containsKey(nodeType)) throw new IllegalStateException("List item CSS class already registered: " + nodeType);
+			if(listItemCssClassResolverByNodeType.put(nodeType, listItemCssClassResolver) != null) throw new AssertionError();
+		}
+	}
+
+	/**
+	 * Registers a new CSS class to use in list items to the given type of node.
+	 *
+	 * @throws  IllegalStateException  if the node type is already registered.
+	 */
+	public <N extends com.semanticcms.core.model.Node> void addListItemCssClass(
+		Class<N> nodeType,
+		final String listItemCssClass
+	) throws IllegalStateException {
+		addListItemCssClassResolver(
+			nodeType,
+			new ListItemCssClassResolver<N>() {
+				@Override
+				public String getListItemCssClass(N node) {
+					return listItemCssClass;
+				}
+			}
+		);
+	}
+	// </editor-fold>
 }

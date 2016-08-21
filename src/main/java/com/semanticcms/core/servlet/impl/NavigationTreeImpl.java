@@ -38,6 +38,7 @@ import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.PageIndex;
 import com.semanticcms.core.servlet.PageRefResolver;
+import com.semanticcms.core.servlet.SemanticCMS;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -207,12 +208,22 @@ final public class NavigationTreeImpl {
 				encodeTextInXhtmlAttribute(encodeHexData(servletPath), out);
 				out.write("\"}'");
 			}
-			String listItemCssClass = node.getListItemCssClass();
-			if(listItemCssClass == null) listItemCssClass = "semanticcms-core-list-item-none";
-			out.write(" class=\"");
-			encodeTextInXhtmlAttribute(listItemCssClass, out);
-			if(level==1) out.write(" expanded");
-			out.write("\"><a");
+			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+			String listItemCssClass = semanticCMS.getListItemCssClass(node);
+			if(listItemCssClass != null || level == 1) {
+				out.write(" class=\"");
+				boolean didClass = false;
+				if(listItemCssClass != null) {
+					encodeTextInXhtmlAttribute(listItemCssClass, out);
+					didClass = true;
+				}
+				if(level == 1) {
+					if(didClass) out.write(' ');
+					out.write("expanded");
+				}
+				out.write('"');
+			}
+			out.write("><a");
 		}
 		// Look for thisPage match
 		boolean thisPageClass = false;
