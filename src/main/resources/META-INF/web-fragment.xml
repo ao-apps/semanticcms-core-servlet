@@ -30,11 +30,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 	<name>semanticcms-core-servlet</name>
     <display-name>SemanticCMS Core Servlet</display-name>
 	<description>Java API for modeling web page content and relationships in a Servlet environment.</description>
-	<!-- The UTF-8 filter must be first, declare all other fragments after this one -->
+	<!-- The UTF-8 filter must be first, declare before all other fragments -->
 	<ordering>
-		<after>
+		<before>
 			<others />
-		</after>
+		</before>
 	</ordering>
 	<!-- Filter to set request character encoding to UTF-8 -->
 	<filter>
