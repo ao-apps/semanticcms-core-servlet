@@ -331,7 +331,7 @@ public class SemanticCMS {
 
 	// <editor-fold defaultstate="collapsed" desc="CSS Links">
 	/**
-	 * The CSS links in the added.
+	 * The CSS links in the order added.
 	 */
 	private final Set<String> cssLinks = new LinkedHashSet<String>();
 
@@ -352,7 +352,35 @@ public class SemanticCMS {
 	 */
 	public void addCssLink(String cssLink) throws IllegalStateException {
 		synchronized(cssLinks) {
-			if(!cssLinks.add(cssLink)) throw new IllegalStateException("CSS link already registered: " + cssLinks);
+			if(!cssLinks.add(cssLink)) throw new IllegalStateException("CSS link already registered: " + cssLink);
+		}
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Head Includes">
+	/**
+	 * The head includes in the order added.
+	 */
+	private final Set<String> headIncludes = new LinkedHashSet<String>();
+
+	/**
+	 * Gets the head includes, in the order added.
+	 */
+	public Set<String> getHeadIncludes() {
+		synchronized(headIncludes) {
+			// Not returning a copy since head includes are normally only registered on app start-up.
+			return Collections.unmodifiableSet(headIncludes);
+		}
+	}
+
+	/**
+	 * Registers a new head include.
+	 *
+	 * @throws  IllegalStateException  if the link is already registered.
+	 */
+	public void addHeadInclude(String headInclude) throws IllegalStateException {
+		synchronized(headIncludes) {
+			if(!headIncludes.add(headInclude)) throw new IllegalStateException("headInclude already registered: " + headInclude);
 		}
 	}
 	// </editor-fold>
