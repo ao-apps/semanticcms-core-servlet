@@ -138,7 +138,7 @@ abstract public class View implements Comparable<View> {
 	}
 
 	/**
-	 * Checks if a view is applicable the given page.
+	 * Checks if a view is applicable the given request and page.
 	 * 
 	 * @implSpec  returns {@code true} by default
 	 */
