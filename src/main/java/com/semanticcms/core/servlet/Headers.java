@@ -32,7 +32,7 @@ public class Headers {
 	/**
 	 * A client may include this header to indicate it is in export mode.
 	 */
-	private static final String EXPORTING_HEADER = "X-com-aoindustries-web-page-exporting";
+	private static final String EXPORTING_HEADER = "X-com-semanticcms-core-exporting";
 
 	/**
 	 * The value to pass in the header.
