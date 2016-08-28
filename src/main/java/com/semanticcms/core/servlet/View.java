@@ -27,6 +27,7 @@ import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
@@ -176,6 +177,15 @@ abstract public class View implements Comparable<View> {
 		HttpServletResponse response
 	) {
 		return null;
+	}
+
+	/**
+	 * Gets the optional additional parameter to a view link.
+	 *
+	 * @implSpec  returns empty map
+	 */
+	public Map<String,List<String>> getLinkParams(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, Page page) {
+		return Collections.emptyMap();
 	}
 
 	/**
