@@ -357,6 +357,55 @@ public class SemanticCMS {
 	}
 	// </editor-fold>
 
+	// <editor-fold defaultstate="collapsed" desc="Scripts">
+	/**
+	 * The scripts in the order added.
+	 */
+	private final Map<String,String> scripts = new LinkedHashMap<String,String>();
+
+	/**
+	 * Gets the scripts, in the order added.
+	 */
+	public Map<String,String> getScripts() {
+		synchronized(scripts) {
+			// Not returning a copy since scripts are normally only registered on app start-up.
+			return Collections.unmodifiableMap(scripts);
+		}
+	}
+
+	/**
+	 * Registers a new script.  When a script is added multiple times,
+	 * the src must be consistent between adds.  Also, a src may not be
+	 * added under different names.
+	 *
+	 * @param  name  the name of the script, independent of version and src
+	 * @param  src   the src of the script.
+	 *
+	 * @throws  IllegalStateException  if the script already registered but with a different src.
+	 */
+	public void addScript(String name, String src) throws IllegalStateException {
+		synchronized(scripts) {
+			String existingSrc = scripts.get(name);
+			if(existingSrc != null) {
+				if(!src.equals(existingSrc)) {
+					throw new IllegalStateException(
+						"Script already registered but with a different src:"
+						+ " name=" + name
+						+ " src=" + src
+						+ " existingSrc=" + existingSrc
+					);
+				}
+			} else {
+				// Make sure src not provided by another script
+				if(scripts.values().contains(src)) {
+					throw new IllegalArgumentException("Non-unique global script src: " + src);
+				}
+				if(scripts.put(name, src) != null) throw new AssertionError();
+			}
+		}
+	}
+	// </editor-fold>
+
 	// <editor-fold defaultstate="collapsed" desc="Head Includes">
 	/**
 	 * The head includes in the order added.

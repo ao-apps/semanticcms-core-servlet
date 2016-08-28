@@ -27,6 +27,7 @@ import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -235,6 +236,18 @@ abstract public class View implements Comparable<View> {
 	 */
 	public Set<String> getCssLinks() {
 		return Collections.emptySet();
+	}
+
+	/**
+	 * Gets any per-view scripts, when have the same name as globally registered
+	 * scripts, must have matching src.
+	 *
+	 * @see  SemanticCMS#getScripts()
+	 *
+	 * @implSpec  returns empty map by default
+	 */
+	public Map<String,String> getScripts() {
+		return Collections.emptyMap();
 	}
 
 	/**
