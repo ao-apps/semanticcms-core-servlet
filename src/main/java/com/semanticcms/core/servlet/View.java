@@ -152,6 +152,32 @@ abstract public class View implements Comparable<View> {
 	}
 
 	/**
+	 * Gets an id to use for the main navigation link to this view.
+	 *
+	 * @return  the ID or null for none
+	 *
+	 * @implSpec  returns {@code null} by default
+	 */
+	public String getLinkId() {
+		return null;
+	}
+
+	/**
+	 * Gets the CSS class to use for the main navigation link to this view.
+	 *
+	 * @return  the CSS class or null for none
+	 *
+	 * @implSpec  returns {@code null} by default
+	 */
+	public String getLinkCssClass(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response
+	) {
+		return null;
+	}
+
+	/**
 	 * Gets the copyright information for the view on the given page.
 	 * 
 	 * @see  CopyrightUtils#findCopyright(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page)
