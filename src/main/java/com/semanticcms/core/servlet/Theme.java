@@ -72,6 +72,13 @@ abstract public class Theme {
 	abstract public String getName();
 
 	/**
+	 * Checks if this is the default theme.
+	 */
+	final public boolean isDefault() {
+		return SemanticCMS.DEFAULT_THEME_NAME.equals(getName());
+	}
+
+	/**
 	 * Renders the theme.
 	 */
 	abstract public void doTheme(

@@ -301,6 +301,11 @@ public class SemanticCMS {
 
 	// <editor-fold defaultstate="collapsed" desc="Themes">
 	/**
+	 * The default theme is used when no other theme is registered.
+	 */
+	public static final String DEFAULT_THEME_NAME = "base";
+
+	/**
 	 * The themes in order added.
 	 */
 	private final Map<String,Theme> themes = new LinkedHashMap<String,Theme>();
