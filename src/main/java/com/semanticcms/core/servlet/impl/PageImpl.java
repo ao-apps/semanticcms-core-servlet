@@ -36,7 +36,6 @@ import com.semanticcms.core.servlet.SemanticCMS;
 import com.semanticcms.core.servlet.Theme;
 import com.semanticcms.core.servlet.View;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -254,12 +253,25 @@ final public class PageImpl {
 			}
 
 			// Find the theme
-			Theme theme;
+			Theme theme = null;
 			{
-				// Currently just picks the first theme registered
-				Iterator<Theme> iter = semanticCMS.getThemes().values().iterator();
-				if(!iter.hasNext()) throw new ServletException("No themes registered");
-				theme = iter.next();
+				// Currently just picks the first non-default theme registered, the uses default
+				Theme defaultTheme = null;
+				for(Theme t : semanticCMS.getThemes().values()) {
+					if(t.isDefault()) {
+						assert defaultTheme == null : "More than one default theme registered";
+						defaultTheme = t;
+					} else {
+						// Use first non-default
+						theme = t;
+						break;
+					}
+				}
+				if(theme == null) {
+					// Use default
+					if(defaultTheme == null) throw new ServletException("No themes registered");
+					theme = defaultTheme;
+				}
 				assert theme != null;
 			}
 
