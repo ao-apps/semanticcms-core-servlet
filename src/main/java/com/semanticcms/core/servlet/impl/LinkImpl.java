@@ -39,6 +39,7 @@ import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageIndex;
 import com.semanticcms.core.servlet.PageRefResolver;
 import com.semanticcms.core.servlet.SemanticCMS;
+import com.semanticcms.core.servlet.View;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URLEncoder;
@@ -48,9 +49,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
-/**
- * TODO: Links to views without getAllowRobots add rel="nofollow"
- */
 final public class LinkImpl {
 
 	public static interface LinkImplBody<E extends Throwable> {
@@ -97,13 +95,18 @@ final public class LinkImpl {
 		String page,
 		String element,
 		boolean allowGeneratedElement,
-		String view,
+		String viewName,
 		boolean small,
 	    HttpParameters params,
 		String clazz,
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
-		if(page==null && element==null && view==null) throw new ServletException("If neither element nor view provided, then page is required.");
+		// Find the view
+		final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+		final View view = semanticCMS.getViewsByName().get(viewName);
+		if(view == null) throw new ServletException("View not found: " + viewName);
+		final boolean isDefaultView = view.isDefault();
+		if(page==null && element==null && isDefaultView) throw new ServletException("If neither element nor view provided, then page is required.");
 
 		// Get the current capture state
 		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
@@ -171,35 +174,35 @@ final public class LinkImpl {
 				{
 					if(element == null) {
 						// Link to page
-						if(index != null && view == null) {
+						if(index != null && isDefaultView) {
 							href = '#' + PageIndex.getRefId(index, null);
 						} else {
 							StringBuilder url = new StringBuilder();
 							targetPageRef.appendServletPath(url);
-							if(view != null) {
+							if(!isDefaultView) {
 								boolean hasQuestion = url.lastIndexOf("?") != -1;
 								url
 									.append(hasQuestion ? "&view=" : "?view=")
-									.append(URLEncoder.encode(view, responseEncoding));
+									.append(URLEncoder.encode(viewName, responseEncoding));
 							}
 							href = url.toString();
 						}
 					} else {
-						if(index != null && view == null) {
+						if(index != null && isDefaultView) {
 							// Link to target in indexed page (view=all mode)
 							href = '#' + PageIndex.getRefId(index, element);
-						} else if(currentPage!=null && currentPage.equals(targetPage) && view == null) {
+						} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
 							// Link to target on same page
 							href = '#' + element;
 						} else {
 							// Link to target on different page (or same page, different view)
 							StringBuilder url = new StringBuilder();
 							targetPageRef.appendServletPath(url);
-							if(view != null) {
+							if(!isDefaultView) {
 								boolean hasQuestion = url.lastIndexOf("?") != -1;
 								url
 									.append(hasQuestion ? "&view=" : "?view=")
-									.append(URLEncoder.encode(view, responseEncoding));
+									.append(URLEncoder.encode(viewName, responseEncoding));
 							}
 							url.append('#').append(element);
 							href = url.toString();
@@ -226,7 +229,6 @@ final public class LinkImpl {
 					}
 				} else {
 					if(targetElement != null) {
-						SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 						String linkCssClass = semanticCMS.getLinkCssClass(targetElement);
 						if(linkCssClass != null) {
 							out.write(" class=\"");
@@ -235,11 +237,10 @@ final public class LinkImpl {
 						}
 					}
 				}
-				// No search index all view to avoid duplicate content penalties
-				// This nofollow should be added by link creator since view names are not global.
-				//if("all".equals(view)) {
-				//	out.write(" rel=\"nofollow\"");
-				//}
+				// Add nofollow consistent with view and page settings.
+				if(!view.getAllowRobots(servletContext, request, response, targetPage)) {
+					out.write(" rel=\"nofollow\"");
+				}
 				out.write('>');
 
 				if(body == null) {
