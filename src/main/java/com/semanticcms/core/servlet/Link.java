@@ -42,7 +42,7 @@ public class Link {
 	private String page;
 	private String element;
 	private boolean allowGeneratedElement;
-	private String view;
+	private String view = SemanticCMS.DEFAULT_VIEW_NAME;
 	private boolean small;
 	private HttpParameters params;
 	private String clazz;

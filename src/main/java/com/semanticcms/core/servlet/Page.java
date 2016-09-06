@@ -52,6 +52,7 @@ public class Page {
 	private String shortTitle;
 	private String description;
 	private String keywords;
+	private Boolean allowRobots;
 	private Boolean toc;
 	private int tocLevels = com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
 	private boolean allowParentMismatch;
@@ -95,6 +96,11 @@ public class Page {
 
 	public Page keywords(String keywords) {
 		this.keywords = keywords;
+		return this;
+	}
+
+	public Page allowRobots(Boolean allowRobots) {
+		this.allowRobots = allowRobots;
 		return this;
 	}
 
@@ -143,6 +149,7 @@ public class Page {
 			shortTitle,
 			description,
 			keywords,
+			allowRobots,
 			toc,
 			tocLevels,
 			allowParentMismatch,

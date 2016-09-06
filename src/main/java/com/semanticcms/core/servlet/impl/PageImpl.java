@@ -57,6 +57,7 @@ final public class PageImpl {
 		String shortTitle,
 		String description,
 		String keywords,
+		Boolean allowRobots,
 		Boolean toc,
 		int tocLevels,
 		boolean allowParentMismatch,
@@ -79,6 +80,7 @@ final public class PageImpl {
 		page.setShortTitle(shortTitle);
 		page.setDescription(description);
 		page.setKeywords(keywords);
+		page.setAllowRobots(allowRobots);
 		page.setToc(toc);
 		page.setTocLevels(tocLevels);
 		page.setAllowParentMismatch(allowParentMismatch);

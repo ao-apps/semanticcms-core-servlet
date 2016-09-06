@@ -264,7 +264,12 @@ abstract public class View implements Comparable<View> {
 	 * Gets whether robots are allowed to access this view to the given page.  When true will include both
 	 * "noindex, nofollow" in the head and put "nofollow" on links to this view.
 	 */
-	abstract public boolean getAllowRobots(Page page);
+	abstract public boolean getAllowRobots(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException;
 
 	/**
 	 * Renders the view.  This is called by the template to fill-out the main content area.

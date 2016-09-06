@@ -128,9 +128,24 @@ public class SemanticCMS {
 			String name = getProperty(booksProps, usedKeys, "books." + bookNum + ".name");
 			if(name == null) break;
 			if(missingBooks.contains(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
-			String cvsworkDirectoryAttribute = "books." + bookNum + ".cvsworkDirectory";
-			String cvsworkDirectory = getProperty(booksProps, usedKeys, cvsworkDirectoryAttribute);
-			if(cvsworkDirectory == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Required parameter not present: " + cvsworkDirectoryAttribute);
+			String cvsworkDirectory;
+			{
+				String cvsworkDirectoryAttribute = "books." + bookNum + ".cvsworkDirectory";
+				cvsworkDirectory = getProperty(booksProps, usedKeys, cvsworkDirectoryAttribute);
+				if(cvsworkDirectory == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Required parameter not present: " + cvsworkDirectoryAttribute);
+			}
+			boolean allowRobots;
+			{
+				String allowRobotsAttribute = "books." + bookNum + ".allowRobots";
+				String allowRobotsVal = getProperty(booksProps, usedKeys, allowRobotsAttribute);
+				if(allowRobotsVal==null || "true".equals(allowRobotsVal)) {
+					allowRobots = true;
+				} else if("false".equalsIgnoreCase(allowRobotsVal)) {
+					allowRobots = false;
+				} else {
+					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Unexpected value for " + allowRobotsAttribute + ", expect either \"true\" or \"false\": " + allowRobotsVal);
+				}
+			}
 			Set<PageRef> parentPages = new LinkedHashSet<PageRef>();
 			for(int parentNum=1; parentNum<Integer.MAX_VALUE; parentNum++) {
 				String parentBookNameAttribute = "books." + bookNum + ".parents." + parentNum + ".book";
@@ -165,6 +180,7 @@ public class SemanticCMS {
 					new Book(
 						name,
 						cvsworkDirectory,
+						allowRobots,
 						parentPages,
 						PropertiesUtils.loadFromResource(servletContext, ("/".equals(name) ? "" : name) + "/book.properties")
 					)
