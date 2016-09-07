@@ -238,7 +238,7 @@ final public class LinkImpl {
 					}
 				}
 				// Add nofollow consistent with view and page settings.
-				if(!view.getAllowRobots(servletContext, request, response, targetPage)) {
+				if(targetPage != null && !view.getAllowRobots(servletContext, request, response, targetPage)) {
 					out.write(" rel=\"nofollow\"");
 				}
 				out.write('>');
