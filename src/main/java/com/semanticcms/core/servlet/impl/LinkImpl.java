@@ -56,6 +56,53 @@ final public class LinkImpl {
 	}
 
 	/**
+	 * Writes a broken path reference as "¿/book/path{#targetId}?", no encoding.
+	 */
+	public static void writeBrokenPath(PageRef pageRef, String targetId, Appendable out) throws IOException {
+		out.append('¿');
+		out.append(pageRef.getBookPrefix());
+		out.append(pageRef.getPath());
+		if(targetId != null) {
+			out.append('#');
+			out.append(targetId);
+		}
+		out.append('?');
+	}
+
+	/**
+	 * Writes a broken path reference as "¿/book/path?", no encoding.
+	 */
+	public static void writeBrokenPath(PageRef pageRef, Appendable out) throws IOException {
+		writeBrokenPath(pageRef, null, out);
+	}
+
+	public static String getBrokenPath(PageRef pageRef, String targetId) {
+		int sbLen = 1 // '¿'
+			+ pageRef.getBookPrefix().length()
+			+ pageRef.getPath().length();
+		if(targetId != null) {
+			sbLen +=
+				1 // '#'
+				+ targetId.length();
+		}
+		sbLen++; // '?'
+		StringBuilder sb = new StringBuilder(sbLen);
+		try {
+			writeBrokenPath(pageRef, targetId, sb);
+		} catch(IOException e) {
+			AssertionError ae = new AssertionError("Should not happen on StringBuilder");
+			ae.initCause(ae);
+			throw ae;
+		}
+		assert sb.length() == sbLen;
+		return sb.toString();
+	}
+
+	public static String getBrokenPath(PageRef pageRef) throws IOException {
+		return getBrokenPath(pageRef, null);
+	}
+
+	/**
 	 * Writes a broken path reference as "¿/book/path{#targetId}?", encoding for XHTML.
 	 */
 	public static void writeBrokenPathInXhtml(PageRef pageRef, String targetId, Appendable out) throws IOException {
@@ -160,6 +207,7 @@ final public class LinkImpl {
 					targetElement = targetPage.getElementsById().get(element);
 					if(targetElement == null) throw new ServletException("Element not found in target page: " + element);
 					if(!allowGeneratedElement && targetPage.getGeneratedIds().contains(element)) throw new ServletException("Not allowed to link to a generated element id, set an explicit id on the target element: " + element);
+					if(targetElement.isHidden()) throw new ServletException("Not allowed to link to a hidden element: " + element);
 				} else {
 					targetElement = null;
 				}

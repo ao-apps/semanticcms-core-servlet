@@ -82,7 +82,9 @@ final public class NavigationTreeImpl {
 			+ (childPages==null ? 0 : childPages.size())
 		);
 		if(includeElements) {
-			childNodes.addAll(childElements);
+			for(Element childElem : childElements) {
+				if(!childElem.isHidden()) childNodes.add(childElem);
+			}
 		}
 		if(childPages != null) {
 			for(PageRef childRef : childPages) {
@@ -113,7 +115,10 @@ final public class NavigationTreeImpl {
 		}
 		if(includeElements) {
 			for(Element childElem : node.getChildElements()) {
-				if(findLinks(servletContext, request, response, linksTo, nodesWithLinks, nodesWithChildLinks, childElem, includeElements)) {
+				if(
+					!childElem.isHidden()
+					&& findLinks(servletContext, request, response, linksTo, nodesWithLinks, nodesWithChildLinks, childElem, includeElements)
+				) {
 					hasChildLink = true;
 				}
 			}
@@ -179,6 +184,7 @@ final public class NavigationTreeImpl {
 		} else if(node instanceof Element) {
 			assert includeElements;
 			element = (Element)node;
+			assert !element.isHidden();
 			page = element.getPage();
 		} else {
 			throw new AssertionError();
