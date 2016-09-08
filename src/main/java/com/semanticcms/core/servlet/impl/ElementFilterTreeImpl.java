@@ -65,7 +65,7 @@ final public class ElementFilterTreeImpl {
 	}
 
 	/**
-	 * A filter to select by element class.
+	 * A filter to select non-hidden and by element class.
 	 */
 	public static class ClassFilter implements ElementFilter {
 
@@ -77,7 +77,7 @@ final public class ElementFilterTreeImpl {
 
 		@Override
 		public boolean matches(Element e) {
-			return elementType.isInstance(e);			
+			return !e.isHidden() && elementType.isInstance(e);			
 		}
 	}
 
