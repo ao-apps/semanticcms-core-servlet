@@ -22,10 +22,12 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.taglib.Link;
 import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -241,10 +243,15 @@ abstract public class View implements Comparable<View> {
 	abstract public String getKeywords(Page page);
 
 	/**
-	 * Gets an optional set of additional CSS resources to include for this view
+	 * Gets an optional set of additional links to include for this view
 	 * in the order they should be added.
 	 */
-	public Set<String> getCssLinks() {
+	public Collection<Link> getLinks(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException {
 		return Collections.emptySet();
 	}
 
