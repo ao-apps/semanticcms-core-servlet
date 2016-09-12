@@ -38,6 +38,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 	<name>SemanticCMS Core Servlet</name>
 	<url>https://semanticcms.com/core/servlet/</url>
 	<description>Java API for modeling web page content and relationships in a Servlet environment.</description>
+	<inceptionYear>2013</inceptionYear>
 
 	<scm>
 		<connection>scm:git:git://github.com/aoindustries/semanticcms-core-servlet.git</connection>
