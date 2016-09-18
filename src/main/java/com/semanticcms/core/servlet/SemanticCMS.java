@@ -636,7 +636,7 @@ public class SemanticCMS {
 	/**
 	 * TODO: Create init param to allow disabling this.
 	 */
-	private static final boolean CONCURRENT_SUBREQUESTS_ENABLED = true;
+	private static final boolean CONCURRENT_SUBREQUESTS_ENABLED = false;
 
 	private final ExecutorService executorService;
 
