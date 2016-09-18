@@ -71,9 +71,23 @@ public class SemanticCMS {
 		}
 	}
 
+	private final ServletContext servletContext;
+
 	private SemanticCMS(ServletContext servletContext) throws IOException {
+		this.servletContext = servletContext;
 		this.demoMode = Boolean.parseBoolean(servletContext.getInitParameter(DEMO_MODE_INIT_PARAM));
-		this.rootBook = initBooks(servletContext);
+		this.rootBook = initBooks();
+		this.executorService = new ExecutorService();
+	}
+
+	/**
+	 * Called when the context is shutting down.
+	 */
+	void destroy() {
+		synchronized(instanceLock) {
+			servletContext.removeAttribute(SemanticCMS.ATTRIBUTE_NAME);
+		}
+
 	}
 	// </editor-fold>
 
@@ -106,7 +120,7 @@ public class SemanticCMS {
 	private final Set<String> missingBooks = new LinkedHashSet<String>();
 	private final Book rootBook;
 
-	private Book initBooks(ServletContext servletContext) throws IOException {
+	private Book initBooks() throws IOException {
 		Properties booksProps = PropertiesUtils.loadFromResource(servletContext, BOOKS_PROPERTIES_RESOURCE);
 		Set<Object> booksPropsKeys = booksProps.keySet();
 
@@ -614,6 +628,27 @@ public class SemanticCMS {
 				}
 			}
 		);
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Concurrency">
+
+	/**
+	 * TODO: Create init param to allow disabling this.
+	 */
+	private static final boolean CONCURRENT_SUBREQUESTS_ENABLED = true;
+
+	private final ExecutorService executorService;
+
+	/**
+	 * A shared executor available to all components.
+	 */
+	public ExecutorService getExecutorService() {
+		return executorService;
+	}
+
+	public boolean getConcurrentSubrequestsEnabled() {
+		return CONCURRENT_SUBREQUESTS_ENABLED;
 	}
 	// </editor-fold>
 }
