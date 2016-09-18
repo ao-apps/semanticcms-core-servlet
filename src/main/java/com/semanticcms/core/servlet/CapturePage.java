@@ -26,12 +26,24 @@ import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
+import com.aoindustries.util.concurrent.ExecutorService;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.servlet.util.HttpServletSubRequest;
+import com.semanticcms.core.servlet.util.HttpServletSubResponse;
+import com.semanticcms.core.servlet.util.ThreadSafeHttpServletRequest;
+import com.semanticcms.core.servlet.util.ThreadSafeHttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -385,7 +397,10 @@ public class CapturePage {
 	 * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.PageRef, com.semanticcms.core.servlet.CaptureLevel)
 	 * @see  PageContext
 	 */
-	public static Page capturePage(PageRef pageRef, CaptureLevel level) throws ServletException, IOException {
+	public static Page capturePage(
+		PageRef pageRef,
+		CaptureLevel level
+	) throws ServletException, IOException {
 		return capturePage(
 			PageContext.getServletContext(),
 			PageContext.getRequest(),
@@ -393,6 +408,188 @@ public class CapturePage {
 			pageRef,
 			level
 		);
+	}
+
+	/**
+	 * Captures multiple pages.
+	 *
+	 * @param  pageRefs  The pages that should be captured.  This set will be iterated only once during this operation.
+	 *
+	 * @return  map from pageRef to page, with iteration order equal to the pageRefs set.
+	 *
+	 * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.PageRef, com.semanticcms.core.servlet.CaptureLevel)
+	 */
+	public static Map<PageRef,Page> capturePages(
+		final ServletContext servletContext,
+		final HttpServletRequest request,
+		final HttpServletResponse response,
+		Set<? extends PageRef> pageRefs,
+		final CaptureLevel level
+	) throws ServletException, IOException {
+		int size = pageRefs.size();
+		if(size == 0) {
+			return Collections.emptyMap();
+		} else if(size == 1) {
+			PageRef pageRef = pageRefs.iterator().next();
+			return Collections.singletonMap(
+				pageRef,
+				capturePage(servletContext, request, response, pageRef, level)
+			);
+		} else {
+			Map<PageRef,Page> results = new LinkedHashMap<PageRef,Page>(size * 4/3 + 1);
+			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+			if(semanticCMS.getConcurrentSubrequestsEnabled()) {
+				// Concurrent implementation
+				final HttpServletRequest threadSafeReq = new ThreadSafeHttpServletRequest(request);
+				final HttpServletResponse threadSafeResp = new ThreadSafeHttpServletResponse(response);
+				ExecutorService executorService = semanticCMS.getExecutorService();
+				Map<PageRef,Future<Page>> futures = new HashMap<PageRef,Future<Page>>(pageRefs.size() *4/3+1);
+				for(final PageRef pageRef : pageRefs) {
+					futures.put(pageRef,
+						executorService.submitPerProcessor(new Callable<Page>() {
+								@Override
+								public Page call() throws ServletException, IOException {
+									return capturePage(
+										servletContext,
+										new HttpServletSubRequest(threadSafeReq),
+										new HttpServletSubResponse(threadSafeReq, threadSafeResp),
+										pageRef,
+										level
+									);
+								}
+							}
+						)
+					);
+				}
+				try {
+					for(PageRef pageRef : pageRefs) {
+						results.put(
+							pageRef,
+							futures.get(pageRef).get()
+						);
+					}
+				} catch(InterruptedException e) {
+					throw new ServletException(e);
+				} catch(ExecutionException e) {
+					Throwable cause = e.getCause();
+					if(cause instanceof ServletException) throw (ServletException)cause;
+					if(cause instanceof IOException) throw (IOException)cause;
+					if(cause instanceof RuntimeException) throw (RuntimeException)cause;
+					throw new ServletException(cause);
+				}
+			} else {
+				// Sequential implementation
+				for(PageRef pageRef : pageRefs) {
+					results.put(
+						pageRef,
+						capturePage(servletContext, request, response, pageRef, level)
+					);
+				}
+			}
+			return Collections.unmodifiableMap(results);
+		}
+	}
+
+	/**
+	 * Captures multiple pages in the current page context.
+	 *
+	 * @see  #capturePages(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Iterable, com.semanticcms.core.servlet.CaptureLevel)
+	 * @see  PageContext
+	 */
+	public static Map<PageRef,Page> capturePages(
+		Set<? extends PageRef> pageRefs,
+		CaptureLevel level
+	) throws ServletException, IOException {
+		return capturePages(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			pageRefs,
+			level
+		);
+	}
+
+	public static interface ChildPageFilter {
+		/**
+		 * Gets the child pages to consider for the given page during a traversal.
+		 */
+		boolean includeChildPage(Page page, PageRef childRef);
+	}
+
+	public static interface PageHandler {
+		/**
+		 * Called after page captured but before or after children captured.
+		 */
+		void handlePage(Page page) throws ServletException, IOException;
+	}
+
+	/**
+	 * Performs a concurrent depth-first traversal of the pages.
+	 * Each page is only visited once.
+	 */
+	public static void traversePagesDepthFirst(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		PageRef root,
+		CaptureLevel level,
+		PageHandler preHandler,
+		ChildPageFilter childPageFilter,
+		PageHandler postHandler
+	) throws ServletException, IOException {
+		traversePagesDepthFirstRecurse(
+			servletContext,
+			request,
+			response,
+			root,
+			level,
+			preHandler,
+			childPageFilter,
+			postHandler,
+			new HashSet<PageRef>()
+		);
+	}
+
+	// TODO: Concurrency: Concurrent implementation
+	private static void traversePagesDepthFirstRecurse(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		PageRef pageRef,
+		CaptureLevel level,
+		PageHandler preHandler,
+		ChildPageFilter childPageFilter,
+		PageHandler postHandler,
+		Set<PageRef> visited
+	) throws ServletException, IOException {
+		if(!visited.add(pageRef)) throw new AssertionError();
+		com.semanticcms.core.model.Page page = CapturePage.capturePage(
+			servletContext,
+			request,
+			response,
+			pageRef,
+			level
+		);
+		if(preHandler != null) preHandler.handlePage(page);
+		for(PageRef childRef : page.getChildPages()) {
+			if(
+				!visited.contains(childRef)
+				&& childPageFilter.includeChildPage(page, childRef)
+			) {
+				traversePagesDepthFirstRecurse(
+					servletContext,
+					request,
+					response,
+					childRef,
+					level,
+					preHandler,
+					childPageFilter,
+					postHandler,
+					visited
+				);
+			}
+		}
+		if(postHandler != null) postHandler.handlePage(page);
 	}
 
 	private CapturePage() {
