@@ -27,8 +27,10 @@ import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
@@ -182,6 +184,31 @@ final public class PageUtils {
 		// Store in finished
 		finished.put(pageRef, pageAllowRobots);
 		return pageAllowRobots;
+	}
+
+	/**
+	 * Filters for all pageRefs that are present (not missing books).
+	 */
+	public static <PR extends PageRef> Set<PR> filterNotMissingBook(Set<PR> pageRefs) {
+		int size = pageRefs.size();
+		if(size == 0) {
+			return Collections.emptySet();
+		} else if(size == 1) {
+			PR pageRef = pageRefs.iterator().next();
+			if(pageRef.getBook() != null) {
+				return Collections.singleton(pageRef);
+			} else {
+				return Collections.emptySet();
+			}
+		} else {
+			Set<PR> notMissingBooks = new LinkedHashSet<PR>(size *4/3+1);
+			for(PR pageRef : pageRefs) {
+				if(pageRef.getBook() != null) {
+					if(!notMissingBooks.add(pageRef)) throw new AssertionError();
+				}
+			}
+			return Collections.unmodifiableSet(notMissingBooks);
+		}
 	}
 
 	/**
