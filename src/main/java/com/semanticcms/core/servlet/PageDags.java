@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 final public class PageDags {
 
+	// TODO: Concurrent: Many / most places that use this can do a more direct depth-first traversal
 	public static List<Page> convertPageDagToList(
 		ServletContext servletContext,
 		HttpServletRequest request,
