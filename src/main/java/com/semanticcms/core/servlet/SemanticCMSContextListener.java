@@ -29,14 +29,19 @@ import javax.servlet.annotation.WebListener;
 @WebListener("Exposes the application context as an application-scope SemanticCMS instance named \"" + SemanticCMS.ATTRIBUTE_NAME + "\".")
 public class SemanticCMSContextListener implements ServletContextListener {
 
+	private SemanticCMS semanticCMS;
+
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		// Kick-off the application
-		SemanticCMS.getInstance(event.getServletContext());
+		semanticCMS = SemanticCMS.getInstance(event.getServletContext());
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
-		event.getServletContext().removeAttribute(SemanticCMS.ATTRIBUTE_NAME);
+		if(semanticCMS != null) {
+			semanticCMS.destroy();
+			semanticCMS = null;
+		}
 	}
 }
