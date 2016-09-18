@@ -32,6 +32,7 @@ import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageRefResolver;
+import com.semanticcms.core.servlet.PageUtils;
 import com.semanticcms.core.servlet.SemanticCMS;
 import com.semanticcms.core.servlet.Theme;
 import com.semanticcms.core.servlet.View;
@@ -198,39 +199,45 @@ final public class PageImpl {
 		} else {
 			// Verify parents
 			if(!page.getAllowParentMismatch()) {
-				for(PageRef parentRef : page.getParentPages()) {
-					// Can't verify parent reference to missing book
-					if(parentRef.getBook() != null) {
-						Page parentPage = CapturePage.capturePage(servletContext, request, response, parentRef, CaptureLevel.PAGE);
-						// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
-						PageRef pageRef = page.getPageRef();
-						if(!parentPage.getChildPages().contains(pageRef)) {
-							throw new ServletException(
-								"The parent page does not have this as a child.  this="
-									+ pageRef
-									+ ", parent="
-									+ parentRef
-							);
-						}
+				Map<PageRef,Page> notMissingParents = CapturePage.capturePages(
+					servletContext,
+					request,
+					response,
+					PageUtils.filterNotMissingBook(page.getParentPages()),
+					CaptureLevel.PAGE
+				);
+				for(Map.Entry<PageRef,Page> entry : notMissingParents.entrySet()) {
+					// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
+					PageRef pageRef = page.getPageRef();
+					if(!entry.getValue().getChildPages().contains(pageRef)) {
+						throw new ServletException(
+							"The parent page does not have this as a child.  this="
+								+ pageRef
+								+ ", parent="
+								+ entry.getKey()
+						);
 					}
 				}
 			}
 			// Verify children
 			if(!page.getAllowChildMismatch()) {
-				for(PageRef childRef : page.getChildPages()) {
-					// Can't verify child reference to missing book
-					if(childRef.getBook() != null) {
-						Page childPage = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.PAGE);
-						// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
-						PageRef pageRef = page.getPageRef();
-						if(!childPage.getParentPages().contains(pageRef)) {
-							throw new ServletException(
-								"The child page does not have this as a parent.  this="
-									+ pageRef
-									+ ", child="
-									+ childRef
-							);
-						}
+				Map<PageRef,Page> notMissingChildren = CapturePage.capturePages(
+					servletContext,
+					request,
+					response,
+					PageUtils.filterNotMissingBook(page.getChildPages()),
+					CaptureLevel.PAGE
+				);
+				for(Map.Entry<PageRef,Page> entry : notMissingChildren.entrySet()) {
+					// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
+					PageRef pageRef = page.getPageRef();
+					if(!entry.getValue().getParentPages().contains(pageRef)) {
+						throw new ServletException(
+							"The child page does not have this as a parent.  this="
+								+ pageRef
+								+ ", child="
+								+ entry.getKey()
+						);
 					}
 				}
 			}
