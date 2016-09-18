@@ -89,6 +89,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		</dependency>
 		<dependency>
 			<groupId>com.aoindustries</groupId>
+			<artifactId>ao-concurrent</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.aoindustries</groupId>
 			<artifactId>ao-encoding</artifactId>
 			<version>1.4-SNAPSHOT</version>
 		</dependency>
