@@ -329,6 +329,7 @@ public class ThreadSafeServletRequest extends ServletRequestWrapper {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public boolean isWrapperFor(Class wrappedType) {
 		synchronized(lock) {
 			return super.isWrapperFor(wrappedType);
