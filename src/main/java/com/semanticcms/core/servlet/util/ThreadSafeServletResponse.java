@@ -171,6 +171,7 @@ public class ThreadSafeServletResponse extends ServletResponseWrapper {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public boolean isWrapperFor(Class wrappedType) {
 		synchronized(lock) {
 			return super.isWrapperFor(wrappedType);
