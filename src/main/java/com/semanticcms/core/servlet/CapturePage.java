@@ -222,7 +222,9 @@ public class CapturePage {
 		if(useCache) {
 			// Check the cache
 			cacheKey = new CapturePageCacheKey(pageRef, level);
-			capturedPage = cache.get(cacheKey);
+			synchronized(cache) {
+				capturedPage = cache.get(cacheKey);
+			}
 		} else {
 			cacheKey = null;
 			capturedPage = null;
@@ -297,93 +299,95 @@ public class CapturePage {
 			}
 		}
 		assert capturedPage != null;
-		if(useCache) {
-			// Add to cache
-			cache.put(cacheKey, capturedPage);
-		}
-		// Verify parents that happened to already be cached
-		if(!capturedPage.getAllowParentMismatch()) {
-			for(PageRef parentRef : capturedPage.getParentPages()) {
-				// Can't verify parent reference to missing book
-				if(parentRef.getBook() != null) {
-					// Check if parent in cache
-					Page parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.PAGE));
-					if(parentPage == null) parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.META));
-					if(parentPage != null) {
-						if(!parentPage.getChildPages().contains(pageRef)) {
-							throw new ServletException(
-								"The parent page does not have this as a child.  this="
-									+ pageRef
-									+ ", parent="
-									+ parentRef
-							);
-						}
-						// Verify parent's children that happened to already be cached since captures can happen in any order.
-						/*
-						if(!parentPage.getAllowChildMismatch()) {
-							for(PageRef childRef : parentPage.getChildPages()) {
-								// Can't verify child reference to missing book
-								if(childRef.getBook() != null) {
-									// Check if child in cache
-									Page childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.PAGE));
-									if(childPage == null) childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
-									if(childPage != null) {
-										if(!childPage.getParentPages().contains(parentRef)) {
-											throw new ServletException(
-												"The child page does not have this as a parent.  this="
-													+ parentRef
-													+ ", child="
-													+ childRef
-											);
+		synchronized(cache) {
+			if(useCache) {
+				// Add to cache
+				cache.put(cacheKey, capturedPage);
+			}
+			// Verify parents that happened to already be cached
+			if(!capturedPage.getAllowParentMismatch()) {
+				for(PageRef parentRef : capturedPage.getParentPages()) {
+					// Can't verify parent reference to missing book
+					if(parentRef.getBook() != null) {
+						// Check if parent in cache
+						Page parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.PAGE));
+						if(parentPage == null) parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.META));
+						if(parentPage != null) {
+							if(!parentPage.getChildPages().contains(pageRef)) {
+								throw new ServletException(
+									"The parent page does not have this as a child.  this="
+										+ pageRef
+										+ ", parent="
+										+ parentRef
+								);
+							}
+							// Verify parent's children that happened to already be cached since captures can happen in any order.
+							/*
+							if(!parentPage.getAllowChildMismatch()) {
+								for(PageRef childRef : parentPage.getChildPages()) {
+									// Can't verify child reference to missing book
+									if(childRef.getBook() != null) {
+										// Check if child in cache
+										Page childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.PAGE));
+										if(childPage == null) childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
+										if(childPage != null) {
+											if(!childPage.getParentPages().contains(parentRef)) {
+												throw new ServletException(
+													"The child page does not have this as a parent.  this="
+														+ parentRef
+														+ ", child="
+														+ childRef
+												);
+											}
 										}
 									}
 								}
 							}
+							 */
 						}
-						 */
 					}
 				}
 			}
-		}
-		// Verify children that happened to already be cached
-		if(!capturedPage.getAllowChildMismatch()) {
-			for(PageRef childRef : capturedPage.getChildPages()) {
-				// Can't verify child reference to missing book
-				if(childRef.getBook() != null) {
-					// Check if child in cache
-					Page childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.PAGE));
-					if(childPage == null) childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
-					if(childPage != null) {
-						if(!childPage.getParentPages().contains(pageRef)) {
-							throw new ServletException(
-								"The child page does not have this as a parent.  this="
-									+ pageRef
-									+ ", child="
-									+ childRef
-							);
-						}
-						// Verify children's parents that happened to already be cached since captures can happen in any order.
-						/*
-						if(!childPage.getAllowParentMismatch()) {
-							for(PageRef parentRef : childPage.getParentPages()) {
-								// Can't verify parent reference to missing book
-								if(parentRef.getBook() != null) {
-									// Check if parent in cache
-									Page parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.PAGE));
-									if(parentPage == null) parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.META));
-									if(parentPage != null) {
-										if(!parentPage.getChildPages().contains(childRef)) {
-											throw new ServletException(
-												"The parent page does not have this as a child.  this="
-													+ childRef
-													+ ", parent="
-													+ parentRef
-											);
+			// Verify children that happened to already be cached
+			if(!capturedPage.getAllowChildMismatch()) {
+				for(PageRef childRef : capturedPage.getChildPages()) {
+					// Can't verify child reference to missing book
+					if(childRef.getBook() != null) {
+						// Check if child in cache
+						Page childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.PAGE));
+						if(childPage == null) childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
+						if(childPage != null) {
+							if(!childPage.getParentPages().contains(pageRef)) {
+								throw new ServletException(
+									"The child page does not have this as a parent.  this="
+										+ pageRef
+										+ ", child="
+										+ childRef
+								);
+							}
+							// Verify children's parents that happened to already be cached since captures can happen in any order.
+							/*
+							if(!childPage.getAllowParentMismatch()) {
+								for(PageRef parentRef : childPage.getParentPages()) {
+									// Can't verify parent reference to missing book
+									if(parentRef.getBook() != null) {
+										// Check if parent in cache
+										Page parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.PAGE));
+										if(parentPage == null) parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.META));
+										if(parentPage != null) {
+											if(!parentPage.getChildPages().contains(childRef)) {
+												throw new ServletException(
+													"The parent page does not have this as a child.  this="
+														+ childRef
+														+ ", parent="
+														+ parentRef
+												);
+											}
 										}
 									}
 								}
-							}
-						}*/
+							}*/
+						}
 					}
 				}
 			}
