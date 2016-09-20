@@ -477,7 +477,7 @@ public class CapturePage {
 				notCachedSize > 1
 				&& (
 					semanticCMS = SemanticCMS.getInstance(servletContext)
-				).getConcurrentSubrequests()
+				).useConcurrentSubrequests(request)
 			) {
 				// Concurrent implementation
 				TempFileList tempFileList = TempFileContext.getTempFileList(request);

@@ -67,6 +67,17 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<dispatcher>REQUEST</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
+	<!-- Tracks the request concurrency, used to decide to use concurrent or sequential implementations. -->
+	<filter>
+		<filter-name>CountConcurrencyFilter</filter-name>
+		<filter-class>com.aoindustries.servlet.filter.CountConcurrencyFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CountConcurrencyFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
 	<!-- Servlet to rewrite CSS files to include lastModified parameters -->
 	<servlet>
 		<servlet-name>LastModifiedServlet</servlet-name>
