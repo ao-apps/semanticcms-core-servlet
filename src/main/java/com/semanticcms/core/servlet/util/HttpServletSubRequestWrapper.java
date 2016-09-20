@@ -28,6 +28,7 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Enumeration;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,15 +38,21 @@ import javax.servlet.http.Part;
 /**
  * {@inhertDoc}
  */
-public class HttpServletSubRequest extends ServletSubRequest implements HttpServletRequest {
+public class HttpServletSubRequestWrapper extends ServletSubRequestWrapper implements HttpServletRequest {
 
-	private final HttpServletRequest req;
+	private HttpServletRequest req;
 
 	private boolean loggedOut;
 
-	public HttpServletSubRequest(HttpServletRequest req) {
+	public HttpServletSubRequestWrapper(HttpServletRequest req) {
 		super(req);
 		this.req = req;
+	}
+
+	@Override
+	public void setRequest(ServletRequest request) {
+		this.req = (HttpServletRequest)request;
+		super.setRequest(request);
 	}
 
 	@Override

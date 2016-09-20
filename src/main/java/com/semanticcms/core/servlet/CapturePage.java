@@ -26,7 +26,6 @@ import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
-import com.aoindustries.util.concurrent.ExecutorService;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
@@ -35,15 +34,16 @@ import com.semanticcms.core.servlet.util.HttpServletSubResponse;
 import com.semanticcms.core.servlet.util.ThreadSafeHttpServletRequest;
 import com.semanticcms.core.servlet.util.ThreadSafeHttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -170,10 +170,49 @@ public class CapturePage {
 		}
 	}
 
+	private static final Object getCacheLock = new Object();
+
+	/**
+	 * Gets the cache to use for the current request.
+	 * All uses of this cache must synchronize on the map itself.
+	 */
+	private static Map<CapturePageCacheKey,Page> getCache(ServletContext servletContext, HttpServletRequest request) {
+		boolean isExporting = Headers.isExporting(request);
+		synchronized(getCacheLock) {
+			ExportPageCache exportCache = (ExportPageCache)servletContext.getAttribute(EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME);
+			if(isExporting) {
+				if(exportCache == null) {
+					exportCache = new ExportPageCache();
+					servletContext.setAttribute(EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME, exportCache);
+				}
+				return exportCache.getCache(System.currentTimeMillis());
+			} else {
+				// Clean-up stale export cache
+				if(exportCache != null) {
+					exportCache.invalidateCache(System.currentTimeMillis());
+				}
+				// Request-level cache when not exporting
+				Map<CapturePageCacheKey,Page> cache;
+				{
+					@SuppressWarnings("unchecked")
+					Map<CapturePageCacheKey,Page> reqCache = (Map<CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
+					cache = reqCache;
+				}
+				if(cache == null) {
+					cache = new HashMap<CapturePageCacheKey,Page>();
+					request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
+				}
+				return cache;
+			}
+		}
+	}
+
 	/**
 	 * Captures a page.
 	 * The capture is always done with a request method of "GET", even when the enclosing request is a different method.
 	 * Also validates parent-child and child-parent relationships if the other related pages happened to already be captured and cached.
+	 *
+	 * TODO: Within the scope of one overall request, avoid capturing the same page at the same time (CurrencyLimiter applied to sub requests), is there a reasonable way to catch deadlock conditions?
 	 */
 	public static Page capturePage(
 		final ServletContext servletContext,
@@ -188,33 +227,7 @@ public class CapturePage {
 		final boolean useCache = level != CaptureLevel.BODY;
 
 		// Find the cache to use
-		Map<CapturePageCacheKey,Page> cache;
-		{
-			ExportPageCache exportCache = (ExportPageCache)servletContext.getAttribute(EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME);
-			if(Headers.isExporting(request)) {
-				// No harm done if two threads create two different caches inbetween check and set
-				if(exportCache == null) {
-					exportCache = new ExportPageCache();
-					servletContext.setAttribute(EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME, exportCache);
-				}
-				cache = exportCache.getCache(System.currentTimeMillis());
-			} else {
-				// Clean-up stale export cache
-				if(exportCache != null) {
-					exportCache.invalidateCache(System.currentTimeMillis());
-				}
-				// Request-level cache when not exporting
-				{
-					@SuppressWarnings("unchecked")
-					Map<CapturePageCacheKey,Page> reqCache = (Map<CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
-					cache = reqCache;
-				}
-				if(cache == null) {
-					cache = new HashMap<CapturePageCacheKey,Page>();
-					request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
-				}
-			}
-		}
+		Map<CapturePageCacheKey,Page> cache = getCache(servletContext, request);
 
 		// cacheKey will be null when this capture is not to be cached
 		final CapturePageCacheKey cacheKey;
@@ -441,49 +454,73 @@ public class CapturePage {
 			);
 		} else {
 			Map<PageRef,Page> results = new LinkedHashMap<PageRef,Page>(size * 4/3 + 1);
-			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
-			if(semanticCMS.getConcurrentSubrequestsEnabled()) {
+			// Check cache before queuing on different threads, building list of those not in cache
+			Map<CapturePageCacheKey,Page> cache = getCache(servletContext, request);
+			List<PageRef> notCachedList = new ArrayList<PageRef>(size);
+			for(PageRef pageRef : pageRefs) {
+				CapturePageCacheKey cacheKey = new CapturePageCacheKey(pageRef, level);
+				Page page = cache.get(cacheKey);
+				if(page != null) {
+					// Use cached value
+					results.put(pageRef, page);
+				} else {
+					// Will capture below
+					notCachedList.add(pageRef);
+				}
+			}
+
+			SemanticCMS semanticCMS;
+			int notCachedSize = notCachedList.size();
+			if(
+				notCachedSize > 1
+				&& (
+					semanticCMS = SemanticCMS.getInstance(servletContext)
+				).getConcurrentSubrequests()
+			) {
 				// Concurrent implementation
-				final HttpServletRequest threadSafeReq = new ThreadSafeHttpServletRequest(request);
-				final HttpServletResponse threadSafeResp = new ThreadSafeHttpServletResponse(response);
-				ExecutorService executorService = semanticCMS.getExecutorService();
-				Map<PageRef,Future<Page>> futures = new HashMap<PageRef,Future<Page>>(pageRefs.size() *4/3+1);
-				for(final PageRef pageRef : pageRefs) {
-					futures.put(pageRef,
-						executorService.submitPerProcessor(new Callable<Page>() {
-								@Override
-								public Page call() throws ServletException, IOException {
-									return capturePage(
-										servletContext,
-										new HttpServletSubRequest(threadSafeReq),
-										new HttpServletSubResponse(threadSafeReq, threadSafeResp),
-										pageRef,
-										level
-									);
-								}
+				HttpServletRequest threadSafeReq = new ThreadSafeHttpServletRequest(request);
+				HttpServletResponse threadSafeResp = new ThreadSafeHttpServletResponse(response);
+				// Create the tasks
+				List<Callable<Page>> tasks = new ArrayList<Callable<Page>>(notCachedSize);
+				for(int i=0; i<notCachedSize; i++) {
+					final PageRef pageRef = notCachedList.get(i);
+					final HttpServletRequest subrequest = new HttpServletSubRequest(threadSafeReq);
+					final HttpServletResponse subresponse = new HttpServletSubResponse(threadSafeReq, threadSafeResp);
+					tasks.add(
+						new Callable<Page>() {
+							@Override
+							public Page call() throws ServletException, IOException {
+								return capturePage(servletContext,
+									subrequest,
+									subresponse,
+									pageRef,
+									level
+								);
 							}
-						)
+						}
 					);
 				}
+				List<Page> notCachedResults;
 				try {
-					for(PageRef pageRef : pageRefs) {
-						results.put(
-							pageRef,
-							futures.get(pageRef).get()
-						);
-					}
+					notCachedResults = semanticCMS.getExecutors().getPerProcessor().callAll(tasks);
 				} catch(InterruptedException e) {
 					throw new ServletException(e);
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
+					if(cause instanceof RuntimeException) throw (RuntimeException)cause;
 					if(cause instanceof ServletException) throw (ServletException)cause;
 					if(cause instanceof IOException) throw (IOException)cause;
-					if(cause instanceof RuntimeException) throw (RuntimeException)cause;
 					throw new ServletException(cause);
+				}
+				for(int i=0; i<notCachedSize; i++) {
+					results.put(
+						notCachedList.get(i),
+						notCachedResults.get(i)
+					);
 				}
 			} else {
 				// Sequential implementation
-				for(PageRef pageRef : pageRefs) {
+				for(PageRef pageRef : notCachedList) {
 					results.put(
 						pageRef,
 						capturePage(servletContext, request, response, pageRef, level)

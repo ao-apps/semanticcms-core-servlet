@@ -32,6 +32,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,13 +40,22 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * {@inhertDoc}
  */
-public class HttpServletSubResponse extends ServletSubResponse implements HttpServletResponse {
+public class HttpServletSubResponseWrapper extends ServletSubResponseWrapper implements HttpServletResponse {
 
-	private final HttpServletResponse resp;
+	private HttpServletResponse resp;
 
-	public HttpServletSubResponse(HttpServletRequest req, HttpServletResponse resp) {
+	/**
+	 * @see  ConcurrentServletResponseWrapper#ConcurrentServletResponseWrapper(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+	 */
+	public HttpServletSubResponseWrapper(HttpServletRequest req, HttpServletResponse resp) {
 		super(req, resp);
 		this.resp = resp;
+	}
+
+	@Override
+	public void setResponse(ServletResponse response) {
+		this.resp = (HttpServletResponse)response;
+		super.setResponse(response);
 	}
 
 	@Override
