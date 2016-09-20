@@ -38,7 +38,6 @@ import com.semanticcms.core.servlet.util.ThreadSafeHttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,20 +56,6 @@ import javax.servlet.jsp.SkipPageException;
 public class CapturePage {
 
 	private static final String CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME = CapturePage.class.getName()+".captureContext";
-	
-	private static final String CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME = CapturePage.class.getName()+".capturePageCache";
-
-	/**
-	 * To speed up an export, the elements are cached between requests.
-	 * The first non-exporting request will clear this cache, and it will also
-	 * be remover after a given number of seconds.
-	 */
-	private static final String EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME = CapturePage.class.getName()+".exportCapturePageCache";
-	
-	/**
-	 * The number of milliseconds after the export cache is no longer considered valid.
-	 */
-	private static final long EXPORT_CAPTURE_PAGE_CACHE_TTL = 60 * 1000; // one minute
 
 	/**
 	 * Gets the capture context or <code>null</code> if none occurring.
@@ -96,7 +81,7 @@ public class CapturePage {
 			CaptureLevel level
 		) {
 			this.pageRef = pageRef;
-			assert level != CaptureLevel.BODY : "Body captures are not cached";
+			if(level == CaptureLevel.BODY) throw new IllegalArgumentException("Body captures are not cached");
 			this.level = level;
 		}
 
@@ -123,92 +108,6 @@ public class CapturePage {
 		}
 	}
 
-	// TODO: Consider consequences of caching once we have a security model applied
-	static class ExportPageCache {
-	
-		private final Object lock = new Object();
-
-		/**
-		 * The time the cache will expire.
-		 */
-		private long cacheStart;
-		
-		/**
-		 * The currently active cache.
-		 */
-		private Map<CapturePageCacheKey,Page> cache;
-
-		/**
-		 * Invalidates the page cache if it has exceeded its TTL.
-		 */
-		void invalidateCache(long currentTime) {
-			synchronized(lock) {
-				if(
-					cache != null
-					&& (
-						currentTime >= (cacheStart + EXPORT_CAPTURE_PAGE_CACHE_TTL)
-						// Handle system time changes
-						|| currentTime <= (cacheStart - EXPORT_CAPTURE_PAGE_CACHE_TTL)
-					)
-				) {
-					cache = null;
-				}
-			}
-		}
-
-		/**
-		 * Invalidates the cache, if needed, then gets the resulting cache.
-		 */
-		Map<CapturePageCacheKey,Page> getCache(long currentTime) {
-			synchronized(lock) {
-				invalidateCache(currentTime);
-				if(cache == null) {
-					cacheStart = currentTime;
-					cache = new HashMap<CapturePageCacheKey,Page>();
-					
-				}
-				return cache;
-			}
-		}
-	}
-
-	private static final Object getCacheLock = new Object();
-
-	/**
-	 * Gets the cache to use for the current request.
-	 * All uses of this cache must synchronize on the map itself.
-	 */
-	private static Map<CapturePageCacheKey,Page> getCache(ServletContext servletContext, HttpServletRequest request) {
-		boolean isExporting = Headers.isExporting(request);
-		synchronized(getCacheLock) {
-			ExportPageCache exportCache = (ExportPageCache)servletContext.getAttribute(EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME);
-			if(isExporting) {
-				if(exportCache == null) {
-					exportCache = new ExportPageCache();
-					servletContext.setAttribute(EXPORT_CAPTURE_PAGE_CACHE_CONTEXT_ATTRIBUTE_NAME, exportCache);
-				}
-				return exportCache.getCache(System.currentTimeMillis());
-			} else {
-				// Clean-up stale export cache
-				if(exportCache != null) {
-					exportCache.invalidateCache(System.currentTimeMillis());
-				}
-				// Request-level cache when not exporting
-				Map<CapturePageCacheKey,Page> cache;
-				{
-					@SuppressWarnings("unchecked")
-					Map<CapturePageCacheKey,Page> reqCache = (Map<CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
-					cache = reqCache;
-				}
-				if(cache == null) {
-					cache = new HashMap<CapturePageCacheKey,Page>();
-					request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
-				}
-				return cache;
-			}
-		}
-	}
-
 	/**
 	 * Captures a page.
 	 * The capture is always done with a request method of "GET", even when the enclosing request is a different method.
@@ -217,19 +116,34 @@ public class CapturePage {
 	 * TODO: Within the scope of one overall request, avoid capturing the same page at the same time (CurrencyLimiter applied to sub requests), is there a reasonable way to catch deadlock conditions?
 	 */
 	public static Page capturePage(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		PageRef pageRef,
+		CaptureLevel level
+	) throws ServletException, IOException {
+		return capturePage(
+			servletContext,
+			request,
+			response,
+			pageRef,
+			level,
+			CapturePageCacheFilter.getCache(request)
+		);
+	}
+
+	private static Page capturePage(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
 		final HttpServletResponse response,
 		PageRef pageRef,
-		CaptureLevel level
+		CaptureLevel level,
+		Map<CapturePageCacheKey,Page> cache
 	) throws ServletException, IOException {
 		NullArgumentException.checkNotNull(level, "level");
 
 		// Don't use cache for full body captures
 		final boolean useCache = level != CaptureLevel.BODY;
-
-		// Find the cache to use
-		Map<CapturePageCacheKey,Page> cache = getCache(servletContext, request);
 
 		// cacheKey will be null when this capture is not to be cached
 		final CapturePageCacheKey cacheKey;
@@ -455,20 +369,24 @@ public class CapturePage {
 				capturePage(servletContext, request, response, pageRef, level)
 			);
 		} else {
+			final Map<CapturePageCacheKey,Page> cache = CapturePageCacheFilter.getCache(request);
 			Map<PageRef,Page> results = new LinkedHashMap<PageRef,Page>(size * 4/3 + 1);
-			// Check cache before queuing on different threads, building list of those not in cache
-			Map<CapturePageCacheKey,Page> cache = getCache(servletContext, request);
 			List<PageRef> notCachedList = new ArrayList<PageRef>(size);
-			for(PageRef pageRef : pageRefs) {
-				CapturePageCacheKey cacheKey = new CapturePageCacheKey(pageRef, level);
-				Page page = cache.get(cacheKey);
-				if(page != null) {
-					// Use cached value
-					results.put(pageRef, page);
-				} else {
-					// Will capture below
-					notCachedList.add(pageRef);
+			if(level != CaptureLevel.BODY) {
+				// Check cache before queuing on different threads, building list of those not in cache
+				for(PageRef pageRef : pageRefs) {
+					CapturePageCacheKey cacheKey = new CapturePageCacheKey(pageRef, level);
+					Page page = cache.get(cacheKey);
+					if(page != null) {
+						// Use cached value
+						results.put(pageRef, page);
+					} else {
+						// Will capture below
+						notCachedList.add(pageRef);
+					}
 				}
+			} else {
+				notCachedList.addAll(pageRefs);
 			}
 
 			SemanticCMS semanticCMS;
@@ -493,11 +411,13 @@ public class CapturePage {
 						new Callable<Page>() {
 							@Override
 							public Page call() throws ServletException, IOException {
-								return capturePage(servletContext,
+								return capturePage(
+									servletContext,
 									subrequest,
 									subresponse,
 									pageRef,
-									level
+									level,
+									cache
 								);
 							}
 						}
@@ -526,7 +446,7 @@ public class CapturePage {
 				for(PageRef pageRef : notCachedList) {
 					results.put(
 						pageRef,
-						capturePage(servletContext, request, response, pageRef, level)
+						capturePage(servletContext, request, response, pageRef, level, cache)
 					);
 				}
 			}
@@ -570,12 +490,46 @@ public class CapturePage {
 	/**
 	 * Performs a concurrent depth-first traversal of the pages.
 	 * Each page is only visited once.
+	 *
+	 * @see  #traversePagesDepthFirst(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page, com.semanticcms.core.servlet.CaptureLevel, com.semanticcms.core.servlet.CapturePage.PageHandler, com.semanticcms.core.servlet.CapturePage.ChildPageFilter, com.semanticcms.core.servlet.CapturePage.PageHandler)  If have page, provide it
 	 */
 	public static void traversePagesDepthFirst(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		PageRef root,
+		PageRef rootRef,
+		CaptureLevel level,
+		PageHandler preHandler,
+		ChildPageFilter childPageFilter,
+		PageHandler postHandler
+	) throws ServletException, IOException {
+		traversePagesDepthFirst(
+			servletContext,
+			request,
+			response,
+			CapturePage.capturePage(
+				servletContext,
+				request,
+				response,
+				rootRef,
+				level
+			),
+			level,
+			preHandler,
+			childPageFilter,
+			postHandler
+		);
+	}
+
+	/**
+	 * Performs a concurrent depth-first traversal of the pages.
+	 * Each page is only visited once.
+	 */
+	public static void traversePagesDepthFirst(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page root,
 		CaptureLevel level,
 		PageHandler preHandler,
 		ChildPageFilter childPageFilter,
@@ -590,47 +544,156 @@ public class CapturePage {
 			preHandler,
 			childPageFilter,
 			postHandler,
+			SemanticCMS.getInstance(servletContext),
+			TempFileContext.getTempFileList(request),
+			level == CaptureLevel.BODY ? null : CapturePageCacheFilter.getCache(request),
 			new HashSet<PageRef>()
 		);
 	}
 
-	// TODO: Concurrency: Concurrent implementation
+	/**
+	 * TODO: More advanced traversal as figured-out by Dan and Brian on the whiteboard.
+	 */
 	private static void traversePagesDepthFirstRecurse(
-		ServletContext servletContext,
+		final ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		PageRef pageRef,
-		CaptureLevel level,
+		Page page,
+		final CaptureLevel level,
 		PageHandler preHandler,
 		ChildPageFilter childPageFilter,
 		PageHandler postHandler,
+		SemanticCMS semanticCMS,
+		TempFileList tempFileList,
+		final Map<CapturePageCacheKey,Page> cache,
 		Set<PageRef> visited
 	) throws ServletException, IOException {
-		if(!visited.add(pageRef)) throw new AssertionError();
-		com.semanticcms.core.model.Page page = CapturePage.capturePage(
-			servletContext,
-			request,
-			response,
-			pageRef,
-			level
-		);
+		if(!visited.add(page.getPageRef())) throw new AssertionError();
 		if(preHandler != null) preHandler.handlePage(page);
-		for(PageRef childRef : page.getChildPages()) {
-			if(
-				!visited.contains(childRef)
-				&& childPageFilter.includeChildPage(page, childRef)
-			) {
-				traversePagesDepthFirstRecurse(
-					servletContext,
-					request,
-					response,
-					childRef,
-					level,
-					preHandler,
-					childPageFilter,
-					postHandler,
-					visited
-				);
+		List<PageRef> childRefs;
+		{
+			Set<PageRef> childRefSet = page.getChildPages();
+			childRefs = new ArrayList<PageRef>(childRefSet.size());
+			for(PageRef childRef : childRefSet) {
+				if(
+					!visited.contains(childRef)
+					&& childPageFilter.includeChildPage(page, childRef)
+				) {
+					childRefs.add(childRef);
+				}
+			}
+		}
+		int childRefsSize = childRefs.size();
+		if(childRefsSize > 0) {
+			List<Page> childPageList = new ArrayList<Page>(childRefsSize);
+			{
+				List<Integer> notCachedIndexes = new ArrayList<Integer>(childRefsSize);
+				List<PageRef> notCachedRefs;
+				if(level != CaptureLevel.BODY) {
+					notCachedRefs = new ArrayList<PageRef>(childRefsSize);
+					synchronized(cache) {
+						for(int i=0; i<childRefsSize; i++) {
+							PageRef childRef = childRefs.get(i);
+							Page cached = cache.get(new CapturePageCacheKey(childRef, level));
+							if(cached != null) {
+								childPageList.add(cached);
+							} else {
+								childPageList.add(null);
+								notCachedIndexes.add(i);
+								notCachedRefs.add(childRef);
+							}
+						}
+					}
+				} else {
+					notCachedRefs = childRefs;
+					for(int i=0; i<childRefsSize; i++) {
+						childPageList.add(null);
+						notCachedIndexes.add(i);
+					}
+				}
+				int notCachedSize = notCachedIndexes.size();
+				if(
+					notCachedSize > 1
+					&& semanticCMS.useConcurrentSubrequests(request)
+				) {
+					// Concurrent implementation
+					HttpServletRequest threadSafeReq = new ThreadSafeHttpServletRequest(request);
+					HttpServletResponse threadSafeResp = new ThreadSafeHttpServletResponse(response);
+					// Create the tasks
+					List<Callable<Page>> tasks = new ArrayList<Callable<Page>>(notCachedSize);
+					for(int i=0; i<notCachedSize; i++) {
+						final PageRef notCachedRef = notCachedRefs.get(i);
+						final HttpServletRequest subrequest = new HttpServletSubRequest(threadSafeReq);
+						final HttpServletResponse subresponse = new HttpServletSubResponse(threadSafeResp, tempFileList);
+						tasks.add(
+							new Callable<Page>() {
+								@Override
+								public Page call() throws ServletException, IOException {
+									return capturePage(
+										servletContext,
+										subrequest,
+										subresponse,
+										notCachedRef,
+										level,
+										cache
+									);
+								}
+							}
+						);
+					}
+					List<Page> notCachedResults;
+					try {
+						notCachedResults = semanticCMS.getExecutors().getPerProcessor().callAll(tasks);
+					} catch(InterruptedException e) {
+						throw new ServletException(e);
+					} catch(ExecutionException e) {
+						Throwable cause = e.getCause();
+						if(cause instanceof RuntimeException) throw (RuntimeException)cause;
+						if(cause instanceof ServletException) throw (ServletException)cause;
+						if(cause instanceof IOException) throw (IOException)cause;
+						throw new ServletException(cause);
+					}
+					for(int i=0; i<notCachedSize; i++) {
+						childPageList.set(
+							notCachedIndexes.get(i),
+							notCachedResults.get(i)
+						);
+					}
+				} else {
+					// Sequential implementation
+					for(int i=0; i<notCachedSize; i++) {
+						childPageList.set(
+							notCachedIndexes.get(i),
+							CapturePage.capturePage(
+								servletContext,
+								request,
+								response,
+								notCachedRefs.get(i),
+								level,
+								cache
+							)
+						);
+					}
+				}
+			}
+			for(Page childPage : childPageList) {
+				// May have been visited already during depth-first
+				if(!visited.contains(childPage.getPageRef())) {
+					traversePagesDepthFirstRecurse(
+						servletContext,
+						request,
+						response,
+						childPage,
+						level,
+						preHandler,
+						childPageFilter,
+						postHandler,
+						semanticCMS,
+						tempFileList,
+						cache,
+						visited
+					);
+				}
 			}
 		}
 		if(postHandler != null) postHandler.handlePage(page);
