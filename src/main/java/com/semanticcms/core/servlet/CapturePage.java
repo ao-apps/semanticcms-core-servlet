@@ -22,7 +22,9 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.io.TempFileList;
 import com.aoindustries.lang.NullArgumentException;
+import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
@@ -478,6 +480,7 @@ public class CapturePage {
 				).getConcurrentSubrequests()
 			) {
 				// Concurrent implementation
+				TempFileList tempFileList = TempFileContext.getTempFileList(request);
 				HttpServletRequest threadSafeReq = new ThreadSafeHttpServletRequest(request);
 				HttpServletResponse threadSafeResp = new ThreadSafeHttpServletResponse(response);
 				// Create the tasks
@@ -485,7 +488,7 @@ public class CapturePage {
 				for(int i=0; i<notCachedSize; i++) {
 					final PageRef pageRef = notCachedList.get(i);
 					final HttpServletRequest subrequest = new HttpServletSubRequest(threadSafeReq);
-					final HttpServletResponse subresponse = new HttpServletSubResponse(threadSafeReq, threadSafeResp);
+					final HttpServletResponse subresponse = new HttpServletSubResponse(threadSafeResp, tempFileList);
 					tasks.add(
 						new Callable<Page>() {
 							@Override
