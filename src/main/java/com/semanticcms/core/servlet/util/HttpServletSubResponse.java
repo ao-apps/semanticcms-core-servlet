@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet.util;
 
+import com.aoindustries.io.TempFileList;
 import com.aoindustries.lang.NotImplementedException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -43,8 +43,8 @@ public class HttpServletSubResponse extends ServletSubResponse implements HttpSe
 
 	private final HttpServletResponse resp;
 
-	public HttpServletSubResponse(HttpServletRequest req, HttpServletResponse resp) {
-		super(req, resp);
+	public HttpServletSubResponse(HttpServletResponse resp, TempFileList tempFileList) {
+		super(resp, tempFileList);
 		this.resp = resp;
 	}
 
