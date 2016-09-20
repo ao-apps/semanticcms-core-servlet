@@ -22,40 +22,22 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.servlet.filter.FunctionContextCallable;
-import com.aoindustries.servlet.filter.FunctionContextRunnable;
-import com.aoindustries.util.i18n.I18nThreadLocalCallable;
-import com.aoindustries.util.i18n.I18nThreadLocalRunnable;
+import com.aoindustries.util.concurrent.ThreadLocalsCallable;
 import java.util.concurrent.Callable;
 
 /**
- * Per-context executor service for concurrent processing.
- * Passes the following ThreadLocal-based items to submitted tasks:
- * <ul>
- *   <li>Internationalization context (via parent class): {@link I18nThreadLocalCallable} and {@link I18nThreadLocalRunnable}</li>
- *   <li>FunctionContext: {@link FunctionContextCallable} and {@link FunctionContextRunnable}</li>
- *   <li>TODO: PageContext</li>
- * </ul>
+ * Maintains current page context for the provided callable.
  */
-public class ExecutorService extends com.aoindustries.util.concurrent.ExecutorService {
+public class PageContextCallable<T> extends ThreadLocalsCallable<T> {
 
-	/**
-	 * Should only be created by SemanticCMS to control life cycle.
-	 */
-	ExecutorService() {
-	}
+	static final ThreadLocal<?>[] threadLocals = {
+		PageContext.servletContext,
+		PageContext.request,
+		PageContext.response,
+		PageContext.out
+	};
 
-	@Override
-	protected <T> Callable<T> wrap(Callable<T> task) {
-		return new FunctionContextCallable<T>(
-			super.wrap(task)
-		);
-	}
-
-	@Override
-	protected Runnable wrap(Runnable task) {
-		return new FunctionContextRunnable(
-			super.wrap(task)
-		);
+	public PageContextCallable(Callable<T> task) {
+		super(task, threadLocals);
 	}
 }

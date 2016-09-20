@@ -47,14 +47,13 @@ import javax.servlet.jsp.SkipPageException;
  */
 final public class PageContext {
 
-	// TODO: Pass these through executor service as well
-	private static final ThreadLocal<ServletContext> servletContext = new ThreadLocal<ServletContext>();
+	static final ThreadLocal<ServletContext> servletContext = new ThreadLocal<ServletContext>();
 
-	private static final ThreadLocal<HttpServletRequest> request = new ThreadLocal<HttpServletRequest>();
+	static final ThreadLocal<HttpServletRequest> request = new ThreadLocal<HttpServletRequest>();
 
-	private static final ThreadLocal<HttpServletResponse> response = new ThreadLocal<HttpServletResponse>();
+	static final ThreadLocal<HttpServletResponse> response = new ThreadLocal<HttpServletResponse>();
 
-	private static final ThreadLocal<PrintWriter> out = new ThreadLocal<PrintWriter>();
+	static final ThreadLocal<PrintWriter> out = new ThreadLocal<PrintWriter>();
 
 	public static interface PageContextCallable {
 		void call() throws ServletException, IOException, SkipPageException;
@@ -95,7 +94,12 @@ final public class PageContext {
 	 * 
 	 * @see  Page#invoke(com.semanticcms.core.servlet.Page.Body)
 	 */
-	public static void newPageContextSkip(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallableSkip target) throws ServletException, IOException, SkipPageException {
+	public static void newPageContextSkip(
+		ServletContext newServletContext,
+		HttpServletRequest newRequest,
+		HttpServletResponse newResponse,
+		PageContextCallableSkip target
+	) throws ServletException, IOException, SkipPageException {
 		final ServletContext oldServletContext = servletContext.get();
 		final HttpServletRequest oldRequest = request.get();
 		final HttpServletResponse oldResponse = response.get();
