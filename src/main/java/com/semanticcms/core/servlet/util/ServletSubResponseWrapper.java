@@ -39,13 +39,6 @@ import javax.servlet.ServletResponseWrapper;
 
 /**
  * <p>
- * <b>This does not implemement {@link ServletResponseWrapper} and use of it is in violation
- * of the specifications.</b>  TODO: When used in conjunction with new threads (or threads
- * from your own pool), Tomcat 7.0 does not noticed you switched the response due to its
- * use of ThreadLocal to enforce the spec.  This is very hackish and fragile - use at
- * your own risk.
- * </p>
- * <p>
  * Wraps a servlet response with the intent to operate as a concurrent sub response.
  * Any changes made to the response will only affect this response and will not be passed
  * along to the wrapped response.
@@ -58,24 +51,21 @@ import javax.servlet.ServletResponseWrapper;
  * This class is not thread safe.
  * </p>
  */
-public class ServletSubResponse implements ServletResponse {
+public class ServletSubResponseWrapper extends ServletResponseWrapper {
 
 	private final ServletRequest req;
-	private final ServletResponse resp;
 	private String characterEncoding;
 	private String contentType;
 	private Locale locale;
 
 	/**
-	 * TODO: Always create temp file list in request instead of passing req in here.
-	 *
 	 * @param req  The request context that contains the temp file list for auto temp files;
 	 *             getAttribute and setAttribute must write through to the original request
 	 *             for proper temp file cleanup.
 	 */
-	public ServletSubResponse(ServletRequest req, ServletResponse resp) {
+	public ServletSubResponseWrapper(ServletRequest req, ServletResponse resp) {
+		super(resp);
 		this.req = req;
-		this.resp = resp;
 		characterEncoding = resp.getCharacterEncoding();
 		contentType = resp.getContentType();
 		locale = resp.getLocale();

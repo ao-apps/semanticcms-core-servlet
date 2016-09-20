@@ -32,26 +32,15 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 
 /**
- * <p>
- * <b>This does not implemement {@link ServletRequestWrapper} and use of it is in violation
- * of the specifications.</b>  TODO: When used in conjunction with new threads (or threads
- * from your own pool), Tomcat 7.0 does not noticed you switched the request due to its
- * use of ThreadLocal to enforce the spec.  This is very hackish and fragile - use at
- * your own risk.
- * </p>
  * <p>
  * Wraps a servlet request with the intent to operate as a concurrent sub request.
  * Any changes made to the request will only affect this request and will not be passed
@@ -66,37 +55,28 @@ import javax.servlet.ServletResponse;
  * This class is not thread safe.
  * </p>
  */
-public class ServletSubRequest implements ServletRequest {
+public class ServletSubRequestWrapper extends ServletRequestWrapper {
 
 	private static final boolean DEBUG = false;
 
-	private final ServletRequest req;
-
-	public ServletSubRequest(ServletRequest req) {
-		this.req = req;
+	public ServletSubRequestWrapper(ServletRequest req) {
+		super(req);
 	}
 
 	/**
 	 * These attributes are hidden.  They exist when queried on request
-	 * but are not returned as part of all attribute names. (At least
-	 * in Tomcat 7.0 - is this a bug?)
+	 * but are not returned as part of all attribute names.
 	 */
 	private static final Set<String> hiddenAttributeNames = Collections.unmodifiableSet(
 		new HashSet<String>(
 			Arrays.asList(
-				//"org.apache.catalina.core.DISPATCHER_TYPE",
-				//"org.apache.catalina.core.DISPATCHER_REQUEST_PATH",
-				//"org.apache.catalina.jsp_file",
-				RequestDispatcher.INCLUDE_REQUEST_URI,
-				RequestDispatcher.INCLUDE_CONTEXT_PATH,
-				RequestDispatcher.INCLUDE_SERVLET_PATH,
-				RequestDispatcher.INCLUDE_PATH_INFO,
-				RequestDispatcher.INCLUDE_QUERY_STRING,
-				RequestDispatcher.FORWARD_REQUEST_URI, 
-				RequestDispatcher.FORWARD_CONTEXT_PATH,
-				RequestDispatcher.FORWARD_SERVLET_PATH, 
-				RequestDispatcher.FORWARD_PATH_INFO,
-				RequestDispatcher.FORWARD_QUERY_STRING
+				"org.apache.catalina.core.DISPATCHER_TYPE",
+				"org.apache.catalina.core.DISPATCHER_REQUEST_PATH",
+				"org.apache.catalina.jsp_file",
+				"javax.servlet.include.servlet_path",
+				"javax.servlet.include.request_uri",
+				"javax.servlet.include.context_path",
+				"javax.servlet.include.path_info"
 			)
 		)
 	);
@@ -108,11 +88,11 @@ public class ServletSubRequest implements ServletRequest {
 		if(DEBUG) System.out.println("DEBUG: getAttribute: " + name);
 		if(
 			attributes != null
-			//&& !hiddenAttributeNames.contains(name)
+			&& !hiddenAttributeNames.contains(name)
 		) {
 			return attributes.get(name);
 		} else {
-			return req.getAttribute(name);
+			return super.getAttribute(name);
 		}
 	}
 
@@ -129,7 +109,7 @@ public class ServletSubRequest implements ServletRequest {
 			}
 			return Collections.enumeration(nonHiddenAttributeNames);
 		} else {
-			return req.getAttributeNames();
+			return super.getAttributeNames();
 		}
 	}
 
@@ -146,17 +126,17 @@ public class ServletSubRequest implements ServletRequest {
 			Map<String,Object> newAttributes = new LinkedHashMap<String,Object>();
 			for(String hiddenAttrName : hiddenAttributeNames) {
 				if(DEBUG) System.out.println("DEBUG: setAttribute: hiddenAttrName: " + hiddenAttrName);
-				Object hiddenAttrVal = req.getAttribute(hiddenAttrName);
+				Object hiddenAttrVal = super.getAttribute(hiddenAttrName);
 				if(DEBUG) System.out.println("DEBUG: setAttribute: hiddenAttrVal: " + hiddenAttrVal);
 				if(hiddenAttrVal != null) {
 					newAttributes.put(hiddenAttrName, hiddenAttrVal);
 				}
 			}
-			Enumeration<String> attrNames = req.getAttributeNames();
+			Enumeration<String> attrNames = super.getAttributeNames();
 			while(attrNames.hasMoreElements()) {
 				String attrName = attrNames.nextElement();
 				if(DEBUG) System.out.println("DEBUG: setAttribute: attrName: " + attrName);
-				Object attrVal = req.getAttribute(attrName);
+				Object attrVal = super.getAttribute(attrName);
 				if(DEBUG) System.out.println("DEBUG: setAttribute: attrVal: " + attrVal);
 				// Check for null in case attribute was removed during iteration
 				if(attrVal != null) {
@@ -184,7 +164,7 @@ public class ServletSubRequest implements ServletRequest {
 		if(characterEncodingSet) {
 			return characterEncoding;
 		} else {
-			return req.getCharacterEncoding();
+			return super.getCharacterEncoding();
 		}
 	}
 
@@ -196,127 +176,13 @@ public class ServletSubRequest implements ServletRequest {
 	}
 
 	@Override
-	public int getContentLength() {
-		return  req.getContentLength();
-	}
-
-	@Override
-	public String getContentType() {
-		return req.getContentType();
-	}
-
-	@Override
 	public ServletInputStream getInputStream() throws IOException {
 		throw new IllegalStateException("Not allowed on concurrent request");
 	}
 
 	@Override
-	public String getParameter(String name) {
-		return req.getParameter(name);
-	}
-
-	@Override
-	public Map<String, String[]> getParameterMap() {
-		return req.getParameterMap();
-	}
-
-	@Override
-	public Enumeration<String> getParameterNames() {
-		return req.getParameterNames();
-	}
-
-	@Override
-	public String[] getParameterValues(String name) {
-		return req.getParameterValues(name);
-	}
-
-	@Override
-	public String getProtocol() {
-		return req.getProtocol();
-	}
-
-	@Override
-	public String getScheme() {
-		return req.getScheme();
-	}
-
-	@Override
-	public String getServerName() {
-		return req.getServerName();
-	}
-
-	@Override
-	public int getServerPort() {
-		return req.getServerPort();
-	}
-
-	@Override
 	public BufferedReader getReader() throws IOException {
 		throw new IllegalStateException("Not allowed on concurrent request");
-	}
-
-	@Override
-	public String getRemoteAddr() {
-		return req.getRemoteAddr();
-	}
-
-	@Override
-	public String getRemoteHost() {
-		return req.getRemoteHost();
-	}
-
-	@Override
-	public Locale getLocale() {
-		return req.getLocale();
-	}
-
-	@Override
-	public Enumeration<Locale> getLocales() {
-		return req.getLocales();
-	}
-
-	@Override
-	public boolean isSecure() {
-		return req.isSecure();
-	}
-
-	@Override
-	public RequestDispatcher getRequestDispatcher(String path) {
-		return req.getRequestDispatcher(path);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	@Override
-	public String getRealPath(String path) {
-		return req.getRealPath(path);
-	}
-
-	@Override
-	public int getRemotePort() {
-		return req.getRemotePort();
-	}
-
-	@Override
-	public String getLocalName() {
-		return req.getLocalName();
-	}
-
-	@Override
-	public String getLocalAddr() {
-		return req.getLocalAddr();
-	}
-
-	@Override
-	public int getLocalPort() {
-		return req.getLocalPort();
-	}
-
-	@Override
-	public ServletContext getServletContext() {
-		return req.getServletContext();
 	}
 
 	@Override
@@ -342,10 +208,5 @@ public class ServletSubRequest implements ServletRequest {
 	@Override
 	public AsyncContext getAsyncContext() {
 		throw new IllegalStateException("Not allowed on concurrent request");
-	}
-
-	@Override
-	public DispatcherType getDispatcherType() {
-		return req.getDispatcherType();
 	}
 }
