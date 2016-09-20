@@ -647,6 +647,10 @@ public class SemanticCMS {
 
 	private final boolean concurrentSubrequests;
 
+	public boolean getConcurrentSubrequests() {
+		return concurrentSubrequests;
+	}
+
 	private final Executors executors;
 
 	/**
@@ -654,10 +658,6 @@ public class SemanticCMS {
 	 */
 	public Executors getExecutors() {
 		return executors;
-	}
-
-	public boolean getConcurrentSubrequests() {
-		return concurrentSubrequests;
 	}
 	// </editor-fold>
 }
