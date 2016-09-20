@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet.util;
 
+import com.aoindustries.io.TempFileList;
 import com.aoindustries.lang.NotImplementedException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -44,11 +44,8 @@ public class HttpServletSubResponseWrapper extends ServletSubResponseWrapper imp
 
 	private HttpServletResponse resp;
 
-	/**
-	 * @see  ConcurrentServletResponseWrapper#ConcurrentServletResponseWrapper(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
-	 */
-	public HttpServletSubResponseWrapper(HttpServletRequest req, HttpServletResponse resp) {
-		super(req, resp);
+	public HttpServletSubResponseWrapper(HttpServletResponse resp, TempFileList tempFileList) {
+		super(resp, tempFileList);
 		this.resp = resp;
 	}
 

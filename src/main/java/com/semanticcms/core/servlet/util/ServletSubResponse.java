@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletResponseWrapper;
 
@@ -60,8 +59,8 @@ import javax.servlet.ServletResponseWrapper;
  */
 public class ServletSubResponse implements ServletResponse {
 
-	private final ServletRequest req;
 	private final ServletResponse resp;
+	private final TempFileList tempFileList;
 	private String characterEncoding;
 	private String contentType;
 	private Locale locale;
@@ -73,9 +72,9 @@ public class ServletSubResponse implements ServletResponse {
 	 *             getAttribute and setAttribute must write through to the original request
 	 *             for proper temp file cleanup.
 	 */
-	public ServletSubResponse(ServletRequest req, ServletResponse resp) {
-		this.req = req;
+	public ServletSubResponse(ServletResponse resp, TempFileList tempFileList) {
 		this.resp = resp;
+		this.tempFileList = tempFileList;
 		characterEncoding = resp.getCharacterEncoding();
 		contentType = resp.getContentType();
 		locale = resp.getLocale();
@@ -105,7 +104,7 @@ public class ServletSubResponse implements ServletResponse {
 			// Enable temp files if temp file context active
 			capturedOut = TempFileContext.wrapTempFileList(
 				new SegmentedWriter(),
-				req,
+				tempFileList,
 				// Java 1.8: AutoTempFileWriter::new
 				new TempFileContext.Wrapper<BufferWriter>() {
 					@Override
