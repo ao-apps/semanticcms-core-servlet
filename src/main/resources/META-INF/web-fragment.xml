@@ -78,6 +78,17 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<dispatcher>REQUEST</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
+	<!-- Sets up the cache for page captures. -->
+	<filter>
+		<filter-name>CapturePageCacheFilter</filter-name>
+		<filter-class>com.semanticcms.core.servlet.CapturePageCacheFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CapturePageCacheFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
 	<!-- Servlet to rewrite CSS files to include lastModified parameters -->
 	<servlet>
 		<servlet-name>LastModifiedServlet</servlet-name>
