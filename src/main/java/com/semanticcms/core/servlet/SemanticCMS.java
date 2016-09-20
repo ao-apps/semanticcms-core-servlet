@@ -76,8 +76,13 @@ public class SemanticCMS {
 	private SemanticCMS(ServletContext servletContext) throws IOException {
 		this.servletContext = servletContext;
 		this.demoMode = Boolean.parseBoolean(servletContext.getInitParameter(DEMO_MODE_INIT_PARAM));
+		int numProcessors = Runtime.getRuntime().availableProcessors();
+		this.concurrentSubrequests =
+			numProcessors > 1
+			&& Boolean.parseBoolean(servletContext.getInitParameter(CONCURRENT_SUBREQUESTS_INIT_PARAM))
+		;
 		this.rootBook = initBooks();
-		this.executorService = new ExecutorService();
+		this.executors = new Executors();
 	}
 
 	/**
@@ -634,21 +639,25 @@ public class SemanticCMS {
 	// <editor-fold defaultstate="collapsed" desc="Concurrency">
 
 	/**
-	 * TODO: Create init param to allow disabling this.
+	 * Initialization parameter, that when set to "true" will enable the
+	 * concurrent subrequest processing feature.  This is still experimental
+	 * and is off by default.
 	 */
-	private static final boolean CONCURRENT_SUBREQUESTS_ENABLED = false;
+	private static final String CONCURRENT_SUBREQUESTS_INIT_PARAM = SemanticCMS.class.getName() + ".concurrentSubrequests";
 
-	private final ExecutorService executorService;
+	private final boolean concurrentSubrequests;
+
+	private final Executors executors;
 
 	/**
 	 * A shared executor available to all components.
 	 */
-	public ExecutorService getExecutorService() {
-		return executorService;
+	public Executors getExecutors() {
+		return executors;
 	}
 
-	public boolean getConcurrentSubrequestsEnabled() {
-		return CONCURRENT_SUBREQUESTS_ENABLED;
+	public boolean getConcurrentSubrequests() {
+		return concurrentSubrequests;
 	}
 	// </editor-fold>
 }
