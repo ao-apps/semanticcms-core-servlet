@@ -63,6 +63,7 @@ public class CopyrightUtils {
 		HttpServletResponse response,
 		com.semanticcms.core.model.Page page
 	) throws ServletException, IOException {
+		// TODO: Implemented as depth-first traversel from page up through parents
 		Copyright copyright = findCopyrightRecursive(
 			servletContext,
 			request,
