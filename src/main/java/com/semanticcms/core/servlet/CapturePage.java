@@ -37,6 +37,7 @@ import com.semanticcms.core.servlet.util.ThreadSafeHttpServletRequest;
 import com.semanticcms.core.servlet.util.ThreadSafeHttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -473,11 +474,11 @@ public class CapturePage {
 		);
 	}
 
-	public static interface ChildPageFilter {
+	public static interface TraversalEdges {
 		/**
 		 * Gets the child pages to consider for the given page during a traversal.
 		 */
-		boolean includeChildPage(Page page, PageRef childRef);
+		Collection<PageRef> getEdges(Page page);
 	}
 
 	public static interface PageHandler {
@@ -500,7 +501,7 @@ public class CapturePage {
 		PageRef rootRef,
 		CaptureLevel level,
 		PageHandler preHandler,
-		ChildPageFilter childPageFilter,
+		TraversalEdges edges,
 		PageHandler postHandler
 	) throws ServletException, IOException {
 		traversePagesDepthFirst(
@@ -516,7 +517,7 @@ public class CapturePage {
 			),
 			level,
 			preHandler,
-			childPageFilter,
+			edges,
 			postHandler
 		);
 	}
@@ -532,7 +533,7 @@ public class CapturePage {
 		Page root,
 		CaptureLevel level,
 		PageHandler preHandler,
-		ChildPageFilter childPageFilter,
+		TraversalEdges edges,
 		PageHandler postHandler
 	) throws ServletException, IOException {
 		traversePagesDepthFirstRecurse(
@@ -542,7 +543,7 @@ public class CapturePage {
 			root,
 			level,
 			preHandler,
-			childPageFilter,
+			edges,
 			postHandler,
 			SemanticCMS.getInstance(servletContext),
 			TempFileContext.getTempFileList(request),
@@ -561,7 +562,7 @@ public class CapturePage {
 		Page page,
 		final CaptureLevel level,
 		PageHandler preHandler,
-		ChildPageFilter childPageFilter,
+		TraversalEdges edges,
 		PageHandler postHandler,
 		SemanticCMS semanticCMS,
 		TempFileList tempFileList,
@@ -572,13 +573,10 @@ public class CapturePage {
 		if(preHandler != null) preHandler.handlePage(page);
 		List<PageRef> childRefs;
 		{
-			Set<PageRef> childRefSet = page.getChildPages();
+			Collection<PageRef> childRefSet = edges.getEdges(page);
 			childRefs = new ArrayList<PageRef>(childRefSet.size());
 			for(PageRef childRef : childRefSet) {
-				if(
-					!visited.contains(childRef)
-					&& childPageFilter.includeChildPage(page, childRef)
-				) {
+				if(!visited.contains(childRef)) {
 					childRefs.add(childRef);
 				}
 			}
@@ -686,7 +684,7 @@ public class CapturePage {
 						childPage,
 						level,
 						preHandler,
-						childPageFilter,
+						edges,
 						postHandler,
 						semanticCMS,
 						tempFileList,
