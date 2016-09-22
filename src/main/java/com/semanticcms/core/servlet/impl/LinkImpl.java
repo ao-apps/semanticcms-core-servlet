@@ -22,8 +22,10 @@
  */
 package com.semanticcms.core.servlet.impl;
 
+import com.aoindustries.encoding.Coercion;
 import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
+import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.net.HttpParameters;
@@ -43,6 +45,8 @@ import com.semanticcms.core.servlet.View;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URLEncoder;
+import javax.el.ELContext;
+import javax.el.ValueExpression;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -135,6 +139,7 @@ final public class LinkImpl {
 
 	public static <E extends Throwable> void writeLinkImpl(
 		ServletContext servletContext,
+		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
@@ -145,7 +150,7 @@ final public class LinkImpl {
 		String viewName,
 		boolean small,
 	    HttpParameters params,
-		String clazz,
+		Object clazz,
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
 		// Find the view
@@ -269,10 +274,14 @@ final public class LinkImpl {
 						LastModifiedServlet.AddLastModifiedWhen.FALSE
 					);
 				}
+				if(clazz instanceof ValueExpression) {
+					ValueExpression expr = (ValueExpression)clazz;
+					clazz = expr.getValue(elContext);
+				}
 				if(clazz != null) {
-					if(!clazz.isEmpty()) {
+					if(!Coercion.isEmpty(clazz)) {
 						out.write(" class=\"");
-						encodeTextInXhtmlAttribute(clazz, out);
+						Coercion.write(clazz, textInXhtmlAttributeEncoder, out);
 						out.write("\"");
 					}
 				} else {
