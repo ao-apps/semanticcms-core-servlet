@@ -30,6 +30,7 @@ import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.net.HttpParameters;
 import com.aoindustries.servlet.http.LastModifiedServlet;
+import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -137,49 +138,62 @@ final public class LinkImpl {
 		out.append('?');
 	}
 
+	/**
+	 * @param book  either String of ValueExpression that returns String
+	 * @param page  either String of ValueExpression that returns String
+	 * @param element  either String of ValueExpression that returns String
+	 * @param view  either String of ValueExpression that returns String
+	 */
 	public static <E extends Throwable> void writeLinkImpl(
 		ServletContext servletContext,
 		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
-		String book,
-		String page,
-		String element,
+		Object book,
+		Object page,
+		Object element,
 		boolean allowGeneratedElement,
-		String viewName,
+		Object viewName,
 		boolean small,
 	    HttpParameters params,
 		Object clazz,
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
-		// Find the view
-		final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
-		final View view = semanticCMS.getViewsByName().get(viewName);
-		if(view == null) throw new ServletException("View not found: " + viewName);
-		final boolean isDefaultView = view.isDefault();
-		if(page==null && element==null && isDefaultView) throw new ServletException("If neither element nor view provided, then page is required.");
-
 		// Get the current capture state
 		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
+			// Evaluate expressions
+			String bookStr = Coercion.nullIfEmpty(resolveValue(book, String.class, elContext));
+			String pageStr = Coercion.nullIfEmpty(resolveValue(page, String.class, elContext));
 
 			final Node currentNode = CurrentNode.getCurrentNode(request);
 			final Page currentPage = CurrentPage.getCurrentPage(request);
 
 			// Use current page when page not set
 			PageRef targetPageRef;
-			if(page == null) {
-				if(book != null) throw new ServletException("page must be provided when book is provided.");
+			if(pageStr == null) {
+				if(bookStr != null) throw new ServletException("page must be provided when book is provided.");
 				if(currentPage == null) throw new ServletException("link must be nested in page when page attribute not set.");
 				targetPageRef = currentPage.getPageRef();
 			} else {
-				targetPageRef = PageRefResolver.getPageRef(servletContext, request, book, page);
+				targetPageRef = PageRefResolver.getPageRef(servletContext, request, bookStr, pageStr);
 			}
 			// Add page links
 			if(currentNode != null) currentNode.addPageLink(targetPageRef);
 			if(captureLevel == CaptureLevel.BODY) {
 				final String responseEncoding = response.getCharacterEncoding();
+
+				// Evaluate expressions
+				String elementStr = Coercion.nullIfEmpty(resolveValue(element, String.class, elContext));
+				String viewNameStr = Coercion.nullIfEmpty(resolveValue(viewName, String.class, elContext));
+				if(viewNameStr == null) viewNameStr = SemanticCMS.DEFAULT_VIEW_NAME;
+
+				// Find the view
+				final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+				final View view = semanticCMS.getViewsByName().get(viewNameStr);
+				if(view == null) throw new ServletException("View not found: " + viewNameStr);
+				final boolean isDefaultView = view.isDefault();
 
 				// Capture the page
 				Page targetPage;
@@ -190,8 +204,8 @@ final public class LinkImpl {
 					currentPage != null
 					&& targetPageRef.equals(currentPage.getPageRef())
 					&& (
-						element==null
-						|| currentPage.getElementsById().containsKey(element)
+						elementStr==null
+						|| currentPage.getElementsById().containsKey(elementStr)
 					)
 				) {
 					targetPage = currentPage;
@@ -202,17 +216,17 @@ final public class LinkImpl {
 						request,
 						response,
 						targetPageRef,
-						element==null ? CaptureLevel.PAGE : CaptureLevel.META
+						elementStr==null ? CaptureLevel.PAGE : CaptureLevel.META
 					);
 				}
 
 				// Find the element
 				Element targetElement;
-				if(element != null && targetPage != null) {
-					targetElement = targetPage.getElementsById().get(element);
-					if(targetElement == null) throw new ServletException("Element not found in target page: " + element);
-					if(!allowGeneratedElement && targetPage.getGeneratedIds().contains(element)) throw new ServletException("Not allowed to link to a generated element id, set an explicit id on the target element: " + element);
-					if(targetElement.isHidden()) throw new ServletException("Not allowed to link to a hidden element: " + element);
+				if(elementStr != null && targetPage != null) {
+					targetElement = targetPage.getElementsById().get(elementStr);
+					if(targetElement == null) throw new ServletException("Element not found in target page: " + elementStr);
+					if(!allowGeneratedElement && targetPage.getGeneratedIds().contains(elementStr)) throw new ServletException("Not allowed to link to a generated element id, set an explicit id on the target element: " + elementStr);
+					if(targetElement.isHidden()) throw new ServletException("Not allowed to link to a hidden element: " + elementStr);
 				} else {
 					targetElement = null;
 				}
@@ -225,7 +239,7 @@ final public class LinkImpl {
 				out.write(small ? "<span" : "<a");
 				String href;
 				{
-					if(element == null) {
+					if(elementStr == null) {
 						// Link to page
 						if(index != null && isDefaultView) {
 							href = '#' + PageIndex.getRefId(index, null);
@@ -236,17 +250,17 @@ final public class LinkImpl {
 								boolean hasQuestion = url.lastIndexOf("?") != -1;
 								url
 									.append(hasQuestion ? "&view=" : "?view=")
-									.append(URLEncoder.encode(viewName, responseEncoding));
+									.append(URLEncoder.encode(viewNameStr, responseEncoding));
 							}
 							href = url.toString();
 						}
 					} else {
 						if(index != null && isDefaultView) {
 							// Link to target in indexed page (view=all mode)
-							href = '#' + PageIndex.getRefId(index, element);
+							href = '#' + PageIndex.getRefId(index, elementStr);
 						} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
 							// Link to target on same page
-							href = '#' + element;
+							href = '#' + elementStr;
 						} else {
 							// Link to target on different page (or same page, different view)
 							StringBuilder url = new StringBuilder();
@@ -255,9 +269,9 @@ final public class LinkImpl {
 								boolean hasQuestion = url.lastIndexOf("?") != -1;
 								url
 									.append(hasQuestion ? "&view=" : "?view=")
-									.append(URLEncoder.encode(viewName, responseEncoding));
+									.append(URLEncoder.encode(viewNameStr, responseEncoding));
 							}
-							url.append('#').append(element);
+							url.append('#').append(elementStr);
 							href = url.toString();
 						}
 					}
@@ -305,7 +319,7 @@ final public class LinkImpl {
 					} else if(targetPage!=null) {
 						encodeTextInXhtml(targetPage.getTitle(), out);
 					} else {
-						writeBrokenPathInXhtml(targetPageRef, element, out);
+						writeBrokenPathInXhtml(targetPageRef, elementStr, out);
 					}
 					if(index != null) {
 						out.write("<sup>[");
