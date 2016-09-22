@@ -111,18 +111,20 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 				PrintWriter out = response.getWriter();
 				if(elementKey == null) {
 					// Write now
-					try {
-						writeTo(out, new ServletElementContext(servletContext, request, response));
-					} catch(ServletException e) {
-						throw e;
-					} catch(IOException e) {
-						throw e;
-					} catch(SkipPageException e) {
-						throw e;
-					} catch(RuntimeException e) {
-						throw e;
-					} catch(Exception e) {
-						throw new ServletException(e);
+					if(captureLevel == CaptureLevel.BODY) {
+						try {
+							writeTo(out, new ServletElementContext(servletContext, request, response));
+						} catch(ServletException e) {
+							throw e;
+						} catch(IOException e) {
+							throw e;
+						} catch(SkipPageException e) {
+							throw e;
+						} catch(RuntimeException e) {
+							throw e;
+						} catch(Exception e) {
+							throw new ServletException(e);
+						}
 					}
 				} else {
 					// Write an element marker instead
