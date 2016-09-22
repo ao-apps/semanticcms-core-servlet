@@ -122,6 +122,7 @@ public class NavigationTree {
 	public void invoke() throws ServletException, IOException, SkipPageException {
 		NavigationTreeImpl.writeNavigationTreeImpl(
 			servletContext,
+			null, // No ELContext for servlets
 			request,
 			response,
 			response.getWriter(),
