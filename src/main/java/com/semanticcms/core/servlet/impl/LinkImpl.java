@@ -275,8 +275,7 @@ final public class LinkImpl {
 					);
 				}
 				if(clazz instanceof ValueExpression) {
-					ValueExpression expr = (ValueExpression)clazz;
-					clazz = expr.getValue(elContext);
+					clazz = ((ValueExpression)clazz).getValue(elContext);
 				}
 				if(clazz != null) {
 					if(!Coercion.isEmpty(clazz)) {
