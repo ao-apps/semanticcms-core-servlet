@@ -45,7 +45,7 @@ public class Link {
 	private String view = SemanticCMS.DEFAULT_VIEW_NAME;
 	private boolean small;
 	private HttpParameters params;
-	private String clazz;
+	private Object clazz;
 
 	public Link(
 		ServletContext servletContext,
@@ -179,7 +179,7 @@ public class Link {
 		return this;
 	}
 
-	public Link clazz(String clazz) {
+	public Link clazz(Object clazz) {
 		this.clazz = clazz;
 		return this;
 	}
@@ -198,6 +198,7 @@ public class Link {
 	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
 		LinkImpl.writeLinkImpl(
 			servletContext,
+			null, // No ELContext for servlets
 			request,
 			response,
 			response.getWriter(),
