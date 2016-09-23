@@ -28,6 +28,7 @@ import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
+import com.aoindustries.util.concurrent.Executor;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
@@ -279,13 +280,10 @@ public class CapturePage {
 				notCachedList.addAll(pageRefs);
 			}
 
-			SemanticCMS semanticCMS;
 			int notCachedSize = notCachedList.size();
 			if(
 				notCachedSize > 1
-				&& (
-					semanticCMS = SemanticCMS.getInstance(servletContext)
-				).useConcurrentSubrequests(request)
+				&& CountConcurrencyFilter.areConcurrentSubrequestsRecommended(request)
 			) {
 				// Concurrent implementation
 				TempFileList tempFileList = TempFileContext.getTempFileList(request);
@@ -315,7 +313,7 @@ public class CapturePage {
 				}
 				List<Page> notCachedResults;
 				try {
-					notCachedResults = semanticCMS.getExecutors().getPerProcessor().callAll(tasks);
+					notCachedResults = SemanticCMS.getInstance(servletContext).getExecutors().getPerProcessor().callAll(tasks);
 				} catch(InterruptedException e) {
 					throw new ServletException(e);
 				} catch(ExecutionException e) {
@@ -434,7 +432,9 @@ public class CapturePage {
 			preHandler,
 			edges,
 			postHandler,
-			SemanticCMS.getInstance(servletContext),
+			CountConcurrencyFilter.areConcurrentSubrequestsRecommended(request)
+				? SemanticCMS.getInstance(servletContext).getExecutors().getPerProcessor()
+				: null,
 			TempFileContext.getTempFileList(request),
 			level == CaptureLevel.BODY ? null : CapturePageCacheFilter.getCache(request),
 			new HashSet<PageRef>()
@@ -453,7 +453,7 @@ public class CapturePage {
 		PageHandler preHandler,
 		TraversalEdges edges,
 		PageHandler postHandler,
-		SemanticCMS semanticCMS,
+		Executor concurrentSubrequestExecutor,
 		TempFileList tempFileList,
 		final PageCache cache,
 		Set<PageRef> visited
@@ -506,7 +506,7 @@ public class CapturePage {
 				int notCachedSize = notCachedIndexes.size();
 				if(
 					notCachedSize > 1
-					&& semanticCMS.useConcurrentSubrequests(request) // TODO: Look this up once and pass as variable through recursion?
+					&& concurrentSubrequestExecutor != null
 				) {
 					// Concurrent implementation
 					HttpServletRequest threadSafeReq = new ThreadSafeHttpServletRequest(request);
@@ -535,7 +535,7 @@ public class CapturePage {
 					}
 					List<Page> notCachedResults;
 					try {
-						notCachedResults = semanticCMS.getExecutors().getPerProcessor().callAll(tasks);
+						notCachedResults = concurrentSubrequestExecutor.callAll(tasks);
 					} catch(InterruptedException e) {
 						throw new ServletException(e);
 					} catch(ExecutionException e) {
@@ -580,7 +580,7 @@ public class CapturePage {
 						preHandler,
 						edges,
 						postHandler,
-						semanticCMS,
+						concurrentSubrequestExecutor,
 						tempFileList,
 						cache,
 						visited
