@@ -82,7 +82,7 @@ public class CapturePage {
 			CaptureLevel level
 		) {
 			this.pageRef = pageRef;
-			if(level == CaptureLevel.BODY) throw new IllegalArgumentException("Body captures are not cached");
+			assert level != CaptureLevel.BODY : "Body captures are not cached";
 			this.level = level;
 		}
 
@@ -96,11 +96,17 @@ public class CapturePage {
 			;
 		}
 
+		private int hash;
+
 		@Override
 		public int hashCode() {
-			int hash = level.hashCode();
-			hash = hash * 31 + pageRef.hashCode();
-			return hash;
+			int h = hash;
+			if(h == 0) {
+				h = level.hashCode();
+				h = h * 31 + pageRef.hashCode();
+				hash = h;
+			}
+			return h;
 		}
 
 		@Override
@@ -115,6 +121,8 @@ public class CapturePage {
 	 * Also validates parent-child and child-parent relationships if the other related pages happened to already be captured and cached.
 	 *
 	 * TODO: Within the scope of one overall request, avoid capturing the same page at the same time (CurrencyLimiter applied to sub requests), is there a reasonable way to catch deadlock conditions?
+	 *
+	 * @param level  The minimum page capture level, note that a higher level might be substituted, such as a META capture in place of a PAGE request.
 	 */
 	public static Page capturePage(
 		ServletContext servletContext,
@@ -144,7 +152,7 @@ public class CapturePage {
 		NullArgumentException.checkNotNull(level, "level");
 
 		// Don't use cache for full body captures
-		final boolean useCache = level != CaptureLevel.BODY;
+		boolean useCache = level != CaptureLevel.BODY;
 
 		// cacheKey will be null when this capture is not to be cached
 		final CapturePageCacheKey cacheKey;
@@ -154,6 +162,12 @@ public class CapturePage {
 			cacheKey = new CapturePageCacheKey(pageRef, level);
 			synchronized(cache) {
 				capturedPage = cache.get(cacheKey);
+				if(capturedPage == null && level == CaptureLevel.PAGE) {
+					// Look for meta in place of page
+					capturedPage = cache.get(new CapturePageCacheKey(pageRef, CaptureLevel.META));
+				}
+				// Set useCache = false to not put back into the cache unnecessarily below
+				useCache = capturedPage == null;
 			}
 		} else {
 			cacheKey = null;
@@ -234,6 +248,7 @@ public class CapturePage {
 				// Add to cache
 				cache.put(cacheKey, capturedPage);
 			}
+			// TODO: Benchmark without parent verification
 			// Verify parents that happened to already be cached
 			if(!capturedPage.getAllowParentMismatch()) {
 				for(PageRef parentRef : capturedPage.getParentPages()) {
@@ -376,8 +391,11 @@ public class CapturePage {
 			if(level != CaptureLevel.BODY) {
 				// Check cache before queuing on different threads, building list of those not in cache
 				for(PageRef pageRef : pageRefs) {
-					CapturePageCacheKey cacheKey = new CapturePageCacheKey(pageRef, level);
-					Page page = cache.get(cacheKey);
+					Page page = cache.get(new CapturePageCacheKey(pageRef, level));
+					if(page == null && level == CaptureLevel.PAGE) {
+						// Look for meta in place of page
+						page = cache.get(new CapturePageCacheKey(pageRef, CaptureLevel.META));
+					}
 					if(page != null) {
 						// Use cached value
 						results.put(pageRef, page);
@@ -593,6 +611,11 @@ public class CapturePage {
 						for(int i=0; i<childRefsSize; i++) {
 							PageRef childRef = childRefs.get(i);
 							Page cached = cache.get(new CapturePageCacheKey(childRef, level));
+							if(cached == null && level == CaptureLevel.PAGE) {
+								// Look for meta in place of page
+								cached = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
+								if(cached != null) System.out.println("TODO: Got traversal meta in place of page: " + childRef);
+							}
 							if(cached != null) {
 								childPageList.add(cached);
 							} else {
