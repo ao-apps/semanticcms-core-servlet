@@ -86,7 +86,7 @@ public class CountConcurrencyFilter extends com.aoindustries.servlet.filter.Coun
 	 * <li>Request concurrency must be less than the executor per-processor thread limit: {@link #isConcurrentProcessingRecommended(javax.servlet.ServletRequest)}</li>
 	 * </ol>
 	 */
-	public static boolean areConcurrentSubrequestsRecommended(ServletRequest request) {
+	public static boolean useConcurrentSubrequests(ServletRequest request) {
 		Boolean concurrentSubrequestsRecommended = (Boolean)request.getAttribute(CONCURRENT_SUBREQUESTS_RECOMMENDED_REQUEST_ATTRIBUTE_NAME);
 		if(concurrentSubrequestsRecommended == null) throw new IllegalStateException(CountConcurrencyFilter.class.getName() + " filter not active on request");
 		return concurrentSubrequestsRecommended;
