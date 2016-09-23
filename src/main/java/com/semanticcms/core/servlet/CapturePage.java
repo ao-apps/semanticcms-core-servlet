@@ -112,15 +112,9 @@ public class CapturePage {
 		if(useCache) {
 			// Check the cache
 			cacheKey = new PageCache.Key(pageRef, level);
-			synchronized(cache) {
-				capturedPage = cache.get(cacheKey);
-				if(capturedPage == null && level == CaptureLevel.PAGE) {
-					// Look for meta in place of page
-					capturedPage = cache.get(pageRef, CaptureLevel.META);
-				}
-				// Set useCache = false to not put back into the cache unnecessarily below
-				useCache = capturedPage == null;
-			}
+			capturedPage = cache.get(cacheKey);
+			// Set useCache = false to not put back into the cache unnecessarily below
+			useCache = capturedPage == null;
 		} else {
 			cacheKey = null;
 			capturedPage = null;
@@ -196,10 +190,8 @@ public class CapturePage {
 		}
 		assert capturedPage != null;
 		if(useCache) {
-			synchronized(cache) {
-				// Add to cache
-				cache.put(cacheKey, capturedPage);
-			}
+			// Add to cache
+			cache.put(cacheKey, capturedPage);
 		} else {
 			// Body capture, performance is not the main objective, perform full child and parent verifications,
 			// this will mean a "View All" will perform thorough verifications.
@@ -260,20 +252,14 @@ public class CapturePage {
 			List<PageRef> notCachedList = new ArrayList<PageRef>(size);
 			if(level != CaptureLevel.BODY) {
 				// Check cache before queuing on different threads, building list of those not in cache
-				synchronized(cache) {
-					for(PageRef pageRef : pageRefs) {
-						Page page = cache.get(pageRef, level);
-						if(page == null && level == CaptureLevel.PAGE) {
-							// Look for meta in place of page
-							page = cache.get(pageRef, CaptureLevel.META);
-						}
-						if(page != null) {
-							// Use cached value
-							results.put(pageRef, page);
-						} else {
-							// Will capture below
-							notCachedList.add(pageRef);
-						}
+				for(PageRef pageRef : pageRefs) {
+					Page page = cache.get(pageRef, level);
+					if(page != null) {
+						// Use cached value
+						results.put(pageRef, page);
+					} else {
+						// Will capture below
+						notCachedList.add(pageRef);
 					}
 				}
 			} else {
@@ -283,7 +269,7 @@ public class CapturePage {
 			int notCachedSize = notCachedList.size();
 			if(
 				notCachedSize > 1
-				&& CountConcurrencyFilter.areConcurrentSubrequestsRecommended(request)
+				&& CountConcurrencyFilter.useConcurrentSubrequests(request)
 			) {
 				// Concurrent implementation
 				TempFileList tempFileList = TempFileContext.getTempFileList(request);
@@ -432,7 +418,7 @@ public class CapturePage {
 			preHandler,
 			edges,
 			postHandler,
-			CountConcurrencyFilter.areConcurrentSubrequestsRecommended(request)
+			CountConcurrencyFilter.useConcurrentSubrequests(request)
 				? SemanticCMS.getInstance(servletContext).getExecutors().getPerProcessor()
 				: null,
 			TempFileContext.getTempFileList(request),
@@ -478,22 +464,15 @@ public class CapturePage {
 				List<PageRef> notCachedRefs;
 				if(level != CaptureLevel.BODY) {
 					notCachedRefs = new ArrayList<PageRef>(childRefsSize);
-					synchronized(cache) {
-						for(int i=0; i<childRefsSize; i++) {
-							PageRef childRef = childRefs.get(i);
-							Page cached = cache.get(childRef, level);
-							if(cached == null && level == CaptureLevel.PAGE) {
-								// Look for meta in place of page
-								cached = cache.get(childRef, CaptureLevel.META);
-								if(cached != null) System.out.println("TODO: Got traversal meta in place of page: " + childRef);
-							}
-							if(cached != null) {
-								childPageList.add(cached);
-							} else {
-								childPageList.add(null);
-								notCachedIndexes.add(i);
-								notCachedRefs.add(childRef);
-							}
+					for(int i=0; i<childRefsSize; i++) {
+						PageRef childRef = childRefs.get(i);
+						Page cached = cache.get(childRef, level);
+						if(cached != null) {
+							childPageList.add(cached);
+						} else {
+							childPageList.add(null);
+							notCachedIndexes.add(i);
+							notCachedRefs.add(childRef);
 						}
 					}
 				} else {

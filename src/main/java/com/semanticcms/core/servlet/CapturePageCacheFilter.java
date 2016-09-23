@@ -34,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Resolves the cache to use for page captures on the current request.
+ *
+ * @see  CountConcurrencyFilter  This must come after CountConcurrencyFilter
  */
 public class CapturePageCacheFilter implements Filter {
 
@@ -41,7 +43,7 @@ public class CapturePageCacheFilter implements Filter {
 
 	private static final String EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME = CapturePageCacheFilter.class.getName()+".exportCache";
 
-	private static final Object getCacheLock = new Object();
+	private static final Object exportCacheLock = new Object();
 
 	/**
 	 * The number of milliseconds after the export cache is no longer considered valid.
@@ -69,10 +71,19 @@ public class CapturePageCacheFilter implements Filter {
 	 */
 	private static class ExportPageCache {
 	
-		private final Object lock = new Object();
+		/**
+		 * When concurrent subrequests are enabled, use concurrent implementation.
+		 * When export mode without subrequests, use synchronized since exports are typically
+		 * done one request at a time.
+		 */
+		private final boolean concurrentSubrequests;
+
+		private ExportPageCache(boolean concurrentSubrequests) {
+			this.concurrentSubrequests = concurrentSubrequests;
+		}
 
 		/**
-		 * The time the cache will expire.
+		 * The time the cache started, used for expiration.
 		 */
 		private long cacheStart;
 		
@@ -83,19 +94,22 @@ public class CapturePageCacheFilter implements Filter {
 
 		/**
 		 * Invalidates the page cache if it has exceeded its TTL.
+		 *
+		 * @return true when the cache is now invalid
 		 */
-		void invalidateCache(long currentTime) {
-			synchronized(lock) {
-				if(
-					cache != null
-					&& (
-						currentTime >= (cacheStart + EXPORT_CAPTURE_PAGE_CACHE_TTL)
-						// Handle system time changes
-						|| currentTime <= (cacheStart - EXPORT_CAPTURE_PAGE_CACHE_TTL)
-					)
-				) {
-					cache = null;
-				}
+		boolean invalidateCache(long currentTime) {
+			assert Thread.holdsLock(exportCacheLock);
+			if(cache == null) {
+				return true;
+			} else if(
+				currentTime >= (cacheStart + EXPORT_CAPTURE_PAGE_CACHE_TTL)
+				// Handle system time changes
+				|| currentTime <= (cacheStart - EXPORT_CAPTURE_PAGE_CACHE_TTL)
+			) {
+				cache = null;
+				return true;
+			} else {
+				return false;
 			}
 		}
 
@@ -103,22 +117,23 @@ public class CapturePageCacheFilter implements Filter {
 		 * Invalidates the cache, if needed, then gets the resulting cache.
 		 */
 		PageCache getCache(long currentTime) {
-			synchronized(lock) {
-				invalidateCache(currentTime);
-				if(cache == null) {
-					cacheStart = currentTime;
-					cache = new PageCache();
-				}
-				return cache;
+			assert Thread.holdsLock(exportCacheLock);
+			invalidateCache(currentTime);
+			if(cache == null) {
+				cacheStart = currentTime;
+				cache = concurrentSubrequests ? new ConcurrentPageCache() : new SynchronizedPageCache();
 			}
+			return cache;
 		}
 	}
 
 	private ServletContext servletContext;
+	private boolean concurrentSubrequests;
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		servletContext = config.getServletContext();
+		concurrentSubrequests = SemanticCMS.getInstance(servletContext).getConcurrentSubrequests();
 	}
 
 	@Override
@@ -132,21 +147,29 @@ public class CapturePageCacheFilter implements Filter {
 			} else {
 				isExporting = false;
 			}
-			synchronized(getCacheLock) {
+			synchronized(exportCacheLock) {
 				ExportPageCache exportCache = (ExportPageCache)servletContext.getAttribute(EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME);
 				if(isExporting) {
 					if(exportCache == null) {
-						exportCache = new ExportPageCache();
+						exportCache = new ExportPageCache(concurrentSubrequests);
 						servletContext.setAttribute(EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME, exportCache);
 					}
 					cache = exportCache.getCache(System.currentTimeMillis());
 				} else {
 					// Clean-up stale export cache
 					if(exportCache != null) {
-						exportCache.invalidateCache(System.currentTimeMillis());
+						if(exportCache.invalidateCache(System.currentTimeMillis())) {
+							servletContext.removeAttribute(EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME);
+						}
 					}
-					// Request-level cache when not exporting
-					cache = new PageCache();
+				}
+			}
+			if(cache == null) {
+				// Request-level cache when not exporting
+				if(CountConcurrencyFilter.useConcurrentSubrequests(request)) {
+					cache = new ConcurrentPageCache();
+				} else {
+					cache = new SingleThreadPageCache();
 				}
 			}
 			try {

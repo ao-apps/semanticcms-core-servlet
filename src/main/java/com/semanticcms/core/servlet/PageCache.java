@@ -34,17 +34,14 @@ import javax.servlet.ServletException;
 
 /**
  * A page cache, whether shared between requests or used within the scope of a single request.
- *
- * This implementation is not thread safe, all uses must lock on this cache object itself.
- *
- * TODO: Make two versions, thread-safe and not thread safe, choose based on concurrency and runtime settings
  */
-class PageCache {
+abstract class PageCache {
 
 	/**
 	 * Enables the page parent-child relationships verification.
+	 * TODO: Benchmark on/off then remove if performance now negligible
 	 */
-	private static final boolean VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS = true;
+	protected static final boolean VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS = true;
 
 	/**
 	 * Caches pages that have been captured within the scope of a single request.
@@ -95,7 +92,7 @@ class PageCache {
 		}
 	}
 
-	private final Map<Key,Page> pageCache = new HashMap<Key,Page>();
+	private final Map<Key,Page> pageCache;
 
 	/**
 	 * Tracks which parent pages are still not verified.
@@ -105,7 +102,7 @@ class PageCache {
 	 * </ul>
 	 * TODO: Could be PageRef instead of Page?
 	 */
-	private final Map<PageRef,Set<Page>> unverifiedParentsByPageRef = VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null;
+	private final Map<PageRef,Set<Page>> unverifiedParentsByPageRef;
 
 	/**
 	 * Tracks which child pages are still not verified.
@@ -115,18 +112,45 @@ class PageCache {
 	 * </ul>
 	 * TODO: Could be PageRef instead of Page?
 	 */
-	private final Map<PageRef,Set<Page>> unverifiedChildrenByPageRef = VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null;
+	private final Map<PageRef,Set<Page>> unverifiedChildrenByPageRef;
 
+	PageCache(
+		Map<Key,Page> pageCache,
+		Map<PageRef,Set<Page>> unverifiedParentsByPageRef,
+		Map<PageRef,Set<Page>> unverifiedChildrenByPageRef
+	) {
+		this.pageCache = pageCache;
+		this.unverifiedParentsByPageRef = unverifiedParentsByPageRef;
+		this.unverifiedChildrenByPageRef = unverifiedChildrenByPageRef;
+	}
+
+	/**
+	 * Uses default HashMap implementations.
+	 */
 	PageCache() {
+		this(
+			new HashMap<Key,Page>(),
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null,
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null
+		);
 	}
 
+	/**
+	 * A lookup of level PAGE will also perform a lookup of META if not found.
+	 */
 	Page get(Key key) {
-		assert Thread.holdsLock(this);
-		return pageCache.get(key);
+		Page page = pageCache.get(key);
+		if(page == null && key.level == CaptureLevel.PAGE) {
+			// Look for meta in place of page
+			page = pageCache.get(new Key(key.pageRef, CaptureLevel.META));
+		}
+		return page;
 	}
 
+	/**
+	 * A lookup of level PAGE will also perform a lookup of META if not found.
+	 */
 	Page get(PageRef pageRef, CaptureLevel level) {
-		assert Thread.holdsLock(this);
 		return get(new Key(pageRef, level));
 	}
 
@@ -143,65 +167,73 @@ class PageCache {
 		}
 	}
 
-	// TODO: Allow null value to represent a body-level capture that has been verified?
 	void put(Key key, Page page) throws ServletException {
-		assert Thread.holdsLock(this);
+		// Check if found in other level, this is used to avoid verifying twice
+		Page otherLevelPage = pageCache.get(
+			new Key(key.pageRef, key.level==CaptureLevel.PAGE ? CaptureLevel.META : CaptureLevel.PAGE)
+		);
+		// Add to cache, verify if this page not yet put into cache
 		if(pageCache.put(key, page) == null) {
-			// Was added
+			// Was added, now avoid verifying twice typically.
+			// In the race condition where both levels check null then are added concurrently, this will verify twice
+			// rather than verify none.
 			if(VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS) {
-				final PageRef pageRef = page.getPageRef();
-				Set<PageRef> parentPages = null; // Set when first needed
-				Set<PageRef> childPages = null; // Set when first needed
-				// Verify parents that happened to already be cached
-				if(!page.getAllowParentMismatch()) {
-					parentPages = page.getParentPages();
-					for(PageRef parentRef : parentPages) {
-						// Can't verify parent reference to missing book
-						if(parentRef.getBook() != null) {
-							// Check if parent in cache
-							Page parentPage = get(parentRef, CaptureLevel.PAGE);
-							if(parentPage == null) parentPage = get(parentRef, CaptureLevel.META);
-							if(parentPage != null) {
-								PageImpl.verifyChildToParent(pageRef, parentRef, parentPage.getChildPages());
-							} else {
-								addToSet(unverifiedParentsByPageRef, parentRef, page);
-							}
-						}
+				if(otherLevelPage == null) verifyAdded(page);
+			}
+		}
+	}
+
+	protected void verifyAdded(Page page) throws ServletException {
+		assert VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
+		final PageRef pageRef = page.getPageRef();
+		Set<PageRef> parentPages = null; // Set when first needed
+		Set<PageRef> childPages = null; // Set when first needed
+		// Verify parents that happened to already be cached
+		if(!page.getAllowParentMismatch()) {
+			parentPages = page.getParentPages();
+			for(PageRef parentRef : parentPages) {
+				// Can't verify parent reference to missing book
+				if(parentRef.getBook() != null) {
+					// Check if parent in cache
+					Page parentPage = get(parentRef, CaptureLevel.PAGE);
+					if(parentPage != null) {
+						PageImpl.verifyChildToParent(pageRef, parentRef, parentPage.getChildPages());
+					} else {
+						addToSet(unverifiedParentsByPageRef, parentRef, page);
 					}
 				}
-				// Verify children that happened to already be cached
-				if(!page.getAllowChildMismatch()) {
-					childPages = page.getChildPages();
-					for(PageRef childRef : childPages) {
-						// Can't verify child reference to missing book
-						if(childRef.getBook() != null) {
-							// Check if child in cache
-							Page childPage = get(childRef, CaptureLevel.PAGE);
-							if(childPage == null) childPage = get(childRef, CaptureLevel.META);
-							if(childPage != null) {
-								PageImpl.verifyParentToChild(pageRef, childRef, childPage.getParentPages());
-							} else {
-								addToSet(unverifiedChildrenByPageRef, childRef, page);
-							}
-						}
+			}
+		}
+		// Verify children that happened to already be cached
+		if(!page.getAllowChildMismatch()) {
+			childPages = page.getChildPages();
+			for(PageRef childRef : childPages) {
+				// Can't verify child reference to missing book
+				if(childRef.getBook() != null) {
+					// Check if child in cache
+					Page childPage = get(childRef, CaptureLevel.PAGE);
+					if(childPage != null) {
+						PageImpl.verifyParentToChild(pageRef, childRef, childPage.getParentPages());
+					} else {
+						addToSet(unverifiedChildrenByPageRef, childRef, page);
 					}
 				}
-				// Verify any pages that have claimed this page as their parent and are not yet verified
-				Set<Page> unverifiedParents = unverifiedParentsByPageRef.remove(pageRef);
-				if(unverifiedParents != null) {
-					if(childPages == null) childPages = page.getChildPages();
-					for(Page unverifiedParent : unverifiedParents) {
-						PageImpl.verifyChildToParent(unverifiedParent.getPageRef(), pageRef, childPages);
-					}
-				}
-				// Verify any pages that have claimed this page as their child and are not yet verified
-				Set<Page> unverifiedChildren = unverifiedChildrenByPageRef.remove(pageRef);
-				if(unverifiedChildren != null) {
-					if(parentPages == null) parentPages = page.getParentPages();
-					for(Page unverifiedChild : unverifiedChildren) {
-						PageImpl.verifyParentToChild(unverifiedChild.getPageRef(), pageRef, parentPages);
-					}
-				}
+			}
+		}
+		// Verify any pages that have claimed this page as their parent and are not yet verified
+		Set<Page> unverifiedParents = unverifiedParentsByPageRef.remove(pageRef);
+		if(unverifiedParents != null) {
+			if(childPages == null) childPages = page.getChildPages();
+			for(Page unverifiedParent : unverifiedParents) {
+				PageImpl.verifyChildToParent(unverifiedParent.getPageRef(), pageRef, childPages);
+			}
+		}
+		// Verify any pages that have claimed this page as their child and are not yet verified
+		Set<Page> unverifiedChildren = unverifiedChildrenByPageRef.remove(pageRef);
+		if(unverifiedChildren != null) {
+			if(parentPages == null) parentPages = page.getParentPages();
+			for(Page unverifiedChild : unverifiedChildren) {
+				PageImpl.verifyParentToChild(unverifiedChild.getPageRef(), pageRef, parentPages);
 			}
 		}
 	}
