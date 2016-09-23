@@ -70,7 +70,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 	<!-- Tracks the request concurrency, used to decide to use concurrent or sequential implementations. -->
 	<filter>
 		<filter-name>CountConcurrencyFilter</filter-name>
-		<filter-class>com.aoindustries.servlet.filter.CountConcurrencyFilter</filter-class>
+		<filter-class>com.semanticcms.core.servlet.CountConcurrencyFilter</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>CountConcurrencyFilter</filter-name>

@@ -22,7 +22,6 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.servlet.filter.CountConcurrencyFilter;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.util.PropertiesUtils;
 import com.aoindustries.util.WrappedException;
@@ -40,7 +39,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -649,35 +647,20 @@ public class SemanticCMS {
 
 	private final boolean concurrentSubrequests;
 
-	/*
-	public boolean getConcurrentSubrequests() {
-		return concurrentSubrequests;
-	}
-	 */
-
 	/**
-	 * Determines if concurrent subrequests are currently allowed and advised for the given request.
-	 * <ol>
-	 * <li>Concurrent subrequests must be enabled: {@link #getConcurrentSubrequests()}</li>
-	 * <li>Concurrency counting must be active: {@link CountConcurrencyFilter}</li>
-	 * <li>Request concurrency must be less than the executor per-processor thread limit</li>
-	 * </ol>
+	 * Checks if concurrent subrequests are allowed.
 	 */
-	public boolean useConcurrentSubrequests(ServletRequest request) {
-		// Concurrent subrequests must be enabled
-		if(!concurrentSubrequests) return false;
-		// Concurrency counting must be active
-		Integer requestConcurrency = CountConcurrencyFilter.getConcurrency(request);
-		if(requestConcurrency == null) return false;
-		// Request concurrency must be less than the executor per-processor thread limit
-		int preferredConcurrency = executors.getPreferredConcurrency();
-		return requestConcurrency < preferredConcurrency;
+	boolean getConcurrentSubrequests() {
+		return concurrentSubrequests;
 	}
 
 	private final Executors executors;
 
 	/**
 	 * A shared executor available to all components.
+	 *
+	 * @see  CountConcurrencyFilter#isConcurrentProcessingRecommended(javax.servlet.ServletRequest)
+	 *       Consider selecting concurrent or sequential implementations based on overall system load.
 	 */
 	public Executors getExecutors() {
 		return executors;
