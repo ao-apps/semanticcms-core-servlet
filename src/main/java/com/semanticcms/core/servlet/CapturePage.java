@@ -66,56 +66,6 @@ public class CapturePage {
 	}
 
 	/**
-	 * Caches pages that have been captured within the scope of a single request.
-	 *
-	 * IDEA: Could possibly substitute pages with higher level capture, such as META capture in place of PAGE capture request.
-	 * IDEA: Could also cache over time, since there is currently no concept of a "user" (except whether request is trusted
-	 *       127.0.0.1 or not).
-	 */
-	static class CapturePageCacheKey {
-
-		final PageRef pageRef;
-		final CaptureLevel level;
-
-		CapturePageCacheKey(
-			PageRef pageRef,
-			CaptureLevel level
-		) {
-			this.pageRef = pageRef;
-			assert level != CaptureLevel.BODY : "Body captures are not cached";
-			this.level = level;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if(!(o instanceof CapturePageCacheKey)) return false;
-			CapturePageCacheKey other = (CapturePageCacheKey)o;
-			return
-				level==other.level
-				&& pageRef.equals(other.pageRef)
-			;
-		}
-
-		private int hash;
-
-		@Override
-		public int hashCode() {
-			int h = hash;
-			if(h == 0) {
-				h = level.hashCode();
-				h = h * 31 + pageRef.hashCode();
-				hash = h;
-			}
-			return h;
-		}
-
-		@Override
-		public String toString() {
-			return '(' + level.toString() + ", " + pageRef.toString() + ')';
-		}
-	}
-
-	/**
 	 * Captures a page.
 	 * The capture is always done with a request method of "GET", even when the enclosing request is a different method.
 	 * Also validates parent-child and child-parent relationships if the other related pages happened to already be captured and cached.
@@ -147,7 +97,7 @@ public class CapturePage {
 		final HttpServletResponse response,
 		PageRef pageRef,
 		CaptureLevel level,
-		Map<CapturePageCacheKey,Page> cache
+		PageCache cache
 	) throws ServletException, IOException {
 		NullArgumentException.checkNotNull(level, "level");
 
@@ -155,16 +105,16 @@ public class CapturePage {
 		boolean useCache = level != CaptureLevel.BODY;
 
 		// cacheKey will be null when this capture is not to be cached
-		final CapturePageCacheKey cacheKey;
+		final PageCache.Key cacheKey;
 		Page capturedPage;
 		if(useCache) {
 			// Check the cache
-			cacheKey = new CapturePageCacheKey(pageRef, level);
+			cacheKey = new PageCache.Key(pageRef, level);
 			synchronized(cache) {
 				capturedPage = cache.get(cacheKey);
 				if(capturedPage == null && level == CaptureLevel.PAGE) {
 					// Look for meta in place of page
-					capturedPage = cache.get(new CapturePageCacheKey(pageRef, CaptureLevel.META));
+					capturedPage = cache.get(pageRef, CaptureLevel.META);
 				}
 				// Set useCache = false to not put back into the cache unnecessarily below
 				useCache = capturedPage == null;
@@ -248,15 +198,14 @@ public class CapturePage {
 				// Add to cache
 				cache.put(cacheKey, capturedPage);
 			}
-			// TODO: Benchmark without parent verification
 			// Verify parents that happened to already be cached
 			if(!capturedPage.getAllowParentMismatch()) {
 				for(PageRef parentRef : capturedPage.getParentPages()) {
 					// Can't verify parent reference to missing book
 					if(parentRef.getBook() != null) {
 						// Check if parent in cache
-						Page parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.PAGE));
-						if(parentPage == null) parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.META));
+						Page parentPage = cache.get(parentRef, CaptureLevel.PAGE);
+						if(parentPage == null) parentPage = cache.get(parentRef, CaptureLevel.META);
 						if(parentPage != null) {
 							if(!parentPage.getChildPages().contains(pageRef)) {
 								throw new ServletException(
@@ -299,8 +248,8 @@ public class CapturePage {
 					// Can't verify child reference to missing book
 					if(childRef.getBook() != null) {
 						// Check if child in cache
-						Page childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.PAGE));
-						if(childPage == null) childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
+						Page childPage = cache.get(childRef, CaptureLevel.PAGE);
+						if(childPage == null) childPage = cache.get(childRef, CaptureLevel.META);
 						if(childPage != null) {
 							if(!childPage.getParentPages().contains(pageRef)) {
 								throw new ServletException(
@@ -385,23 +334,25 @@ public class CapturePage {
 				capturePage(servletContext, request, response, pageRef, level)
 			);
 		} else {
-			final Map<CapturePageCacheKey,Page> cache = CapturePageCacheFilter.getCache(request);
+			final PageCache cache = CapturePageCacheFilter.getCache(request);
 			Map<PageRef,Page> results = new LinkedHashMap<PageRef,Page>(size * 4/3 + 1);
 			List<PageRef> notCachedList = new ArrayList<PageRef>(size);
 			if(level != CaptureLevel.BODY) {
 				// Check cache before queuing on different threads, building list of those not in cache
-				for(PageRef pageRef : pageRefs) {
-					Page page = cache.get(new CapturePageCacheKey(pageRef, level));
-					if(page == null && level == CaptureLevel.PAGE) {
-						// Look for meta in place of page
-						page = cache.get(new CapturePageCacheKey(pageRef, CaptureLevel.META));
-					}
-					if(page != null) {
-						// Use cached value
-						results.put(pageRef, page);
-					} else {
-						// Will capture below
-						notCachedList.add(pageRef);
+				synchronized(cache) {
+					for(PageRef pageRef : pageRefs) {
+						Page page = cache.get(pageRef, level);
+						if(page == null && level == CaptureLevel.PAGE) {
+							// Look for meta in place of page
+							page = cache.get(pageRef, CaptureLevel.META);
+						}
+						if(page != null) {
+							// Use cached value
+							results.put(pageRef, page);
+						} else {
+							// Will capture below
+							notCachedList.add(pageRef);
+						}
 					}
 				}
 			} else {
@@ -584,7 +535,7 @@ public class CapturePage {
 		PageHandler postHandler,
 		SemanticCMS semanticCMS,
 		TempFileList tempFileList,
-		final Map<CapturePageCacheKey,Page> cache,
+		final PageCache cache,
 		Set<PageRef> visited
 	) throws ServletException, IOException {
 		if(!visited.add(page.getPageRef())) throw new AssertionError();
@@ -610,10 +561,10 @@ public class CapturePage {
 					synchronized(cache) {
 						for(int i=0; i<childRefsSize; i++) {
 							PageRef childRef = childRefs.get(i);
-							Page cached = cache.get(new CapturePageCacheKey(childRef, level));
+							Page cached = cache.get(childRef, level);
 							if(cached == null && level == CaptureLevel.PAGE) {
 								// Look for meta in place of page
-								cached = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
+								cached = cache.get(childRef, CaptureLevel.META);
 								if(cached != null) System.out.println("TODO: Got traversal meta in place of page: " + childRef);
 							}
 							if(cached != null) {
@@ -635,7 +586,7 @@ public class CapturePage {
 				int notCachedSize = notCachedIndexes.size();
 				if(
 					notCachedSize > 1
-					&& semanticCMS.useConcurrentSubrequests(request)
+					&& semanticCMS.useConcurrentSubrequests(request) // TODO: Look this up once and pass as variable through recursion?
 				) {
 					// Concurrent implementation
 					HttpServletRequest threadSafeReq = new ThreadSafeHttpServletRequest(request);

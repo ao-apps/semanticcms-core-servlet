@@ -22,10 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.semanticcms.core.model.Page;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -57,9 +54,8 @@ public class CapturePageCacheFilter implements Filter {
 	 *
 	 * @throws IllegalStateException if the filter is not active on the current request
 	 */
-	static Map<CapturePage.CapturePageCacheKey,Page> getCache(ServletRequest request) throws IllegalStateException {
-		@SuppressWarnings("unchecked")
-		Map<CapturePage.CapturePageCacheKey,Page> cache = (Map<CapturePage.CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
+	static PageCache getCache(ServletRequest request) throws IllegalStateException {
+		PageCache cache = (PageCache)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
 		if(cache == null) throw new IllegalStateException("cache not active on the current request");
 		return cache;
 	}
@@ -83,7 +79,7 @@ public class CapturePageCacheFilter implements Filter {
 		/**
 		 * The currently active cache.
 		 */
-		private Map<CapturePage.CapturePageCacheKey,Page> cache;
+		private PageCache cache;
 
 		/**
 		 * Invalidates the page cache if it has exceeded its TTL.
@@ -106,13 +102,12 @@ public class CapturePageCacheFilter implements Filter {
 		/**
 		 * Invalidates the cache, if needed, then gets the resulting cache.
 		 */
-		Map<CapturePage.CapturePageCacheKey,Page> getCache(long currentTime) {
+		PageCache getCache(long currentTime) {
 			synchronized(lock) {
 				invalidateCache(currentTime);
 				if(cache == null) {
 					cacheStart = currentTime;
-					cache = new HashMap<CapturePage.CapturePageCacheKey,Page>();
-					
+					cache = new PageCache();
 				}
 				return cache;
 			}
@@ -129,7 +124,7 @@ public class CapturePageCacheFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		@SuppressWarnings("unchecked")
-		Map<CapturePage.CapturePageCacheKey,Page> cache = (Map<CapturePage.CapturePageCacheKey,Page>)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
+		PageCache cache = (PageCache)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
 		if(cache == null) {
 			boolean isExporting;
 			if(request instanceof HttpServletRequest) {
@@ -151,7 +146,7 @@ public class CapturePageCacheFilter implements Filter {
 						exportCache.invalidateCache(System.currentTimeMillis());
 					}
 					// Request-level cache when not exporting
-					cache = new HashMap<CapturePage.CapturePageCacheKey,Page>();
+					cache = new PageCache();
 				}
 			}
 			try {
