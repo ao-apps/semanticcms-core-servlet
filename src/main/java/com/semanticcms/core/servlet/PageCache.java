@@ -24,8 +24,13 @@ package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.servlet.impl.PageImpl;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import javax.servlet.ServletException;
 
 /**
  * A page cache, whether shared between requests or used within the scope of a single request.
@@ -35,6 +40,11 @@ import java.util.Map;
  * TODO: Make two versions, thread-safe and not thread safe, choose based on concurrency and runtime settings
  */
 class PageCache {
+
+	/**
+	 * Enables the page parent-child relationships verification.
+	 */
+	private static final boolean VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS = true;
 
 	/**
 	 * Caches pages that have been captured within the scope of a single request.
@@ -87,6 +97,29 @@ class PageCache {
 
 	private final Map<Key,Page> pageCache = new HashMap<Key,Page>();
 
+	/**
+	 * Tracks which parent pages are still not verified.
+	 * <ul>
+	 *   <li>Key: The parent pageRef.</li>
+	 *   <li>Value: The page(s) that claim the pageRef as a parent but are still not verified.</li>
+	 * </ul>
+	 * TODO: Could be PageRef instead of Page?
+	 */
+	private final Map<PageRef,Set<Page>> unverifiedParentsByPageRef = VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null;
+
+	/**
+	 * Tracks which child pages are still not verified.
+	 * <ul>
+	 *   <li>Key: The child pageRef.</li>
+	 *   <li>Value: The page(s) that claim the pageRef as a child but are still not verified.</li>
+	 * </ul>
+	 * TODO: Could be PageRef instead of Page?
+	 */
+	private final Map<PageRef,Set<Page>> unverifiedChildrenByPageRef = VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null;
+
+	PageCache() {
+	}
+
 	Page get(Key key) {
 		assert Thread.holdsLock(this);
 		return pageCache.get(key);
@@ -97,8 +130,79 @@ class PageCache {
 		return get(new Key(pageRef, level));
 	}
 
-	void put(Key key, Page page) {
+	private static void addToSet(Map<PageRef,Set<Page>> map, PageRef key, Page page) {
+		Set<Page> pages = map.get(key);
+		if(pages == null) {
+			map.put(key, Collections.singleton(page));
+		} else if(pages.size() == 1) {
+			pages = new HashSet<Page>(pages);
+			pages.add(page);
+			map.put(key, pages);
+		} else {
+			pages.add(page);
+		}
+	}
+
+	// TODO: Allow null value to represent a body-level capture that has been verified?
+	void put(Key key, Page page) throws ServletException {
 		assert Thread.holdsLock(this);
-		pageCache.put(key, page);
+		if(pageCache.put(key, page) == null) {
+			// Was added
+			if(VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS) {
+				final PageRef pageRef = page.getPageRef();
+				Set<PageRef> parentPages = null; // Set when first needed
+				Set<PageRef> childPages = null; // Set when first needed
+				// Verify parents that happened to already be cached
+				if(!page.getAllowParentMismatch()) {
+					parentPages = page.getParentPages();
+					for(PageRef parentRef : parentPages) {
+						// Can't verify parent reference to missing book
+						if(parentRef.getBook() != null) {
+							// Check if parent in cache
+							Page parentPage = get(parentRef, CaptureLevel.PAGE);
+							if(parentPage == null) parentPage = get(parentRef, CaptureLevel.META);
+							if(parentPage != null) {
+								PageImpl.verifyChildToParent(pageRef, parentRef, parentPage.getChildPages());
+							} else {
+								addToSet(unverifiedParentsByPageRef, parentRef, page);
+							}
+						}
+					}
+				}
+				// Verify children that happened to already be cached
+				if(!page.getAllowChildMismatch()) {
+					childPages = page.getChildPages();
+					for(PageRef childRef : childPages) {
+						// Can't verify child reference to missing book
+						if(childRef.getBook() != null) {
+							// Check if child in cache
+							Page childPage = get(childRef, CaptureLevel.PAGE);
+							if(childPage == null) childPage = get(childRef, CaptureLevel.META);
+							if(childPage != null) {
+								PageImpl.verifyParentToChild(pageRef, childRef, childPage.getParentPages());
+							} else {
+								addToSet(unverifiedChildrenByPageRef, childRef, page);
+							}
+						}
+					}
+				}
+				// Verify any pages that have claimed this page as their parent and are not yet verified
+				Set<Page> unverifiedParents = unverifiedParentsByPageRef.remove(pageRef);
+				if(unverifiedParents != null) {
+					if(childPages == null) childPages = page.getChildPages();
+					for(Page unverifiedParent : unverifiedParents) {
+						PageImpl.verifyChildToParent(unverifiedParent.getPageRef(), pageRef, childPages);
+					}
+				}
+				// Verify any pages that have claimed this page as their child and are not yet verified
+				Set<Page> unverifiedChildren = unverifiedChildrenByPageRef.remove(pageRef);
+				if(unverifiedChildren != null) {
+					if(parentPages == null) parentPages = page.getParentPages();
+					for(Page unverifiedChild : unverifiedChildren) {
+						PageImpl.verifyParentToChild(unverifiedChild.getPageRef(), pageRef, parentPages);
+					}
+				}
+			}
+		}
 	}
 }
