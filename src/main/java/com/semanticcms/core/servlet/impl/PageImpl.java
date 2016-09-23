@@ -38,6 +38,7 @@ import com.semanticcms.core.servlet.Theme;
 import com.semanticcms.core.servlet.View;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +49,82 @@ final public class PageImpl {
 
 	public static interface PageImplBody<E extends Throwable> {
 		BufferResult doBody(boolean discard, Page page) throws E, IOException, SkipPageException;
+	}
+
+	/**
+	 * Verified one child-parent relationship.
+	 *
+	 * @throws  ServletException  if verification failed
+	 */
+	public static void verifyChildToParent(PageRef childRef, PageRef parentRef, Set<PageRef> childPages) throws ServletException {
+		if(!childPages.contains(childRef)) {
+			throw new ServletException(
+				"The parent page does not have this as a child.  this="
+					+ childRef
+					+ ", parent="
+					+ parentRef
+			);
+		}
+	}
+
+	/**
+	 * Verified one parent-child relationship.
+	 *
+	 * @throws  ServletException  if verification failed
+	 */
+	public static void verifyParentToChild(PageRef parentRef, PageRef childRef, Set<PageRef> parentPages) throws ServletException {
+		if(!parentPages.contains(parentRef)) {
+			throw new ServletException(
+				"The child page does not have this as a parent.  this="
+					+ parentRef
+					+ ", child="
+					+ childRef
+			);
+		}
+	}
+
+	/**
+	 * Performs full parent/child verifications of the provided page.  This is normally
+	 * not needed for pages that have been added to the cache (PAGE/META level), as verification
+	 * is done within the cache.  This is used for BODY level captures which are not put in the
+	 * cache and desire full verification.
+	 *
+	 * @throws  ServletException  if verification failed
+	 */
+	public static void fullVerifyParentChild(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException {
+		// Verify parents
+		if(!page.getAllowParentMismatch()) {
+			Map<PageRef,Page> notMissingParents = CapturePage.capturePages(
+				servletContext,
+				request,
+				response,
+				PageUtils.filterNotMissingBook(page.getParentPages()),
+				CaptureLevel.PAGE
+			);
+			PageRef pageRef = page.getPageRef();
+			for(Map.Entry<PageRef,Page> entry : notMissingParents.entrySet()) {
+				verifyChildToParent(pageRef, entry.getKey(), entry.getValue().getChildPages());
+			}
+		}
+		// Verify children
+		if(!page.getAllowChildMismatch()) {
+			Map<PageRef,Page> notMissingChildren = CapturePage.capturePages(
+				servletContext,
+				request,
+				response,
+				PageUtils.filterNotMissingBook(page.getChildPages()),
+				CaptureLevel.PAGE
+			);
+			PageRef pageRef = page.getPageRef();
+			for(Map.Entry<PageRef,Page> entry : notMissingChildren.entrySet()) {
+				verifyParentToChild(pageRef, entry.getKey(), entry.getValue().getParentPages());
+			}
+		}
 	}
 
 	public static <E extends Throwable> void doPageImpl(
@@ -197,50 +274,8 @@ final public class PageImpl {
 			// Capturing, add to capture
 			capture.setCapturedPage(page);
 		} else {
-			// Verify parents
-			if(!page.getAllowParentMismatch()) {
-				Map<PageRef,Page> notMissingParents = CapturePage.capturePages(
-					servletContext,
-					request,
-					response,
-					PageUtils.filterNotMissingBook(page.getParentPages()),
-					CaptureLevel.PAGE
-				);
-				for(Map.Entry<PageRef,Page> entry : notMissingParents.entrySet()) {
-					// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
-					PageRef pageRef = page.getPageRef();
-					if(!entry.getValue().getChildPages().contains(pageRef)) {
-						throw new ServletException(
-							"The parent page does not have this as a child.  this="
-								+ pageRef
-								+ ", parent="
-								+ entry.getKey()
-						);
-					}
-				}
-			}
-			// Verify children
-			if(!page.getAllowChildMismatch()) {
-				Map<PageRef,Page> notMissingChildren = CapturePage.capturePages(
-					servletContext,
-					request,
-					response,
-					PageUtils.filterNotMissingBook(page.getChildPages()),
-					CaptureLevel.PAGE
-				);
-				for(Map.Entry<PageRef,Page> entry : notMissingChildren.entrySet()) {
-					// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
-					PageRef pageRef = page.getPageRef();
-					if(!entry.getValue().getParentPages().contains(pageRef)) {
-						throw new ServletException(
-							"The child page does not have this as a parent.  this="
-								+ pageRef
-								+ ", child="
-								+ entry.getKey()
-						);
-					}
-				}
-			}
+			// Perform full verification now since not interacting with the page cache
+			fullVerifyParentChild(servletContext, request, response, page);
 
 			// Resolve the view
 			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);

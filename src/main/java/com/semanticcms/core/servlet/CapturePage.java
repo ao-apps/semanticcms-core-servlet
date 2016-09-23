@@ -31,6 +31,7 @@ import com.aoindustries.servlet.http.ServletUtil;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.servlet.impl.PageImpl;
 import com.semanticcms.core.servlet.util.HttpServletSubRequest;
 import com.semanticcms.core.servlet.util.HttpServletSubResponse;
 import com.semanticcms.core.servlet.util.ThreadSafeHttpServletRequest;
@@ -193,97 +194,16 @@ public class CapturePage {
 			}
 		}
 		assert capturedPage != null;
-		synchronized(cache) {
-			if(useCache) {
+		if(useCache) {
+			synchronized(cache) {
 				// Add to cache
 				cache.put(cacheKey, capturedPage);
 			}
-			// Verify parents that happened to already be cached
-			if(!capturedPage.getAllowParentMismatch()) {
-				for(PageRef parentRef : capturedPage.getParentPages()) {
-					// Can't verify parent reference to missing book
-					if(parentRef.getBook() != null) {
-						// Check if parent in cache
-						Page parentPage = cache.get(parentRef, CaptureLevel.PAGE);
-						if(parentPage == null) parentPage = cache.get(parentRef, CaptureLevel.META);
-						if(parentPage != null) {
-							if(!parentPage.getChildPages().contains(pageRef)) {
-								throw new ServletException(
-									"The parent page does not have this as a child.  this="
-										+ pageRef
-										+ ", parent="
-										+ parentRef
-								);
-							}
-							// Verify parent's children that happened to already be cached since captures can happen in any order.
-							/*
-							if(!parentPage.getAllowChildMismatch()) {
-								for(PageRef childRef : parentPage.getChildPages()) {
-									// Can't verify child reference to missing book
-									if(childRef.getBook() != null) {
-										// Check if child in cache
-										Page childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.PAGE));
-										if(childPage == null) childPage = cache.get(new CapturePageCacheKey(childRef, CaptureLevel.META));
-										if(childPage != null) {
-											if(!childPage.getParentPages().contains(parentRef)) {
-												throw new ServletException(
-													"The child page does not have this as a parent.  this="
-														+ parentRef
-														+ ", child="
-														+ childRef
-												);
-											}
-										}
-									}
-								}
-							}
-							 */
-						}
-					}
-				}
-			}
-			// Verify children that happened to already be cached
-			if(!capturedPage.getAllowChildMismatch()) {
-				for(PageRef childRef : capturedPage.getChildPages()) {
-					// Can't verify child reference to missing book
-					if(childRef.getBook() != null) {
-						// Check if child in cache
-						Page childPage = cache.get(childRef, CaptureLevel.PAGE);
-						if(childPage == null) childPage = cache.get(childRef, CaptureLevel.META);
-						if(childPage != null) {
-							if(!childPage.getParentPages().contains(pageRef)) {
-								throw new ServletException(
-									"The child page does not have this as a parent.  this="
-										+ pageRef
-										+ ", child="
-										+ childRef
-								);
-							}
-							// Verify children's parents that happened to already be cached since captures can happen in any order.
-							/*
-							if(!childPage.getAllowParentMismatch()) {
-								for(PageRef parentRef : childPage.getParentPages()) {
-									// Can't verify parent reference to missing book
-									if(parentRef.getBook() != null) {
-										// Check if parent in cache
-										Page parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.PAGE));
-										if(parentPage == null) parentPage = cache.get(new CapturePageCacheKey(parentRef, CaptureLevel.META));
-										if(parentPage != null) {
-											if(!parentPage.getChildPages().contains(childRef)) {
-												throw new ServletException(
-													"The parent page does not have this as a child.  this="
-														+ childRef
-														+ ", parent="
-														+ parentRef
-												);
-											}
-										}
-									}
-								}
-							}*/
-						}
-					}
-				}
+		} else {
+			// Body capture, performance is not the main objective, perform full child and parent verifications,
+			// this will mean a "View All" will perform thorough verifications.
+			if(level == CaptureLevel.BODY) {
+				PageImpl.fullVerifyParentChild(servletContext, request, response, capturedPage);
 			}
 		}
 		return capturedPage;
