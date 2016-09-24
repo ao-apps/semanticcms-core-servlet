@@ -39,7 +39,8 @@ abstract class PageCache {
 
 	/**
 	 * Enables the page parent-child relationships verification.
-	 * TODO: Benchmark on/off then remove if performance now negligible
+	 *
+	 * This does not measurably affect performance; just leave it on.
 	 */
 	protected static final boolean VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS = true;
 
@@ -100,9 +101,8 @@ abstract class PageCache {
 	 *   <li>Key: The parent pageRef.</li>
 	 *   <li>Value: The page(s) that claim the pageRef as a parent but are still not verified.</li>
 	 * </ul>
-	 * TODO: Could be PageRef instead of Page?
 	 */
-	private final Map<PageRef,Set<Page>> unverifiedParentsByPageRef;
+	private final Map<PageRef,Set<PageRef>> unverifiedParentsByPageRef;
 
 	/**
 	 * Tracks which child pages are still not verified.
@@ -110,14 +110,13 @@ abstract class PageCache {
 	 *   <li>Key: The child pageRef.</li>
 	 *   <li>Value: The page(s) that claim the pageRef as a child but are still not verified.</li>
 	 * </ul>
-	 * TODO: Could be PageRef instead of Page?
 	 */
-	private final Map<PageRef,Set<Page>> unverifiedChildrenByPageRef;
+	private final Map<PageRef,Set<PageRef>> unverifiedChildrenByPageRef;
 
 	PageCache(
 		Map<Key,Page> pageCache,
-		Map<PageRef,Set<Page>> unverifiedParentsByPageRef,
-		Map<PageRef,Set<Page>> unverifiedChildrenByPageRef
+		Map<PageRef,Set<PageRef>> unverifiedParentsByPageRef,
+		Map<PageRef,Set<PageRef>> unverifiedChildrenByPageRef
 	) {
 		this.pageCache = pageCache;
 		this.unverifiedParentsByPageRef = unverifiedParentsByPageRef;
@@ -130,8 +129,8 @@ abstract class PageCache {
 	PageCache() {
 		this(
 			new HashMap<Key,Page>(),
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null
 		);
 	}
 
@@ -154,16 +153,16 @@ abstract class PageCache {
 		return get(new Key(pageRef, level));
 	}
 
-	private static void addToSet(Map<PageRef,Set<Page>> map, PageRef key, Page page) {
-		Set<Page> pages = map.get(key);
-		if(pages == null) {
-			map.put(key, Collections.singleton(page));
-		} else if(pages.size() == 1) {
-			pages = new HashSet<Page>(pages);
-			pages.add(page);
-			map.put(key, pages);
+	private static void addToSet(Map<PageRef,Set<PageRef>> map, PageRef key, PageRef pageRef) {
+		Set<PageRef> pageRefs = map.get(key);
+		if(pageRefs == null) {
+			map.put(key, Collections.singleton(pageRef));
+		} else if(pageRefs.size() == 1) {
+			pageRefs = new HashSet<PageRef>(pageRefs);
+			pageRefs.add(pageRef);
+			map.put(key, pageRefs);
 		} else {
-			pages.add(page);
+			pageRefs.add(pageRef);
 		}
 	}
 
@@ -199,7 +198,7 @@ abstract class PageCache {
 					if(parentPage != null) {
 						PageImpl.verifyChildToParent(pageRef, parentRef, parentPage.getChildPages());
 					} else {
-						addToSet(unverifiedParentsByPageRef, parentRef, page);
+						addToSet(unverifiedParentsByPageRef, parentRef, pageRef);
 					}
 				}
 			}
@@ -215,25 +214,25 @@ abstract class PageCache {
 					if(childPage != null) {
 						PageImpl.verifyParentToChild(pageRef, childRef, childPage.getParentPages());
 					} else {
-						addToSet(unverifiedChildrenByPageRef, childRef, page);
+						addToSet(unverifiedChildrenByPageRef, childRef, pageRef);
 					}
 				}
 			}
 		}
 		// Verify any pages that have claimed this page as their parent and are not yet verified
-		Set<Page> unverifiedParents = unverifiedParentsByPageRef.remove(pageRef);
+		Set<PageRef> unverifiedParents = unverifiedParentsByPageRef.remove(pageRef);
 		if(unverifiedParents != null) {
 			if(childPages == null) childPages = page.getChildPages();
-			for(Page unverifiedParent : unverifiedParents) {
-				PageImpl.verifyChildToParent(unverifiedParent.getPageRef(), pageRef, childPages);
+			for(PageRef unverifiedParent : unverifiedParents) {
+				PageImpl.verifyChildToParent(unverifiedParent, pageRef, childPages);
 			}
 		}
 		// Verify any pages that have claimed this page as their child and are not yet verified
-		Set<Page> unverifiedChildren = unverifiedChildrenByPageRef.remove(pageRef);
+		Set<PageRef> unverifiedChildren = unverifiedChildrenByPageRef.remove(pageRef);
 		if(unverifiedChildren != null) {
 			if(parentPages == null) parentPages = page.getParentPages();
-			for(Page unverifiedChild : unverifiedChildren) {
-				PageImpl.verifyParentToChild(unverifiedChild.getPageRef(), pageRef, parentPages);
+			for(PageRef unverifiedChild : unverifiedChildren) {
+				PageImpl.verifyParentToChild(unverifiedChild, pageRef, parentPages);
 			}
 		}
 	}
