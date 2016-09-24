@@ -40,8 +40,8 @@ class ConcurrentPageCache extends PageCache {
 	ConcurrentPageCache() {
 		super(
 			new ConcurrentHashMap<Key, Page>(),
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<Page>>() : null
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null
 		);
 	}
 
