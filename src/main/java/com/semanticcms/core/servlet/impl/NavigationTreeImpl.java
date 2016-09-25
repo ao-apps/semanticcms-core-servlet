@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.el.ELContext;
+import javax.el.ValueExpression;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -201,11 +202,11 @@ final public class NavigationTreeImpl {
 	}
 
 	/**
-	 * @param root  either Page of ValueExpression that returns Page
-	 * @param thisBook  either String of ValueExpression that returns String
-	 * @param thisPage  either String of ValueExpression that returns String
-	 * @param linksToBook  either String of ValueExpression that returns String
-	 * @param linksToPage  either String of ValueExpression that returns String
+	 * @param root  ValueExpression that returns Page
+	 * @param thisBook  ValueExpression that returns String
+	 * @param thisPage  ValueExpression that returns String
+	 * @param linksToBook  ValueExpression that returns String
+	 * @param linksToPage  ValueExpression that returns String
 	 */
 	public static void writeNavigationTreeImpl(
 		ServletContext servletContext,
@@ -213,15 +214,15 @@ final public class NavigationTreeImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
-		Object root,
+		ValueExpression root,
 		boolean skipRoot,
 		boolean yuiConfig,
 		boolean includeElements,
 		String target,
-		Object thisBook,
-		Object thisPage,
-		Object linksToBook,
-		Object linksToPage,
+		ValueExpression thisBook,
+		ValueExpression thisPage,
+		ValueExpression linksToBook,
+		ValueExpression linksToPage,
 		int maxDepth
 	) throws ServletException, IOException {
 		// Get the current capture state
