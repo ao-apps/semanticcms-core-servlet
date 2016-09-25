@@ -198,7 +198,6 @@ public class Link {
 	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
 		LinkImpl.writeLinkImpl(
 			servletContext,
-			null, // No ELContext for servlets
 			request,
 			response,
 			response.getWriter(),
