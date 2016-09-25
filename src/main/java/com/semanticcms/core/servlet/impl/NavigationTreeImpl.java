@@ -22,7 +22,6 @@
  */
 package com.semanticcms.core.servlet.impl;
 
-import com.aoindustries.encoding.Coercion;
 import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
@@ -31,6 +30,7 @@ import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.nio.charset.Charsets;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import com.aoindustries.util.StringUtility;
+import static com.aoindustries.util.StringUtility.nullIfEmpty;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -159,6 +159,211 @@ final public class NavigationTreeImpl {
 	public static String encodeHexData(String data) {
 		// Note: This is always UTF-8 encoded and does not depend on response encoding
 		return StringUtility.convertToHex(data.getBytes(Charsets.UTF_8));
+	}
+
+	public static void writeNavigationTreeImpl(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Writer out,
+		Page root,
+		boolean skipRoot,
+		boolean yuiConfig,
+		boolean includeElements,
+		String target,
+		String thisBook,
+		String thisPage,
+		String linksToBook,
+		String linksToPage,
+		int maxDepth
+	) throws ServletException, IOException {
+		// Get the current capture state
+		CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
+			writeNavigationTreeImpl(
+				servletContext,
+				request,
+				response,
+				out,
+				root,
+				skipRoot,
+				yuiConfig,
+				includeElements,
+				target,
+				thisBook,
+				thisPage,
+				linksToBook,
+				linksToPage,
+				maxDepth,
+				captureLevel
+			);
+		}
+	}
+
+	/**
+	 * @param root  either Page of ValueExpression that returns Page
+	 * @param thisBook  either String of ValueExpression that returns String
+	 * @param thisPage  either String of ValueExpression that returns String
+	 * @param linksToBook  either String of ValueExpression that returns String
+	 * @param linksToPage  either String of ValueExpression that returns String
+	 */
+	public static void writeNavigationTreeImpl(
+		ServletContext servletContext,
+		ELContext elContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Writer out,
+		Object root,
+		boolean skipRoot,
+		boolean yuiConfig,
+		boolean includeElements,
+		String target,
+		Object thisBook,
+		Object thisPage,
+		Object linksToBook,
+		Object linksToPage,
+		int maxDepth
+	) throws ServletException, IOException {
+		// Get the current capture state
+		CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
+			writeNavigationTreeImpl(
+				servletContext,
+				request,
+				response,
+				out,
+				resolveValue(root, Page.class, elContext),
+				skipRoot,
+				yuiConfig,
+				includeElements,
+				target,
+				resolveValue(thisBook, String.class, elContext),
+				resolveValue(thisPage, String.class, elContext),
+				resolveValue(linksToBook, String.class, elContext),
+				resolveValue(linksToPage, String.class, elContext),
+				maxDepth,
+				captureLevel
+			);
+		}
+	}
+
+	private static void writeNavigationTreeImpl(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Writer out,
+		Page root,
+		boolean skipRoot,
+		boolean yuiConfig,
+		boolean includeElements,
+		String target,
+		String thisBook,
+		String thisPage,
+		String linksToBook,
+		String linksToPage,
+		int maxDepth,
+		CaptureLevel captureLevel
+	) throws ServletException, IOException {
+		assert captureLevel.compareTo(CaptureLevel.META) >= 0;
+		final Node currentNode = CurrentNode.getCurrentNode(request);
+
+		thisBook = nullIfEmpty(thisBook);
+		thisPage = nullIfEmpty(thisPage);
+		linksToBook = nullIfEmpty(linksToBook);
+		linksToPage = nullIfEmpty(linksToPage);
+
+		// Filter by link-to
+		final Set<Node> nodesWithLinks;
+		final Set<Node> nodesWithChildLinks;
+		if(linksToPage == null) {
+			if(linksToBook != null) throw new ServletException("linksToPage must be provided when linksToBook is provided.");
+			nodesWithLinks = null;
+			nodesWithChildLinks = null;
+		} else {
+			// Find all nodes in the navigation tree that link to the linksToPage
+			PageRef linksTo = PageRefResolver.getPageRef(servletContext, request, linksToBook, linksToPage);
+			nodesWithLinks = new HashSet<Node>();
+			nodesWithChildLinks = new HashSet<Node>();
+			findLinks(
+				servletContext,
+				request,
+				response,
+				linksTo,
+				nodesWithLinks,
+				nodesWithChildLinks,
+				root,
+				includeElements
+			);
+		}
+
+		PageRef thisPageRef;
+		if(thisPage == null) {
+			if(thisBook != null) throw new ServletException("thisPage must be provided when thisBook is provided.");
+			thisPageRef = null;
+		} else {
+			thisPageRef = PageRefResolver.getPageRef(servletContext, request, thisBook, thisPage);
+		}
+
+		boolean foundThisPage = false;
+		PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
+		if(skipRoot) {
+			List<Node> childNodes = NavigationTreeImpl.getChildNodes(
+				servletContext,
+				request,
+				response,
+				includeElements,
+				false,
+				root
+			);
+			if(nodesWithChildLinks != null) {
+				childNodes = NavigationTreeImpl.filterChildren(childNodes, nodesWithChildLinks);
+			}
+			if(!childNodes.isEmpty()) {
+				if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
+				for(Node childNode : childNodes) {
+					foundThisPage = writeNode(
+						servletContext,
+						request,
+						response,
+						captureLevel == CaptureLevel.BODY ? out : null,
+						currentNode,
+						nodesWithLinks,
+						nodesWithChildLinks,
+						pageIndex,
+						childNode,
+						yuiConfig,
+						includeElements,
+						target,
+						thisPageRef,
+						foundThisPage,
+						maxDepth,
+						1
+					);
+				}
+				if(captureLevel == CaptureLevel.BODY) out.write("</ul>\n");
+			}
+		} else {
+			if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
+			/*foundThisPage =*/ writeNode(
+				servletContext,
+				request,
+				response,
+				captureLevel == CaptureLevel.BODY ? out : null,
+				currentNode,
+				nodesWithLinks,
+				nodesWithChildLinks,
+				pageIndex,
+				root,
+				yuiConfig,
+				includeElements,
+				target,
+				thisPageRef,
+				foundThisPage,
+				maxDepth,
+				1
+			);
+			if(captureLevel == CaptureLevel.BODY) out.write("</ul>\n");
+		}
 	}
 
 	private static boolean writeNode(
@@ -328,137 +533,6 @@ final public class NavigationTreeImpl {
 		}
 		if(out != null) out.write("</li>\n");
 		return foundThisPage;
-	}
-
-	/**
-	 * @param root  either Page of ValueExpression that returns Page
-	 * @param thisBook  either String of ValueExpression that returns String
-	 * @param thisPage  either String of ValueExpression that returns String
-	 * @param linksToBook  either String of ValueExpression that returns String
-	 * @param linksToPage  either String of ValueExpression that returns String
-	 */
-	public static void writeNavigationTreeImpl(
-		ServletContext servletContext,
-		ELContext elContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Writer out,
-		Object root,
-		boolean skipRoot,
-		boolean yuiConfig,
-		boolean includeElements,
-		String target,
-		Object thisBook,
-		Object thisPage,
-		Object linksToBook,
-		Object linksToPage,
-		int maxDepth
-	) throws ServletException, IOException {
-		// Get the current capture state
-		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
-		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
-			final Node currentNode = CurrentNode.getCurrentNode(request);
-
-			// Evaluate expressions
-			Page rootPage = resolveValue(root, Page.class, elContext);
-			String thisBookStr = Coercion.nullIfEmpty(resolveValue(thisBook, String.class, elContext));
-			String thisPageStr = Coercion.nullIfEmpty(resolveValue(thisPage, String.class, elContext));
-			String linksToBookStr = Coercion.nullIfEmpty(resolveValue(linksToBook, String.class, elContext));
-			String linksToPageStr = Coercion.nullIfEmpty(resolveValue(linksToPage, String.class, elContext));
-
-			// Filter by link-to
-			final Set<Node> nodesWithLinks;
-			final Set<Node> nodesWithChildLinks;
-			if(linksToPageStr == null) {
-				if(linksToBookStr != null) throw new ServletException("linksToPage must be provided when linksToBook is provided.");
-				nodesWithLinks = null;
-				nodesWithChildLinks = null;
-			} else {
-				// Find all nodes in the navigation tree that link to the linksToPage
-				PageRef linksTo = PageRefResolver.getPageRef(servletContext, request, linksToBookStr, linksToPageStr);
-				nodesWithLinks = new HashSet<Node>();
-				nodesWithChildLinks = new HashSet<Node>();
-				findLinks(
-					servletContext,
-					request,
-					response,
-					linksTo,
-					nodesWithLinks,
-					nodesWithChildLinks,
-					rootPage,
-					includeElements
-				);
-			}
-
-			PageRef thisPageRef;
-			if(thisPageStr == null) {
-				if(thisBookStr != null) throw new ServletException("thisPage must be provided when thisBook is provided.");
-				thisPageRef = null;
-			} else {
-				thisPageRef = PageRefResolver.getPageRef(servletContext, request, thisBookStr, thisPageStr);
-			}
-
-			boolean foundThisPage = false;
-			PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
-			if(skipRoot) {
-				List<Node> childNodes = NavigationTreeImpl.getChildNodes(
-					servletContext,
-					request,
-					response,
-					includeElements,
-					false,
-					rootPage
-				);
-				if(nodesWithChildLinks != null) {
-					childNodes = NavigationTreeImpl.filterChildren(childNodes, nodesWithChildLinks);
-				}
-				if(!childNodes.isEmpty()) {
-					if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
-					for(Node childNode : childNodes) {
-						foundThisPage = writeNode(
-							servletContext,
-							request,
-							response,
-							captureLevel == CaptureLevel.BODY ? out : null,
-							currentNode,
-							nodesWithLinks,
-							nodesWithChildLinks,
-							pageIndex,
-							childNode,
-							yuiConfig,
-							includeElements,
-							target,
-							thisPageRef,
-							foundThisPage,
-							maxDepth,
-							1
-						);
-					}
-					if(captureLevel == CaptureLevel.BODY) out.write("</ul>\n");
-				}
-			} else {
-				if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
-				/*foundThisPage =*/ writeNode(
-					servletContext,
-					request,
-					response,
-					captureLevel == CaptureLevel.BODY ? out : null,
-					currentNode,
-					nodesWithLinks,
-					nodesWithChildLinks,
-					pageIndex,
-					rootPage,
-					yuiConfig,
-					includeElements,
-					target,
-					thisPageRef,
-					foundThisPage,
-					maxDepth,
-					1
-				);
-				if(captureLevel == CaptureLevel.BODY) out.write("</ul>\n");
-			}
-		}
 	}
 
 	/**

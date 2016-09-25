@@ -31,6 +31,7 @@ import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.net.HttpParameters;
 import com.aoindustries.servlet.http.LastModifiedServlet;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
+import static com.aoindustries.util.StringUtility.nullIfEmpty;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -138,6 +139,39 @@ final public class LinkImpl {
 		out.append('?');
 	}
 
+	public static <E extends Throwable> void writeLinkImpl(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Writer out,
+		String book,
+		String page,
+		String element,
+		boolean allowGeneratedElement,
+		String viewName,
+		boolean small,
+	    HttpParameters params,
+		Object clazz,
+		LinkImplBody<E> body
+	) throws E, ServletException, IOException, SkipPageException {
+		writeLinkImpl(
+			servletContext,
+			null,
+			request,
+			response,
+			out,
+			book,
+			page,
+			element,
+			allowGeneratedElement,
+			viewName,
+			small,
+			params,
+			clazz,
+			body
+		);
+	}
+
 	/**
 	 * @param book  either String of ValueExpression that returns String
 	 * @param page  either String of ValueExpression that returns String
@@ -164,8 +198,8 @@ final public class LinkImpl {
 		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			// Evaluate expressions
-			String bookStr = Coercion.nullIfEmpty(resolveValue(book, String.class, elContext));
-			String pageStr = Coercion.nullIfEmpty(resolveValue(page, String.class, elContext));
+			String bookStr = nullIfEmpty(resolveValue(book, String.class, elContext));
+			String pageStr = nullIfEmpty(resolveValue(page, String.class, elContext));
 
 			final Node currentNode = CurrentNode.getCurrentNode(request);
 			final Page currentPage = CurrentPage.getCurrentPage(request);
@@ -185,8 +219,8 @@ final public class LinkImpl {
 				final String responseEncoding = response.getCharacterEncoding();
 
 				// Evaluate expressions
-				String elementStr = Coercion.nullIfEmpty(resolveValue(element, String.class, elContext));
-				String viewNameStr = Coercion.nullIfEmpty(resolveValue(viewName, String.class, elContext));
+				String elementStr = nullIfEmpty(resolveValue(element, String.class, elContext));
+				String viewNameStr = nullIfEmpty(resolveValue(viewName, String.class, elContext));
 				if(viewNameStr == null) viewNameStr = SemanticCMS.DEFAULT_VIEW_NAME;
 
 				// Find the view
