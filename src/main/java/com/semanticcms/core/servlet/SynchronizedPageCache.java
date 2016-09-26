@@ -28,7 +28,7 @@ import javax.servlet.ServletException;
 /**
  * A page cache that is thread safe using synchronization on the default HashMaps.
  */
-class SynchronizedPageCache extends PageCache {
+class SynchronizedPageCache extends MapPageCache {
 
 	SynchronizedPageCache() {
 	}
