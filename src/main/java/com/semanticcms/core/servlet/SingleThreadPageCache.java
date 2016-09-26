@@ -29,7 +29,7 @@ import javax.servlet.ServletException;
  * A page cache that is not thread safe and should only be used within the
  * context of a single thread.
  */
-class SingleThreadPageCache extends PageCache {
+class SingleThreadPageCache extends MapPageCache {
 
 	private final Thread assertingThread;
 
