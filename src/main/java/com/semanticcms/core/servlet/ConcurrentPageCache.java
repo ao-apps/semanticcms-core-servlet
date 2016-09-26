@@ -47,6 +47,6 @@ class ConcurrentPageCache extends PageCache {
 
 	@Override
 	synchronized protected void verifyAdded(Page page) throws ServletException {
-		super.verifyAdded(page); //To change body of generated methods, choose Tools | Templates.
+		super.verifyAdded(page);
 	}
 }
