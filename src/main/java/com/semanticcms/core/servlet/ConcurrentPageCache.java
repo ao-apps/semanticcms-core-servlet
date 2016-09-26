@@ -35,7 +35,7 @@ import javax.servlet.ServletException;
  *
  * Is currently still synchronized on parent-child verifications, which only occurs on put.
  */
-class ConcurrentPageCache extends PageCache {
+class ConcurrentPageCache extends MapPageCache {
 
 	ConcurrentPageCache() {
 		super(

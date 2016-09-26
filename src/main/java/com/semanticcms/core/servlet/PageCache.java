@@ -24,12 +24,6 @@ package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
-import com.semanticcms.core.servlet.impl.PageImpl;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import javax.servlet.ServletException;
 
 /**
@@ -93,58 +87,10 @@ abstract class PageCache {
 		}
 	}
 
-	private final Map<Key,Page> pageCache;
-
-	/**
-	 * Tracks which parent pages are still not verified.
-	 * <ul>
-	 *   <li>Key: The parent pageRef.</li>
-	 *   <li>Value: The page(s) that claim the pageRef as a parent but are still not verified.</li>
-	 * </ul>
-	 */
-	private final Map<PageRef,Set<PageRef>> unverifiedParentsByPageRef;
-
-	/**
-	 * Tracks which child pages are still not verified.
-	 * <ul>
-	 *   <li>Key: The child pageRef.</li>
-	 *   <li>Value: The page(s) that claim the pageRef as a child but are still not verified.</li>
-	 * </ul>
-	 */
-	private final Map<PageRef,Set<PageRef>> unverifiedChildrenByPageRef;
-
-	PageCache(
-		Map<Key,Page> pageCache,
-		Map<PageRef,Set<PageRef>> unverifiedParentsByPageRef,
-		Map<PageRef,Set<PageRef>> unverifiedChildrenByPageRef
-	) {
-		this.pageCache = pageCache;
-		this.unverifiedParentsByPageRef = unverifiedParentsByPageRef;
-		this.unverifiedChildrenByPageRef = unverifiedChildrenByPageRef;
-	}
-
-	/**
-	 * Uses default HashMap implementations.
-	 */
-	PageCache() {
-		this(
-			new HashMap<Key,Page>(),
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null
-		);
-	}
-
 	/**
 	 * A lookup of level PAGE will also perform a lookup of META if not found.
 	 */
-	Page get(Key key) {
-		Page page = pageCache.get(key);
-		if(page == null && key.level == CaptureLevel.PAGE) {
-			// Look for meta in place of page
-			page = pageCache.get(new Key(key.pageRef, CaptureLevel.META));
-		}
-		return page;
-	}
+	abstract Page get(Key key);
 
 	/**
 	 * A lookup of level PAGE will also perform a lookup of META if not found.
@@ -153,87 +99,9 @@ abstract class PageCache {
 		return get(new Key(pageRef, level));
 	}
 
-	private static void addToSet(Map<PageRef,Set<PageRef>> map, PageRef key, PageRef pageRef) {
-		Set<PageRef> pageRefs = map.get(key);
-		if(pageRefs == null) {
-			map.put(key, Collections.singleton(pageRef));
-		} else if(pageRefs.size() == 1) {
-			pageRefs = new HashSet<PageRef>(pageRefs);
-			pageRefs.add(pageRef);
-			map.put(key, pageRefs);
-		} else {
-			pageRefs.add(pageRef);
-		}
-	}
-
-	void put(Key key, Page page) throws ServletException {
-		// Check if found in other level, this is used to avoid verifying twice
-		Page otherLevelPage = pageCache.get(
-			new Key(key.pageRef, key.level==CaptureLevel.PAGE ? CaptureLevel.META : CaptureLevel.PAGE)
-		);
-		// Add to cache, verify if this page not yet put into cache
-		if(pageCache.put(key, page) == null) {
-			// Was added, now avoid verifying twice typically.
-			// In the race condition where both levels check null then are added concurrently, this will verify twice
-			// rather than verify none.
-			if(VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS) {
-				if(otherLevelPage == null) verifyAdded(page);
-			}
-		}
-	}
-
-	protected void verifyAdded(Page page) throws ServletException {
-		assert VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
-		final PageRef pageRef = page.getPageRef();
-		Set<PageRef> parentPages = null; // Set when first needed
-		Set<PageRef> childPages = null; // Set when first needed
-		// Verify parents that happened to already be cached
-		if(!page.getAllowParentMismatch()) {
-			parentPages = page.getParentPages();
-			for(PageRef parentRef : parentPages) {
-				// Can't verify parent reference to missing book
-				if(parentRef.getBook() != null) {
-					// Check if parent in cache
-					Page parentPage = get(parentRef, CaptureLevel.PAGE);
-					if(parentPage != null) {
-						PageImpl.verifyChildToParent(pageRef, parentRef, parentPage.getChildPages());
-					} else {
-						addToSet(unverifiedParentsByPageRef, parentRef, pageRef);
-					}
-				}
-			}
-		}
-		// Verify children that happened to already be cached
-		if(!page.getAllowChildMismatch()) {
-			childPages = page.getChildPages();
-			for(PageRef childRef : childPages) {
-				// Can't verify child reference to missing book
-				if(childRef.getBook() != null) {
-					// Check if child in cache
-					Page childPage = get(childRef, CaptureLevel.PAGE);
-					if(childPage != null) {
-						PageImpl.verifyParentToChild(pageRef, childRef, childPage.getParentPages());
-					} else {
-						addToSet(unverifiedChildrenByPageRef, childRef, pageRef);
-					}
-				}
-			}
-		}
-		// Verify any pages that have claimed this page as their parent and are not yet verified
-		Set<PageRef> unverifiedParents = unverifiedParentsByPageRef.remove(pageRef);
-		if(unverifiedParents != null) {
-			if(childPages == null) childPages = page.getChildPages();
-			for(PageRef unverifiedParent : unverifiedParents) {
-				PageImpl.verifyChildToParent(unverifiedParent, pageRef, childPages);
-			}
-		}
-		// Verify any pages that have claimed this page as their child and are not yet verified
-		Set<PageRef> unverifiedChildren = unverifiedChildrenByPageRef.remove(pageRef);
-		if(unverifiedChildren != null) {
-			if(parentPages == null) parentPages = page.getParentPages();
-			for(PageRef unverifiedChild : unverifiedChildren) {
-				PageImpl.verifyParentToChild(unverifiedChild, pageRef, parentPages);
-			}
-		}
-	}
+	/**
+	 * Adds the provided page to the cache.  Will also verify parent-child relationships
+	 * on an as-needed basis.
+	 */
+	abstract void put(Key key, Page page) throws ServletException;
 }
