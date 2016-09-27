@@ -62,6 +62,7 @@ public class AuthorUtils {
 		HttpServletResponse response,
 		com.semanticcms.core.model.Page page
 	) throws ServletException, IOException {
+		// TODO: traversal
 		return findAuthorsRecursive(
 			servletContext,
 			request,
