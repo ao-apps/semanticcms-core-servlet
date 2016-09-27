@@ -33,7 +33,8 @@ import javax.servlet.ServletResponseWrapper;
  */
 public class ThreadSafeServletResponse extends ServletResponseWrapper {
 
-	protected final Object lock = new Object();
+	private static class Lock {}
+	protected final Lock lock = new Lock();
 
 	public ThreadSafeServletResponse(ServletResponse resp) {
 		super(resp);
