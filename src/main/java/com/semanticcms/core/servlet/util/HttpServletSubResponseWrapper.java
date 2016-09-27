@@ -38,6 +38,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * TODO: Use this on non-concurrent captures?
+ *
  * {@inhertDoc}
  */
 public class HttpServletSubResponseWrapper extends ServletSubResponseWrapper implements HttpServletResponse {

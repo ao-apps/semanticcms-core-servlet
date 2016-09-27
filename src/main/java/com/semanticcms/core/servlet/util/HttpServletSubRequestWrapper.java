@@ -36,6 +36,8 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
 /**
+ * TODO: Use this on non-concurrent captures?
+ *
  * {@inhertDoc}
  */
 public class HttpServletSubRequestWrapper extends ServletSubRequestWrapper implements HttpServletRequest {
