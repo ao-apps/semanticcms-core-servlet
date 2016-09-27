@@ -43,7 +43,8 @@ public class CapturePageCacheFilter implements Filter {
 
 	private static final String EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME = CapturePageCacheFilter.class.getName()+".exportCache";
 
-	private static final Object exportCacheLock = new Object();
+	private static class ExportCacheLock {}
+	private static final ExportCacheLock exportCacheLock = new ExportCacheLock();
 
 	/**
 	 * The number of milliseconds after the export cache is no longer considered valid.
