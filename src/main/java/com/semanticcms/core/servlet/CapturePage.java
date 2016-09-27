@@ -35,8 +35,8 @@ import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import com.semanticcms.core.servlet.util.HttpServletSubRequest;
 import com.semanticcms.core.servlet.util.HttpServletSubResponse;
-import com.semanticcms.core.servlet.util.ThreadSafeHttpServletResponse;
 import com.semanticcms.core.servlet.util.UnmodifiableCopyHttpServletRequest;
+import com.semanticcms.core.servlet.util.UnmodifiableCopyHttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -283,7 +283,7 @@ public class CapturePage {
 				// Concurrent implementation
 				final TempFileList tempFileList = TempFileContext.getTempFileList(request);
 				final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
-				final HttpServletResponse threadSafeResp = new ThreadSafeHttpServletResponse(response);
+				final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
 				// Create the tasks
 				List<Callable<Page>> tasks = new ArrayList<Callable<Page>>(notCachedSize);
 				for(int i=0; i<notCachedSize; i++) {
@@ -502,7 +502,7 @@ public class CapturePage {
 	) throws ServletException, IOException {
 		// TODO: Make these when first needed, to avoid overhead when stuff already cached, here and elsewhere
 		final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
-		final HttpServletResponse threadSafeResp = new ThreadSafeHttpServletResponse(response);
+		final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
 		final Executor concurrentSubrequestExecutor = SemanticCMS.getInstance(servletContext).getExecutors().getPerProcessor();
 		final TempFileList tempFileList = TempFileContext.getTempFileList(request);
 
@@ -632,7 +632,7 @@ public class CapturePage {
 				}
 				synchronized(finishedFutures) {
 					isDrainingFinishedFutures[0] = true;
-					while(finishedFutures.poll() != null);
+					while(finishedFutures.poll() != null) {}
 				}
 			}
 		}
@@ -730,7 +730,7 @@ public class CapturePage {
 				request,
 				response,
 				new UnmodifiableCopyHttpServletRequest(request),
-				new ThreadSafeHttpServletResponse(response),
+				new UnmodifiableCopyHttpServletResponse(response),
 				root,
 				level,
 				preHandler,
