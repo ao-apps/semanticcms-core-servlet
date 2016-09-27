@@ -575,63 +575,77 @@ public class CapturePage {
 				}
 				readyPages.clear();
 
-				if(!edgesToAdd.isEmpty()) {
-					if(threadSafeReq == null) {
-						threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
-						threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
-					}
-					final HttpServletRequest finalThreadSafeReq = threadSafeReq;
-					final HttpServletResponse finalThreadSafeResp = threadSafeResp;
-					// Submit to the futures, but only up to preferredConcurrency
-					while(
-						futures.size() < preferredConcurrency
-						&& !edgesToAdd.isEmpty()
-					) {
-						final PageRef edge = edgesToAdd.remove();
-						futures.put(
-							edge,
-							concurrentSubrequestExecutor.submit(
-								new Callable<Page>() {
-									@Override
-									public Page call() throws ServletException, IOException, InterruptedException {
-										try {
-											return capturePage(
-												servletContext,
-												new HttpServletSubRequest(finalThreadSafeReq),
-												new HttpServletSubResponse(finalThreadSafeResp, tempFileList),
-												edge,
-												level,
-												cache
-											);
-										} finally {
-											// This one is ready now
-											// There should always be enough room in the queue since the futures are limited going in
-											finishedFutures.add(edge);
+				// Run on this thread if there is only one
+				if(futures.isEmpty() && edgesToAdd.size() == 1) {
+					if(DEBUG) System.err.println("There is only one, running on current thread");
+					readyPages.add(
+						capturePage(
+							servletContext,
+							request,
+							response,
+							edgesToAdd.remove(),
+							level,
+							cache
+						)
+					);
+				} else {
+					if(!edgesToAdd.isEmpty()) {
+						if(threadSafeReq == null) {
+							threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
+							threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
+						}
+						final HttpServletRequest finalThreadSafeReq = threadSafeReq;
+						final HttpServletResponse finalThreadSafeResp = threadSafeResp;
+						// Submit to the futures, but only up to preferredConcurrency
+						while(
+							futures.size() < preferredConcurrency
+							&& !edgesToAdd.isEmpty()
+						) {
+							final PageRef edge = edgesToAdd.remove();
+							futures.put(
+								edge,
+								concurrentSubrequestExecutor.submit(
+									new Callable<Page>() {
+										@Override
+										public Page call() throws ServletException, IOException, InterruptedException {
+											try {
+												return capturePage(
+													servletContext,
+													new HttpServletSubRequest(finalThreadSafeReq),
+													new HttpServletSubResponse(finalThreadSafeResp, tempFileList),
+													edge,
+													level,
+													cache
+												);
+											} finally {
+												// This one is ready now
+												// There should always be enough room in the queue since the futures are limited going in
+												finishedFutures.add(edge);
+											}
 										}
 									}
-								}
-							)
+								)
+							);
+						}
+						if(DEBUG) {
+							int futuresSize = futures.size();
+							int edgesToAddSize = edgesToAdd.size();
+							int size = futuresSize + edgesToAddSize;
+							if(size > maxSize) {
+								System.err.println("futures.size()=" + futuresSize + ", edgesToAdd.size()=" + edgesToAddSize);
+								maxSize = size;
+							}
+						}
+					}
+					// Continue until no more futures
+					if(!futures.isEmpty()) {
+						// wait until a result is available
+						readyPages.add(
+							futures.remove(
+								finishedFutures.take()
+							).get()
 						);
 					}
-				}
-				if(DEBUG) {
-					int futuresSize = futures.size();
-					int edgesToAddSize = edgesToAdd.size();
-					int size = futuresSize + edgesToAddSize;
-					if(size > maxSize) {
-						System.err.println("futures.size()=" + futuresSize + ", edgesToAdd.size()=" + edgesToAddSize);
-						maxSize = size;
-					}
-				}
-
-				// Continue until no more futures
-				if(!futures.isEmpty()) {
-					// wait until a result is available
-					readyPages.add(
-						futures.remove(
-							finishedFutures.take()
-						).get()
-					);
 				}
 			} while(!readyPages.isEmpty());
 			// Traversal over, not found
