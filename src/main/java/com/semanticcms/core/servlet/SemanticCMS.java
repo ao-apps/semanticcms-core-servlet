@@ -51,7 +51,8 @@ public class SemanticCMS {
 	// <editor-fold defaultstate="collapsed" desc="Singleton Instance (per application)">
 	static final String ATTRIBUTE_NAME = "semanticCMS";
 
-	private static final Object instanceLock = new Object();
+	private static class InstanceLock {}
+	private static final InstanceLock instanceLock = new InstanceLock();
 
 	/**
 	 * Gets the SemanticCMS instance, creating it if necessary.
@@ -282,7 +283,8 @@ public class SemanticCMS {
 	 */
 	public static final String DEFAULT_VIEW_NAME = "content";
 
-	private final Object viewsLock = new Object();
+	private static class ViewsLock {}
+	private final ViewsLock viewsLock = new ViewsLock();
 
 	/**
 	 * The views by name in order added.
