@@ -40,6 +40,7 @@ import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
@@ -54,7 +55,7 @@ import javax.servlet.ServletResponse;
  */
 public class UnmodifiableCopyServletRequest implements ServletRequest {
 
-	private static class Lock {}
+	protected static class Lock {}
 	protected final Lock lock = new Lock();
 
 	private final ServletRequest req;
@@ -143,7 +144,7 @@ public class UnmodifiableCopyServletRequest implements ServletRequest {
 	}
 
 	@Override
-	public ThreadSafeServletInputStream getInputStream() throws IOException {
+	public ServletInputStream getInputStream() throws IOException {
 		throw new NotImplementedException();
 	}
 
