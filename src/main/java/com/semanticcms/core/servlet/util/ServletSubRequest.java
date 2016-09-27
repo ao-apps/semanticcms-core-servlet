@@ -46,9 +46,9 @@ import javax.servlet.ServletResponse;
 
 /**
  * <p>
- * <b>This does not implemement {@link ServletRequestWrapper} and use of it is in violation
- * of the specifications.</b>  TODO: When used in conjunction with new threads (or threads
- * from your own pool), Tomcat 7.0 does not noticed you switched the request due to its
+ * <b>This does not implement {@link ServletRequestWrapper} and use of it is in violation
+ * of the specification.</b>  When used in conjunction with new threads (or threads
+ * from your own pool), Tomcat 7.0 and 8.5 do not notice you switched the request due to its
  * use of ThreadLocal to enforce the spec.  This is very hackish and fragile - use at
  * your own risk.
  * </p>

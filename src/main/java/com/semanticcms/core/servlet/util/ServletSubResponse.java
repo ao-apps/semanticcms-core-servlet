@@ -38,9 +38,9 @@ import javax.servlet.ServletResponseWrapper;
 
 /**
  * <p>
- * <b>This does not implemement {@link ServletResponseWrapper} and use of it is in violation
- * of the specifications.</b>  TODO: When used in conjunction with new threads (or threads
- * from your own pool), Tomcat 7.0 does not noticed you switched the response due to its
+ * <b>This does not implement {@link ServletResponseWrapper} and use of it is in violation
+ * of the specification.</b>  When used in conjunction with new threads (or threads
+ * from your own pool), Tomcat 7.0 and 8.5 do not notice you switched the response due to its
  * use of ThreadLocal to enforce the spec.  This is very hackish and fragile - use at
  * your own risk.
  * </p>
@@ -50,8 +50,9 @@ import javax.servlet.ServletResponseWrapper;
  * along to the wrapped response.
  * </p>
  * <p>
- * The wrapped response may change state while this sub response is being processed.
- * Any changes to the wrapped response will not affect this concurrent sub response.
+ * It is expected that the wrapped response will not change for the life of this wrapper.
+ * If it does change, the changes may or may not be visible depending on what has been
+ * accessed and changed on this response.
  * </p>
  * <p>
  * This class is not thread safe.
