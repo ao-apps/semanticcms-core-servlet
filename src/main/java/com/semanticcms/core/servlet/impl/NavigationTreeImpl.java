@@ -70,6 +70,7 @@ final public class NavigationTreeImpl {
 		return filtered;
 	}
 
+	// TODO: Concurrent
 	public static List<Node> getChildNodes(
 		ServletContext servletContext,
 		HttpServletRequest request,
