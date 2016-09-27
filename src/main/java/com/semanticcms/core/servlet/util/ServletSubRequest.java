@@ -81,7 +81,7 @@ public class ServletSubRequest implements ServletRequest {
 	 * but are not returned as part of all attribute names. (At least
 	 * in Tomcat 7.0 - is this a bug?)
 	 */
-	private static final Set<String> hiddenAttributeNames = Collections.unmodifiableSet(
+	static final Set<String> hiddenAttributeNames = Collections.unmodifiableSet(
 		new HashSet<String>(
 			Arrays.asList(
 				//"org.apache.catalina.core.DISPATCHER_TYPE",
@@ -100,6 +100,30 @@ public class ServletSubRequest implements ServletRequest {
 			)
 		)
 	);
+
+	static Map<String,Object> getAllAttributes(ServletRequest req) {
+		Map<String,Object> newAttributes = new LinkedHashMap<String,Object>();
+		for(String hiddenAttrName : hiddenAttributeNames) {
+			if(DEBUG) System.out.println("DEBUG: setAttribute: hiddenAttrName: " + hiddenAttrName);
+			Object hiddenAttrVal = req.getAttribute(hiddenAttrName);
+			if(DEBUG) System.out.println("DEBUG: setAttribute: hiddenAttrVal: " + hiddenAttrVal);
+			if(hiddenAttrVal != null) {
+				newAttributes.put(hiddenAttrName, hiddenAttrVal);
+			}
+		}
+		Enumeration<String> attrNames = req.getAttributeNames();
+		while(attrNames.hasMoreElements()) {
+			String attrName = attrNames.nextElement();
+			if(DEBUG) System.out.println("DEBUG: setAttribute: attrName: " + attrName);
+			Object attrVal = req.getAttribute(attrName);
+			if(DEBUG) System.out.println("DEBUG: setAttribute: attrVal: " + attrVal);
+			// Check for null in case attribute was removed during iteration
+			if(attrVal != null) {
+				newAttributes.put(attrName, attrVal);
+			}
+		}
+		return newAttributes;
+	}
 
 	private Map<String,Object> attributes;
 
@@ -142,29 +166,7 @@ public class ServletSubRequest implements ServletRequest {
 				// Object not ready for toString
 			}
 		}
-		if(attributes == null) {
-			Map<String,Object> newAttributes = new LinkedHashMap<String,Object>();
-			for(String hiddenAttrName : hiddenAttributeNames) {
-				if(DEBUG) System.out.println("DEBUG: setAttribute: hiddenAttrName: " + hiddenAttrName);
-				Object hiddenAttrVal = req.getAttribute(hiddenAttrName);
-				if(DEBUG) System.out.println("DEBUG: setAttribute: hiddenAttrVal: " + hiddenAttrVal);
-				if(hiddenAttrVal != null) {
-					newAttributes.put(hiddenAttrName, hiddenAttrVal);
-				}
-			}
-			Enumeration<String> attrNames = req.getAttributeNames();
-			while(attrNames.hasMoreElements()) {
-				String attrName = attrNames.nextElement();
-				if(DEBUG) System.out.println("DEBUG: setAttribute: attrName: " + attrName);
-				Object attrVal = req.getAttribute(attrName);
-				if(DEBUG) System.out.println("DEBUG: setAttribute: attrVal: " + attrVal);
-				// Check for null in case attribute was removed during iteration
-				if(attrVal != null) {
-					newAttributes.put(attrName, attrVal);
-				}
-			}
-			attributes = newAttributes;
-		}
+		if(attributes == null) attributes = getAllAttributes(req);
 		if(o == null) {
 			attributes.remove(name);
 		} else {
