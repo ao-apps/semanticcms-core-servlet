@@ -53,6 +53,7 @@ public class CountConcurrencyFilter extends com.aoindustries.servlet.filter.Coun
 		assert request.getAttribute(CONCURRENT_PROCESSING_RECOMMENDED_REQUEST_ATTRIBUTE_NAME) == null;
 		assert request.getAttribute(CONCURRENT_SUBREQUESTS_RECOMMENDED_REQUEST_ATTRIBUTE_NAME) == null;
 
+		// One single-CPU system, preferredConcurrency is 1 and concurrency will never be done
 		boolean concurrentProcessingRecommended = (newConcurrency < preferredConcurrency);
 		boolean concurrentSubrequestsRecommended = concurrentProcessingRecommended && concurrentSubrequests;
 
