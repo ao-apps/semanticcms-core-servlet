@@ -83,7 +83,7 @@ public class CapturePage {
 	 * The capture is always done with a request method of "GET", even when the enclosing request is a different method.
 	 * Also validates parent-child and child-parent relationships if the other related pages happened to already be captured and cached.
 	 *
-	 * TODO: Within the scope of one overall request, avoid capturing the same page at the same time (CurrencyLimiter applied to sub requests), is there a reasonable way to catch deadlock conditions?
+	 * TODO: Within the scope of one request and cache, avoid capturing the same page at the same time (CurrencyLimiter applied to sub requests), is there a reasonable way to catch deadlock conditions?
 	 *
 	 * @param level  The minimum page capture level, note that a higher level might be substituted, such as a META capture in place of a PAGE request.
 	 */
