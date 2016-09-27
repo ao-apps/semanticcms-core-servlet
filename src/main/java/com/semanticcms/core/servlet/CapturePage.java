@@ -45,14 +45,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -417,6 +419,12 @@ public class CapturePage {
 	 * Each page is only visited once.
 	 * </p>
 	 * <p>
+	 * This may at times appear to give results in a predictable order, but this must not be relied upon.
+	 * For example, with all items already in cache it might end up giving results in a breadth-first order,
+	 * whereas the same situation on a single-CPU system might end up in a depth-first order.  The ordering
+	 * is not guaranteed in any way and should not be relied upon.
+	 * </p>
+	 * <p>
 	 * pageHandler, edges, and edgeFilter are all called on the main thread (the thread invoking this method).
 	 * <p>
 	 * Returns when the first pageHandler returns a non-null object.
@@ -503,7 +511,14 @@ public class CapturePage {
 		// TODO: Make these when first needed, to avoid overhead when stuff already cached, here and elsewhere
 		final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
 		final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
-		final Executor concurrentSubrequestExecutor = SemanticCMS.getInstance(servletContext).getExecutors().getPerProcessor();
+		final Executor concurrentSubrequestExecutor;
+		final int preferredConcurrency;
+		{ // Scoping block
+			final Executors executors = SemanticCMS.getInstance(servletContext).getExecutors();
+			concurrentSubrequestExecutor = executors.getPerProcessor();
+			preferredConcurrency = executors.getPreferredConcurrency();
+			assert preferredConcurrency > 1 : "Single-CPU systems should never make it to this concurrent implementation";
+		}
 		final TempFileList tempFileList = TempFileContext.getTempFileList(request);
 
 		int maxSize = 0;
@@ -513,20 +528,16 @@ public class CapturePage {
 		// The pages that are currently ready for processing
 		final List<Page> readyPages = new ArrayList<Page>();
 		// Track which futures have been completed (callable put itself here once done)
-		// Using SynchronousQueue so that the futures will not runaway unbounded ahead of the main thread
-		// TODO: Limit the number of tasks put into the executor and do not block from within the tasks themselves
-		final BlockingQueue<PageRef> finishedFutures = new SynchronousQueue<PageRef>(); // LinkedBlockingQueue<PageRef>();
-		// Set to true once all futures canceled and is doing final drain, access synchronized with finishedFutures
-		final boolean[] isDrainingFinishedFutures = new boolean[1];
+		final BlockingQueue<PageRef> finishedFutures = new ArrayBlockingQueue<PageRef>(preferredConcurrency);
 		// Does not immediately submit to the executor, waits until the readyPages are exhausted
-		final List<PageRef> edgesToAdd = new ArrayList<PageRef>();
+		final Queue<PageRef> edgesToAdd = new LinkedList<PageRef>();
 		// The futures are queued, active, or finished but not yet processed by main thread
-		final Map<PageRef,Future<Page>> futures = new HashMap<PageRef,Future<Page>>();
+		final Map<PageRef,Future<Page>> futures = new HashMap<PageRef,Future<Page>>(preferredConcurrency * 4/3+1);
 		try {
 			// Kick it off
 			visited.add(page.getPageRef());
 			readyPages.add(page);
-			while(true) {
+			do {
 				// Handle all the ready pages (note: readyPages might grow during this iteration so checking size each iteration)
 				for(int i = 0; i < readyPages.size(); i++) {
 					Page readyPage = readyPages.get(i);
@@ -563,8 +574,12 @@ public class CapturePage {
 				}
 				readyPages.clear();
 
-				// Submit to the futures
-				for(final PageRef edge : edgesToAdd) {
+				// Submit to the futures, but only up to preferredConcurrency
+				while(
+					futures.size() < preferredConcurrency
+					&& !edgesToAdd.isEmpty()
+				) {
+					final PageRef edge = edgesToAdd.remove();
 					futures.put(
 						edge,
 						concurrentSubrequestExecutor.submit(
@@ -582,10 +597,8 @@ public class CapturePage {
 										);
 									} finally {
 										// This one is ready now
-										// Don't get too far ahead of the main thread
-										synchronized(finishedFutures) {
-											if(!isDrainingFinishedFutures[0]) finishedFutures.put(edge);
-										}
+										// There should always be enough room in the queue since the futures are limited going in
+										finishedFutures.add(edge);
 									}
 								}
 							}
@@ -593,28 +606,27 @@ public class CapturePage {
 					);
 				}
 				if(DEBUG) {
-					int size = futures.size();
+					int futuresSize = futures.size();
+					int edgesToAddSize = edgesToAdd.size();
+					int size = futuresSize + edgesToAddSize;
 					if(size > maxSize) {
-						System.err.println("futures.size()=" + size + ", edgesToAdd.size()=" + edgesToAdd.size());
+						System.err.println("futures.size()=" + futuresSize + ", edgesToAdd.size()=" + edgesToAddSize);
 						maxSize = size;
 					}
 				}
-				edgesToAdd.clear();
 
-				// Continue until no more ready pages and futures empty
-				if(futures.isEmpty()) {
-					assert finishedFutures.isEmpty();
-					// Traversal over, not found
-					return null;
-				} else {
-					// remove to wait until page available
+				// Continue until no more futures
+				if(!futures.isEmpty()) {
+					// wait until a result is available
 					readyPages.add(
 						futures.remove(
 							finishedFutures.take()
 						).get()
 					);
 				}
-			}
+			} while(!readyPages.isEmpty());
+			// Traversal over, not found
+			return null;
 		} catch(InterruptedException e) {
 			throw new ServletException(e);
 		} catch(ExecutionException e) {
@@ -629,10 +641,6 @@ public class CapturePage {
 				if(DEBUG) System.err.println("Canceling " + futures.size() + " futures");
 				for(Future<Page> future : futures.values()) {
 					future.cancel(false);
-				}
-				synchronized(finishedFutures) {
-					isDrainingFinishedFutures[0] = true;
-					while(finishedFutures.poll() != null) {}
 				}
 			}
 		}
