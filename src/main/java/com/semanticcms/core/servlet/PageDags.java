@@ -26,10 +26,9 @@ import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +39,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 final public class PageDags {
 
-	// TODO: Concurrent: Many / most places that use this can do a more direct depth-first traversal
 	public static List<Page> convertPageDagToList(
 		ServletContext servletContext,
 		HttpServletRequest request,
@@ -48,42 +46,36 @@ final public class PageDags {
 		Page rootPage,
 		CaptureLevel level
 	) throws ServletException, IOException {
-		Set<PageRef> seenPages = new HashSet<PageRef>();
-		List<Page> list = new ArrayList<Page>();
-		addPage(
+		final List<Page> list = new ArrayList<Page>();
+		CapturePage.traversePagesDepthFirst(
 			servletContext,
 			request,
 			response,
 			rootPage,
 			level,
-			seenPages,
-			list
+			new CapturePage.PageHandler<Void>() {
+				@Override
+				public Void handlePage(Page page) throws ServletException, IOException {
+					list.add(page);
+					return null;
+				}
+			},
+			new CapturePage.TraversalEdges() {
+				@Override
+				public Collection<PageRef> getEdges(Page page) {
+					return page.getChildPages();
+				}
+			},
+			new CapturePage.EdgeFilter() {
+				@Override
+				public boolean applyEdge(PageRef childPage) {
+					// Child not in missing book
+					return childPage.getBook() != null;
+				}
+			},
+			null
 		);
 		return Collections.unmodifiableList(list);
-	}
-
-	private static void addPage(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Page page,
-		CaptureLevel level,
-		Set<PageRef> seenPages,
-		List<Page> list
-	) throws ServletException, IOException {
-		seenPages.add(page.getPageRef());
-		list.add(page);
-		for(PageRef childRef : page.getChildPages()) {
-			if(
-				// Child not in missing book
-				childRef.getBook() != null
-				// Not already seen
-				&& !seenPages.contains(childRef)
-			) {
-				Page child = CapturePage.capturePage(servletContext, request, response, childRef, level);
-				addPage(servletContext, request, response, child, level, seenPages, list);
-			}
-		}
 	}
 
 	/**
