@@ -30,7 +30,8 @@ import javax.servlet.ServletOutputStream;
  */
 public final class ThreadSafeServletOutputStream extends ServletOutputStream {
 
-	private final Object lock = new Object();
+	private static class Lock {}
+	private final Lock lock = new Lock();
 
 	private final ServletOutputStream out;
 
