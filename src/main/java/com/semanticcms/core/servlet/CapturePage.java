@@ -508,9 +508,10 @@ public class CapturePage {
 		EdgeFilter edgeFilter,
 		final PageCache cache
 	) throws ServletException, IOException {
-		// TODO: Make these when first needed, to avoid overhead when stuff already cached, here and elsewhere
-		final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
-		final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
+		// Created when first needed to avoid the overhead when fully operating from cache
+		HttpServletRequest threadSafeReq = null;
+		HttpServletResponse threadSafeResp = null;
+		// Find the executor
 		final Executor concurrentSubrequestExecutor;
 		final int preferredConcurrency;
 		{ // Scoping block
@@ -574,36 +575,44 @@ public class CapturePage {
 				}
 				readyPages.clear();
 
-				// Submit to the futures, but only up to preferredConcurrency
-				while(
-					futures.size() < preferredConcurrency
-					&& !edgesToAdd.isEmpty()
-				) {
-					final PageRef edge = edgesToAdd.remove();
-					futures.put(
-						edge,
-						concurrentSubrequestExecutor.submit(
-							new Callable<Page>() {
-								@Override
-								public Page call() throws ServletException, IOException, InterruptedException {
-									try {
-										return capturePage(
-											servletContext,
-											new HttpServletSubRequest(threadSafeReq),
-											new HttpServletSubResponse(threadSafeResp, tempFileList),
-											edge,
-											level,
-											cache
-										);
-									} finally {
-										// This one is ready now
-										// There should always be enough room in the queue since the futures are limited going in
-										finishedFutures.add(edge);
+				if(!edgesToAdd.isEmpty()) {
+					if(threadSafeReq == null) {
+						threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
+						threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
+					}
+					final HttpServletRequest finalThreadSafeReq = threadSafeReq;
+					final HttpServletResponse finalThreadSafeResp = threadSafeResp;
+					// Submit to the futures, but only up to preferredConcurrency
+					while(
+						futures.size() < preferredConcurrency
+						&& !edgesToAdd.isEmpty()
+					) {
+						final PageRef edge = edgesToAdd.remove();
+						futures.put(
+							edge,
+							concurrentSubrequestExecutor.submit(
+								new Callable<Page>() {
+									@Override
+									public Page call() throws ServletException, IOException, InterruptedException {
+										try {
+											return capturePage(
+												servletContext,
+												new HttpServletSubRequest(finalThreadSafeReq),
+												new HttpServletSubResponse(finalThreadSafeResp, tempFileList),
+												edge,
+												level,
+												cache
+											);
+										} finally {
+											// This one is ready now
+											// There should always be enough room in the queue since the futures are limited going in
+											finishedFutures.add(edge);
+										}
 									}
 								}
-							}
-						)
-					);
+							)
+						);
+					}
 				}
 				if(DEBUG) {
 					int futuresSize = futures.size();
