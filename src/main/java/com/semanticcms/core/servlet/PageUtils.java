@@ -27,9 +27,9 @@ import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -50,65 +50,55 @@ final public class PageUtils {
 		return false;
 	}
 
+	// TODO: Cache result per class per page?
 	public static boolean hasElement(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Page page,
-		Class<? extends Element> elementType,
-		boolean recursive
+		final Class<? extends Element> elementType,
+		final boolean recursive
 	) throws ServletException, IOException {
-		return hasElementRecursive(
-			servletContext,
-			request,
-			response,
-			page,
-			elementType,
-			recursive,
-			recursive ? new HashSet<PageRef>() : null
-		);
-	}
-
-	private static boolean hasElementRecursive(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Page page,
-		Class<? extends Element> elementType,
-		boolean recursive,
-		Set<PageRef> seenPages
-	) throws ServletException, IOException {
-		for(Element element : page.getElements()) {
-			if(elementType.isAssignableFrom(element.getClass())) {
-				return true;
-			}
-		}
 		if(recursive) {
-			seenPages.add(page.getPageRef());
-			for(PageRef childRef : page.getChildPages()) {
-				if(
-					// Child not in missing book
-					childRef.getBook() != null
-					// Not already seen
-					&& !seenPages.contains(childRef)
-				) {
-					if(
-						hasElementRecursive(
-							servletContext,
-							request,
-							response,
-							CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.META),
-							elementType,
-							recursive,
-							seenPages
-						)
-					) {
-						return true;
+			return CapturePage.traversePagesAnyOrder(
+				servletContext,
+				request,
+				response,
+				page,
+				CaptureLevel.META,
+				new CapturePage.PageHandler<Boolean>() {
+					@Override
+					public Boolean handlePage(Page page) {
+						for(Element element : page.getElements()) {
+							if(elementType.isAssignableFrom(element.getClass())) {
+								return true;
+							}
+						}
+						return null;
+					}
+				},
+				new CapturePage.TraversalEdges() {
+					@Override
+					public Collection<PageRef> getEdges(Page page) {
+						return page.getChildPages();
+					}
+				},
+				new CapturePage.EdgeFilter() {
+					@Override
+					public boolean applyEdge(PageRef childPage) {
+						// Child not in missing book
+						return childPage.getBook() != null;
 					}
 				}
+			) != null;
+		} else {
+			for(Element element : page.getElements()) {
+				if(elementType.isAssignableFrom(element.getClass())) {
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
 	}
 
 	/**
@@ -133,6 +123,7 @@ final public class PageUtils {
 		HttpServletResponse response,
 		com.semanticcms.core.model.Page page
 	) throws ServletException, IOException {
+		// TODO: Traversal
 		return findAllowRobotsRecursive(
 			servletContext,
 			request,
