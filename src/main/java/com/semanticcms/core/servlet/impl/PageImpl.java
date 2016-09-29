@@ -37,6 +37,7 @@ import com.semanticcms.core.servlet.SemanticCMS;
 import com.semanticcms.core.servlet.Theme;
 import com.semanticcms.core.servlet.View;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
@@ -202,70 +203,7 @@ final public class PageImpl {
 					CurrentNode.setCurrentNode(request, null);
 				}
 			}
-			if(page.getParentPages().isEmpty()) {
-				// Auto parents
-
-				// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
-				PageRef pageRef = page.getPageRef();
-
-				// If this page is the "content.root" of a book, include all parents configured when book imported.
-				boolean addedBookParents = false;
-				for(Book book : SemanticCMS.getInstance(servletContext).getBooks().values()) {
-					if(book.getContentRoot().equals(pageRef)) {
-						for(PageRef bookParentPage : book.getParentPages()) {
-							page.addParentPage(bookParentPage);
-						}
-						addedBookParents = true;
-						break;
-					}
-				}
-				if(!addedBookParents) {
-					Book pageBook = pageRef.getBook();
-					assert pageBook != null;
-					String pagePath = pageRef.getPath();
-					if(
-						pagePath.endsWith("/")
-						|| pagePath.endsWith("/index.jspx")
-						|| pagePath.endsWith("/index.jsp")
-					) {
-						// If this page URL ends in "/", "/index.jspx" or "/index.jsp", look for JSP page at "../index.jspx" or "../index.jsp" then asssume "../", error if outside book.
-						int lastSlash = pagePath.lastIndexOf('/');
-						if(lastSlash == -1) throw new AssertionError();
-						int nextLastSlash = pagePath.lastIndexOf('/', lastSlash-1);
-						if(nextLastSlash == -1) {
-							throw new ServletException("Auto parent of page would be outside book: " + pageRef);
-						}
-						String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
-						PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
-						if(servletContext.getResource(indexJspxPageRef.getServletPath()) != null) {
-							page.addParentPage(indexJspxPageRef);
-						} else {
-							PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
-							if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
-								page.addParentPage(indexJspPageRef);
-							} else {
-								page.addParentPage(new PageRef(pageBook, endSlashPath));
-							}
-						}
-					} else {
-						// Look for page at "./index.jspx" or "./index.jsp" then assume "./".
-						int lastSlash = pagePath.lastIndexOf('/');
-						if(lastSlash == -1) throw new AssertionError();
-						String endSlashPath = pagePath.substring(0, lastSlash + 1);
-						PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
-						if(servletContext.getResource(indexJspxPageRef.getServletPath()) != null) {
-							page.addParentPage(indexJspxPageRef);
-						} else {
-							PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
-							if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
-								page.addParentPage(indexJspPageRef);
-							} else {
-								page.addParentPage(new PageRef(pageBook, endSlashPath));
-							}
-						}
-					}
-				}
-			}
+			doAutoParents(servletContext, page);
 		} finally {
 			page.freeze();
 		}
@@ -322,6 +260,78 @@ final public class PageImpl {
 			// Forward to theme
 			theme.doTheme(servletContext, request, response, view, page);
 			throw new SkipPageException();
+		}
+	}
+
+	private static Book findBookByContentRoot(ServletContext servletContext, PageRef pageRef) {
+		for(Book book : SemanticCMS.getInstance(servletContext).getBooks().values()) {
+			if(book.getContentRoot().equals(pageRef)) {
+				return book;
+			}
+		}
+		return null;
+	}
+
+	private static void doAutoParents(ServletContext servletContext, Page page) throws ServletException, MalformedURLException {
+		if(page.getParentPages().isEmpty()) {
+			// Auto parents
+
+			// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
+			PageRef pageRef = page.getPageRef();
+
+			// If this page is the "content.root" of a book, include all parents configured when book imported.
+			Book book = findBookByContentRoot(servletContext, pageRef);
+			if(book != null) {
+				for(PageRef bookParentPage : book.getParentPages()) {
+					page.addParentPage(bookParentPage);
+				}
+			} else {
+				// Otherwise, try auto parents
+				Book pageBook = pageRef.getBook();
+				assert pageBook != null;
+				String pagePath = pageRef.getPath();
+				if(
+					pagePath.endsWith("/")
+					|| pagePath.endsWith("/index.jspx")
+					|| pagePath.endsWith("/index.jsp")
+				) {
+					// If this page URL ends in "/", "/index.jspx" or "/index.jsp", look for JSP page at "../index.jspx" or "../index.jsp" then asssume "../", error if outside book.
+					int lastSlash = pagePath.lastIndexOf('/');
+					if(lastSlash == -1) throw new AssertionError();
+					int nextLastSlash = pagePath.lastIndexOf('/', lastSlash-1);
+					if(nextLastSlash == -1) {
+						throw new ServletException("Auto parent of page would be outside book: " + pageRef);
+					}
+					String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
+					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
+					if(servletContext.getResource(indexJspxPageRef.getServletPath()) != null) {
+						page.addParentPage(indexJspxPageRef);
+					} else {
+						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
+						if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
+							page.addParentPage(indexJspPageRef);
+						} else {
+							page.addParentPage(new PageRef(pageBook, endSlashPath));
+						}
+					}
+				} else {
+					// Look for page at "./index.jspx" or "./index.jsp" then assume "./".
+					int lastSlash = pagePath.lastIndexOf('/');
+					if(lastSlash == -1) throw new AssertionError();
+					String endSlashPath = pagePath.substring(0, lastSlash + 1);
+					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
+					if(servletContext.getResource(indexJspxPageRef.getServletPath()) != null) {
+						page.addParentPage(indexJspxPageRef);
+					} else {
+						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
+						if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
+							page.addParentPage(indexJspPageRef);
+						} else {
+							page.addParentPage(new PageRef(pageBook, endSlashPath));
+						}
+					}
+				}
+			}
 		}
 	}
 
