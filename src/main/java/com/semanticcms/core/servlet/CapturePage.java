@@ -760,8 +760,8 @@ public class CapturePage {
 				servletContext,
 				request,
 				response,
-				new UnmodifiableCopyHttpServletRequest(request),
-				new UnmodifiableCopyHttpServletResponse(response),
+				new HttpServletRequest[1],
+				new HttpServletResponse[1],
 				root,
 				level,
 				preHandler,
@@ -859,8 +859,8 @@ public class CapturePage {
 		final ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		final HttpServletRequest threadSafeReq,
-		final HttpServletResponse threadSafeResp,
+		HttpServletRequest[] threadSafeReq,
+		HttpServletResponse[] threadSafeResp,
 		Page page,
 		final CaptureLevel level,
 		PageHandler<? extends T> preHandler,
@@ -877,43 +877,56 @@ public class CapturePage {
 			T result = preHandler.handlePage(page);
 			if(result != null) return result;
 		}
-		PageRef[] childRefs;
+		PageRef[] childRefs = null;
 		int childRefsSize = 0;
 		{
 			Collection<PageRef> edgesSet = edges.getEdges(page);
-			childRefs = new PageRef[edgesSet.size()];
-			for(PageRef edge : edgesSet) {
-				if(
-					!visited.contains(edge)
-					&& (
-						edgeFilter == null
-						|| edgeFilter.applyEdge(edge)
-					)
-				) {
-					childRefs[childRefsSize++] = edge;
+			int edgesSize = edgesSet.size();
+			if(edgesSize == 0) {
+				childRefs = null;
+			} else {
+				int i = 0;
+				for(PageRef edge : edgesSet) {
+					if(
+						!visited.contains(edge)
+						&& (
+							edgeFilter == null
+							|| edgeFilter.applyEdge(edge)
+						)
+					) {
+						if(childRefs == null) childRefs = new PageRef[edgesSize - i];
+						childRefs[childRefsSize++] = edge;
+					}
+					i++;
 				}
 			}
 		}
 		if(childRefsSize > 0) {
 			Page[] childPageList = new Page[childRefsSize];
 			{
-				int[] notCachedIndexes = new int[childRefsSize];
+				int[] notCachedIndexes;
 				PageRef[] notCachedRefs;
 				int notCachedSize;
 				if(level != CaptureLevel.BODY) {
+					notCachedIndexes = null;
 					notCachedSize = 0;
-					notCachedRefs = new PageRef[childRefsSize];
+					notCachedRefs = null;
 					for(int i=0; i<childRefsSize; i++) {
 						PageRef childRef = childRefs[i];
 						Page cached = cache.get(childRef, level);
 						if(cached != null) {
 							childPageList[i] = cached;
 						} else {
+							if(notCachedIndexes == null) {
+								notCachedIndexes = new int[childRefsSize - i];
+								notCachedRefs = new PageRef[childRefsSize - i];
+							}
 							notCachedIndexes[notCachedSize] = i;
 							notCachedRefs[notCachedSize++] = childRef;
 						}
 					}
 				} else {
+					notCachedIndexes = new int[childRefsSize];
 					for(int i=0; i<childRefsSize; i++) {
 						notCachedIndexes[i] = i;
 					}
@@ -921,6 +934,19 @@ public class CapturePage {
 					notCachedSize = childRefsSize;
 				}
 				if(notCachedSize > 1) {
+					// Wrap request/response when first needed
+					final HttpServletRequest finalThreadSafeReq;
+					final HttpServletResponse finalThreadSafeResp;
+					{
+						HttpServletRequest hsr = threadSafeReq[0];
+						if(hsr == null) {
+							finalThreadSafeReq = threadSafeReq[0] = new UnmodifiableCopyHttpServletRequest(request);
+							finalThreadSafeResp = threadSafeResp[0] = new UnmodifiableCopyHttpServletResponse(response);
+						} else {
+							finalThreadSafeReq = threadSafeReq[0];
+							finalThreadSafeResp = threadSafeResp[0];
+						}
+					}
 					// Concurrent implementation
 					// Create the tasks
 					@SuppressWarnings({"unchecked", "rawtypes"})
@@ -932,8 +958,8 @@ public class CapturePage {
 							public Page call() throws ServletException, IOException {
 								return capturePage(
 									servletContext,
-									new HttpServletSubRequest(threadSafeReq),
-									new HttpServletSubResponse(threadSafeResp, tempFileList),
+									new HttpServletSubRequest(finalThreadSafeReq),
+									new HttpServletSubResponse(finalThreadSafeResp, tempFileList), // temp lists only when first needed?
 									notCachedRef,
 									level,
 									cache
