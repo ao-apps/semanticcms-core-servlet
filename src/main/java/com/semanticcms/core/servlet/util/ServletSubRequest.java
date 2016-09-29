@@ -130,11 +130,12 @@ public class ServletSubRequest implements ServletRequest {
 	@Override
 	public Object getAttribute(String name) {
 		if(DEBUG) System.out.println("DEBUG: getAttribute: " + name);
+		Map<String,Object> a = attributes;
 		if(
-			attributes != null
+			a != null
 			//&& !hiddenAttributeNames.contains(name)
 		) {
-			return attributes.get(name);
+			return a.get(name);
 		} else {
 			return req.getAttribute(name);
 		}
@@ -143,8 +144,9 @@ public class ServletSubRequest implements ServletRequest {
 	@Override
 	public Enumeration<String> getAttributeNames() {
 		if(DEBUG) System.out.println("DEBUG: getAttributeNames");
-		if(attributes != null) {
-			Set<String> attrNames = attributes.keySet();
+		Map<String,Object> a = attributes;
+		if(a != null) {
+			Set<String> attrNames = a.keySet();
 			List<String> nonHiddenAttributeNames = new ArrayList<String>(attrNames.size());
 			for(String attrName : attrNames) {
 				if(!hiddenAttributeNames.contains(attrName)) {
