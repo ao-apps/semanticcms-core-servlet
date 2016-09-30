@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * TODO: Use this on non-concurrent captures?
  *
- * {@inhertDoc}
+ * {@inheritDoc}
  */
 public class HttpServletSubResponseWrapper extends ServletSubResponseWrapper implements HttpServletResponse {
 
