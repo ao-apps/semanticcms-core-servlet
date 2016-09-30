@@ -25,9 +25,9 @@ package com.semanticcms.core.servlet.util;
 import com.aoindustries.io.TempFileList;
 import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferWriter;
-import com.aoindustries.io.buffer.SegmentedWriter;
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.filter.TempFileContext;
+import com.aoindustries.taglib.AutoEncodingBufferedTag;
 import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -104,7 +104,7 @@ public class ServletSubResponse implements ServletResponse {
 		if(capturedOut == null) {
 			// Enable temp files if temp file context active
 			capturedOut = TempFileContext.wrapTempFileList(
-				new SegmentedWriter(),
+				AutoEncodingBufferedTag.newBufferWriter(),
 				tempFileList,
 				// Java 1.8: AutoTempFileWriter::new
 				new TempFileContext.Wrapper<BufferWriter>() {

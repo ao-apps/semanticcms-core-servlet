@@ -27,10 +27,10 @@ import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.EmptyResult;
-import com.aoindustries.io.buffer.SegmentedWriter;
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
+import com.aoindustries.taglib.AutoEncodingBufferedTag;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -180,7 +180,7 @@ public class Page {
 						} else {
 							// Enable temp files if temp file context active
 							BufferWriter capturedOut = TempFileContext.wrapTempFileList(
-								new SegmentedWriter(),
+								AutoEncodingBufferedTag.newBufferWriter(),
 								request,
 								// Java 1.8: AutoTempFileWriter::new
 								new TempFileContext.Wrapper<BufferWriter>() {
