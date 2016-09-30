@@ -23,6 +23,7 @@
 package com.semanticcms.core.servlet.impl;
 
 import com.aoindustries.io.buffer.BufferResult;
+import com.aoindustries.servlet.ServletContextCache;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -287,6 +288,7 @@ final public class PageImpl {
 				}
 			} else {
 				// Otherwise, try auto parents
+				ServletContextCache servletContextCache = ServletContextCache.getCache(servletContext);
 				Book pageBook = pageRef.getBook();
 				assert pageBook != null;
 				String pagePath = pageRef.getPath();
@@ -304,11 +306,11 @@ final public class PageImpl {
 					}
 					String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
 					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
-					if(servletContext.getResource(indexJspxPageRef.getServletPath()) != null) {
+					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
 						page.addParentPage(indexJspxPageRef);
 					} else {
 						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
-						if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
+						if(servletContextCache.getResource(indexJspPageRef.getServletPath()) != null) {
 							page.addParentPage(indexJspPageRef);
 						} else {
 							page.addParentPage(new PageRef(pageBook, endSlashPath));
@@ -320,11 +322,11 @@ final public class PageImpl {
 					if(lastSlash == -1) throw new AssertionError();
 					String endSlashPath = pagePath.substring(0, lastSlash + 1);
 					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
-					if(servletContext.getResource(indexJspxPageRef.getServletPath()) != null) {
+					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
 						page.addParentPage(indexJspxPageRef);
 					} else {
 						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
-						if(servletContext.getResource(indexJspPageRef.getServletPath()) != null) {
+						if(servletContextCache.getResource(indexJspPageRef.getServletPath()) != null) {
 							page.addParentPage(indexJspPageRef);
 						} else {
 							page.addParentPage(new PageRef(pageBook, endSlashPath));
