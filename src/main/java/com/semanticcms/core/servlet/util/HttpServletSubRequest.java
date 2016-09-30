@@ -35,7 +35,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
 /**
- * {@inhertDoc}
+ * {@inheritDoc}
  */
 public class HttpServletSubRequest extends ServletSubRequest implements HttpServletRequest {
 
