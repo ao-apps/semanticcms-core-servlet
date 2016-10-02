@@ -108,10 +108,10 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 					// Note: Page freezes all of its elements
 					if(currentPage == null) element.freeze();
 				}
-				PrintWriter out = response.getWriter();
-				if(elementKey == null) {
-					// Write now
-					if(captureLevel == CaptureLevel.BODY) {
+				// Write now
+				if(captureLevel == CaptureLevel.BODY) {
+					PrintWriter out = response.getWriter();
+					if(elementKey == null) {
 						try {
 							writeTo(out, new ServletElementContext(servletContext, request, response));
 						} catch(ServletException e) {
@@ -125,11 +125,11 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 						} catch(Exception e) {
 							throw new ServletException(e);
 						}
+					} else {
+						// Write an element marker instead
+						// TODO: Do not write element marker for empty elements, such as passwordTable at http://localhost:8080/docs/ao/infrastructure/ao/regions/mobile-al/workstations/francis.aoindustries.com/
+						NodeBodyWriter.writeElementMarker(elementKey, out);
 					}
-				} else {
-					// Write an element marker instead
-					// TODO: Do not write element marker for empty elements, such as passwordTable at http://localhost:8080/docs/ao/infrastructure/ao/regions/mobile-al/workstations/francis.aoindustries.com/
-					NodeBodyWriter.writeElementMarker(elementKey, out);
 				}
 			} finally {
 				// Restore previous currentNode
