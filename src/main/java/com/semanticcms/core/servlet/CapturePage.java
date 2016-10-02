@@ -46,10 +46,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -71,6 +69,7 @@ public class CapturePage {
 	private static final boolean CONCURRENT_TRAVERSALS_ENABLED = true;
 
 	private static final boolean DEBUG = false;
+	private static final boolean DEBUG_NOW = true;
 
 	/**
 	 * Gets the capture context or <code>null</code> if none occurring.
@@ -362,9 +361,8 @@ public class CapturePage {
 	public static interface TraversalEdges {
 		/**
 		 * Gets the child pages to consider for the given page during a traversal.
-		 * This will only be called once per page per traversal.
-		 * The returned collection will be iterated at most once.
-		 * The returned collection will be iterated fully unless a traversal returns a value;
+		 * This may be called more than once per page per traversal and must give consistent results each call.
+		 * The returned collection may be iterated more than once and must give consistent results each iteration.
 		 * TODO: Make this Iterable?
 		 */
 		Collection<PageRef> getEdges(Page page);
@@ -375,7 +373,8 @@ public class CapturePage {
 		 * Each edge returned is filtered through this, must return true for the
 		 * edge to be considered.  This filter is not called when the edge has
 		 * already been visited, however it might be called more than once during
-		 * some concurrent implementations.
+		 * some concurrent implementations.  This filter must give consistent results
+		 * when called more than once.
 		 */
 		boolean applyEdge(PageRef edge);
 	}
@@ -484,7 +483,8 @@ public class CapturePage {
 				pageHandler,
 				edges,
 				edgeFilter,
-				cache
+				cache,
+				null
 			);
 		} else {
 			return traversePagesDepthFirstRecurseSequential(
@@ -504,6 +504,15 @@ public class CapturePage {
 		}
 	}
 
+	private static PageRef getNext(PageRef[] nextHint) {
+		return nextHint == null ? null : nextHint[0];
+	}
+
+	/**
+	 * @param nextHint  an optional one-element array containing what is needed next.
+	 *                  if non-null and contains non-null element, any future task for that page
+	 *                  that is not yet scheduled will be moved to the front of the list.
+	 */
 	private static <T> T traversePagesAnyOrderConcurrent(
 		final ServletContext servletContext,
 		HttpServletRequest request,
@@ -513,7 +522,8 @@ public class CapturePage {
 		PageHandler<? extends T> pageHandler,
 		TraversalEdges edges,
 		EdgeFilter edgeFilter,
-		final PageCache cache
+		final PageCache cache,
+		PageRef[] nextHint
 	) throws ServletException, IOException {
 		// Created when first needed to avoid the overhead when fully operating from cache
 		HttpServletRequest threadSafeReq = null;
@@ -535,26 +545,51 @@ public class CapturePage {
 		final Set<PageRef> visited = new HashSet<PageRef>();
 		// The pages that are currently ready for processing
 		final List<Page> readyPages = new ArrayList<Page>();
+		// New ready pages, used to add in the correct order to readyPages based on traversal direction hints
+		final List<Page> newReadyPages = new ArrayList<Page>();
 		// Track which futures have been completed (callable put itself here once done)
 		final BlockingQueue<PageRef> finishedFutures = new ArrayBlockingQueue<PageRef>(preferredConcurrency);
 		// Does not immediately submit to the executor, waits until the readyPages are exhausted
-		final Queue<PageRef> edgesToAdd = new LinkedList<PageRef>();
+		final List<PageRef> edgesToAdd = new ArrayList<PageRef>();
+		// New edges to add, used to add in the correct order to edgesToAdd based on traversal direction hints
+		final List<PageRef> newEdgesToAdd = new ArrayList<PageRef>();
 		// The futures are queued, active, or finished but not yet processed by main thread
 		final Map<PageRef,Future<Page>> futures = new HashMap<PageRef,Future<Page>>(preferredConcurrency * 4/3+1);
 		try {
 			// Kick it off
 			visited.add(page.getPageRef());
 			readyPages.add(page);
+			// The most recently seen nextHint
+			PageRef next = getNext(nextHint);
 			do {
-				// Handle all the ready pages (note: readyPages might grow during this iteration so checking size each iteration)
-				for(int i = 0; i < readyPages.size(); i++) {
-					Page readyPage = readyPages.get(i);
+				// Handle all the ready pages (using stack-ordering to achieve depth-first ordering from cache)
+				while(!readyPages.isEmpty()) {
+					Page readyPage = null;
+					if(next != null) {
+						// Search readyPages for "next", searching backwards assuming depth-first
+						// TODO: This is sequential search
+						for(int i=readyPages.size()-1; i >= 0; i--) {
+							Page rp = readyPages.get(i);
+							if(rp.getPageRef().equals(next)) {
+								if(DEBUG && i != (readyPages.size()-1)) System.err.println("Found next in readyPages at index " + i + ", size = " + readyPages.size());
+								readyPage = rp;
+								readyPages.remove(i);
+								break;
+							}
+						}
+					}
+					if(readyPage == null) {
+						// Pop off stack
+						readyPage = readyPages.remove(readyPages.size() - 1);
+					}
 					if(pageHandler != null) {
 						T result = pageHandler.handlePage(readyPage);
 						if(result != null) {
 							return result;
 						}
 					}
+					// Update next from any hint
+					next = getNext(nextHint);
 					// Add any children not yet visited
 					for(PageRef edge : edges.getEdges(readyPage)) {
 						if(
@@ -573,14 +608,21 @@ public class CapturePage {
 								cached = cache.get(edge, level);
 							}
 							if(cached != null) {
-								readyPages.add(cached);
+								newReadyPages.add(cached);
 							} else {
-								edgesToAdd.add(edge);
+								newEdgesToAdd.add(edge);
 							}
 						}
 					}
+					// Add to readyPages in backwards order, so they pop off the top in correct traversal order
+					while(!newReadyPages.isEmpty()) {
+						readyPages.add(newReadyPages.remove(newReadyPages.size()-1));
+					}
 				}
-				readyPages.clear();
+				// Add to edgesToAdd in backwards order, so they pop off the top in correct traversal order
+				while(!newEdgesToAdd.isEmpty()) {
+					edgesToAdd.add(newEdgesToAdd.remove(newEdgesToAdd.size()-1));
+				}
 
 				// Run on this thread if there is only one
 				if(futures.isEmpty() && edgesToAdd.size() == 1) {
@@ -590,7 +632,7 @@ public class CapturePage {
 							servletContext,
 							request,
 							response,
-							edgesToAdd.remove(),
+							edgesToAdd.remove(0),
 							level,
 							cache
 						)
@@ -603,12 +645,21 @@ public class CapturePage {
 						}
 						final HttpServletRequest finalThreadSafeReq = threadSafeReq;
 						final HttpServletResponse finalThreadSafeResp = threadSafeResp;
+						// Use hint, make sure it is end of edgesToAdd if in the list
+						if(next != null) {
+							// TODO: This is sequential search
+							int i = edgesToAdd.lastIndexOf(next);
+							if(i != -1) {
+								if(DEBUG_NOW && i != (edgesToAdd.size()-1)) System.err.println("Found next in edgesToAdd at index " + i + ", size = " + edgesToAdd.size());
+								edgesToAdd.add(edgesToAdd.remove(i));
+							}
+						}
 						// Submit to the futures, but only up to preferredConcurrency
 						while(
 							futures.size() < preferredConcurrency
 							&& !edgesToAdd.isEmpty()
 						) {
-							final PageRef edge = edgesToAdd.remove();
+							final PageRef edge = edgesToAdd.remove(edgesToAdd.size() - 1);
 							futures.put(
 								edge,
 								concurrentSubrequestExecutor.submit(
@@ -639,7 +690,7 @@ public class CapturePage {
 							int edgesToAddSize = edgesToAdd.size();
 							int size = futuresSize + edgesToAddSize;
 							if(size > maxSize) {
-								System.err.println("futures.size()=" + futuresSize + ", edgesToAdd.size()=" + edgesToAddSize);
+								if(DEBUG) System.err.println("futures.size()=" + futuresSize + ", edgesToAdd.size()=" + edgesToAddSize);
 								maxSize = size;
 							}
 						}
@@ -860,7 +911,7 @@ public class CapturePage {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Page page,
+		final Page page,
 		CaptureLevel level,
 		final PageHandler<? extends T> preHandler,
 		final TraversalEdges edges,
@@ -868,40 +919,10 @@ public class CapturePage {
 		final PageHandler<? extends T> postHandler,
 		PageCache cache
 	) throws ServletException, IOException {
-		// All of the edges visited or already set as a next
-		final Set<PageRef> visited = new HashSet<PageRef>();
-		// The already resolved parents, used for postHandler
-		final List<Page> parents = new ArrayList<Page>();
-		// The next node that is to be processed, highest on list is active
-		final List<PageRef> nexts = new ArrayList<PageRef>();
-		// Those that are to be done after what is next
-		final List<Iterator<PageRef>> afters = new ArrayList<Iterator<PageRef>>();
-		// The set of nodes we've received but are not yet ready to process
-		final Map<PageRef,Page> received = new HashMap<PageRef,Page>();
 		// Caches the results of edges call, to fit within specification that it will only be called once per page.
 		// This also prevents the chance that caller can give different results or change the collection during traversal.
-		final TraversalEdges cachedEdges = new TraversalEdges() {
-			private final Map<PageRef,Collection<PageRef>> edgesCache = new HashMap<PageRef,Collection<PageRef>>();
-			@Override
-			public Collection<PageRef> getEdges(Page page) {
-				PageRef pageRef = page.getPageRef();
-				Collection<PageRef> result = edgesCache.get(pageRef);
-				if(result == null) {
-					result = edges.getEdges(page);
-					edgesCache.put(pageRef, AoCollections.unmodifiableCopyCollection(result));
-				}
-				return result;
-			}
-		};
-
-		// Kick it off
-		{
-			PageRef pageRef = page.getPageRef();
-			visited.add(pageRef);
-			nexts.add(pageRef);
-			Iterator<PageRef> empty = AoCollections.emptyIterator(); // Java 1.7: Use java.util.Collections.emptyIterator()
-			afters.add(empty);
-		}
+		// The next item is desired is shared with the underlying traversal
+		final PageRef[] nextHint = new PageRef[] {page.getPageRef()};
 		// TODO: Have traversePagesAnyOrderConcurrent return in approximate depth-first ordering to get results sooner
 		// TODO: Have it consider what is "next" here, in preference, move to front of next tasks if not already a queued future.
 		// TODO: and exact depth-first order when it's serving fully from cache
@@ -912,6 +933,26 @@ public class CapturePage {
 			page,
 			level,
 			new PageHandler<T>() {
+				// All of the edges visited or already set as a next
+				final Set<PageRef> visited = new HashSet<PageRef>();
+				// The already resolved parents, used for postHandler
+				final List<Page> parents = new ArrayList<Page>();
+				// The next node that is to be processed, highest on list is active
+				final List<PageRef> nexts = new ArrayList<PageRef>();
+				// Those that are to be done after what is next
+				final List<Iterator<PageRef>> afters = new ArrayList<Iterator<PageRef>>();
+				// The set of nodes we've received but are not yet ready to process
+				Map<PageRef,Page> received = null;
+
+				// Kick it off
+				{
+					PageRef pageRef = page.getPageRef();
+					visited.add(pageRef);
+					nexts.add(pageRef);
+					Iterator<PageRef> empty = AoCollections.emptyIterator(); // Java 1.7: Use java.util.Collections.emptyIterator()
+					afters.add(empty);
+				}
+
 				private PageRef findNext(Iterator<PageRef> after) {
 					while(after.hasNext()) {
 						PageRef possNext = after.next();
@@ -935,16 +976,16 @@ public class CapturePage {
 					int index = nexts.size() - 1;
 					if(pageRef.equals(nexts.get(index))) {
 						do {
-							//System.out.println("pre.: " + pageRef);
+							if(DEBUG) System.err.println("pre.: " + pageRef);
 							if(preHandler != null) {
 								T preResult = preHandler.handlePage(page);
 								if(preResult != null) return preResult;
 							}
 							// Find the first edge that we still need, if any
-							Iterator<PageRef> after = cachedEdges.getEdges(page).iterator();
+							Iterator<PageRef> after = edges.getEdges(page).iterator();
 							PageRef next = findNext(after);
 							if(next != null) {
-								//System.out.println("next: " + next);
+								if(DEBUG) System.err.println("next: " + next);
 								// Have at least one child, not ready for our postHandler yet
 								// Make sure we only look for a given edge once
 								visited.add(next);
@@ -952,23 +993,25 @@ public class CapturePage {
 								parents.add(page);
 								nexts.add(next);
 								afters.add(after);
+								nextHint[0] = next;
 								index++;
 								page = null;
 								pageRef = next;
 							} else {
 								// No children to wait for, run postHandlers and move to next
 								while(true) {
-									//System.out.println("post: " + pageRef);
+									if(DEBUG) System.err.println("post: " + pageRef);
 									if(postHandler != null) {
 										T postResult = postHandler.handlePage(page);
 										if(postResult != null) return postResult;
 									}
 									next = findNext(afters.get(index));
 									if(next != null) {
-										//System.out.println("next: " + next);
+										if(DEBUG) System.err.println("next: " + next);
 										// Make sure we only look for a given edge once
 										visited.add(next);
 										nexts.set(index, next);
+										nextHint[0] = next;
 										page = null;
 										pageRef = next;
 										break;
@@ -979,6 +1022,7 @@ public class CapturePage {
 										index--;
 										if(index < 0) {
 											// Nothing left to check, all postHandlers done
+											nextHint[0] = null;
 											return null;
 										} else {
 											page = parents.remove(index);
@@ -989,23 +1033,30 @@ public class CapturePage {
 							}
 						} while(
 							page != null
-							|| (page = received.remove(pageRef)) != null
+							|| (
+								received != null
+								&& (page = received.remove(pageRef)) != null
+							)
 						);
 					} else {
+						if(received == null) received = new HashMap<PageRef,Page>();
 						received.put(pageRef, page);
-						System.out.println("Received " + pageRef + ", size = " + received.size());
+						if(DEBUG_NOW) System.err.println("Received " + pageRef + ", size = " + received.size());
 					}
 					return null;
 				}
 			},
-			cachedEdges,
+			edges,
 			edgeFilter,
-			cache
+			cache,
+			nextHint
 		);
+		/* TODO
 		assert result != null || parents.isEmpty();
 		assert result != null || nexts.isEmpty();
 		assert result != null || afters.isEmpty();
 		assert result != null || received.isEmpty();
+		 */
 		return result;
 	}
 
