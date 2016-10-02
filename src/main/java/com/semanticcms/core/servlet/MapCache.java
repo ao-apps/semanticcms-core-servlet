@@ -26,7 +26,6 @@ import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -35,9 +34,9 @@ import javax.servlet.ServletException;
 /**
  * A page cache implemented via a map.
  */
-abstract class MapPageCache extends PageCache {
+abstract class MapCache extends Cache {
 
-	private final Map<Key,Page> pageCache;
+	private final Map<CaptureKey,Page> pageCache;
 
 	/**
 	 * Tracks which parent pages are still not verified.
@@ -57,36 +56,32 @@ abstract class MapPageCache extends PageCache {
 	 */
 	private final Map<PageRef,Set<PageRef>> unverifiedChildrenByPageRef;
 
-	MapPageCache(
-		Map<Key,Page> pageCache,
+	/**
+	 * The map used to store attributes.
+	 */
+	protected final Map<String,Object> attributes;
+
+	MapCache(
+		Map<CaptureKey,Page> pageCache,
 		Map<PageRef,Set<PageRef>> unverifiedParentsByPageRef,
-		Map<PageRef,Set<PageRef>> unverifiedChildrenByPageRef
+		Map<PageRef,Set<PageRef>> unverifiedChildrenByPageRef,
+		Map<String,Object> attributes
 	) {
 		this.pageCache = pageCache;
 		this.unverifiedParentsByPageRef = unverifiedParentsByPageRef;
 		this.unverifiedChildrenByPageRef = unverifiedChildrenByPageRef;
-	}
-
-	/**
-	 * Uses default HashMap implementations.
-	 */
-	MapPageCache() {
-		this(
-			new HashMap<Key,Page>(),
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null
-		);
+		this.attributes = attributes;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	Page get(Key key) {
+	Page get(CaptureKey key) {
 		Page page = pageCache.get(key);
 		if(page == null && key.level == CaptureLevel.PAGE) {
 			// Look for meta in place of page
-			page = pageCache.get(new Key(key.pageRef, CaptureLevel.META));
+			page = pageCache.get(new CaptureKey(key.pageRef, CaptureLevel.META));
 		}
 		return page;
 	}
@@ -108,10 +103,10 @@ abstract class MapPageCache extends PageCache {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void put(Key key, Page page) throws ServletException {
+	void put(CaptureKey key, Page page) throws ServletException {
 		// Check if found in other level, this is used to avoid verifying twice
 		Page otherLevelPage = pageCache.get(
-			new Key(key.pageRef, key.level==CaptureLevel.PAGE ? CaptureLevel.META : CaptureLevel.PAGE)
+			new CaptureKey(key.pageRef, key.level==CaptureLevel.PAGE ? CaptureLevel.META : CaptureLevel.PAGE)
 		);
 		// Add to cache, verify if this page not yet put into cache
 		if(pageCache.put(key, page) == null) {
@@ -177,5 +172,35 @@ abstract class MapPageCache extends PageCache {
 				PageImpl.verifyParentToChild(unverifiedChild, pageRef, parentPages);
 			}
 		}
+	}
+
+	@Override
+	public void setAttribute(String key, Object value) {
+		if(value == null) attributes.remove(key);
+		else attributes.put(key, value);
+	}
+
+	@Override
+	public Object getAttribute(String key) {
+		return attributes.get(key);
+	}
+
+	@Override
+	public <V,E extends Exception> V getAttribute(
+		String key,
+		Class<V> clazz,
+		Callable<? extends V,E> callable
+	) throws E {
+		V attribute = getAttribute(key, clazz);
+		if(attribute == null) {
+			attribute = callable.call();
+			setAttribute(key, attribute);
+		}
+		return attribute;
+	}
+
+	@Override
+	public void removeAttribute(String key) {
+		attributes.remove(key);
 	}
 }

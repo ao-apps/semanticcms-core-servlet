@@ -23,17 +23,28 @@
 package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Page;
+import com.semanticcms.core.model.PageRef;
+import static com.semanticcms.core.servlet.Cache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import javax.servlet.ServletException;
 
 /**
  * A page cache that is not thread safe and should only be used within the
  * context of a single thread.
  */
-class SingleThreadPageCache extends MapPageCache {
+class SingleThreadCache extends MapCache {
 
 	private final Thread assertingThread;
 
-	SingleThreadPageCache() {
+	SingleThreadCache() {
+		super(
+			new HashMap<CaptureKey,Page>(),
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
+			new HashMap<String, Object>()
+		);
 		Thread t = null;
 		// Intentional side-effect from assert
 		assert (t = Thread.currentThread()) != null;
@@ -41,14 +52,50 @@ class SingleThreadPageCache extends MapPageCache {
 	}
 
 	@Override
-	Page get(Key key) {
+	Page get(CaptureKey key) {
 		assert assertingThread == Thread.currentThread();
 		return super.get(key);
 	}
 
 	@Override
-	void put(Key key, Page page) throws ServletException {
+	void put(CaptureKey key, Page page) throws ServletException {
 		assert assertingThread == Thread.currentThread();
 		super.put(key, page);
+	}
+
+	@Override
+	public <K,V> Map<K,V> newMap() {
+		assert assertingThread == Thread.currentThread();
+		return new HashMap<K,V>();
+	}
+
+	@Override
+	public <K,V> Map<K,V> newMap(int size) {
+		assert assertingThread == Thread.currentThread();
+		return new HashMap<K,V>(size *4/3+1);
+	}
+
+	@Override
+	public void setAttribute(String key, Object value) {
+		assert assertingThread == Thread.currentThread();
+		super.setAttribute(key, value);
+	}
+
+	@Override
+	public Object getAttribute(String key) {
+		assert assertingThread == Thread.currentThread();
+		return super.getAttribute(key);
+	}
+
+	@Override
+	public <V, E extends Exception> V getAttribute(String key, Class<V> clazz, Callable<? extends V, E> callable) throws E {
+		assert assertingThread == Thread.currentThread();
+		return super.getAttribute(key, clazz, callable);
+	}
+
+	@Override
+	public void removeAttribute(String key) {
+		assert assertingThread == Thread.currentThread();
+		super.removeAttribute(key);
 	}
 }

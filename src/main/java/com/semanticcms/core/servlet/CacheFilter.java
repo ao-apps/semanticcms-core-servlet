@@ -33,15 +33,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Resolves the cache to use for page captures on the current request.
+ * Resolves the cache to use for the current request.
  *
  * @see  CountConcurrencyFilter  This must come after CountConcurrencyFilter
  */
-public class CapturePageCacheFilter implements Filter {
+public class CacheFilter implements Filter {
 
-	private static final String CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME = CapturePageCacheFilter.class.getName()+".capturePageCache";
+	private static final String CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME = CacheFilter.class.getName();
 
-	private static final String EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME = CapturePageCacheFilter.class.getName()+".exportCache";
+	private static final String EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME = CacheFilter.class.getName()+".exportCache";
 
 	private static class ExportCacheLock {}
 	private static final ExportCacheLock exportCacheLock = new ExportCacheLock();
@@ -57,8 +57,8 @@ public class CapturePageCacheFilter implements Filter {
 	 *
 	 * @throws IllegalStateException if the filter is not active on the current request
 	 */
-	static PageCache getCache(ServletRequest request) throws IllegalStateException {
-		PageCache cache = (PageCache)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
+	public static Cache getCache(ServletRequest request) throws IllegalStateException {
+		Cache cache = (Cache)request.getAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME);
 		if(cache == null) throw new IllegalStateException("cache not active on the current request");
 		return cache;
 	}
@@ -91,7 +91,7 @@ public class CapturePageCacheFilter implements Filter {
 		/**
 		 * The currently active cache.
 		 */
-		private PageCache cache;
+		private Cache cache;
 
 		/**
 		 * Invalidates the page cache if it has exceeded its TTL.
@@ -117,12 +117,12 @@ public class CapturePageCacheFilter implements Filter {
 		/**
 		 * Invalidates the cache, if needed, then gets the resulting cache.
 		 */
-		PageCache getCache(long currentTime) {
+		Cache getCache(long currentTime) {
 			assert Thread.holdsLock(exportCacheLock);
 			invalidateCache(currentTime);
 			if(cache == null) {
 				cacheStart = currentTime;
-				cache = concurrentSubrequests ? new ConcurrentPageCache() : new SynchronizedPageCache();
+				cache = concurrentSubrequests ? new ConcurrentCache() : new SynchronizedCache();
 			}
 			return cache;
 		}
@@ -140,7 +140,7 @@ public class CapturePageCacheFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		@SuppressWarnings("unchecked")
-		PageCache cache = (PageCache)request.getAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
+		Cache cache = (Cache)request.getAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME);
 		if(cache == null) {
 			boolean isExporting;
 			if(request instanceof HttpServletRequest) {
@@ -168,16 +168,16 @@ public class CapturePageCacheFilter implements Filter {
 			if(cache == null) {
 				// Request-level cache when not exporting
 				if(CountConcurrencyFilter.useConcurrentSubrequests(request)) {
-					cache = new ConcurrentPageCache();
+					cache = new ConcurrentCache();
 				} else {
-					cache = new SingleThreadPageCache();
+					cache = new SingleThreadCache();
 				}
 			}
 			try {
-				request.setAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
+				request.setAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
 				chain.doFilter(request, response);
 			} finally {
-				request.removeAttribute(CAPTURE_PAGE_CACHE_REQUEST_ATTRIBUTE_NAME);
+				request.removeAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME);
 			}
 		} else {
 			// Cache already set

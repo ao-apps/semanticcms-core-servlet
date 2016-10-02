@@ -100,7 +100,7 @@ public class CapturePage {
 			response,
 			pageRef,
 			level,
-			CapturePageCacheFilter.getCache(request)
+			CacheFilter.getCache(request)
 		);
 	}
 
@@ -110,7 +110,7 @@ public class CapturePage {
 		final HttpServletResponse response,
 		PageRef pageRef,
 		CaptureLevel level,
-		PageCache cache
+		Cache cache
 	) throws ServletException, IOException {
 		NullArgumentException.checkNotNull(level, "level");
 
@@ -118,11 +118,11 @@ public class CapturePage {
 		boolean useCache = level != CaptureLevel.BODY;
 
 		// cacheKey will be null when this capture is not to be cached
-		final PageCache.Key cacheKey;
+		final Cache.CaptureKey cacheKey;
 		Page capturedPage;
 		if(useCache) {
 			// Check the cache
-			cacheKey = new PageCache.Key(pageRef, level);
+			cacheKey = new Cache.CaptureKey(pageRef, level);
 			capturedPage = cache.get(cacheKey);
 			// Set useCache = false to not put back into the cache unnecessarily below
 			useCache = capturedPage == null;
@@ -258,7 +258,7 @@ public class CapturePage {
 				capturePage(servletContext, request, response, pageRef, level)
 			);
 		} else {
-			final PageCache cache = CapturePageCacheFilter.getCache(request);
+			final Cache cache = CacheFilter.getCache(request);
 			Map<PageRef,Page> results = new LinkedHashMap<PageRef,Page>(size * 4/3 + 1);
 			List<PageRef> notCachedList = new ArrayList<PageRef>(size);
 			if(level != CaptureLevel.BODY) {
@@ -469,7 +469,7 @@ public class CapturePage {
 		TraversalEdges edges,
 		EdgeFilter edgeFilter
 	) throws ServletException, IOException {
-		PageCache cache = level == CaptureLevel.BODY ? null : CapturePageCacheFilter.getCache(request);
+		Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
 		if(
 			CONCURRENT_TRAVERSALS_ENABLED
 			&& CountConcurrencyFilter.useConcurrentSubrequests(request)
@@ -522,7 +522,7 @@ public class CapturePage {
 		PageHandler<? extends T> pageHandler,
 		TraversalEdges edges,
 		EdgeFilter edgeFilter,
-		final PageCache cache,
+		final Cache cache,
 		PageRef[] nextHint
 	) throws ServletException, IOException {
 		// Created when first needed to avoid the overhead when fully operating from cache
@@ -811,7 +811,7 @@ public class CapturePage {
 		EdgeFilter edgeFilter,
 		PageHandler<? extends T> postHandler
 	) throws ServletException, IOException {
-		PageCache cache = level == CaptureLevel.BODY ? null : CapturePageCacheFilter.getCache(request);
+		Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
 		if(
 			CONCURRENT_TRAVERSALS_ENABLED
 			&& CountConcurrencyFilter.useConcurrentSubrequests(request)
@@ -860,7 +860,7 @@ public class CapturePage {
 		EdgeFilter edgeFilter,
 		PageHandler<? extends T> postHandler,
 		TempFileList tempFileList,
-		PageCache cache,
+		Cache cache,
 		Set<PageRef> visited
 	) throws ServletException, IOException {
 		if(!visited.add(page.getPageRef())) throw new AssertionError();
@@ -917,15 +917,12 @@ public class CapturePage {
 		final TraversalEdges edges,
 		final EdgeFilter edgeFilter,
 		final PageHandler<? extends T> postHandler,
-		PageCache cache
+		Cache cache
 	) throws ServletException, IOException {
 		// Caches the results of edges call, to fit within specification that it will only be called once per page.
 		// This also prevents the chance that caller can give different results or change the collection during traversal.
 		// The next item is desired is shared with the underlying traversal
 		final PageRef[] nextHint = new PageRef[] {page.getPageRef()};
-		// TODO: Have traversePagesAnyOrderConcurrent return in approximate depth-first ordering to get results sooner
-		// TODO: Have it consider what is "next" here, in preference, move to front of next tasks if not already a queued future.
-		// TODO: and exact depth-first order when it's serving fully from cache
 		T result = traversePagesAnyOrderConcurrent(
 			servletContext,
 			request,
