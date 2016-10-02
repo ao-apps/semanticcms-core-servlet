@@ -305,6 +305,7 @@ final public class PageImpl {
 						throw new ServletException("Auto parent of page would be outside book: " + pageRef);
 					}
 					String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
+					// TODO: These new PageRef call String.intern - worth avoiding it?
 					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
 					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
 						page.addParentPage(indexJspxPageRef);

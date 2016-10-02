@@ -90,6 +90,7 @@ public class PageRefResolver {
 				return new PageRef(foundBook, path);
 			} else {
 				// Missing book
+				// TODO: missingBooks intered, too?  Then can take it's interned copy for "book"
 				if(!semanticCMS.getMissingBooks().contains(book)) {
 					throw new ServletException("Reference to missing book not allowed: " + book);
 				}
