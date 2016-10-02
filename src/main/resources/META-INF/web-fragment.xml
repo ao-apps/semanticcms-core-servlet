@@ -78,13 +78,13 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<dispatcher>REQUEST</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
-	<!-- Sets up the cache for page captures. -->
+	<!-- Sets up the cache for the request. -->
 	<filter>
-		<filter-name>CapturePageCacheFilter</filter-name>
-		<filter-class>com.semanticcms.core.servlet.CapturePageCacheFilter</filter-class>
+		<filter-name>CacheFilter</filter-name>
+		<filter-class>com.semanticcms.core.servlet.CacheFilter</filter-class>
 	</filter>
 	<filter-mapping>
-		<filter-name>CapturePageCacheFilter</filter-name>
+		<filter-name>CacheFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 		<dispatcher>REQUEST</dispatcher>
 		<dispatcher>ERROR</dispatcher>

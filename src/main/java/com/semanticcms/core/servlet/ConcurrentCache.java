@@ -24,10 +24,11 @@ package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
-import static com.semanticcms.core.servlet.PageCache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
+import static com.semanticcms.core.servlet.Cache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.servlet.ServletException;
 
 /**
@@ -35,18 +36,50 @@ import javax.servlet.ServletException;
  *
  * Is currently still synchronized on parent-child verifications, which only occurs on put.
  */
-class ConcurrentPageCache extends MapPageCache {
+class ConcurrentCache extends MapCache {
 
-	ConcurrentPageCache() {
+	private final ConcurrentMap<String, Object> concurrentAttributes;
+
+	ConcurrentCache() {
 		super(
-			new ConcurrentHashMap<Key, Page>(),
+			new ConcurrentHashMap<CaptureKey, Page>(),
 			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
+			new ConcurrentHashMap<String, Object>()
 		);
+		concurrentAttributes = (ConcurrentMap<String, Object>)attributes;
 	}
 
+	/**
+	 * Overridden to add synchronization.
+	 */
 	@Override
 	synchronized protected void verifyAdded(Page page) throws ServletException {
 		super.verifyAdded(page);
+	}
+
+	@Override
+	public <K,V> ConcurrentMap<K,V> newMap() {
+		return new ConcurrentHashMap<K,V>();
+	}
+
+	@Override
+	public <K,V> ConcurrentMap<K,V> newMap(int size) {
+		return new ConcurrentHashMap<K,V>(size);
+	}
+
+	@Override
+	public <V,E extends Exception> V getAttribute(
+		String key,
+		Class<V> clazz,
+		Callable<? extends V,E> callable
+	) throws E {
+		V attribute = getAttribute(key, clazz);
+		if(attribute == null) {
+			attribute = callable.call();
+			Object existing = concurrentAttributes.putIfAbsent(key, attribute);
+			if(existing != null) attribute = clazz.cast(existing);
+		}
+		return attribute;
 	}
 }
