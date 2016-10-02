@@ -66,8 +66,7 @@ final public class LinkImpl {
 	 */
 	public static void writeBrokenPath(PageRef pageRef, String targetId, Appendable out) throws IOException {
 		out.append('¿');
-		out.append(pageRef.getBookPrefix());
-		out.append(pageRef.getPath());
+		out.append(pageRef.getServletPath());
 		if(targetId != null) {
 			out.append('#');
 			out.append(targetId);
@@ -84,8 +83,7 @@ final public class LinkImpl {
 
 	public static String getBrokenPath(PageRef pageRef, String targetId) {
 		int sbLen = 1 // '¿'
-			+ pageRef.getBookPrefix().length()
-			+ pageRef.getPath().length();
+			+ pageRef.getServletPath().length();
 		if(targetId != null) {
 			sbLen +=
 				1 // '#'
@@ -113,8 +111,7 @@ final public class LinkImpl {
 	 */
 	public static void writeBrokenPathInXhtml(PageRef pageRef, String targetId, Appendable out) throws IOException {
 		out.append('¿');
-		encodeTextInXhtml(pageRef.getBookPrefix(), out);
-		encodeTextInXhtml(pageRef.getPath(), out);
+		encodeTextInXhtml(pageRef.getServletPath(), out);
 		if(targetId != null) {
 			out.append('#');
 			encodeTextInXhtml(targetId, out);
@@ -134,8 +131,7 @@ final public class LinkImpl {
 	 */
 	public static void writeBrokenPathInXhtmlAttribute(PageRef pageRef, Appendable out) throws IOException {
 		out.append('¿');
-		encodeTextInXhtmlAttribute(pageRef.getBookPrefix(), out);
-		encodeTextInXhtmlAttribute(pageRef.getPath(), out);
+		encodeTextInXhtmlAttribute(pageRef.getServletPath(), out);
 		out.append('?');
 	}
 
