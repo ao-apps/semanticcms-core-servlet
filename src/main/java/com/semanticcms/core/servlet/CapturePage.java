@@ -69,7 +69,7 @@ public class CapturePage {
 	private static final boolean CONCURRENT_TRAVERSALS_ENABLED = true;
 
 	private static final boolean DEBUG = false;
-	private static final boolean DEBUG_NOW = true;
+	private static final boolean DEBUG_NOW = false;
 
 	/**
 	 * Gets the capture context or <code>null</code> if none occurring.
@@ -104,7 +104,10 @@ public class CapturePage {
 		);
 	}
 
-	private static Page capturePage(
+	/**
+	 * @param cache  See {@link CacheFilter#getCache(javax.servlet.ServletRequest)}
+	 */
+	public static Page capturePage(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
 		final HttpServletResponse response,
@@ -388,6 +391,16 @@ public class CapturePage {
 		T handlePage(Page page) throws ServletException, IOException;
 	}
 
+	public static interface PageDepthHandler<T> {
+		/**
+		 * Called after page captured but before or after children captured.
+		 * Provided the current depth in the page tree, where 0 is the root node.
+		 *
+		 * @return non-null value to terminate the traversal and return this value
+		 */
+		T handlePage(Page page, int depth) throws ServletException, IOException;
+	}
+
 	/**
 	 * @see  #traversePagesAnyOrder(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page, com.semanticcms.core.servlet.CaptureLevel, com.semanticcms.core.servlet.CapturePage.PageHandler, com.semanticcms.core.servlet.CapturePage.TraversalEdges, com.semanticcms.core.servlet.CapturePage.EdgeFilter)
 	 */
@@ -465,7 +478,7 @@ public class CapturePage {
 		HttpServletResponse response,
 		Page root,
 		CaptureLevel level,
-		PageHandler<? extends T> pageHandler,
+		final PageHandler<? extends T> pageHandler,
 		TraversalEdges edges,
 		EdgeFilter edgeFilter
 	) throws ServletException, IOException {
@@ -492,8 +505,14 @@ public class CapturePage {
 				request,
 				response,
 				root,
+				0,
 				level,
-				pageHandler,
+				new PageDepthHandler<T>() {
+					@Override
+					public T handlePage(Page page, int depth) throws ServletException, IOException {
+						return pageHandler.handlePage(page);
+					}
+				},
 				edges,
 				edgeFilter,
 				null,
@@ -512,6 +531,8 @@ public class CapturePage {
 	 * @param nextHint  an optional one-element array containing what is needed next.
 	 *                  if non-null and contains non-null element, any future task for that page
 	 *                  that is not yet scheduled will be moved to the front of the list.
+	 *                  TODO: Do max concurrency - 1, except nextHint?  Then can always schedule at least nextHint immediately.
+	 *                  TODO: Once we get a result matching nextHint, move it's children to the top of the stack so we get them first, let first child of nextHint occupy last slot.
 	 */
 	private static <T> T traversePagesAnyOrderConcurrent(
 		final ServletContext servletContext,
@@ -571,7 +592,7 @@ public class CapturePage {
 						for(int i=readyPages.size()-1; i >= 0; i--) {
 							Page rp = readyPages.get(i);
 							if(rp.getPageRef().equals(next)) {
-								if(DEBUG && i != (readyPages.size()-1)) System.err.println("Found next in readyPages at index " + i + ", size = " + readyPages.size());
+								if(DEBUG_NOW && i != (readyPages.size()-1)) System.err.println("Found next in readyPages at index " + i + ", size = " + readyPages.size());
 								readyPage = rp;
 								readyPages.remove(i);
 								break;
@@ -697,12 +718,27 @@ public class CapturePage {
 					}
 					// Continue until no more futures
 					if(!futures.isEmpty()) {
-						// wait until a result is available
-						readyPages.add(
-							futures.remove(
-								finishedFutures.take()
-							).get()
-						);
+						Future<Page> future = null;
+						// Favor nextHint on which future to consume first
+						if(next != null) {
+							Future<Page> nextsFuture = futures.get(next);
+							if(nextsFuture.isDone()) {
+								if(DEBUG_NOW) {
+									PageRef nextFinished = finishedFutures.peek();
+									if(!nextFinished.equals(next)) {
+										System.err.println("Found nextHint done early in futures: " + next +", nextFinished = " + nextFinished);
+									}
+								}
+								if(!finishedFutures.remove(next)) throw new AssertionError("done future not removed from finishedFutures");
+								futures.remove(next);
+								future = nextsFuture;
+							}
+						}
+						if(future == null) {
+							// wait until a result is available
+							future = futures.remove(finishedFutures.take());
+						}
+						readyPages.add(future.get());
 					}
 				}
 			} while(!readyPages.isEmpty());
@@ -738,10 +774,10 @@ public class CapturePage {
 		HttpServletResponse response,
 		PageRef rootRef,
 		CaptureLevel level,
-		PageHandler<? extends T> preHandler,
+		PageDepthHandler<? extends T> preHandler,
 		TraversalEdges edges,
 		EdgeFilter edgeFilter,
-		PageHandler<? extends T> postHandler
+		PageDepthHandler<? extends T> postHandler
 	) throws ServletException, IOException {
 		return traversePagesDepthFirst(
 			servletContext,
@@ -806,10 +842,10 @@ public class CapturePage {
 		HttpServletResponse response,
 		Page root,
 		CaptureLevel level,
-		PageHandler<? extends T> preHandler,
+		PageDepthHandler<? extends T> preHandler,
 		TraversalEdges edges,
 		EdgeFilter edgeFilter,
-		PageHandler<? extends T> postHandler
+		PageDepthHandler<? extends T> postHandler
 	) throws ServletException, IOException {
 		Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
 		if(
@@ -834,6 +870,7 @@ public class CapturePage {
 				request,
 				response,
 				root,
+				0,
 				level,
 				preHandler,
 				edges,
@@ -854,18 +891,19 @@ public class CapturePage {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Page page,
+		int depth,
 		CaptureLevel level,
-		PageHandler<? extends T> preHandler,
+		PageDepthHandler<? extends T> preHandler,
 		TraversalEdges edges,
 		EdgeFilter edgeFilter,
-		PageHandler<? extends T> postHandler,
+		PageDepthHandler<? extends T> postHandler,
 		TempFileList tempFileList,
 		Cache cache,
 		Set<PageRef> visited
 	) throws ServletException, IOException {
 		if(!visited.add(page.getPageRef())) throw new AssertionError();
 		if(preHandler != null) {
-			T result = preHandler.handlePage(page);
+			T result = preHandler.handlePage(page, depth);
 			if(result != null) return result;
 		}
 		for(PageRef edge : edges.getEdges(page)) {
@@ -888,6 +926,7 @@ public class CapturePage {
 						level,
 						cache
 					),
+					depth + 1,
 					level,
 					preHandler,
 					edges,
@@ -901,7 +940,7 @@ public class CapturePage {
 			}
 		}
 		if(postHandler != null) {
-			T result = postHandler.handlePage(page);
+			T result = postHandler.handlePage(page, depth);
 			if(result != null) return result;
 		}
 		return null;
@@ -913,10 +952,10 @@ public class CapturePage {
 		HttpServletResponse response,
 		final Page page,
 		CaptureLevel level,
-		final PageHandler<? extends T> preHandler,
+		final PageDepthHandler<? extends T> preHandler,
 		final TraversalEdges edges,
 		final EdgeFilter edgeFilter,
-		final PageHandler<? extends T> postHandler,
+		final PageDepthHandler<? extends T> postHandler,
 		Cache cache
 	) throws ServletException, IOException {
 		// Caches the results of edges call, to fit within specification that it will only be called once per page.
@@ -971,11 +1010,16 @@ public class CapturePage {
 					PageRef pageRef = page.getPageRef();
 					// page and pageRef match, but sometimes we have a pageRef with a null page (indicating unknown)
 					int index = nexts.size() - 1;
+					if(DEBUG_NOW) {
+						if(pageRef.equals(nextHint[0])) {
+							System.err.println("Got nextHint from underlying traversal: " + pageRef);
+						}
+					}
 					if(pageRef.equals(nexts.get(index))) {
 						do {
 							if(DEBUG) System.err.println("pre.: " + pageRef);
 							if(preHandler != null) {
-								T preResult = preHandler.handlePage(page);
+								T preResult = preHandler.handlePage(page, parents.size());
 								if(preResult != null) return preResult;
 							}
 							// Find the first edge that we still need, if any
@@ -999,7 +1043,7 @@ public class CapturePage {
 								while(true) {
 									if(DEBUG) System.err.println("post: " + pageRef);
 									if(postHandler != null) {
-										T postResult = postHandler.handlePage(page);
+										T postResult = postHandler.handlePage(page, parents.size());
 										if(postResult != null) return postResult;
 									}
 									next = findNext(afters.get(index));
@@ -1035,10 +1079,13 @@ public class CapturePage {
 								&& (page = received.remove(pageRef)) != null
 							)
 						);
+						if(DEBUG_NOW) System.err.println("nextHint now: " + nextHint[0]);
 					} else {
 						if(received == null) received = new HashMap<PageRef,Page>();
 						received.put(pageRef, page);
-						if(DEBUG_NOW) System.err.println("Received " + pageRef + ", size = " + received.size());
+						if(DEBUG_NOW) {
+							System.err.println("Received " + pageRef + ", size = " + received.size() + ", next = " + nextHint[0]);
+						}
 					}
 					return null;
 				}

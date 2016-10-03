@@ -53,9 +53,9 @@ final public class PageDags {
 			response,
 			rootPage,
 			level,
-			new CapturePage.PageHandler<Void>() {
+			new CapturePage.PageDepthHandler<Void>() {
 				@Override
-				public Void handlePage(Page page) throws ServletException, IOException {
+				public Void handlePage(Page page, int depth) throws ServletException, IOException {
 					list.add(page);
 					return null;
 				}
