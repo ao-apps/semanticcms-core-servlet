@@ -22,8 +22,8 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
-import com.aoindustries.util.PropertiesUtils;
 import com.aoindustries.util.WrappedException;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
