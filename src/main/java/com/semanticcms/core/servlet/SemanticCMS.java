@@ -33,11 +33,13 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -333,6 +335,27 @@ public class SemanticCMS {
 			if(viewsByName.put(name, view) != null) throw new AssertionError();
 			if(!views.add(view)) throw new AssertionError();
 		}
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Components">
+	/**
+	 * The components that are currently registered.
+	 */
+	private final List<Component> components = new CopyOnWriteArrayList<Component>();
+
+	/**
+	 * Gets all components in the order registered.
+	 */
+	public List<Component> getComponents() {
+		return components;
+	}
+
+	/**
+	 * Registers a new component.
+	 */
+	public void addComponent(Component component) {
+		components.add(component);
 	}
 	// </editor-fold>
 
