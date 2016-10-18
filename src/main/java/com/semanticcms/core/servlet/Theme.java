@@ -80,6 +80,8 @@ abstract public class Theme {
 
 	/**
 	 * Renders the theme.
+	 *
+	 * TODO: Is SkipPageException acceptable at the view rendering stage?
 	 */
 	abstract public void doTheme(
 		ServletContext servletContext,

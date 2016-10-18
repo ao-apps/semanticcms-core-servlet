@@ -280,6 +280,8 @@ abstract public class View implements Comparable<View> {
 
 	/**
 	 * Renders the view.  This is called by the template to fill-out the main content area.
+	 *
+	 * TODO: Is SkipPageException acceptable at the view rendering stage?
 	 */
 	abstract public void doView(
 		ServletContext servletContext,
