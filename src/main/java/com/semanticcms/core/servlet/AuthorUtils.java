@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.model.ParentRef;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -102,17 +103,18 @@ public class AuthorUtils {
 			// Use the authors of all parents in the same book
 			pageAuthors = null;
 			Book book = pageRef.getBook();
-			for(PageRef parentRef : page.getParentPages()) {
-				if(book.equals(parentRef.getBook())) {
+			for(ParentRef parentRef : page.getParentRefs()) {
+				PageRef parentPageRef = parentRef.getPageRef();
+				if(book.equals(parentPageRef.getBook())) {
 					// Check finished already
-					Set<Author> parentAuthors = finished.get(parentRef);
+					Set<Author> parentAuthors = finished.get(parentPageRef);
 					if(parentAuthors == null) {
 						// Capture parent and find its authors
 						parentAuthors = findAuthorsRecursive(
 							servletContext,
 							request,
 							response,
-							CapturePage.capturePage(servletContext, request, response, parentRef, CaptureLevel.PAGE),
+							CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
 							finished
 						);
 					}

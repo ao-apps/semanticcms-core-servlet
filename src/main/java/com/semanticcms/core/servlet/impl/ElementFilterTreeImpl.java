@@ -28,6 +28,7 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlA
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.net.UrlUtils;
+import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -124,10 +125,11 @@ final public class ElementFilterTreeImpl {
 			}
 		}
 		if(node instanceof Page) {
-			for(PageRef childRef : ((Page)node).getChildPages()) {
+			for(ChildRef childRef : ((Page)node).getChildRefs()) {
+				PageRef childPageRef = childRef.getPageRef();
 				// Child not in missing book
-				if(childRef.getBook() != null) {
-					Page child = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.META);
+				if(childPageRef.getBook() != null) {
+					Page child = CapturePage.capturePage(servletContext, request, response, childPageRef, CaptureLevel.META);
 					if(findElements(servletContext, request, response, elementFilter, nodesWithMatches, child, includeElements)) {
 						hasMatch = true;
 					}
@@ -220,7 +222,7 @@ final public class ElementFilterTreeImpl {
 			out.write("</a>");
 		}
 		List<Node> childNodes = NavigationTreeImpl.getChildNodes(servletContext, request, response, includeElements, true, node);
-		childNodes = NavigationTreeImpl.filterChildren(childNodes, nodesWithMatches);
+		childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithMatches);
 		if(!childNodes.isEmpty()) {
 			if(out != null) {
 				out.write('\n');

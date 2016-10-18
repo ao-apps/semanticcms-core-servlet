@@ -22,8 +22,10 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.model.ParentRef;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.util.Collections;
 import java.util.HashSet;
@@ -122,36 +124,38 @@ abstract class MapCache extends Cache {
 	protected void verifyAdded(Page page) throws ServletException {
 		assert VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
 		final PageRef pageRef = page.getPageRef();
-		Set<PageRef> parentPages = null; // Set when first needed
-		Set<PageRef> childPages = null; // Set when first needed
+		Set<ParentRef> parentRefs = null; // Set when first needed
+		Set<ChildRef> childRefs = null; // Set when first needed
 		// Verify parents that happened to already be cached
 		if(!page.getAllowParentMismatch()) {
-			parentPages = page.getParentPages();
-			for(PageRef parentRef : parentPages) {
+			parentRefs = page.getParentRefs();
+			for(ParentRef parentRef : parentRefs) {
+				PageRef parentPageRef = parentRef.getPageRef();
 				// Can't verify parent reference to missing book
-				if(parentRef.getBook() != null) {
+				if(parentPageRef.getBook() != null) {
 					// Check if parent in cache
-					Page parentPage = get(parentRef, CaptureLevel.PAGE);
+					Page parentPage = get(parentPageRef, CaptureLevel.PAGE);
 					if(parentPage != null) {
-						PageImpl.verifyChildToParent(pageRef, parentRef, parentPage.getChildPages());
+						PageImpl.verifyChildToParent(pageRef, parentPageRef, parentPage.getChildRefs());
 					} else {
-						addToSet(unverifiedParentsByPageRef, parentRef, pageRef);
+						addToSet(unverifiedParentsByPageRef, parentPageRef, pageRef);
 					}
 				}
 			}
 		}
 		// Verify children that happened to already be cached
 		if(!page.getAllowChildMismatch()) {
-			childPages = page.getChildPages();
-			for(PageRef childRef : childPages) {
+			childRefs = page.getChildRefs();
+			for(ChildRef childRef : childRefs) {
+				PageRef childPageRef = childRef.getPageRef();
 				// Can't verify child reference to missing book
-				if(childRef.getBook() != null) {
+				if(childPageRef.getBook() != null) {
 					// Check if child in cache
-					Page childPage = get(childRef, CaptureLevel.PAGE);
+					Page childPage = get(childPageRef, CaptureLevel.PAGE);
 					if(childPage != null) {
-						PageImpl.verifyParentToChild(pageRef, childRef, childPage.getParentPages());
+						PageImpl.verifyParentToChild(pageRef, childPageRef, childPage.getParentRefs());
 					} else {
-						addToSet(unverifiedChildrenByPageRef, childRef, pageRef);
+						addToSet(unverifiedChildrenByPageRef, childPageRef, pageRef);
 					}
 				}
 			}
@@ -159,17 +163,17 @@ abstract class MapCache extends Cache {
 		// Verify any pages that have claimed this page as their parent and are not yet verified
 		Set<PageRef> unverifiedParents = unverifiedParentsByPageRef.remove(pageRef);
 		if(unverifiedParents != null) {
-			if(childPages == null) childPages = page.getChildPages();
+			if(childRefs == null) childRefs = page.getChildRefs();
 			for(PageRef unverifiedParent : unverifiedParents) {
-				PageImpl.verifyChildToParent(unverifiedParent, pageRef, childPages);
+				PageImpl.verifyChildToParent(unverifiedParent, pageRef, childRefs);
 			}
 		}
 		// Verify any pages that have claimed this page as their child and are not yet verified
 		Set<PageRef> unverifiedChildren = unverifiedChildrenByPageRef.remove(pageRef);
 		if(unverifiedChildren != null) {
-			if(parentPages == null) parentPages = page.getParentPages();
+			if(parentRefs == null) parentRefs = page.getParentRefs();
 			for(PageRef unverifiedChild : unverifiedChildren) {
-				PageImpl.verifyParentToChild(unverifiedChild, pageRef, parentPages);
+				PageImpl.verifyParentToChild(unverifiedChild, pageRef, parentRefs);
 			}
 		}
 	}

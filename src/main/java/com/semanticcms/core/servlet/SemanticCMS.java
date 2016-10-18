@@ -24,9 +24,11 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
+import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.WrappedException;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.model.ParentRef;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -113,6 +115,7 @@ public class SemanticCMS {
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Books">
+	// TODO: This might be cleaner format if we switch to books.json
 	private static final String BOOKS_PROPERTIES_RESOURCE = "/WEB-INF/books.properties";
 
 	private static final String BOOKS_ATTRIBUTE_NAME = "books";
@@ -168,12 +171,13 @@ public class SemanticCMS {
 					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Unexpected value for " + allowRobotsAttribute + ", expect either \"true\" or \"false\": " + allowRobotsVal);
 				}
 			}
-			Set<PageRef> parentPages = new LinkedHashSet<PageRef>();
+			Set<ParentRef> parentRefs = new LinkedHashSet<ParentRef>();
 			for(int parentNum=1; parentNum<Integer.MAX_VALUE; parentNum++) {
 				String parentBookNameAttribute = "books." + bookNum + ".parents." + parentNum + ".book";
 				String parentBookName = getProperty(booksProps, usedKeys, parentBookNameAttribute);
 				String parentPageAttribute = "books." + bookNum + ".parents." + parentNum + ".page";
 				String parentPage = getProperty(booksProps, usedKeys, parentPageAttribute);
+				String parentShortTitle = StringUtility.nullIfEmpty(getProperty(booksProps, usedKeys, "books." + bookNum + ".parents." + parentNum + ".shortTitle"));
 				// Stop on the first not found
 				if(parentBookName == null && parentPage == null) break;
 				if(parentBookName == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent book required when parent page provided: " + parentPageAttribute + "=" + parentPage);
@@ -183,16 +187,16 @@ public class SemanticCMS {
 				if(parentBook == null) {
 					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookNameAttribute + "=" + parentBookName);
 				}
-				if(!parentPages.add(new PageRef(parentBook, parentPage))) {
+				if(!parentRefs.add(new ParentRef(new PageRef(parentBook, parentPage), parentShortTitle))) {
 					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate parent: " + parentPageAttribute + "=" + parentPage);
 				}
 			}
 			if(name.equals(rootBookName)) {
-				if(!parentPages.isEmpty()) {
+				if(!parentRefs.isEmpty()) {
 					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookName);
 				}
 			} else {
-				if(parentPages.isEmpty()) {
+				if(parentRefs.isEmpty()) {
 					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Non-root books must have at least one parent: " + name);
 				}
 			}
@@ -203,7 +207,7 @@ public class SemanticCMS {
 						name,
 						cvsworkDirectory,
 						allowRobots,
-						parentPages,
+						parentRefs,
 						PropertiesUtils.loadFromResource(servletContext, ("/".equals(name) ? "" : name) + "/book.properties")
 					)
 				) != null
