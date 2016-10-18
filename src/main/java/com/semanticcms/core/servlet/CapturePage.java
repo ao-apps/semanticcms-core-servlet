@@ -189,10 +189,11 @@ public class CapturePage {
 					if(capturedPage==null) throw new ServletException("No page captured, page=" + capturePath);
 					PageRef capturedPageRef = capturedPage.getPageRef();
 					if(!capturedPageRef.equals(pageRef)) throw new ServletException(
-						"Captured page has unexpected pageRef.  Expected "
-							+ pageRef
-							+ " but got "
-							+ capturedPageRef
+						"Captured page has unexpected pageRef.  Expected ("
+							+ pageRef.getBookName() + ", " + pageRef.getPath()
+							+ ") but got ("
+							+ capturedPageRef.getBookName() + ", " + capturedPageRef.getPath()
+							+ ')'
 					);
 				} finally {
 					// Restore previous capture context
