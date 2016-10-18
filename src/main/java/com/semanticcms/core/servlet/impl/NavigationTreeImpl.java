@@ -31,15 +31,18 @@ import com.aoindustries.nio.charset.Charsets;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import com.aoindustries.util.StringUtility;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
+import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.model.PageReferrer;
 import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.PageIndex;
 import com.semanticcms.core.servlet.PageRefResolver;
+import com.semanticcms.core.servlet.PageUtils;
 import com.semanticcms.core.servlet.SemanticCMS;
 import java.io.IOException;
 import java.io.Writer;
@@ -58,12 +61,24 @@ import javax.servlet.http.HttpServletResponse;
 
 final public class NavigationTreeImpl {
 
-	public static <T> List<T> filterChildren(Collection<T> children, Set<T> pagesToInclude) {
+	public static <T extends Node> List<T> filterNodes(Collection<T> children, Set<T> nodesToInclude) {
 		int size = children.size();
 		if(size == 0) return Collections.emptyList();
 		List<T> filtered = new ArrayList<T>(size);
 		for(T child : children) {
-			if(pagesToInclude.contains(child)) {
+			if(nodesToInclude.contains(child)) {
+				filtered.add(child);
+			}
+		}
+		return filtered;
+	}
+
+	public static <T extends PageReferrer> List<T> filterPages(Collection<T> children, Set<PageRef> pagesToInclude) {
+		int size = children.size();
+		if(size == 0) return Collections.emptyList();
+		List<T> filtered = new ArrayList<T>(size);
+		for(T child : children) {
+			if(pagesToInclude.contains(child.getPageRef())) {
 				filtered.add(child);
 			}
 		}
@@ -80,21 +95,22 @@ final public class NavigationTreeImpl {
 	) throws ServletException, IOException {
 		// Both elements and pages are child nodes
 		List<Element> childElements = includeElements ? node.getChildElements() : null;
-		Set<PageRef> childPages = (node instanceof Page) ? ((Page)node).getChildPages() : null;
+		Set<ChildRef> childRefs = (node instanceof Page) ? ((Page)node).getChildRefs() : null;
 		List<Node> childNodes = new ArrayList<Node>(
 			(childElements==null ? 0 : childElements.size())
-			+ (childPages==null ? 0 : childPages.size())
+			+ (childRefs==null ? 0 : childRefs.size())
 		);
 		if(includeElements) {
 			for(Element childElem : childElements) {
 				if(!childElem.isHidden()) childNodes.add(childElem);
 			}
 		}
-		if(childPages != null) {
-			for(PageRef childRef : childPages) {
+		if(childRefs != null) {
+			for(ChildRef childRef : childRefs) {
+				PageRef childPageRef = childRef.getPageRef();
 				// Child not in missing book
-				if(childRef.getBook() != null) {
-					Page childPage = CapturePage.capturePage(servletContext, request, response, childRef, includeElements || metaCapture ? CaptureLevel.META : CaptureLevel.PAGE);
+				if(childPageRef.getBook() != null) {
+					Page childPage = CapturePage.capturePage(servletContext, request, response, childPageRef, includeElements || metaCapture ? CaptureLevel.META : CaptureLevel.PAGE);
 					childNodes.add(childPage);
 				}
 			}
@@ -141,10 +157,11 @@ final public class NavigationTreeImpl {
 			}
 		}
 		if(node instanceof Page) {
-			for(PageRef childRef : ((Page)node).getChildPages()) {
+			for(ChildRef childRef : ((Page)node).getChildRefs()) {
+				PageRef childPageRef = childRef.getPageRef();
 				// Child not in missing book
-				if(childRef.getBook() != null) {
-					Page child = CapturePage.capturePage(servletContext, request, response, childRef, CaptureLevel.META);
+				if(childPageRef.getBook() != null) {
+					Page child = CapturePage.capturePage(servletContext, request, response, childPageRef, CaptureLevel.META);
 					if(findLinks(servletContext, request, response, linksTo, nodesWithLinks, nodesWithChildLinks, child, includeElements)) {
 						hasChildLink = true;
 					}
@@ -317,7 +334,7 @@ final public class NavigationTreeImpl {
 				root
 			);
 			if(nodesWithChildLinks != null) {
-				childNodes = NavigationTreeImpl.filterChildren(childNodes, nodesWithChildLinks);
+				childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithChildLinks);
 			}
 			if(!childNodes.isEmpty()) {
 				if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
@@ -331,6 +348,7 @@ final public class NavigationTreeImpl {
 						nodesWithLinks,
 						nodesWithChildLinks,
 						pageIndex,
+						null,
 						childNode,
 						yuiConfig,
 						includeElements,
@@ -354,6 +372,7 @@ final public class NavigationTreeImpl {
 				nodesWithLinks,
 				nodesWithChildLinks,
 				pageIndex,
+				null,
 				root,
 				yuiConfig,
 				includeElements,
@@ -376,6 +395,7 @@ final public class NavigationTreeImpl {
 		Set<Node> nodesWithLinks,
 		Set<Node> nodesWithChildLinks,
 		PageIndex pageIndex,
+		PageRef parentPageRef,
 		Node node,
 		boolean yuiConfig,
 		boolean includeElements,
@@ -491,7 +511,15 @@ final public class NavigationTreeImpl {
 				);
 			}
 			out.write("\">");
-			node.appendLabel(new MediaWriter(textInXhtmlEncoder, out));
+			if(node instanceof Page) {
+				// Use shortTitle for pages
+				encodeTextInXhtml(
+					PageUtils.getShortTitle(parentPageRef, (Page)node),
+					out
+				);
+			} else {
+				node.appendLabel(new MediaWriter(textInXhtmlEncoder, out));
+			}
 			if(index != null) {
 				out.write("<sup>[");
 				encodeTextInXhtml(Integer.toString(index+1), out);
@@ -502,7 +530,7 @@ final public class NavigationTreeImpl {
 		if(maxDepth==0 || level < maxDepth) {
 			List<Node> childNodes = NavigationTreeImpl.getChildNodes(servletContext, request, response, includeElements, false, node);
 			if(nodesWithChildLinks!=null) {
-				childNodes = NavigationTreeImpl.filterChildren(childNodes, nodesWithChildLinks);
+				childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithChildLinks);
 			}
 			if(!childNodes.isEmpty()) {
 				if(out != null) {
@@ -519,6 +547,7 @@ final public class NavigationTreeImpl {
 						nodesWithLinks,
 						nodesWithChildLinks,
 						pageIndex,
+						element==null ? pageRef : parentPageRef,
 						childNode,
 						yuiConfig,
 						includeElements,

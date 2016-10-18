@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.model.ParentRef;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,17 +106,18 @@ public class CopyrightUtils {
 			String parentsRights = null;
 			String parentsDateCopyrighted = null;
 			Book book = pageRef.getBook();
-			for(PageRef parentRef : page.getParentPages()) {
-				if(book.equals(parentRef.getBook())) {
+			for(ParentRef parentRef : page.getParentRefs()) {
+				PageRef parentPageRef = parentRef.getPageRef();
+				if(book.equals(parentPageRef.getBook())) {
 					// Check finished already
-					Copyright parentCopyright = finished.get(parentRef);
-					if(!finished.containsKey(parentRef)) {
+					Copyright parentCopyright = finished.get(parentPageRef);
+					if(!finished.containsKey(parentPageRef)) {
 						// Capture parent and find its authors
 						parentCopyright = findCopyrightRecursive(
 							servletContext,
 							request,
 							response,
-							CapturePage.capturePage(servletContext, request, response, parentRef, CaptureLevel.PAGE),
+							CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
 							finished
 						);
 					}

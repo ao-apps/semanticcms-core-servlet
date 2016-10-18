@@ -25,9 +25,11 @@ package com.semanticcms.core.servlet.impl;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.servlet.ServletContextCache;
 import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.model.ParentRef;
 import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
@@ -58,13 +60,38 @@ final public class PageImpl {
 	 *
 	 * @throws  ServletException  if verification failed
 	 */
-	public static void verifyChildToParent(PageRef childRef, PageRef parentRef, Set<PageRef> childPages) throws ServletException {
-		if(!childPages.contains(childRef)) {
+	public static void verifyChildToParent(ChildRef childRef, PageRef parentPageRef, Set<ChildRef> childRefs) throws ServletException {
+		if(!childRefs.contains(childRef)) {
 			throw new ServletException(
 				"The parent page does not have this as a child.  this="
 					+ childRef
 					+ ", parent="
+					+ parentPageRef
+			);
+		}
+	}
+
+	/**
+	 * Verified one child-parent relationship.
+	 *
+	 * @throws  ServletException  if verification failed
+	 */
+	public static void verifyChildToParent(PageRef childPageRef, PageRef parentPageRef, Set<ChildRef> childRefs) throws ServletException {
+		verifyChildToParent(new ChildRef(childPageRef), parentPageRef, childRefs);
+	}
+
+	/**
+	 * Verified one parent-child relationship.
+	 *
+	 * @throws  ServletException  if verification failed
+	 */
+	public static void verifyParentToChild(ParentRef parentRef, PageRef childPageRef, Set<ParentRef> parentRefs) throws ServletException {
+		if(!parentRefs.contains(parentRef)) {
+			throw new ServletException(
+				"The child page does not have this as a parent.  this="
 					+ parentRef
+					+ ", child="
+					+ childPageRef
 			);
 		}
 	}
@@ -74,15 +101,8 @@ final public class PageImpl {
 	 *
 	 * @throws  ServletException  if verification failed
 	 */
-	public static void verifyParentToChild(PageRef parentRef, PageRef childRef, Set<PageRef> parentPages) throws ServletException {
-		if(!parentPages.contains(parentRef)) {
-			throw new ServletException(
-				"The child page does not have this as a parent.  this="
-					+ parentRef
-					+ ", child="
-					+ childRef
-			);
-		}
+	public static void verifyParentToChild(PageRef parentPageRef, PageRef childPageRef, Set<ParentRef> parentRefs) throws ServletException {
+		verifyParentToChild(new ParentRef(parentPageRef, null), childPageRef, parentRefs);
 	}
 
 	/**
@@ -105,12 +125,12 @@ final public class PageImpl {
 				servletContext,
 				request,
 				response,
-				PageUtils.filterNotMissingBook(page.getParentPages()),
+				PageUtils.filterNotMissingBook(page.getParentRefs()),
 				CaptureLevel.PAGE
 			);
 			PageRef pageRef = page.getPageRef();
 			for(Map.Entry<PageRef,Page> entry : notMissingParents.entrySet()) {
-				verifyChildToParent(pageRef, entry.getKey(), entry.getValue().getChildPages());
+				verifyChildToParent(pageRef, entry.getKey(), entry.getValue().getChildRefs());
 			}
 		}
 		// Verify children
@@ -119,12 +139,12 @@ final public class PageImpl {
 				servletContext,
 				request,
 				response,
-				PageUtils.filterNotMissingBook(page.getChildPages()),
+				PageUtils.filterNotMissingBook(page.getChildRefs()),
 				CaptureLevel.PAGE
 			);
 			PageRef pageRef = page.getPageRef();
 			for(Map.Entry<PageRef,Page> entry : notMissingChildren.entrySet()) {
-				verifyParentToChild(pageRef, entry.getKey(), entry.getValue().getParentPages());
+				verifyParentToChild(pageRef, entry.getKey(), entry.getValue().getParentRefs());
 			}
 		}
 	}
@@ -274,7 +294,7 @@ final public class PageImpl {
 	}
 
 	private static void doAutoParents(ServletContext servletContext, Page page) throws ServletException, MalformedURLException {
-		if(page.getParentPages().isEmpty()) {
+		if(page.getParentRefs().isEmpty()) {
 			// Auto parents
 
 			// PageRef might have been changed during page capture if the default value was incorrect, such as when using pathInfo, get the new value
@@ -283,8 +303,8 @@ final public class PageImpl {
 			// If this page is the "content.root" of a book, include all parents configured when book imported.
 			Book book = findBookByContentRoot(servletContext, pageRef);
 			if(book != null) {
-				for(PageRef bookParentPage : book.getParentPages()) {
-					page.addParentPage(bookParentPage);
+				for(ParentRef bookParentRef : book.getParentRefs()) {
+					page.addParentRef(bookParentRef);
 				}
 			} else {
 				// Otherwise, try auto parents
@@ -308,13 +328,13 @@ final public class PageImpl {
 					// TODO: These new PageRef call String.intern - worth avoiding it?
 					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
 					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
-						page.addParentPage(indexJspxPageRef);
+						page.addParentRef(new ParentRef(indexJspxPageRef, null));
 					} else {
 						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
 						if(servletContextCache.getResource(indexJspPageRef.getServletPath()) != null) {
-							page.addParentPage(indexJspPageRef);
+							page.addParentRef(new ParentRef(indexJspPageRef, null));
 						} else {
-							page.addParentPage(new PageRef(pageBook, endSlashPath));
+							page.addParentRef(new ParentRef(new PageRef(pageBook, endSlashPath), null));
 						}
 					}
 				} else {
@@ -324,13 +344,13 @@ final public class PageImpl {
 					String endSlashPath = pagePath.substring(0, lastSlash + 1);
 					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
 					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
-						page.addParentPage(indexJspxPageRef);
+						page.addParentRef(new ParentRef(indexJspxPageRef, null));
 					} else {
 						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
 						if(servletContextCache.getResource(indexJspPageRef.getServletPath()) != null) {
-							page.addParentPage(indexJspPageRef);
+							page.addParentRef(new ParentRef(indexJspPageRef, null));
 						} else {
-							page.addParentPage(new PageRef(pageBook, endSlashPath));
+							page.addParentRef(new ParentRef(new PageRef(pageBook, endSlashPath), null));
 						}
 					}
 				}

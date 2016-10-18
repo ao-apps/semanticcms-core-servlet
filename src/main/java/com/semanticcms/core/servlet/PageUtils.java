@@ -23,9 +23,12 @@
 package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.model.PageReferrer;
+import com.semanticcms.core.model.ParentRef;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,8 +47,8 @@ import javax.servlet.http.HttpServletResponse;
 final public class PageUtils {
 
 	public static boolean hasChild(Page page) {
-		for(PageRef childRef : page.getChildPages()) {
-			if(childRef.getBook() != null) return true;
+		for(ChildRef childRef : page.getChildRefs()) {
+			if(childRef.getPageRef().getBook() != null) return true;
 		}
 		return false;
 	}
@@ -79,8 +82,8 @@ final public class PageUtils {
 				},
 				new CapturePage.TraversalEdges() {
 					@Override
-					public Collection<PageRef> getEdges(Page page) {
-						return page.getChildPages();
+					public Collection<ChildRef> getEdges(Page page) {
+						return page.getChildRefs();
 					}
 				},
 				new CapturePage.EdgeFilter() {
@@ -147,17 +150,18 @@ final public class PageUtils {
 		if(pageAllowRobots == null) {
 			// Use the allowRobots of all parents in the same book
 			Book book = pageRef.getBook();
-			for(PageRef parentRef : page.getParentPages()) {
-				if(book.equals(parentRef.getBook())) {
+			for(ParentRef parentRef : page.getParentRefs()) {
+				PageRef parentPageRef = parentRef.getPageRef();
+				if(book.equals(parentPageRef.getBook())) {
 					// Check finished already
-					Boolean parentAllowRobots = finished.get(parentRef);
+					Boolean parentAllowRobots = finished.get(parentPageRef);
 					if(parentAllowRobots == null) {
 						// Capture parent and find its allowRobots
 						parentAllowRobots = findAllowRobotsRecursive(
 							servletContext,
 							request,
 							response,
-							CapturePage.capturePage(servletContext, request, response, parentRef, CaptureLevel.PAGE),
+							CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
 							finished
 						);
 					}
@@ -180,26 +184,44 @@ final public class PageUtils {
 	/**
 	 * Filters for all pageRefs that are present (not missing books).
 	 */
-	public static <PR extends PageRef> Set<PR> filterNotMissingBook(Set<PR> pageRefs) {
-		int size = pageRefs.size();
+	public static <PR extends PageReferrer> Set<PR> filterNotMissingBook(Set<PR> pageReferrers) {
+		int size = pageReferrers.size();
 		if(size == 0) {
 			return Collections.emptySet();
 		} else if(size == 1) {
-			PR pageRef = pageRefs.iterator().next();
-			if(pageRef.getBook() != null) {
-				return Collections.singleton(pageRef);
+			PR pageReferrer = pageReferrers.iterator().next();
+			if(pageReferrer.getPageRef().getBook() != null) {
+				return Collections.singleton(pageReferrer);
 			} else {
 				return Collections.emptySet();
 			}
 		} else {
 			Set<PR> notMissingBooks = new LinkedHashSet<PR>(size *4/3+1);
-			for(PR pageRef : pageRefs) {
-				if(pageRef.getBook() != null) {
-					if(!notMissingBooks.add(pageRef)) throw new AssertionError();
+			for(PR pageReferrer : pageReferrers) {
+				if(pageReferrer.getPageRef().getBook() != null) {
+					if(!notMissingBooks.add(pageReferrer)) throw new AssertionError();
 				}
 			}
 			return Collections.unmodifiableSet(notMissingBooks);
 		}
+	}
+
+	/**
+	 * Determines the short title for a page and one of its parents.
+	 */
+	public static String getShortTitle(PageRef parentPageRef, Page page) {
+		// Check for per-parent shortTitle first for the given parent
+		if(parentPageRef != null) {
+			for(ParentRef parentRef : page.getParentRefs()) {
+				if(parentRef.getPageRef().equals(parentPageRef)) {
+					String shortTitle = parentRef.getShortTitle();
+					if(shortTitle != null) return shortTitle;
+					break;
+				}
+			}
+		}
+		// Use the overall page shortTitle
+		return page.getShortTitle();
 	}
 
 	/**
