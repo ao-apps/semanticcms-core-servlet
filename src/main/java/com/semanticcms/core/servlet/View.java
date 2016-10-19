@@ -221,7 +221,7 @@ abstract public class View implements Comparable<View> {
 	/**
 	 * Gets the page title for the view on the given page.
 	 *
-	 * Defaults to: "view.display - page.title - page.pageRef.book.title"
+	 * Defaults to: "view.display - page.title[ - page.pageRef.book.title]"
 	 */
 	public String getTitle(
 		ServletContext servletContext,
@@ -229,7 +229,12 @@ abstract public class View implements Comparable<View> {
 		HttpServletResponse response,
 		Page page
 	) {
-		return getDisplay() + TITLE_SEPARATOR + page.getTitle() + TITLE_SEPARATOR + page.getPageRef().getBook().getTitle();
+		String bookTitle = page.getPageRef().getBook().getTitle();
+		if(bookTitle != null && !bookTitle.isEmpty()) {
+			return getDisplay() + TITLE_SEPARATOR + page.getTitle() + TITLE_SEPARATOR + bookTitle;
+		} else {
+			return getDisplay() + TITLE_SEPARATOR + page.getTitle();
+		}
 	}
 
 	/**
