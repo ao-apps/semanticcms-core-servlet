@@ -45,6 +45,9 @@ public interface Component {
 	 * is rendered by the theme.  A component that does not apply to the given
 	 * view, page, or position should take no action and return quickly.
 	 * </p>
+	 *
+	 * @param view  The view that is currently being rendered.  May be {@code null} during error handling.
+	 * @param page  The page that is currently being rendered.  May be {@code null} during error handling.
 	 */
 	void doComponent(
 		ServletContext servletContext,
