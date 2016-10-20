@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.util.AoCollections;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
@@ -222,6 +223,35 @@ final public class PageUtils {
 		}
 		// Use the overall page shortTitle
 		return page.getShortTitle();
+	}
+
+	/**
+	 * Gets all the parents of the given page that are not in missing books
+	 * and are applicable to the given view.
+	 *
+	 * @return  The filtered set of parents, in the order declared by the page.
+	 */
+	public static Set<Page> getApplicableParents(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		View view,
+		Page page
+	) throws ServletException, IOException {
+		Collection<Page> parents = CapturePage.capturePages(
+			servletContext,
+			request,
+			response,
+			filterNotMissingBook(page.getParentRefs()),
+			CaptureLevel.META // TODO: View provide capture level required for isApplicable check, might be PAGE or (null for none) for some views.
+		).values();
+		Set<Page> applicableParents = new LinkedHashSet<Page>(parents.size() *4/3+1);
+		for(Page parent : parents) {
+			if(view.isApplicable(servletContext, request, response, parent)) {
+				applicableParents.add(parent);
+			}
+		}
+		return AoCollections.optimalUnmodifiableSet(applicableParents);
 	}
 
 	/**
