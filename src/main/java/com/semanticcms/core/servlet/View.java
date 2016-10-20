@@ -27,6 +27,7 @@ import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -194,6 +195,29 @@ abstract public class View implements Comparable<View> {
 	 */
 	public Map<String,List<String>> getLinkParams(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response, Page page) {
 		return Collections.emptyMap();
+	}
+
+	/**
+	 * Gets the canonical URL for the given page in this view.  This should only
+	 * be called once a view is already determined to be applicable to the given
+	 * page.  By default, {@link #getLinkParams(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page) link parameters}
+	 * are not added.
+	 * <p>
+	 * This URL is absolute and has already been response encoded.
+	 * </p>
+	 */
+	public String getCanonicalUrl(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException {
+		assert isApplicable(servletContext, request, response, page);
+		String servletPath = page.getPageRef().getServletPath();
+		if(!isDefault()) {
+			servletPath += "?view=" + URLEncoder.encode(getName(), response.getCharacterEncoding());
+		}
+		return SemanticCMS.getInstance(servletContext).getCanonicalBase(request) + response.encodeURL(servletPath);
 	}
 
 	/**
