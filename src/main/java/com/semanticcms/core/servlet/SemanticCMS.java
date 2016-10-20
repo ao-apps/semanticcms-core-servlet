@@ -24,13 +24,16 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
+import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.WrappedException;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -42,6 +45,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,6 +57,8 @@ import javax.servlet.http.HttpServletRequest;
  * TODO: Consider custom EL resolver for this variable: http://stackoverflow.com/questions/5016965/how-to-add-a-custom-variableresolver-in-pure-jsp
  */
 public class SemanticCMS {
+
+	private static final Logger logger = Logger.getLogger(SemanticCMS.class.getName());
 
 	// <editor-fold defaultstate="collapsed" desc="Singleton Instance (per application)">
 	static final String ATTRIBUTE_NAME = "semanticCMS";
@@ -88,6 +96,7 @@ public class SemanticCMS {
 		;
 		this.rootBook = initBooks();
 		this.executors = new Executors();
+		this.canonicalBase = StringUtility.nullIfEmpty(servletContext.getInitParameter(CANONICAL_BASE_INIT_PARAM));
 	}
 
 	/**
@@ -349,7 +358,7 @@ public class SemanticCMS {
 	private final List<Component> components = new CopyOnWriteArrayList<Component>();
 
 	/**
-	 * Gets all components in the order registered.
+	 * Gets all components in an undefined, but consistent (within a single run) ordering.
 	 */
 	public List<Component> getComponents() {
 		return components;
@@ -360,6 +369,17 @@ public class SemanticCMS {
 	 */
 	public void addComponent(Component component) {
 		components.add(component);
+		// Order the components by classname, just to have a consistent output
+		// independent of the order components happened to be registered.
+		Collections.sort(
+			components,
+			new Comparator<Component>() {
+				@Override
+				public int compare(Component o1, Component o2) {
+					return o1.getClass().getName().compareTo(o2.getClass().getName());
+				}
+			}
+		);
 	}
 	// </editor-fold>
 
@@ -693,6 +713,48 @@ public class SemanticCMS {
 	 */
 	public Executors getExecutors() {
 		return executors;
+	}
+	// </editor-fold>
+
+	// <editor-fold defaultstate="collapsed" desc="Canonicalization">
+
+	/**
+	 * Optional initialization parameter providing the canonical base URL.
+	 */
+	private static final String CANONICAL_BASE_INIT_PARAM = SemanticCMS.class.getName() + ".canonicalBase";
+
+	private final String canonicalBase;
+
+	private final AtomicBoolean warnedAutoCanonical = new AtomicBoolean();
+
+	/**
+	 * Gets the canonical base URL, not including any trailing slash, such as
+	 * <code>https://example.com</code>
+	 * <p>
+	 * TODO: Support canonicalBase per book instead!
+	 * </p>
+	 * <p>
+	 * This is configured with the {@link #CANONICAL_BASE_INIT_PARAM} init parameter.
+	 * When not provided the URL is generated from the request, and a warning is logged
+	 * once.
+	 * TODO: Create central per-request warnings list that could be reported during development mode, include this warning on requests.
+	 * TODO: Also could use that for broken link detection instead of throwing exceptions.
+	 * </p>
+	 */
+	public String getCanonicalBase(HttpServletRequest request) throws MalformedURLException {
+		if(canonicalBase == null) {
+			String autoCanonical = ServletUtil.getAbsolutePath(request, "");
+			if(
+				// Logger checked first, so if warnings enabled mid-run, will get first warning still
+				logger.isLoggable(Level.WARNING)
+				&& warnedAutoCanonical.compareAndSet(false, true)
+			) {
+				logger.warning("Using generated canonical base URL, please configure the \"" + CANONICAL_BASE_INIT_PARAM + "\" init parameter: " + autoCanonical);
+			}
+			return autoCanonical;
+		} else {
+			return canonicalBase;
+		}
 	}
 	// </editor-fold>
 }
