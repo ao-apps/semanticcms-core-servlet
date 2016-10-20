@@ -143,7 +143,13 @@ abstract public class View implements Comparable<View> {
 
 	/**
 	 * Checks if a view is applicable the given request and page.
-	 * 
+	 * For correct determination, the page must have been captured at {@link CaptureLevel#META}
+	 * level or higher.
+	 *
+	 * TODO: Store the captureLevel in effect when a page is captured, and confirm that here and other places where
+	 *       certain capture levels are required for correct behavior.  Could also automatically re-capture at a higher level
+	 *       instead of throwing an exception.
+	 *
 	 * @implSpec  returns {@code true} by default
 	 */
 	public boolean isApplicable(
