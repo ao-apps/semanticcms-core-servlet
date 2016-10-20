@@ -54,7 +54,7 @@ final public class BookUtils {
 	public static String getCanonicalBase(ServletContext servletContext, HttpServletRequest request, Book book) throws MalformedURLException {
 		String canonicalBase = book.getCanonicalBase();
 		if(canonicalBase == null) {
-			String autoCanonical = ServletUtil.getAbsoluteURL(request, "");
+			String autoCanonical = ServletUtil.getAbsoluteURL(request, book.getPathPrefix());
 			if(
 				// Logger checked first, so if warnings enabled mid-run, will get first warning still
 				logger.isLoggable(Level.WARNING)
