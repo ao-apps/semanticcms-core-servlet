@@ -24,8 +24,10 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.taglib.Link;
 import com.semanticcms.core.model.Author;
+import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
+import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -199,12 +201,14 @@ abstract public class View implements Comparable<View> {
 
 	/**
 	 * Gets the canonical URL for the given page in this view.
+	 * Can not get canonical URLs for missing books.
 	 * This might be called even when a page is not applicable to this view, such as when browing to an empty TODO list.
 	 * By default, {@link #getLinkParams(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page) link parameters}
 	 * are not added.
 	 * <p>
 	 * This URL is absolute and has already been response encoded.
 	 * </p>
+	 * @see  BookUtils#getCanonicalBase(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.model.Book)
 	 */
 	public String getCanonicalUrl(
 		ServletContext servletContext,
@@ -212,11 +216,30 @@ abstract public class View implements Comparable<View> {
 		HttpServletResponse response,
 		Page page
 	) throws ServletException, IOException {
-		String servletPath = page.getPageRef().getServletPath();
-		if(!isDefault()) {
-			servletPath += "?view=" + URLEncoder.encode(getName(), response.getCharacterEncoding());
+		PageRef pageRef = page.getPageRef();
+		Book book = pageRef.getBook();
+		// TODO: Should we use servletPath here, then remove the book prefix?
+		//       We're passing a partial path to response.encodeURL
+		String encodedServletPath;
+		{
+			String servletPath = pageRef.getServletPath();
+			if(!isDefault()) {
+				servletPath += "?view=" + URLEncoder.encode(getName(), response.getCharacterEncoding());
+			}
+			encodedServletPath = response.encodeURL(servletPath);
 		}
-		return SemanticCMS.getInstance(servletContext).getCanonicalBase(request) + response.encodeURL(servletPath);
+		// To be safe, we're encoding the servletPath, then picking it back into a bookPath
+		String encodedBookPath;
+		{
+			String bookPrefix = book.getPathPrefix();
+			if(bookPrefix.isEmpty()) {
+				encodedBookPath = encodedServletPath;
+			} else {
+				if(!encodedServletPath.startsWith(bookPrefix)) throw new IllegalStateException("Encoded servlet path is outside this book, unable to canonicalize: encodedServletPath = " + encodedServletPath);
+				encodedBookPath = encodedServletPath.substring(bookPrefix.length());
+			}
+		}
+		return BookUtils.getCanonicalBase(servletContext, request, book) + encodedBookPath;
 	}
 
 	/**
