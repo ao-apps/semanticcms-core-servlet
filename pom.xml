@@ -35,6 +35,12 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 	<version>1.9.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
+	<properties>
+		<bookPath>/core/servlet</bookPath>
+		<shortTitle>Servlet</shortTitle>
+		<description.html><![CDATA[<a target="_top" href="https://support.google.com/webmasters/answer/139066">Canonical URLs</a> for <a target="_top" href="https://semanticcms.com/">SemanticCMS</a> pages.]]></description.html>
+	</properties>
+
 	<name>SemanticCMS Core Servlet</name>
 	<url>https://semanticcms.com/core/servlet/</url>
 	<description>Java API for modeling web page content and relationships in a Servlet environment.</description>
