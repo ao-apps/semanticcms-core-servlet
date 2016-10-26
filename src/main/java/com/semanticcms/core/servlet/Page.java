@@ -41,12 +41,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.jsp.SkipPageException;
+import org.joda.time.ReadableDateTime;
 
 public class Page {
 
 	private final ServletContext servletContext;
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
+
+	private ReadableDateTime dateCreated;
+	private ReadableDateTime datePublished;
+	private ReadableDateTime dateModified;
+	private ReadableDateTime dateReviewed;
+
 	private final String title;
 
 	private String shortTitle;
@@ -82,6 +89,26 @@ public class Page {
 			PageContext.getResponse(),
 			title
 		);
+	}
+
+	public Page dateCreated(ReadableDateTime dateCreated) {
+		this.dateCreated = dateCreated;
+		return this;
+	}
+
+	public Page datePublished(ReadableDateTime datePublished) {
+		this.datePublished = datePublished;
+		return this;
+	}
+
+	public Page dateModified(ReadableDateTime dateModified) {
+		this.dateModified = dateModified;
+		return this;
+	}
+
+	public Page dateReviewed(ReadableDateTime dateReviewed) {
+		this.dateReviewed = dateReviewed;
+		return this;
 	}
 
 	public Page shortTitle(String shortTitle) {
@@ -145,6 +172,10 @@ public class Page {
 			servletContext,
 			request,
 			response,
+			dateCreated,
+			datePublished,
+			dateModified,
+			dateReviewed,
 			title,
 			shortTitle,
 			description,
