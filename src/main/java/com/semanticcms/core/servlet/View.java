@@ -40,6 +40,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
+import org.joda.time.ReadableInstant;
 
 /**
  * A site may provide multiple views of the data.  Except the default content view,
@@ -240,6 +241,23 @@ abstract public class View implements Comparable<View> {
 			}
 		}
 		return BookUtils.getCanonicalBase(servletContext, request, book) + encodedBookPath;
+	}
+
+	/**
+	 * Gets the effective last modified time, if known, for the given page in this view.
+	 * This is used for things such as sitemaps.
+	 *
+	 * @implSpec  This default implemention returns {@code null} indicating not applicable to this view.
+	 *
+	 * @return  The effective last modified time or {@code null} if unknown or not applicable.
+	 */
+	public ReadableInstant getLastModified(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Page page
+	) throws ServletException, IOException {
+		return null;
 	}
 
 	/**

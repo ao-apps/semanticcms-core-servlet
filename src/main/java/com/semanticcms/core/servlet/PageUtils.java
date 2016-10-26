@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.encoding.Coercion;
 import com.aoindustries.util.AoCollections;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.ChildRef;
@@ -41,6 +42,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.joda.time.DateTime;
+import org.joda.time.ReadableDateTime;
 
 /**
  * Utilities for working with pages.
@@ -252,6 +255,20 @@ final public class PageUtils {
 			}
 		}
 		return AoCollections.optimalUnmodifiableSet(applicableParents);
+	}
+
+	public static ReadableDateTime toDateTime(Object o) throws IOException {
+		if(o instanceof ReadableDateTime) {
+			return (ReadableDateTime)o;
+		}
+		if(o instanceof Long) {
+			long l = (Long)o;
+			return l==-1 || l==0 ? null : new DateTime(l);
+		}
+		if(Coercion.isEmpty(o)) {
+			return null;
+		}
+		return new DateTime(o);
 	}
 
 	/**

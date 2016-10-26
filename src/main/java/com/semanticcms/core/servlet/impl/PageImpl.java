@@ -48,6 +48,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
+import org.joda.time.ReadableDateTime;
 
 final public class PageImpl {
 
@@ -153,6 +154,10 @@ final public class PageImpl {
 		final ServletContext servletContext,
 		final HttpServletRequest request,
 		final HttpServletResponse response,
+		ReadableDateTime dateCreated,
+		ReadableDateTime datePublished,
+		ReadableDateTime dateModified,
+		ReadableDateTime dateReviewed,
 		String title,
 		String shortTitle,
 		String description,
@@ -176,6 +181,10 @@ final public class PageImpl {
 			assert CurrentPage.getCurrentPage(request) == null : "When no parent node, cannot have a parent page";
 		}
 
+		page.setDateCreated(dateCreated);
+		page.setDatePublished(datePublished);
+		page.setDateModified(dateModified);
+		page.setDateReviewed(dateReviewed);
 		page.setTitle(title);
 		page.setShortTitle(shortTitle);
 		page.setDescription(description);
