@@ -77,7 +77,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				<li>Added method to get all the applicable parents for a given view.</li>
 				<li>Response content type set on capture for more consistent capture states.
 					This also resolves issue where capture before content type set caused a NPE when trying to resolve MediaType.</li>
-				<li>View now determines the canonical for itself and a given page.</li>
+				<li>View now determines the canonical URL for itself and a given page.</li>
 				<li>Canonical URL is now set on a per-book basis.</li>
 			</ul>
 		</changelog:release>
