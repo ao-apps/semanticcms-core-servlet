@@ -58,7 +58,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.9.0"
-			dateCreated="2016-10-20T18:20:00-0500"
+			datePublished="2016-10-20T18:20:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -85,7 +85,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.8.1"
-			dateCreated="2016-10-10T19:37:00-0500"
+			datePublished="2016-10-10T19:37:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -99,7 +99,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.8.0"
-			dateCreated="2016-10-04T20:39:00-0500"
+			datePublished="2016-10-04T20:39:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -141,7 +141,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.7"
-			dateCreated="2016-09-11T15:34:00-0500"
+			datePublished="2016-09-11T15:34:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -158,7 +158,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.6"
-			dateCreated="2016-09-03T21:48:00-0500"
+			datePublished="2016-09-03T21:48:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -171,7 +171,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.5"
-			dateCreated="2016-08-28T20:33:00-0500"
+			datePublished="2016-08-28T20:33:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -190,7 +190,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.4"
-			dateCreated="2016-08-21T16:57:00-0500"
+			datePublished="2016-08-21T16:57:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -207,7 +207,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.3"
-			dateCreated="2016-08-19T14:39:00-0500"
+			datePublished="2016-08-19T14:39:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -240,7 +240,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.2"
-			dateCreated="2016-08-09T22:22:00-0500"
+			datePublished="2016-08-09T22:22:00-0500"
 			groupId="@{project.groupId}"
 			artifactId="@{project.artifactId}"
 			scmUrl="@{project.scm.url}"
@@ -253,7 +253,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.1"
-			dateCreated="2016-08-07T23:39:00-0500"
+			datePublished="2016-08-07T23:39:00-0500"
 			groupId="com.aoindustries"
 			artifactId="ao-web-page-servlet"
 			scmUrl="@{project.scm.url}"
@@ -266,7 +266,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<changelog:release
 			projectName="@{project.name}"
 			version="1.0"
-			dateCreated="2016-08-07T10:49:00-0500"
+			datePublished="2016-08-07T10:49:00-0500"
 			groupId="com.aoindustries"
 			artifactId="ao-web-page-servlet"
 			scmUrl="@{project.scm.url}"
