@@ -33,7 +33,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="@{shortTitle}"
 		description="@{project.description}"
 		datePublished="2016-10-18T18:08:00-0500"
-		dateModified="2016-10-28T00:11:09-0500"
+		dateModified="2016-11-02T11:35:27-0500"
 	>
 		<core:child page="changelog.jspx" />
 		<core:child page="apidocs/index.jspx" />
