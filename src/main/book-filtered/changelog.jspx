@@ -36,6 +36,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
+		dateModified="2016-11-01T16:51:55-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT')}">
@@ -51,6 +52,10 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 					<li>Added support for dateCreated, datePublished, dateModified, and dateReviewed.</li>
 					<li>Project documentation moved to per-project book in <core:link book="/" page="/index.jspx" /> format.</li>
 					<li>Added changelog as top-level project link.</li>
+					<li><code>/WEB-INF/books.properties</code> changed to XML at <code>/WEB-INF/books.xml</code> with XML Schema defined at
+						<!-- TODO: file:file once cvsworkDirectory no longer required -->
+						<ao:a href="books-1.0.xsd">books-1.0.xsd</ao:a>.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>

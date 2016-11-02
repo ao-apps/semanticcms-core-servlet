@@ -24,27 +24,33 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
-import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.WrappedException;
+import com.aoindustries.xml.XmlUtils;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  * The SemanticCMS application context.
@@ -74,12 +80,18 @@ public class SemanticCMS {
 			}
 		} catch(IOException e) {
 			throw new WrappedException(e);
+		} catch(SAXException e) {
+			throw new WrappedException(e);
+		} catch(ParserConfigurationException e) {
+			throw new WrappedException(e);
+		} catch(XPathExpressionException e) {
+			throw new WrappedException(e);
 		}
 	}
 
 	private final ServletContext servletContext;
 
-	private SemanticCMS(ServletContext servletContext) throws IOException {
+	private SemanticCMS(ServletContext servletContext) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
 		this.servletContext = servletContext;
 		this.demoMode = Boolean.parseBoolean(servletContext.getInitParameter(DEMO_MODE_INIT_PARAM));
 		int numProcessors = Runtime.getRuntime().availableProcessors();
@@ -116,118 +128,89 @@ public class SemanticCMS {
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Books">
-	// TODO: This might be cleaner format if we switch to books.json
-	private static final String BOOKS_PROPERTIES_RESOURCE = "/WEB-INF/books.properties";
+	// See https://docs.oracle.com/javase/tutorial/jaxp/dom/validating.html
+	private static final String BOOKS_XML_RESOURCE = "/WEB-INF/books.xml";
+	private static final String BOOKS_XML_SCHEMA_RESOURCE = "books-1.0.xsd";
 
-	private static final String BOOKS_ATTRIBUTE_NAME = "books";
-	private static final String MISSING_BOOKS_ATTRIBUTE_NAME = "missingBooks";
+	private static final String MISSING_BOOK_TAG_NAME = "missingBook";
+	private static final String BOOK_TAG_NAME = "book";
+	private static final String PARENT_TAG_NAME = "parent";
 	private static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
-
-	private static String getProperty(Properties booksProps, Set<Object> usedKeys, String key) {
-		usedKeys.add(key);
-		return booksProps.getProperty(key);
-	}
 
 	private final Map<String,Book> books = new LinkedHashMap<String,Book>();
 	private final Set<String> missingBooks = new LinkedHashSet<String>();
 	private final Book rootBook;
 
-	private Book initBooks() throws IOException {
-		Properties booksProps = PropertiesUtils.loadFromResource(servletContext, BOOKS_PROPERTIES_RESOURCE);
-		Set<Object> booksPropsKeys = booksProps.keySet();
-
-		// Tracks each properties key used, will throw exception if any key exists in the properties file that is not used
-		Set<Object> usedKeys = new HashSet<Object>(booksPropsKeys.size() * 4/3 + 1);
-
-		// Load missingBooks
-		for(int missingBookNum=1; missingBookNum<Integer.MAX_VALUE; missingBookNum++) {
-			String key =  MISSING_BOOKS_ATTRIBUTE_NAME + "." + missingBookNum;
-			String name = getProperty(booksProps, usedKeys, key);
-			if(name == null) break;
-			if(!missingBooks.add(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate value for \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + key + "=" + name);
-		}
-
-		// Load books
-		String rootBookName = getProperty(booksProps, usedKeys, ROOT_BOOK_ATTRIBUTE_NAME);
-		if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
-		for(int bookNum=1; bookNum<Integer.MAX_VALUE; bookNum++) {
-			String name = getProperty(booksProps, usedKeys, "books." + bookNum + ".name");
-			if(name == null) break;
-			if(missingBooks.contains(name)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Book also listed in \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + name);
-			String cvsworkDirectory;
-			{
-				String cvsworkDirectoryAttribute = "books." + bookNum + ".cvsworkDirectory";
-				cvsworkDirectory = getProperty(booksProps, usedKeys, cvsworkDirectoryAttribute);
-				if(cvsworkDirectory == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Required parameter not present: " + cvsworkDirectoryAttribute);
-			}
-			boolean allowRobots;
-			{
-				String allowRobotsAttribute = "books." + bookNum + ".allowRobots";
-				String allowRobotsVal = getProperty(booksProps, usedKeys, allowRobotsAttribute);
-				if(allowRobotsVal==null || "true".equals(allowRobotsVal)) {
-					allowRobots = true;
-				} else if("false".equalsIgnoreCase(allowRobotsVal)) {
-					allowRobots = false;
-				} else {
-					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Unexpected value for " + allowRobotsAttribute + ", expect either \"true\" or \"false\": " + allowRobotsVal);
+	private Book initBooks() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
+		Document booksXml;
+		{
+			InputStream schemaIn = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_RESOURCE);
+			if(schemaIn == null) throw new IOException("Schema not found: " + BOOKS_XML_SCHEMA_RESOURCE);
+			try {
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				dbf.setNamespaceAware(true);
+				dbf.setValidating(true);
+				dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
+				dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", schemaIn);
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				InputStream booksXmlIn = servletContext.getResource(BOOKS_XML_RESOURCE).openStream();
+				if(booksXmlIn == null) throw new IOException(BOOKS_XML_RESOURCE + " not found");
+				try {
+					booksXml = db.parse(booksXmlIn);
+				} finally {
+					booksXmlIn.close();
 				}
+			} finally {
+				schemaIn.close();
 			}
+		}
+		org.w3c.dom.Element booksElem = booksXml.getDocumentElement();
+		// Load missingBooks
+		for(org.w3c.dom.Element missingBookElem : XmlUtils.iterableChildElementsByTagName(booksElem, MISSING_BOOK_TAG_NAME)) {
+			String name = missingBookElem.getAttribute("name");
+			if(!missingBooks.add(name)) throw new IllegalStateException(BOOKS_XML_RESOURCE+ ": Duplicate value for \"" + MISSING_BOOK_TAG_NAME + "\": " + name);
+		}
+		// Load books
+		String rootBookName = booksElem.getAttribute(ROOT_BOOK_ATTRIBUTE_NAME);
+		if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
+		for(org.w3c.dom.Element bookElem : XmlUtils.iterableChildElementsByTagName(booksElem, BOOK_TAG_NAME)) {
+			String name = bookElem.getAttribute("name");
+			if(missingBooks.contains(name)) throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Book also listed in \"" + MISSING_BOOK_TAG_NAME+ "\": " + name);
 			Set<ParentRef> parentRefs = new LinkedHashSet<ParentRef>();
-			for(int parentNum=1; parentNum<Integer.MAX_VALUE; parentNum++) {
-				String parentBookNameAttribute = "books." + bookNum + ".parents." + parentNum + ".book";
-				String parentBookName = getProperty(booksProps, usedKeys, parentBookNameAttribute);
-				String parentPageAttribute = "books." + bookNum + ".parents." + parentNum + ".page";
-				String parentPage = getProperty(booksProps, usedKeys, parentPageAttribute);
-				String parentShortTitle = StringUtility.nullIfEmpty(getProperty(booksProps, usedKeys, "books." + bookNum + ".parents." + parentNum + ".shortTitle"));
-				// Stop on the first not found
-				if(parentBookName == null && parentPage == null) break;
-				if(parentBookName == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent book required when parent page provided: " + parentPageAttribute + "=" + parentPage);
-				if(parentPage == null) throw new IllegalArgumentException(BOOKS_PROPERTIES_RESOURCE + ": parent page required when parent book provided: " + parentBookNameAttribute + "=" + parentBookName);
-				if(missingBooks.contains(parentBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + parentBookNameAttribute + "=" + parentBookName);
+			for(org.w3c.dom.Element parentElem : XmlUtils.iterableChildElementsByTagName(bookElem, PARENT_TAG_NAME)) {
+				String parentBookName = parentElem.getAttribute("book");
+				String parentPage = parentElem.getAttribute("page");
+				String parentShortTitle = parentElem.hasAttribute("shortTitle") ? parentElem.getAttribute("shortTitle") : null;
 				Book parentBook = books.get(parentBookName);
 				if(parentBook == null) {
-					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookNameAttribute + "=" + parentBookName);
+					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookName);
 				}
-				if(!parentRefs.add(new ParentRef(new PageRef(parentBook, parentPage), parentShortTitle))) {
-					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate parent: " + parentPageAttribute + "=" + parentPage);
-				}
+				parentRefs.add(new ParentRef(new PageRef(parentBook, parentPage), parentShortTitle));
 			}
 			if(name.equals(rootBookName)) {
 				if(!parentRefs.isEmpty()) {
-					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookName);
+					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookName);
 				}
 			} else {
 				if(parentRefs.isEmpty()) {
-					throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Non-root books must have at least one parent: " + name);
+					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Non-root books must have at least one parent: " + name);
 				}
 			}
-			if(
-				books.put(
+			books.put(
+				name,
+				new Book(
 					name,
-					new Book(
-						name,
-						cvsworkDirectory,
-						allowRobots,
-						parentRefs,
-						PropertiesUtils.loadFromResource(servletContext, ("/".equals(name) ? "" : name) + "/book.properties")
-					)
-				) != null
-			) {
-				throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Duplicate book: " + name);
-			}
+					bookElem.getAttribute("cvsworkDirectory"),
+					Boolean.valueOf(bookElem.getAttribute("allowRobots")),
+					parentRefs,
+					PropertiesUtils.loadFromResource(servletContext, ("/".equals(name) ? "" : name) + "/book.properties")
+				)
+			);
 		}
 
 		// Load rootBook
-		if(missingBooks.contains(rootBookName)) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not be a \"" + MISSING_BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
 		Book newRootBook = books.get(rootBookName);
-		if(newRootBook == null) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" is not found in \"" + BOOKS_ATTRIBUTE_NAME + "\": " + rootBookName);
-
-		// Make sure all keys used
-		Set<Object> unusedKeys = new HashSet<Object>();
-		for(Object key : booksPropsKeys) {
-			if(!usedKeys.contains(key)) unusedKeys.add(key);
-		}
-		if(!unusedKeys.isEmpty()) throw new IllegalStateException(BOOKS_PROPERTIES_RESOURCE + ": Unused keys: " + unusedKeys);
+		if(newRootBook == null) throw new AssertionError();
 
 		// Successful book load
 		return newRootBook;
