@@ -49,5 +49,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				<li><ao:a href="@{project.scm.url}">GitHub</ao:a></li>
 			</ul>
 		</section:section>
+		<section:section label="XML Schemas">
+			<!-- TODO: file:file once cvsworkDirectory no longer required -->
+			<ul>
+				<li><ao:a href="books-1.0.xsd">books-1.0.xsd</ao:a></li>
+			</ul>
+		</section:section>
 	</core:page>
 </jsp:root>
