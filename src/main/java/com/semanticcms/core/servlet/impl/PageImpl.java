@@ -68,6 +68,8 @@ final public class PageImpl {
 					+ childRef
 					+ ", parent="
 					+ parentPageRef
+					+ ", parent.children="
+					+ childRefs
 			);
 		}
 	}
@@ -93,6 +95,8 @@ final public class PageImpl {
 					+ parentRef
 					+ ", child="
 					+ childPageRef
+					+ ", child.parents="
+					+ parentRefs
 			);
 		}
 	}
