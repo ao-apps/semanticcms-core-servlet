@@ -247,7 +247,7 @@ abstract public class View implements Comparable<View> {
 	 * Gets the effective last modified time, if known, for the given page in this view.
 	 * This is used for things such as sitemaps.
 	 *
-	 * @implSpec  This default implemention returns {@code null} indicating not applicable to this view.
+	 * @implSpec  This default implementation returns {@code null} indicating not applicable to this view.
 	 *
 	 * @return  The effective last modified time or {@code null} if unknown or not applicable.
 	 */

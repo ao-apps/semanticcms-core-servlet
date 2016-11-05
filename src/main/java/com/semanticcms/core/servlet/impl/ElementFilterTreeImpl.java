@@ -236,7 +236,7 @@ final public class ElementFilterTreeImpl {
 		if(out != null) out.write("</li>\n");
 	}
 
-	// Traversal-based implemention is proving too complicated due to needing to
+	// Traversal-based implementation is proving too complicated due to needing to
 	// look ahead to know which elements to show.
 	// TODO: Caching?
 	public static void writeElementFilterTreeImpl(
