@@ -31,6 +31,7 @@ import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.taglib.AutoEncodingBufferedTag;
+import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -48,6 +49,8 @@ public class Page {
 	private final ServletContext servletContext;
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
+
+	private PageRef pageRef;
 
 	private ReadableDateTime dateCreated;
 	private ReadableDateTime datePublished;
@@ -89,6 +92,11 @@ public class Page {
 			PageContext.getResponse(),
 			title
 		);
+	}
+
+	public Page pageRef(PageRef pageRef) {
+		this.pageRef = pageRef;
+		return this;
 	}
 
 	public Page dateCreated(ReadableDateTime dateCreated) {
@@ -172,6 +180,7 @@ public class Page {
 			servletContext,
 			request,
 			response,
+			pageRef,
 			dateCreated,
 			datePublished,
 			dateModified,
