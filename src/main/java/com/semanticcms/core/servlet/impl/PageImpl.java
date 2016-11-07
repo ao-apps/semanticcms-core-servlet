@@ -158,6 +158,7 @@ final public class PageImpl {
 		final ServletContext servletContext,
 		final HttpServletRequest request,
 		final HttpServletResponse response,
+		PageRef pageRef,
 		ReadableDateTime dateCreated,
 		ReadableDateTime datePublished,
 		ReadableDateTime dateModified,
@@ -175,8 +176,10 @@ final public class PageImpl {
 	) throws E, ServletException, IOException, SkipPageException {
 		final Page page = new Page();
 		// Find the default path to this page, this might be changed during page processing
-		final PageRef defaultPageRef = PageRefResolver.getCurrentPageRef(servletContext, request);
-		page.setPageRef(defaultPageRef);
+		if(pageRef == null) {
+			pageRef = PageRefResolver.getCurrentPageRef(servletContext, request);
+		}
+		page.setPageRef(pageRef);
 
 		{
 			// Pages may not be nested within any kind of node
@@ -220,10 +223,10 @@ final public class PageImpl {
 						}
 						// Page may not move itself to a different book
 						PageRef newPageRef = page.getPageRef();
-						if(!newPageRef.getBook().equals(defaultPageRef.getBook())) {
+						if(!newPageRef.getBook().equals(pageRef.getBook())) {
 							throw new ServletException(
-								"Page may not move itself into a different book.  defaultPageRef="
-									+ defaultPageRef
+								"Page may not move itself into a different book.  pageRef="
+									+ pageRef
 									+ ", newPageRef="
 									+ newPageRef
 							);
