@@ -52,7 +52,7 @@ public class PageRefResolver {
 	}
 
 	/**
-	 * Resolves a PageRef.  If book is provided, path may be book-relative path, which will be interpreted relative
+	 * Resolves a PageRef.  When book is not provided, path may be book-relative path, which will be interpreted relative
 	 * to the current page.
 	 * <p>
 	 * Resolves the bookName to use.  If the provided book is null, uses the book
