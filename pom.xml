@@ -36,12 +36,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 	<packaging>jar</packaging>
 
 	<properties>
-		<bookPath>/core/servlet</bookPath>
 		<shortTitle>Servlet</shortTitle>
 	</properties>
 
 	<name>SemanticCMS Core Servlet</name>
-	<url>https://semanticcms.com${bookPath}/</url><!-- Can't inherit due to multi-module -->
+	<url>https://semanticcms.com/core/servlet/</url>
 	<description>Java API for modeling web page content and relationships in a Servlet environment.</description>
 	<inceptionYear>2013</inceptionYear>
 
@@ -91,6 +90,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
+									<!-- TODO: Set content-type in Tomcat for *.xsd files -->
 									<resources>
 										<resource>
 											<directory>src/main/resources/com/semanticcms/core/servlet</directory>
@@ -100,7 +100,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 										</resource>
 									</resources>
 									<!-- Put into META-INF/resources to be accessible as website content when jar included in WEB-INF/lib -->
-									<outputDirectory>${project.build.directory}/book/META-INF/resources${bookPath}</outputDirectory>
+									<outputDirectory>${project.build.directory}/book/META-INF/resources/core/servlet</outputDirectory>
 								</configuration>
 							</execution>
 						</executions>
