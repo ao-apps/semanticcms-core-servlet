@@ -77,35 +77,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 						</plugin>
 					</plugins>
 				</pluginManagement>
-				<plugins>
-					<!-- Add XML Schema resources -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-resources-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>book-xml-schemas</id>
-								<phase>process-resources</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<!-- TODO: Set content-type in Tomcat for *.xsd files -->
-									<resources>
-										<resource>
-											<directory>src/main/resources/com/semanticcms/core/servlet</directory>
-											<includes>
-												<include>books-1.0.xsd</include>
-											</includes>
-										</resource>
-									</resources>
-									<!-- Put into META-INF/resources to be accessible as website content when jar included in WEB-INF/lib -->
-									<outputDirectory>${project.build.directory}/book/META-INF/resources/core/servlet</outputDirectory>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
 			</build>
 		</profile>
 	</profiles>
