@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 import com.aoindustries.io.TempFileList;
 import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferWriter;
+import com.aoindustries.lang.LocalizedIllegalStateException;
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
@@ -67,6 +68,22 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 
 	public Element<E> id(String id) {
 		this.element.setId(id);
+		return this;
+	}
+
+	/**
+	 * Adds a property to the element.
+	 *
+	 * @throws  IllegalStateException  if the property with the given name has already been set
+	 */
+	public Element<E> property(String name, Object value) throws IllegalStateException {
+		if(!this.element.setProperty(name, value)) {
+			throw new LocalizedIllegalStateException(
+				ApplicationResources.accessor,
+				"error.duplicateElementProperty",
+				name
+			);
+		}
 		return this;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,6 +27,7 @@ import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.EmptyResult;
+import com.aoindustries.lang.LocalizedIllegalStateException;
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
@@ -35,6 +36,8 @@ import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -67,6 +70,7 @@ public class Page {
 	private int tocLevels = com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
 	private boolean allowParentMismatch;
 	private boolean allowChildMismatch;
+	private Map<String,Object> properties;
 
 	public Page(
 		ServletContext servletContext,
@@ -159,6 +163,25 @@ public class Page {
 		return this;
 	}
 
+	/**
+	 * Adds a property to the page.
+	 *
+	 * @throws  IllegalStateException  if the property with the given name has already been set
+	 */
+	public Page property(String name, Object value) throws IllegalStateException {
+		if(properties == null) {
+			properties = new LinkedHashMap<String,Object>();
+		} else if(properties.containsKey(name)) {
+			throw new LocalizedIllegalStateException(
+				ApplicationResources.accessor,
+				"error.duplicatePageProperty",
+				name
+			);
+		}
+		properties.put(name, value);
+		return this;
+	}
+
 	public static interface Body {
 		void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
 	}
@@ -194,6 +217,7 @@ public class Page {
 			tocLevels,
 			allowParentMismatch,
 			allowChildMismatch,
+			properties,
 			body == null
 				? null
 				// Lamdba version not working with generic exceptions:

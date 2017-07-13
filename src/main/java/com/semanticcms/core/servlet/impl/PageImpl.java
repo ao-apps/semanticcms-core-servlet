@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,9 @@
  */
 package com.semanticcms.core.servlet.impl;
 
+import com.semanticcms.core.servlet.ApplicationResources;
 import com.aoindustries.io.buffer.BufferResult;
+import com.aoindustries.servlet.LocalizedServletException;
 import com.aoindustries.servlet.ServletContextCache;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.ChildRef;
@@ -172,6 +174,7 @@ final public class PageImpl {
 		int tocLevels,
 		boolean allowParentMismatch,
 		boolean allowChildMismatch,
+		Map<String,Object> properties,
 		PageImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
 		final Page page = new Page();
@@ -201,7 +204,18 @@ final public class PageImpl {
 		page.setTocLevels(tocLevels);
 		page.setAllowParentMismatch(allowParentMismatch);
 		page.setAllowChildMismatch(allowChildMismatch);
-
+		if(properties != null) {
+			for(Map.Entry<String,Object> entry : properties.entrySet()) {
+				String name = entry.getKey();
+				if(!page.setProperty(name, entry.getValue())) {
+					throw new LocalizedServletException(
+						ApplicationResources.accessor,
+						"error.duplicatePageProperty",
+						name
+					);
+				}
+			}
+		}
 		// Freeze page once body done
 		try {
 			// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
