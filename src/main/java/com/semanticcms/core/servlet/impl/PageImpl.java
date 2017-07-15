@@ -22,7 +22,6 @@
  */
 package com.semanticcms.core.servlet.impl;
 
-import com.semanticcms.core.servlet.ApplicationResources;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.servlet.LocalizedServletException;
 import com.aoindustries.servlet.ServletContextCache;
@@ -32,11 +31,11 @@ import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
+import com.semanticcms.core.servlet.ApplicationResources;
 import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
-import com.semanticcms.core.servlet.PageRefResolver;
 import com.semanticcms.core.servlet.PageUtils;
 import com.semanticcms.core.servlet.SemanticCMS;
 import com.semanticcms.core.servlet.Theme;
@@ -156,6 +155,9 @@ final public class PageImpl {
 		}
 	}
 
+	/**
+	 * @param pageRef  the default path to this page, this might be changed during page processing
+	 */
 	public static <E extends Throwable> void doPageImpl(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
@@ -178,12 +180,7 @@ final public class PageImpl {
 		PageImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
 		final Page page = new Page();
-		// Find the default path to this page, this might be changed during page processing
-		if(pageRef == null) {
-			pageRef = PageRefResolver.getCurrentPageRef(servletContext, request);
-		}
 		page.setPageRef(pageRef);
-
 		{
 			// Pages may not be nested within any kind of node
 			Node parentNode = CurrentNode.getCurrentNode(request);
