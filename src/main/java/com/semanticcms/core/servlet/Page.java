@@ -199,11 +199,13 @@ public class Page {
 	 * @see  PageImpl#PAGE_REQUEST_ATTRIBUTE
 	 */
 	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
+		PageRef pr = pageRef;
+		if(pr == null) pr = PageRefResolver.getCurrentPageRef(servletContext, request);
 		PageImpl.doPageImpl(
 			servletContext,
 			request,
 			response,
-			pageRef,
+			pr,
 			dateCreated,
 			datePublished,
 			dateModified,
