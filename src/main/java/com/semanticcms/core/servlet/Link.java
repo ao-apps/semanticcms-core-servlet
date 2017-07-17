@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -42,6 +42,7 @@ public class Link {
 	private String page;
 	private String element;
 	private boolean allowGeneratedElement;
+	private String anchor;
 	private String view = SemanticCMS.DEFAULT_VIEW_NAME;
 	private boolean small;
 	private HttpParameters params;
@@ -153,6 +154,11 @@ public class Link {
 		return this;
 	}
 
+	public Link anchor(String anchor) {
+		this.anchor = anchor;
+		return this;
+	}
+
 	public Link view(String view) {
 		this.view = view;
 		return this;
@@ -205,6 +211,7 @@ public class Link {
 			page,
 			element,
 			allowGeneratedElement,
+			anchor,
 			view,
 			small,
 			params,
