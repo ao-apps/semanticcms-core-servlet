@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -144,6 +144,7 @@ final public class LinkImpl {
 		String page,
 		String element,
 		boolean allowGeneratedElement,
+		String anchor,
 		String viewName,
 		boolean small,
 	    HttpParameters params,
@@ -162,6 +163,7 @@ final public class LinkImpl {
 				page,
 				element,
 				allowGeneratedElement,
+				anchor,
 				viewName,
 				small,
 				params,
@@ -173,11 +175,14 @@ final public class LinkImpl {
 	}
 
 	/**
-	 * @param book  ValueExpression that returns String, evaluated at META or higher
-	 * @param page  ValueExpression that returns String, evaluated at META or higher
-	 * @param element  ValueExpression that returns String, evaluated at BODY only
-	 * @param view  ValueExpression that returns String, evaluated at BODY only
-	 * @param clazz  ValueExpression that returns Object, evaluated at BODY only
+	 * @param book  ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
+	 * @param page  ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
+	 * @param element  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only.
+	 *                 Conflicts with {@code anchor}.
+	 * @param anchor  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only.
+	 *                Conflicts with {@code element}.
+	 * @param view  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only
+	 * @param clazz  ValueExpression that returns Object, evaluated at {@link CaptureLevel#BODY} only
 	 */
 	public static <E extends Throwable> void writeLinkImpl(
 		ServletContext servletContext,
@@ -189,6 +194,7 @@ final public class LinkImpl {
 		ValueExpression page,
 		ValueExpression element,
 		boolean allowGeneratedElement,
+		ValueExpression anchor,
 		ValueExpression viewName,
 		boolean small,
 	    HttpParameters params,
@@ -202,14 +208,17 @@ final public class LinkImpl {
 			String bookStr = resolveValue(book, String.class, elContext);
 			String pageStr = resolveValue(page, String.class, elContext);
 			String elementStr;
+			String anchorStr;
 			String viewNameStr;
 			Object clazzObj;
 			if(captureLevel == CaptureLevel.BODY) {
 				elementStr = resolveValue(element, String.class, elContext);
+				anchorStr = resolveValue(anchor, String.class, elContext);
 				viewNameStr = resolveValue(viewName, String.class, elContext);
 				clazzObj = resolveValue(clazz, Object.class, elContext);
 			} else {
 				elementStr = null;
+				anchorStr = null;
 				viewNameStr = null;
 				clazzObj = null;
 			}
@@ -222,6 +231,7 @@ final public class LinkImpl {
 				pageStr,
 				elementStr,
 				allowGeneratedElement,
+				anchorStr,
 				viewNameStr,
 				small,
 				params,
@@ -241,6 +251,7 @@ final public class LinkImpl {
 		String page,
 		String element,
 		boolean allowGeneratedElement,
+		String anchor,
 		String viewName,
 		boolean small,
 	    HttpParameters params,
@@ -271,6 +282,10 @@ final public class LinkImpl {
 			final String responseEncoding = response.getCharacterEncoding();
 
 			element = nullIfEmpty(element);
+			anchor = nullIfEmpty(anchor);
+			if(element != null && anchor != null) {
+				throw new ServletException("May not provide both \"element\" and \"anchor\": element=\"" + element + "\", anchor=\"" + anchor + "\"");
+			}
 			viewName = nullIfEmpty(viewName);
 			// Evaluate expressions
 			if(viewName == null) viewName = SemanticCMS.DEFAULT_VIEW_NAME;
@@ -290,7 +305,7 @@ final public class LinkImpl {
 				currentPage != null
 				&& targetPageRef.equals(currentPage.getPageRef())
 				&& (
-					element==null
+					element == null
 					|| currentPage.getElementsById().containsKey(element)
 				)
 			) {
@@ -302,7 +317,7 @@ final public class LinkImpl {
 					request,
 					response,
 					targetPageRef,
-					element==null ? CaptureLevel.PAGE : CaptureLevel.META
+					element == null ? CaptureLevel.PAGE : CaptureLevel.META
 				);
 			}
 
@@ -326,27 +341,50 @@ final public class LinkImpl {
 			String href;
 			{
 				if(element == null) {
-					// Link to page
-					if(index != null && isDefaultView) {
-						href = '#' + PageIndex.getRefId(index, null);
-					} else {
-						StringBuilder url = new StringBuilder();
-						targetPageRef.appendServletPath(url);
-						if(!isDefaultView) {
-							boolean hasQuestion = url.lastIndexOf("?") != -1;
-							url
-								.append(hasQuestion ? "&view=" : "?view=")
-								.append(URLEncoder.encode(viewName, responseEncoding));
+					if(anchor == null) {
+						// Link to page
+						if(index != null && isDefaultView) {
+							href = '#' + URLEncoder.encode(PageIndex.getRefId(index, null), responseEncoding);
+						} else {
+							StringBuilder url = new StringBuilder();
+							targetPageRef.appendServletPath(url);
+							if(!isDefaultView) {
+								boolean hasQuestion = url.lastIndexOf("?") != -1;
+								url
+									.append(hasQuestion ? "&view=" : "?view=")
+									.append(URLEncoder.encode(viewName, responseEncoding));
+							}
+							href = url.toString();
 						}
-						href = url.toString();
+					} else {
+						// Link to anchor in page
+						if(index != null && isDefaultView) {
+							// Link to target in indexed page (view=all mode)
+							href = '#' + URLEncoder.encode(PageIndex.getRefId(index, anchor), responseEncoding);
+						} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
+							// Link to target on same page
+							href = '#' + URLEncoder.encode(anchor, responseEncoding);
+						} else {
+							// Link to target on different page (or same page, different view)
+							StringBuilder url = new StringBuilder();
+							targetPageRef.appendServletPath(url);
+							if(!isDefaultView) {
+								boolean hasQuestion = url.lastIndexOf("?") != -1;
+								url
+									.append(hasQuestion ? "&view=" : "?view=")
+									.append(URLEncoder.encode(viewName, responseEncoding));
+							}
+							url.append('#').append(URLEncoder.encode(anchor, responseEncoding));
+							href = url.toString();
+						}
 					}
 				} else {
 					if(index != null && isDefaultView) {
 						// Link to target in indexed page (view=all mode)
-						href = '#' + PageIndex.getRefId(index, element);
+						href = '#' + URLEncoder.encode(PageIndex.getRefId(index, element), responseEncoding);
 					} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
 						// Link to target on same page
-						href = '#' + element;
+						href = '#' + URLEncoder.encode(element, responseEncoding);
 					} else {
 						// Link to target on different page (or same page, different view)
 						StringBuilder url = new StringBuilder();
@@ -357,7 +395,7 @@ final public class LinkImpl {
 								.append(hasQuestion ? "&view=" : "?view=")
 								.append(URLEncoder.encode(viewName, responseEncoding));
 						}
-						url.append('#').append(element);
+						url.append('#').append(URLEncoder.encode(element, responseEncoding));
 						href = url.toString();
 					}
 				}
