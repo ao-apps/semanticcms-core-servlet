@@ -36,7 +36,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2017-07-13T18:47:01-0500"
+		dateModified="2017-07-17T14:02:26-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -56,6 +56,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 					<li>New release for bug fixes in underlying <ao:a href="https://aoindustries.com/ao-encoding/">AO Encoding</ao:a> library.</li>
 					<li>Nodes, including both pages and elements, now have properties.</li>
 					<li>Updated dependencies.</li>
+					<li>May now specify <code>anchor</code> to link to non-SemanticCMS-element targets.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
