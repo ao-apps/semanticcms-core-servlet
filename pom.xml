@@ -33,7 +33,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 
 	<groupId>com.semanticcms</groupId>
 	<artifactId>semanticcms-core-servlet</artifactId>
-	<version>1.10.1-SNAPSHOT</version>
+	<version>1.11.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<properties>
