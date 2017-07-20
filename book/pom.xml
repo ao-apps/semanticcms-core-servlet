@@ -33,7 +33,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 
 	<groupId>com.semanticcms</groupId>
 	<artifactId>semanticcms-core-servlet-book</artifactId>
-	<version>1.10.1-SNAPSHOT</version>
+	<version>1.11.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -83,7 +83,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 								<artifactItem>
 									<groupId>com.semanticcms</groupId>
 									<artifactId>semanticcms-core-servlet</artifactId>
-									<version>1.10.1-SNAPSHOT</version>
+									<version>1.11.0-SNAPSHOT</version>
 									<type>jar</type>
 									<includes>com/semanticcms/core/servlet/books-1.0.xsd</includes>
 								</artifactItem>
@@ -187,7 +187,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<dependency>
 			<groupId>com.semanticcms</groupId>
 			<artifactId>semanticcms-core-servlet</artifactId>
-			<version>1.10.1-SNAPSHOT</version>
+			<version>1.11.0-SNAPSHOT</version>
 			<type>pom</type>
 			<scope>provided</scope>
 			<optional>true</optional>
