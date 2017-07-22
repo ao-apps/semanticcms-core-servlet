@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -41,11 +41,33 @@ public class PageRefResolver {
 	/**
 	 * Finds the path to the current page.
 	 * The current page must be in a Book.
+	 *
+	 * @see  #getCurrentPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, boolean)
 	 */
 	public static PageRef getCurrentPageRef(ServletContext servletContext, HttpServletRequest request) throws ServletException {
+		return getCurrentPageRef(servletContext, request, true);
+	}
+
+	/**
+	 * Finds the path to the current page, optionally returning {@code null} when the
+	 * current page is not in a book.
+	 *
+	 * @param requireBook affects the behavior when the current page is not in a book.
+	 *                    When {@code true}, a {@link ServletException} is thrown.
+	 *                    When {@code false}, {@code null} is returned.
+	 *
+	 * @see  #getCurrentPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest)
+	 */
+	public static PageRef getCurrentPageRef(ServletContext servletContext, HttpServletRequest request, boolean requireBook) throws ServletException {
 		String pagePath = Dispatcher.getCurrentPagePath(request);
 		Book book = SemanticCMS.getInstance(servletContext).getBook(pagePath);
-		if(book == null) throw new ServletException("Book not found for pagePath: " + pagePath);
+		if(book == null) {
+			if(requireBook) {
+				throw new ServletException("Book not found for pagePath: " + pagePath);
+			} else {
+				return null;
+			}
+		}
 		String bookPrefix = book.getPathPrefix();
 		if(!pagePath.startsWith(bookPrefix)) throw new AssertionError();
 		return new PageRef(book, pagePath.substring(bookPrefix.length()));
