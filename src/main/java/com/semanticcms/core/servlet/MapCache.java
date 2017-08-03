@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -38,6 +38,8 @@ import javax.servlet.ServletException;
  */
 abstract class MapCache extends Cache {
 
+	protected final SemanticCMS semanticCMS;
+
 	private final Map<CaptureKey,Page> pageCache;
 
 	/**
@@ -64,11 +66,13 @@ abstract class MapCache extends Cache {
 	protected final Map<String,Object> attributes;
 
 	MapCache(
+		SemanticCMS semanticCMS,
 		Map<CaptureKey,Page> pageCache,
 		Map<PageRef,Set<PageRef>> unverifiedParentsByPageRef,
 		Map<PageRef,Set<PageRef>> unverifiedChildrenByPageRef,
 		Map<String,Object> attributes
 	) {
+		this.semanticCMS = semanticCMS;
 		this.pageCache = pageCache;
 		this.unverifiedParentsByPageRef = unverifiedParentsByPageRef;
 		this.unverifiedChildrenByPageRef = unverifiedChildrenByPageRef;
@@ -132,7 +136,7 @@ abstract class MapCache extends Cache {
 			for(ParentRef parentRef : parentRefs) {
 				PageRef parentPageRef = parentRef.getPageRef();
 				// Can't verify parent reference to missing book
-				if(parentPageRef.getBook() != null) {
+				if(semanticCMS.getBook(parentPageRef.getBookRef()).isAccessible()) {
 					// Check if parent in cache
 					Page parentPage = get(parentPageRef, CaptureLevel.PAGE);
 					if(parentPage != null) {
@@ -149,7 +153,7 @@ abstract class MapCache extends Cache {
 			for(ChildRef childRef : childRefs) {
 				PageRef childPageRef = childRef.getPageRef();
 				// Can't verify child reference to missing book
-				if(childPageRef.getBook() != null) {
+				if(semanticCMS.getBook(childPageRef.getBookRef()).isAccessible()) {
 					// Check if child in cache
 					Page childPage = get(childPageRef, CaptureLevel.PAGE);
 					if(childPage != null) {
