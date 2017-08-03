@@ -301,6 +301,7 @@ public class SemanticCMS {
 	 * Please note the book may be {@link Book#isAccessible() inaccessible}.
 	 * </p>
 	 * TODO: Support mount point different than name?
+	 * TODO: How to return null at local-but-not-published books.
 	 *
 	 * @see  #getPublishedBooks()
 	 * @see  #getPublishedBook(javax.servlet.http.HttpServletRequest)
