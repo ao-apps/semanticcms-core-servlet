@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -48,6 +48,7 @@ final public class PageDags {
 		CaptureLevel level
 	) throws ServletException, IOException {
 		final List<Page> list = new ArrayList<Page>();
+		final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 		CapturePage.traversePagesDepthFirst(
 			servletContext,
 			request,
@@ -70,8 +71,8 @@ final public class PageDags {
 			new CapturePage.EdgeFilter() {
 				@Override
 				public boolean applyEdge(PageRef childPage) {
-					// Child not in missing book
-					return childPage.getBook() != null;
+					// Child is in accessible book
+					return semanticCMS.getBook(childPage.getBookRef()).isAccessible();
 				}
 			},
 			null

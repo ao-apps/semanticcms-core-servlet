@@ -38,6 +38,7 @@ public class Link {
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
 
+	private String domain;
 	private String book;
 	private String page;
 	private String element;
@@ -83,12 +84,12 @@ public class Link {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
+		String domain,
 		String book,
-		String page,
-		String element
+		String page
 	) {
 		this(servletContext, request, response, book, page);
-		this.element = element;
+		this.domain = domain;
 	}
 
 	/**
@@ -129,9 +130,14 @@ public class Link {
 	 *
 	 * @see  PageContext
 	 */
-	public Link(String book, String page, String element) {
+	public Link(String domain, String book, String page) {
 		this(book, page);
-		this.element = element;
+		this.domain = domain;
+	}
+
+	public Link domain(String domain) {
+		this.domain = domain;
+		return this;
 	}
 
 	public Link book(String book) {
@@ -207,6 +213,7 @@ public class Link {
 			request,
 			response,
 			response.getWriter(),
+			domain,
 			book,
 			page,
 			element,

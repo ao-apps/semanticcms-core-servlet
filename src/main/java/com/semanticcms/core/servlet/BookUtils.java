@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,7 +23,8 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.servlet.http.ServletUtil;
-import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.BookRef;
+import com.semanticcms.core.repository.Book;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,12 +55,13 @@ final public class BookUtils {
 	public static String getCanonicalBase(ServletContext servletContext, HttpServletRequest request, Book book) throws MalformedURLException {
 		String canonicalBase = book.getCanonicalBase();
 		if(canonicalBase == null) {
-			String autoCanonical = ServletUtil.getAbsoluteURL(request, book.getPathPrefix());
+			BookRef bookRef = book.getBookRef();
+			String autoCanonical = ServletUtil.getAbsoluteURL(request, bookRef.getPrefix());
 			if(
 				// Logger checked first, so if warnings enabled mid-run, will get first warning still
 				logger.isLoggable(Level.WARNING)
 			) {
-				String bookName = book.getName();
+				String bookName = bookRef.getName();
 				String warningAttribute = CANONICAL_BASE_WARNED_ATTRIBUTE + bookName;
 				if(servletContext.getAttribute(warningAttribute) == null) {
 					servletContext.setAttribute(warningAttribute, true);

@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,7 +24,7 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.encoding.Coercion;
 import com.aoindustries.util.AoCollections;
-import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Page;
@@ -50,9 +50,13 @@ import org.joda.time.ReadableDateTime;
  */
 final public class PageUtils {
 
-	public static boolean hasChild(Page page) {
-		for(ChildRef childRef : page.getChildRefs()) {
-			if(childRef.getPageRef().getBook() != null) return true;
+	public static boolean hasChild(ServletContext servletContext, Page page) {
+		Set<ChildRef> childRefs = page.getChildRefs();
+		if(!childRefs.isEmpty()) {
+			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+			for(ChildRef childRef : childRefs) {
+				if(semanticCMS.getBook(childRef.getPageRef().getBookRef()).isAccessible()) return true;
+			}
 		}
 		return false;
 	}
@@ -67,6 +71,7 @@ final public class PageUtils {
 		final boolean recursive
 	) throws ServletException, IOException {
 		if(recursive) {
+			final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 			return CapturePage.traversePagesAnyOrder(
 				servletContext,
 				request,
@@ -93,8 +98,8 @@ final public class PageUtils {
 				new CapturePage.EdgeFilter() {
 					@Override
 					public boolean applyEdge(PageRef childPage) {
-						// Child not in missing book
-						return childPage.getBook() != null;
+						// Child is in an accessible book
+						return semanticCMS.getBook(childPage.getBookRef()).isAccessible();
 					}
 				}
 			) != null;
@@ -135,6 +140,7 @@ final public class PageUtils {
 			servletContext,
 			request,
 			response,
+			SemanticCMS.getInstance(servletContext),
 			page,
 			new HashMap<PageRef,Boolean>()
 		);
@@ -144,6 +150,7 @@ final public class PageUtils {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
+		SemanticCMS semanticCMS,
 		com.semanticcms.core.model.Page page,
 		Map<PageRef,Boolean> finished
 	) throws ServletException, IOException {
@@ -153,10 +160,10 @@ final public class PageUtils {
 		Boolean pageAllowRobots = page.getAllowRobots();
 		if(pageAllowRobots == null) {
 			// Use the allowRobots of all parents in the same book
-			Book book = pageRef.getBook();
+			BookRef bookRef = pageRef.getBookRef();
 			for(ParentRef parentRef : page.getParentRefs()) {
 				PageRef parentPageRef = parentRef.getPageRef();
-				if(book.equals(parentPageRef.getBook())) {
+				if(bookRef.equals(parentPageRef.getBookRef())) {
 					// Check finished already
 					Boolean parentAllowRobots = finished.get(parentPageRef);
 					if(parentAllowRobots == null) {
@@ -165,6 +172,7 @@ final public class PageUtils {
 							servletContext,
 							request,
 							response,
+							semanticCMS,
 							CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
 							finished
 						);
@@ -178,7 +186,7 @@ final public class PageUtils {
 				}
 			}
 			// No parents in the same book, use book allowRobots
-			if(pageAllowRobots == null) pageAllowRobots = book.getAllowRobots();
+			if(pageAllowRobots == null) pageAllowRobots = semanticCMS.getBook(bookRef).getAllowRobots();
 		}
 		// Store in finished
 		finished.put(pageRef, pageAllowRobots);
@@ -188,25 +196,28 @@ final public class PageUtils {
 	/**
 	 * Filters for all pageRefs that are present (not missing books).
 	 */
-	public static <PR extends PageReferrer> Set<PR> filterNotMissingBook(Set<PR> pageReferrers) {
+	public static <PR extends PageReferrer> Set<PR> filterNotMissingBook(ServletContext servletContext, Set<PR> pageReferrers) {
 		int size = pageReferrers.size();
 		if(size == 0) {
 			return Collections.emptySet();
-		} else if(size == 1) {
-			PR pageReferrer = pageReferrers.iterator().next();
-			if(pageReferrer.getPageRef().getBook() != null) {
-				return Collections.singleton(pageReferrer);
-			} else {
-				return Collections.emptySet();
-			}
 		} else {
-			Set<PR> notMissingBooks = new LinkedHashSet<PR>(size *4/3+1);
-			for(PR pageReferrer : pageReferrers) {
-				if(pageReferrer.getPageRef().getBook() != null) {
-					if(!notMissingBooks.add(pageReferrer)) throw new AssertionError();
+			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+			if(size == 1) {
+				PR pageReferrer = pageReferrers.iterator().next();
+				if(semanticCMS.getBook(pageReferrer.getPageRef().getBookRef()).isAccessible()) {
+					return Collections.singleton(pageReferrer);
+				} else {
+					return Collections.emptySet();
 				}
+			} else {
+				Set<PR> notMissingBooks = new LinkedHashSet<PR>(size *4/3+1);
+				for(PR pageReferrer : pageReferrers) {
+					if(semanticCMS.getBook(pageReferrer.getPageRef().getBookRef()).isAccessible()) {
+						if(!notMissingBooks.add(pageReferrer)) throw new AssertionError();
+					}
+				}
+				return Collections.unmodifiableSet(notMissingBooks);
 			}
-			return Collections.unmodifiableSet(notMissingBooks);
 		}
 	}
 
@@ -245,7 +256,7 @@ final public class PageUtils {
 			servletContext,
 			request,
 			response,
-			filterNotMissingBook(page.getParentRefs()),
+			filterNotMissingBook(servletContext, page.getParentRefs()),
 			CaptureLevel.META // TODO: View provide capture level required for isApplicable check, might be PAGE or (null for none) for some views.
 		).values();
 		Set<Page> applicableParents = new LinkedHashSet<Page>(parents.size() *4/3+1);

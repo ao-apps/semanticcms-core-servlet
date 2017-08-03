@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -86,6 +86,7 @@ final public class ElementFilterTreeImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
+		SemanticCMS semanticCMS,
 		ElementFilter elementFilter,
 		Set<Node> nodesWithMatches,
 		Node node,
@@ -107,7 +108,7 @@ final public class ElementFilterTreeImpl {
 		}
 		if(includeElements) {
 			for(Element childElem : childElements) {
-				if(findElements(servletContext, request, response, elementFilter, nodesWithMatches, childElem, includeElements)) {
+				if(findElements(servletContext, request, response, semanticCMS, elementFilter, nodesWithMatches, childElem, includeElements)) {
 					hasMatch = true;
 				}
 			}
@@ -127,10 +128,10 @@ final public class ElementFilterTreeImpl {
 		if(node instanceof Page) {
 			for(ChildRef childRef : ((Page)node).getChildRefs()) {
 				PageRef childPageRef = childRef.getPageRef();
-				// Child not in missing book
-				if(childPageRef.getBook() != null) {
+				// Child is in an accessible book
+				if(semanticCMS.getBook(childPageRef.getBookRef()).isAccessible()) {
 					Page child = CapturePage.capturePage(servletContext, request, response, childPageRef, CaptureLevel.META);
-					if(findElements(servletContext, request, response, elementFilter, nodesWithMatches, child, includeElements)) {
+					if(findElements(servletContext, request, response, semanticCMS, elementFilter, nodesWithMatches, child, includeElements)) {
 						hasMatch = true;
 					}
 				}
@@ -176,11 +177,11 @@ final public class ElementFilterTreeImpl {
 			servletPath = null;
 		} else {
 			if(element == null) {
-				servletPath = pageRef.getServletPath();
+				servletPath = pageRef.getBookRef().getPrefix() + pageRef.getPath();
 			} else {
 				String elemId = element.getId();
 				assert elemId != null;
-				servletPath = pageRef.getServletPath() + '#' + elemId;
+				servletPath = pageRef.getBookRef().getPrefix() + pageRef.getPath() + '#' + elemId;
 			}
 		}
 		if(out != null) {
@@ -254,8 +255,16 @@ final public class ElementFilterTreeImpl {
 			final Node currentNode = CurrentNode.getCurrentNode(request);
 			// Filter by has files
 			final Set<Node> nodesWithMatches = new HashSet<Node>();
-			findElements(servletContext, request, response, elementFilter, nodesWithMatches, root, includeElements);
-
+			findElements(
+				servletContext,
+				request,
+				response,
+				SemanticCMS.getInstance(servletContext),
+				elementFilter,
+				nodesWithMatches,
+				root,
+				includeElements
+			);
 			if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
 			writeNode(
 				servletContext,
