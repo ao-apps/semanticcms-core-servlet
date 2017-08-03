@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,10 +23,12 @@
 package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Author;
-import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
+import com.semanticcms.core.repository.Book;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -68,6 +70,7 @@ public class AuthorUtils {
 			servletContext,
 			request,
 			response,
+			SemanticCMS.getInstance(servletContext),
 			page,
 			new HashMap<PageRef,Set<Author>>()
 		);
@@ -92,6 +95,7 @@ public class AuthorUtils {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
+		SemanticCMS semanticCMS,
 		com.semanticcms.core.model.Page page,
 		Map<PageRef,Set<Author>> finished
 	) throws ServletException, IOException {
@@ -102,10 +106,10 @@ public class AuthorUtils {
 		if(pageAuthors.isEmpty()) {
 			// Use the authors of all parents in the same book
 			pageAuthors = null;
-			Book book = pageRef.getBook();
+			BookRef bookRef = pageRef.getBookRef();
 			for(ParentRef parentRef : page.getParentRefs()) {
 				PageRef parentPageRef = parentRef.getPageRef();
-				if(book.equals(parentPageRef.getBook())) {
+				if(bookRef.equals(parentPageRef.getBookRef())) {
 					// Check finished already
 					Set<Author> parentAuthors = finished.get(parentPageRef);
 					if(parentAuthors == null) {
@@ -114,6 +118,7 @@ public class AuthorUtils {
 							servletContext,
 							request,
 							response,
+							semanticCMS,
 							CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
 							finished
 						);
@@ -127,7 +132,11 @@ public class AuthorUtils {
 				}
 			}
 			// No parents in the same book, use book authors
-			if(pageAuthors == null) pageAuthors = book.getAuthors();
+			if(pageAuthors == null) {
+				Book book = semanticCMS.getBook(bookRef);
+				pageAuthors = book.getAuthors();
+				if(pageAuthors == null) pageAuthors = Collections.emptySet();
+			}
 		}
 		// Store in finished
 		finished.put(pageRef, pageAuthors);

@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -42,8 +42,10 @@ public class NavigationTree {
 	private boolean yuiConfig;
 	private boolean includeElements;
 	private String target;
+	private String thisDomain;
 	private String thisBook;
 	private String thisPage;
+	private String linksToDomain;
 	private String linksToBook;
 	private String linksToPage;
 	private int maxDepth;
@@ -94,6 +96,11 @@ public class NavigationTree {
 		return this;
 	}
 
+	public NavigationTree thisDomain(String thisDomain) {
+		this.thisDomain = thisDomain;
+		return this;
+	}
+
 	public NavigationTree thisBook(String thisBook) {
 		this.thisBook = thisBook;
 		return this;
@@ -101,6 +108,11 @@ public class NavigationTree {
 
 	public NavigationTree thisPage(String thisPage) {
 		this.thisPage = thisPage;
+		return this;
+	}
+
+	public NavigationTree linksToDomain(String linksToDomain) {
+		this.linksToDomain = linksToDomain;
 		return this;
 	}
 
@@ -130,8 +142,10 @@ public class NavigationTree {
 			yuiConfig,
 			includeElements,
 			target,
+			thisDomain,
 			thisBook,
 			thisPage,
+			linksToDomain,
 			linksToBook,
 			linksToPage,
 			maxDepth

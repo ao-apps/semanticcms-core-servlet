@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,9 +26,10 @@ import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.util.WrappedException;
 import com.aoindustries.xml.XmlUtils;
-import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
+import com.semanticcms.core.repository.Book;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -38,6 +39,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -130,38 +132,53 @@ public class SemanticCMS {
 	// <editor-fold defaultstate="collapsed" desc="Books">
 	// See https://docs.oracle.com/javase/tutorial/jaxp/dom/validating.html
 	private static final String BOOKS_XML_RESOURCE = "/WEB-INF/books.xml";
-	private static final String BOOKS_XML_SCHEMA_RESOURCE = "books-1.0.xsd";
+	private static final String BOOKS_XML_SCHEMA_1_0_RESOURCE = "books-1.0.xsd";
+	private static final String BOOKS_XML_SCHEMA_2_0_RESOURCE = "books-2.0.xsd";
 
 	private static final String MISSING_BOOK_TAG_NAME = "missingBook";
 	private static final String BOOK_TAG_NAME = "book";
 	private static final String PARENT_TAG_NAME = "parent";
 	private static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
 
-	private final Map<String,Book> books = new LinkedHashMap<String,Book>();
-	private final Set<String> missingBooks = new LinkedHashSet<String>();
+	private final Map<BookRef,Book> books = new LinkedHashMap<BookRef,Book>();
+	private final Map<BookRef,Book> unmodifiableBooks = Collections.unmodifiableMap(books);
+	private final Map<String,Book> publishedBooks = new LinkedHashMap<String,Book>();
+	private final Map<String,Book> unmodifiablePublishedBooks = Collections.unmodifiableMap(publishedBooks);
 	private final Book rootBook;
 
 	private Book initBooks() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
 		Document booksXml;
 		{
-			InputStream schemaIn = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_RESOURCE);
-			if(schemaIn == null) throw new IOException("Schema not found: " + BOOKS_XML_SCHEMA_RESOURCE);
+			InputStream schemaIn_1_0 = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_1_0_RESOURCE);
+			if(schemaIn_1_0 == null) throw new IOException("Schema not found: " + BOOKS_XML_SCHEMA_1_0_RESOURCE);
 			try {
-				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-				dbf.setNamespaceAware(true);
-				dbf.setValidating(true);
-				dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
-				dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", schemaIn);
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				InputStream booksXmlIn = servletContext.getResource(BOOKS_XML_RESOURCE).openStream();
-				if(booksXmlIn == null) throw new IOException(BOOKS_XML_RESOURCE + " not found");
+				InputStream schemaIn_1_1 = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_1_1_RESOURCE);
+				if(schemaIn_1_1 == null) throw new IOException("Schema not found: " + BOOKS_XML_SCHEMA_1_1_RESOURCE);
 				try {
-					booksXml = db.parse(booksXmlIn);
+					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+					dbf.setNamespaceAware(true);
+					dbf.setValidating(true);
+					dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
+					dbf.setAttribute(
+						"http://java.sun.com/xml/jaxp/properties/schemaSource",
+						new InputStream[] {
+							schemaIn_1_0,
+							schemaIn_1_1
+						}
+					);
+					DocumentBuilder db = dbf.newDocumentBuilder();
+					InputStream booksXmlIn = servletContext.getResource(BOOKS_XML_RESOURCE).openStream();
+					if(booksXmlIn == null) throw new IOException(BOOKS_XML_RESOURCE + " not found");
+					try {
+						booksXml = db.parse(booksXmlIn);
+					} finally {
+						booksXmlIn.close();
+					}
 				} finally {
-					booksXmlIn.close();
+					schemaIn_1_1.close();
 				}
 			} finally {
-				schemaIn.close();
+				schemaIn_1_0.close();
 			}
 		}
 		org.w3c.dom.Element booksElem = booksXml.getDocumentElement();
@@ -216,50 +233,127 @@ public class SemanticCMS {
 		return newRootBook;
 	}
 
-	public Map<String,Book> getBooks() {
-		return Collections.unmodifiableMap(books);
-	}
-
-	public Set<String> getMissingBooks() {
-		return Collections.unmodifiableSet(missingBooks);
+	/**
+	 * Gets the mapping of all configured books, including those that are not
+	 * {@link #getPublishedBooks() published} and/or {@link Book#isAccessible() inaccessible}.
+	 *
+	 * @see  #getBook(com.semanticcms.core.model.BookRef)
+	 * @see  #getBook(java.lang.String, java.lang.String)
+	 */
+	public Map<BookRef,Book> getBooks() {
+		return unmodifiableBooks;
 	}
 
 	/**
-	 * Gets the root book as configured in /WEB-INF/books.properties
+	 * Gets a book given its reference, including those that are not
+	 * {@link #getPublishedBooks() published} and/or {@link Book#isAccessible() inaccessible}.
+	 *
+	 * @throws  NoSuchElementException  when book not found
+	 *
+	 * @see  #getBooks()
+	 */
+	public Book getBook(BookRef bookRef) throws NoSuchElementException {
+		Book book = books.get(bookRef);
+		if(book == null) throw new NoSuchElementException("Book not found: " + bookRef);
+		return book;
+	}
+
+	/**
+	 * Gets a book given its domain and name, including those that are not
+	 * {@link #getPublishedBooks() published} and/or {@link Book#isAccessible() inaccessible}.
+	 *
+	 * @throws  NoSuchElementException  when book not found
+	 *
+	 * @see  #getBook(com.semanticcms.core.model.BookRef)
+	 */
+	public Book getBook(String domain, String name) throws NoSuchElementException {
+		return getBook(new BookRef(domain, name));
+	}
+
+	/**
+	 * A published book is one that is served by the local web application.
+	 * Its content may or may not be generated locally.
+	 * <p>
+	 * Its content may also be inaccessible/missing, which can serve as a placeholder
+	 * for future content or allow for maintenance of parts of a site.
+	 * </p>
+	 * <p>
+	 * There may exist books that are generated locally, but not published.
+	 * In this configuration, the local book is used for captures, while links
+	 * may be optionally generated to an external base.  This is one option to
+	 * integrate content between sites while avoiding real-time cross-server communication,
+	 * but at the cost of the two versions may get out of sync or be deployed separately.
+	 * Consider using with autogit modules.
+	 * </p>
+	 *
+	 * @see  #getPublishedBook(java.lang.String)
+	 * @see  #getPublishedBook(javax.servlet.http.HttpServletRequest)
+	 */
+	public Map<String,Book> getPublishedBooks() {
+		return unmodifiablePublishedBooks;
+	}
+
+	/**
+	 * Gets the published book for the provided context-relative servlet path or <code>null</code> if no book published at that path.
+	 * The book with the longest prefix match is used, matched along segments only (along '/' boundaries).
+	 * The servlet path must begin with a slash (/).
+	 * <p>
+	 * Please note the book may be {@link Book#isAccessible() inaccessible}.
+	 * </p>
+	 * TODO: Support mount point different than name?
+	 *
+	 * @see  #getPublishedBooks()
+	 * @see  #getPublishedBook(javax.servlet.http.HttpServletRequest)
+	 */
+	public Book getPublishedBook(String servletPath) {
+		if(servletPath.charAt(0) != '/') throw new IllegalArgumentException("Invalid servletPath: " + servletPath);
+		int len = servletPath.length();
+		// Quick path for initial trailing slash: avoid map lookup that will never match
+		if(servletPath.charAt(len - 1) == '/') len -= 1;
+		while(len > 0) {
+			servletPath = servletPath.substring(0, len);
+			assert servletPath.charAt(len - 1) != '/' : "Should not end in slash: " + servletPath;
+			Book book = publishedBooks.get(servletPath);
+			if(book != null) return book;
+			int lastSlash = servletPath.lastIndexOf('/');
+			assert lastSlash != -1 : "Starts with slash, so should always find one when len > 0";
+			len = lastSlash;
+		}
+		return publishedBooks.get("/");
+	}
+
+	/**
+	 * Gets the published book for the provided request or <code>null</code> if no book published at the current request path.
+	 * <p>
+	 * Please note the book may be {@link Book#isAccessible() inaccessible}.
+	 * </p>
+	 *
+	 * @see  #getPublishedBooks()
+	 * @see  Dispatcher#getCurrentPagePath(javax.servlet.http.HttpServletRequest)
+	 * @see  #getPublishedBook(java.lang.String)
+	 */
+	public Book getPublishedBook(HttpServletRequest request) {
+		return getPublishedBook(Dispatcher.getCurrentPagePath(request));
+	}
+
+	/**
+	 * Gets the root book as configured in <code>/WEB-INF/books.xml</code>.
+	 * <p>
+	 * The root book will always be {@link Book#isAccessible() accessible}.
+	 * TODO: Can this be enforced in the XML Schema for books.xml?
+	 * </p>
+	 * <p>
+	 * The root book may or may not be {@link #getPublishedBooks() published} by the local
+	 * server.
+	 * </p>
 	 */
 	public Book getRootBook() {
+		assert rootBook.isAccessible();
 		return rootBook;
 	}
 
-	/**
-	 * Gets the book for the provided context-relative servlet path or <code>null</code> if no book configured at that path.
-	 * The book with the longest prefix match is used.
-	 * The servlet path must begin with a slash (/).
-	 */
-	public Book getBook(String servletPath) {
-		if(servletPath.charAt(0) != '/') throw new IllegalArgumentException("Invalid servletPath: " + servletPath);
-		Book longestPrefixBook = null;
-		int longestPrefixLen = -1;
-		for(Book book : getBooks().values()) {
-			String prefix = book.getPathPrefix();
-			int prefixLen = prefix.length();
-			if(
-				prefixLen > longestPrefixLen
-				&& servletPath.startsWith(prefix)
-			) {
-				longestPrefixBook = book;
-				longestPrefixLen = prefixLen;
-			}
-		}
-		return longestPrefixBook;
-	}
+	// TODO: What to do to protect a local book that is not published?
 
-	/**
-	 * Gets the book for the provided request or <code>null</code> if no book configured at the current request path.
-	 */
-	public Book getBook(HttpServletRequest request) {
-		return getBook(Dispatcher.getCurrentPagePath(request));
-	}
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Views">

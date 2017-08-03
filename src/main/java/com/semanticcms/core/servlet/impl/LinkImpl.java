@@ -32,10 +32,12 @@ import com.aoindustries.net.HttpParameters;
 import com.aoindustries.servlet.http.LastModifiedServlet;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
+import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.repository.Book;
 import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
@@ -62,28 +64,51 @@ final public class LinkImpl {
 	}
 
 	/**
-	 * Writes a broken path reference as "¿/book/path{#targetId}?", no encoding.
+	 * Writes a broken path reference as "¿domain:/book/path{#targetId}?", no encoding.
+	 *
+	 * @see  #writeBrokenPath(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #writeBrokenPathInXhtml(com.semanticcms.core.model.PageRef, java.lang.String, java.lang.Appendable)
+	 * @see  #getBrokenPath(com.semanticcms.core.model.PageRef, java.lang.String)
 	 */
 	public static void writeBrokenPath(PageRef pageRef, String targetId, Appendable out) throws IOException {
-		out.append('¿');
-		out.append(pageRef.getServletPath());
+		BookRef bookRef = pageRef.getBookRef();
+		out
+			.append('¿')
+			.append(bookRef.getDomain())
+			.append(':')
+			.append(bookRef.getPrefix())
+			.append(pageRef.getPath())
+		;
 		if(targetId != null) {
-			out.append('#');
-			out.append(targetId);
+			out.append('#').append(targetId);
 		}
 		out.append('?');
 	}
 
 	/**
-	 * Writes a broken path reference as "¿/book/path?", no encoding.
+	 * Writes a broken path reference as "¿domain:/book/path?", no encoding.
+	 *
+	 * @see  #writeBrokenPath(com.semanticcms.core.model.PageRef, java.lang.String, java.lang.Appendable)
+	 * @see  #writeBrokenPathInXhtml(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #writeBrokenPathInXhtmlAttribute(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #getBrokenPath(com.semanticcms.core.model.PageRef)
 	 */
 	public static void writeBrokenPath(PageRef pageRef, Appendable out) throws IOException {
 		writeBrokenPath(pageRef, null, out);
 	}
 
+	/**
+	 * @see  #getBrokenPath(com.semanticcms.core.model.PageRef)
+	 * @see  #writeBrokenPath(com.semanticcms.core.model.PageRef, java.lang.String, java.lang.Appendable)
+	 * @see  #writeBrokenPathInXhtml(com.semanticcms.core.model.PageRef, java.lang.String, java.lang.Appendable)
+	 */
 	public static String getBrokenPath(PageRef pageRef, String targetId) {
+		BookRef bookRef = pageRef.getBookRef();
 		int sbLen = 1 // '¿'
-			+ pageRef.getServletPath().length();
+			+ bookRef.getDomain().length()
+			+ 1 // ':'
+			+ bookRef.getPrefix().length()
+			+ pageRef.getPath().length();
 		if(targetId != null) {
 			sbLen +=
 				1 // '#'
@@ -102,16 +127,30 @@ final public class LinkImpl {
 		return sb.toString();
 	}
 
-	public static String getBrokenPath(PageRef pageRef) throws IOException {
+	/**
+	 * @see  #getBrokenPath(com.semanticcms.core.model.PageRef, java.lang.String)
+	 * @see  #writeBrokenPath(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #writeBrokenPathInXhtml(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #writeBrokenPathInXhtmlAttribute(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 */
+	public static String getBrokenPath(PageRef pageRef) {
 		return getBrokenPath(pageRef, null);
 	}
 
 	/**
-	 * Writes a broken path reference as "¿/book/path{#targetId}?", encoding for XHTML.
+	 * Writes a broken path reference as "¿domain:/book/path{#targetId}?", encoding for XHTML.
+	 *
+	 * @see  #writeBrokenPathInXhtml(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #writeBrokenPath(com.semanticcms.core.model.PageRef, java.lang.String, java.lang.Appendable)
+	 * @see  #getBrokenPath(com.semanticcms.core.model.PageRef, java.lang.String)
 	 */
 	public static void writeBrokenPathInXhtml(PageRef pageRef, String targetId, Appendable out) throws IOException {
+		BookRef bookRef = pageRef.getBookRef();
 		out.append('¿');
-		encodeTextInXhtml(pageRef.getServletPath(), out);
+		encodeTextInXhtml(bookRef.getDomain(), out);
+		out.append(':');
+		encodeTextInXhtml(bookRef.getPrefix(), out);
+		encodeTextInXhtml(pageRef.getPath(), out);
 		if(targetId != null) {
 			out.append('#');
 			encodeTextInXhtml(targetId, out);
@@ -120,18 +159,31 @@ final public class LinkImpl {
 	}
 
 	/**
-	 * Writes a broken path reference as "¿/book/path?", encoding for XHTML.
+	 * Writes a broken path reference as "¿domain:/book/path?", encoding for XHTML.
+	 *
+	 * @see  #writeBrokenPathInXhtml(com.semanticcms.core.model.PageRef, java.lang.String, java.lang.Appendable)
+	 * @see  #writeBrokenPath(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #writeBrokenPathInXhtmlAttribute(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #getBrokenPath(com.semanticcms.core.model.PageRef)
 	 */
 	public static void writeBrokenPathInXhtml(PageRef pageRef, Appendable out) throws IOException {
 		writeBrokenPathInXhtml(pageRef, null, out);
 	}
 
 	/**
-	 * Writes a broken path reference as "¿/book/path?", encoding for XML attribute.
+	 * Writes a broken path reference as "¿domain:/book/path?", encoding for XML attribute.
+	 *
+	 * @see  #writeBrokenPath(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #writeBrokenPathInXhtml(com.semanticcms.core.model.PageRef, java.lang.Appendable)
+	 * @see  #getBrokenPath(com.semanticcms.core.model.PageRef)
 	 */
 	public static void writeBrokenPathInXhtmlAttribute(PageRef pageRef, Appendable out) throws IOException {
+		BookRef bookRef = pageRef.getBookRef();
 		out.append('¿');
-		encodeTextInXhtmlAttribute(pageRef.getServletPath(), out);
+		encodeTextInXhtmlAttribute(bookRef.getDomain(), out);
+		out.append(':');
+		encodeTextInXhtmlAttribute(bookRef.getPrefix(), out);
+		encodeTextInXhtmlAttribute(pageRef.getPath(), out);
 		out.append('?');
 	}
 
@@ -140,6 +192,7 @@ final public class LinkImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
+		String domain,
 		String book,
 		String page,
 		String element,
@@ -159,6 +212,7 @@ final public class LinkImpl {
 				request,
 				response,
 				out,
+				domain,
 				book,
 				page,
 				element,
@@ -175,14 +229,15 @@ final public class LinkImpl {
 	}
 
 	/**
-	 * @param book  ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
-	 * @param page  ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
+	 * @param domain   ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
+	 * @param book     ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
+	 * @param page     ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
 	 * @param element  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only.
 	 *                 Conflicts with {@code anchor}.
-	 * @param anchor  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only.
-	 *                Conflicts with {@code element}.
-	 * @param view  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only
-	 * @param clazz  ValueExpression that returns Object, evaluated at {@link CaptureLevel#BODY} only
+	 * @param anchor   ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only.
+	 *                 Conflicts with {@code element}.
+	 * @param view     ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only
+	 * @param clazz    ValueExpression that returns Object, evaluated at {@link CaptureLevel#BODY} only
 	 */
 	public static <E extends Throwable> void writeLinkImpl(
 		ServletContext servletContext,
@@ -190,6 +245,7 @@ final public class LinkImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
+		ValueExpression domain,
 		ValueExpression book,
 		ValueExpression page,
 		ValueExpression element,
@@ -205,6 +261,7 @@ final public class LinkImpl {
 		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			// Evaluate expressions
+			String domainStr = resolveValue(domain, String.class, elContext);
 			String bookStr = resolveValue(book, String.class, elContext);
 			String pageStr = resolveValue(page, String.class, elContext);
 			String elementStr;
@@ -227,6 +284,7 @@ final public class LinkImpl {
 				request,
 				response,
 				out,
+				domainStr,
 				bookStr,
 				pageStr,
 				elementStr,
@@ -247,6 +305,7 @@ final public class LinkImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
+		String domain,
 		String book,
 		String page,
 		String element,
@@ -261,20 +320,26 @@ final public class LinkImpl {
 	) throws E, ServletException, IOException, SkipPageException {
 		assert captureLevel.compareTo(CaptureLevel.META) >= 0;
 
+		domain = nullIfEmpty(domain);
 		book = nullIfEmpty(book);
 		page = nullIfEmpty(page);
+
+		if(domain != null && book == null) {
+			throw new ServletException("book must be provided when domain is provided.");
+		}
 
 		final Node currentNode = CurrentNode.getCurrentNode(request);
 		final Page currentPage = CurrentPage.getCurrentPage(request);
 
+
 		// Use current page when page not set
-		PageRef targetPageRef;
+		final PageRef targetPageRef;
 		if(page == null) {
 			if(book != null) throw new ServletException("page must be provided when book is provided.");
 			if(currentPage == null) throw new ServletException("link must be nested in page when page attribute not set.");
 			targetPageRef = currentPage.getPageRef();
 		} else {
-			targetPageRef = PageRefResolver.getPageRef(servletContext, request, book, page);
+			targetPageRef = PageRefResolver.getPageRef(servletContext, request, domain, book, page);
 		}
 		// Add page links
 		if(currentNode != null) currentNode.addPageLink(targetPageRef);
@@ -297,8 +362,11 @@ final public class LinkImpl {
 			final boolean isDefaultView = view.isDefault();
 
 			// Capture the page
+			final BookRef targetBookRef = targetPageRef.getBookRef();
+			final Book targetBook = semanticCMS.getBook(targetBookRef);
 			Page targetPage;
-			if(targetPageRef.getBook()==null) {
+			if(!targetBook.isAccessible()) {
+				// Book is not accessible
 				targetPage = null;
 			} else if(
 				// Short-cut for element already added above within current page
@@ -346,8 +414,10 @@ final public class LinkImpl {
 						if(index != null && isDefaultView) {
 							href = '#' + URLEncoder.encode(PageIndex.getRefId(index, null), responseEncoding);
 						} else {
-							StringBuilder url = new StringBuilder();
-							targetPageRef.appendServletPath(url);
+							// TODO: Support multi-domain
+							StringBuilder url = new StringBuilder()
+								.append(targetBookRef.getPrefix())
+								.append(targetPageRef.getPath());
 							if(!isDefaultView) {
 								boolean hasQuestion = url.lastIndexOf("?") != -1;
 								url
@@ -366,8 +436,10 @@ final public class LinkImpl {
 							href = '#' + URLEncoder.encode(anchor, responseEncoding);
 						} else {
 							// Link to target on different page (or same page, different view)
-							StringBuilder url = new StringBuilder();
-							targetPageRef.appendServletPath(url);
+							// TODO: Support multi-domain
+							StringBuilder url = new StringBuilder()
+								.append(targetBookRef.getPrefix())
+								.append(targetPageRef.getPath());
 							if(!isDefaultView) {
 								boolean hasQuestion = url.lastIndexOf("?") != -1;
 								url
@@ -387,8 +459,10 @@ final public class LinkImpl {
 						href = '#' + URLEncoder.encode(element, responseEncoding);
 					} else {
 						// Link to target on different page (or same page, different view)
-						StringBuilder url = new StringBuilder();
-						targetPageRef.appendServletPath(url);
+						// TODO: Support multi-domain
+						StringBuilder url = new StringBuilder()
+							.append(targetBookRef.getPrefix())
+							.append(targetPageRef.getPath());
 						if(!isDefaultView) {
 							boolean hasQuestion = url.lastIndexOf("?") != -1;
 							url
@@ -429,6 +503,7 @@ final public class LinkImpl {
 				}
 			}
 			// Add nofollow consistent with view and page settings.
+			// TODO: Nofollow to missing books that cause targetPage to be null here?
 			if(targetPage != null && !view.getAllowRobots(servletContext, request, response, targetPage)) {
 				out.write(" rel=\"nofollow\"");
 			}
@@ -437,7 +512,7 @@ final public class LinkImpl {
 			if(body == null) {
 				if(targetElement != null) {
 					targetElement.appendLabel(new MediaWriter(textInXhtmlEncoder, out));
-				} else if(targetPage!=null) {
+				} else if(targetPage != null) {
 					encodeTextInXhtml(targetPage.getTitle(), out);
 				} else {
 					writeBrokenPathInXhtml(targetPageRef, element, out);
@@ -451,6 +526,7 @@ final public class LinkImpl {
 				body.doBody(false);
 			}
 			if(small) {
+				// TODO: Support multi-domain
 				out.write("<sup><a");
 				UrlUtils.writeHref(
 					servletContext,

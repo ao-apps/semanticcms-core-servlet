@@ -25,12 +25,12 @@ package com.semanticcms.core.servlet.impl;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.servlet.LocalizedServletException;
 import com.aoindustries.servlet.ServletContextCache;
-import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
+import com.semanticcms.core.repository.Book;
 import com.semanticcms.core.servlet.ApplicationResources;
 import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
@@ -234,7 +234,7 @@ final public class PageImpl {
 						}
 						// Page may not move itself to a different book
 						PageRef newPageRef = page.getPageRef();
-						if(!newPageRef.getBook().equals(pageRef.getBook())) {
+						if(!newPageRef.getBookRef().equals(pageRef.getBookRef())) {
 							throw new ServletException(
 								"Page may not move itself into a different book.  pageRef="
 									+ pageRef
@@ -311,9 +311,10 @@ final public class PageImpl {
 		}
 	}
 
+	// TODO: Profile this since have many books now.  Maybe create method on SemanticCMS for this lookup
 	private static Book findBookByContentRoot(ServletContext servletContext, PageRef pageRef) {
 		for(Book book : SemanticCMS.getInstance(servletContext).getBooks().values()) {
-			if(book.getContentRoot().equals(pageRef)) {
+			if(pageRef.equals(book.getContentRoot())) {
 				return book;
 			}
 		}

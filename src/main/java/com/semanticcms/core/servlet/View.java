@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,10 +24,11 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.taglib.Link;
 import com.semanticcms.core.model.Author;
-import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.repository.Book;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -202,14 +203,14 @@ abstract public class View implements Comparable<View> {
 
 	/**
 	 * Gets the canonical URL for the given page in this view.
-	 * Can not get canonical URLs for missing books.
-	 * This might be called even when a page is not applicable to this view, such as when browing to an empty TODO list.
+	 * This might be called even when a page is not applicable to this view, such as when browsing to an empty TO-DO list.
 	 * By default, {@link #getLinkParams(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page) link parameters}
 	 * are not added.
 	 * <p>
 	 * This URL is absolute and has already been response encoded.
 	 * </p>
-	 * @see  BookUtils#getCanonicalBase(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.model.Book)
+	 * @see  Book#getCanonicalBase()
+	 * @see  BookUtils#getCanonicalBase(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.repository.Book)
 	 */
 	public String getCanonicalUrl(
 		ServletContext servletContext,
@@ -218,21 +219,26 @@ abstract public class View implements Comparable<View> {
 		Page page
 	) throws ServletException, IOException {
 		PageRef pageRef = page.getPageRef();
-		Book book = pageRef.getBook();
-		// TODO: Should we use servletPath here, then remove the book prefix?
-		//       We're passing a partial path to response.encodeURL
+		BookRef bookRef = pageRef.getBookRef();
+		Book book = SemanticCMS.getInstance(servletContext).getBook(pageRef.getBookRef());
 		String encodedServletPath;
 		{
-			String servletPath = pageRef.getServletPath();
+			StringBuilder servletPath = new StringBuilder()
+				.append(bookRef.getPrefix())
+				.append(pageRef.getPath());
 			if(!isDefault()) {
-				servletPath += "?view=" + URLEncoder.encode(getName(), response.getCharacterEncoding());
+				servletPath
+					.append("?view=")
+					.append(URLEncoder.encode(getName(), response.getCharacterEncoding()));
 			}
-			encodedServletPath = response.encodeURL(servletPath);
+			encodedServletPath = response.encodeURL(servletPath.toString());
 		}
-		// To be safe, we're encoding the servletPath, then picking it back into a bookPath
+		// TODO: Should we use servletPath here, then remove the book prefix?
+		//       We were passing a partial path to response.encodeURL
+		//       To be safe, we're encoding the servletPath, then picking it back into a bookPath
 		String encodedBookPath;
 		{
-			String bookPrefix = book.getPathPrefix();
+			String bookPrefix = bookRef.getPrefix();
 			if(bookPrefix.isEmpty()) {
 				encodedBookPath = encodedServletPath;
 			} else {
@@ -299,7 +305,7 @@ abstract public class View implements Comparable<View> {
 		HttpServletResponse response,
 		Page page
 	) {
-		String bookTitle = page.getPageRef().getBook().getTitle();
+		String bookTitle = SemanticCMS.getInstance(servletContext).getBook(page.getPageRef().getBookRef()).getTitle();
 		if(bookTitle != null && !bookTitle.isEmpty()) {
 			return getDisplay() + TITLE_SEPARATOR + page.getTitle() + TITLE_SEPARATOR + bookTitle;
 		} else {

@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -106,10 +106,11 @@ final public class NavigationTreeImpl {
 			}
 		}
 		if(childRefs != null) {
+			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 			for(ChildRef childRef : childRefs) {
 				PageRef childPageRef = childRef.getPageRef();
-				// Child not in missing book
-				if(childPageRef.getBook() != null) {
+				// Child is in an accessible book
+				if(semanticCMS.getBook(childPageRef.getBookRef()).isAccessible()) {
 					Page childPage = CapturePage.capturePage(servletContext, request, response, childPageRef, includeElements || metaCapture ? CaptureLevel.META : CaptureLevel.PAGE);
 					childNodes.add(childPage);
 				}
@@ -122,6 +123,7 @@ final public class NavigationTreeImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
+		SemanticCMS semanticCMS,
 		PageRef linksTo,
 		Set<Node> nodesWithLinks,
 		Set<Node> nodesWithChildLinks,
@@ -137,7 +139,7 @@ final public class NavigationTreeImpl {
 			for(Element childElem : node.getChildElements()) {
 				if(
 					!childElem.isHidden()
-					&& findLinks(servletContext, request, response, linksTo, nodesWithLinks, nodesWithChildLinks, childElem, includeElements)
+					&& findLinks(servletContext, request, response, semanticCMS, linksTo, nodesWithLinks, nodesWithChildLinks, childElem, includeElements)
 				) {
 					hasChildLink = true;
 				}
@@ -159,10 +161,10 @@ final public class NavigationTreeImpl {
 		if(node instanceof Page) {
 			for(ChildRef childRef : ((Page)node).getChildRefs()) {
 				PageRef childPageRef = childRef.getPageRef();
-				// Child not in missing book
-				if(childPageRef.getBook() != null) {
+				// Child is in an accessible book
+				if(semanticCMS.getBook(childPageRef.getBookRef()).isAccessible()) {
 					Page child = CapturePage.capturePage(servletContext, request, response, childPageRef, CaptureLevel.META);
-					if(findLinks(servletContext, request, response, linksTo, nodesWithLinks, nodesWithChildLinks, child, includeElements)) {
+					if(findLinks(servletContext, request, response, semanticCMS, linksTo, nodesWithLinks, nodesWithChildLinks, child, includeElements)) {
 						hasChildLink = true;
 					}
 				}
@@ -189,8 +191,10 @@ final public class NavigationTreeImpl {
 		boolean yuiConfig,
 		boolean includeElements,
 		String target,
+		String thisDomain,
 		String thisBook,
 		String thisPage,
+		String linksToDomain,
 		String linksToBook,
 		String linksToPage,
 		int maxDepth
@@ -208,8 +212,10 @@ final public class NavigationTreeImpl {
 				yuiConfig,
 				includeElements,
 				target,
+				thisDomain,
 				thisBook,
 				thisPage,
+				linksToDomain,
 				linksToBook,
 				linksToPage,
 				maxDepth,
@@ -219,11 +225,13 @@ final public class NavigationTreeImpl {
 	}
 
 	/**
-	 * @param root  ValueExpression that returns Page
-	 * @param thisBook  ValueExpression that returns String
-	 * @param thisPage  ValueExpression that returns String
-	 * @param linksToBook  ValueExpression that returns String
-	 * @param linksToPage  ValueExpression that returns String
+	 * @param root           ValueExpression that returns Page
+	 * @param thisDomain     ValueExpression that returns String
+	 * @param thisBook       ValueExpression that returns String
+	 * @param thisPage       ValueExpression that returns String
+	 * @param linksToDomain  ValueExpression that returns String
+	 * @param linksToBook    ValueExpression that returns String
+	 * @param linksToPage    ValueExpression that returns String
 	 */
 	public static void writeNavigationTreeImpl(
 		ServletContext servletContext,
@@ -236,8 +244,10 @@ final public class NavigationTreeImpl {
 		boolean yuiConfig,
 		boolean includeElements,
 		String target,
+		ValueExpression thisDomain,
 		ValueExpression thisBook,
 		ValueExpression thisPage,
+		ValueExpression linksToDomain,
 		ValueExpression linksToBook,
 		ValueExpression linksToPage,
 		int maxDepth
@@ -255,10 +265,12 @@ final public class NavigationTreeImpl {
 				yuiConfig,
 				includeElements,
 				target,
-				resolveValue(thisBook, String.class, elContext),
-				resolveValue(thisPage, String.class, elContext),
-				resolveValue(linksToBook, String.class, elContext),
-				resolveValue(linksToPage, String.class, elContext),
+				resolveValue(thisDomain, String.class, elContext),
+				resolveValue(thisBook,   String.class, elContext),
+				resolveValue(thisPage,   String.class, elContext),
+				resolveValue(linksToDomain, String.class, elContext),
+				resolveValue(linksToBook,   String.class, elContext),
+				resolveValue(linksToPage,   String.class, elContext),
 				maxDepth,
 				captureLevel
 			);
@@ -275,8 +287,10 @@ final public class NavigationTreeImpl {
 		boolean yuiConfig,
 		boolean includeElements,
 		String target,
+		String thisDomain,
 		String thisBook,
 		String thisPage,
+		String linksToDomain,
 		String linksToBook,
 		String linksToPage,
 		int maxDepth,
@@ -285,10 +299,18 @@ final public class NavigationTreeImpl {
 		assert captureLevel.compareTo(CaptureLevel.META) >= 0;
 		final Node currentNode = CurrentNode.getCurrentNode(request);
 
-		thisBook = nullIfEmpty(thisBook);
-		thisPage = nullIfEmpty(thisPage);
-		linksToBook = nullIfEmpty(linksToBook);
-		linksToPage = nullIfEmpty(linksToPage);
+		thisDomain = nullIfEmpty(thisDomain);
+		thisBook   = nullIfEmpty(thisBook);
+		thisPage   = nullIfEmpty(thisPage);
+		if(thisDomain != null && thisBook == null) {
+			throw new ServletException("thisBook must be provided when thisDomain is provided.");
+		}
+		linksToDomain = nullIfEmpty(linksToDomain);
+		linksToBook   = nullIfEmpty(linksToBook);
+		linksToPage   = nullIfEmpty(linksToPage);
+		if(linksToDomain != null && linksToBook == null) {
+			throw new ServletException("linksToBook must be provided when linksToDomain is provided.");
+		}
 
 		// Filter by link-to
 		final Set<Node> nodesWithLinks;
@@ -299,13 +321,14 @@ final public class NavigationTreeImpl {
 			nodesWithChildLinks = null;
 		} else {
 			// Find all nodes in the navigation tree that link to the linksToPage
-			PageRef linksTo = PageRefResolver.getPageRef(servletContext, request, linksToBook, linksToPage);
+			PageRef linksTo = PageRefResolver.getPageRef(servletContext, request, linksToDomain, linksToBook, linksToPage);
 			nodesWithLinks = new HashSet<Node>();
 			nodesWithChildLinks = new HashSet<Node>();
 			findLinks(
 				servletContext,
 				request,
 				response,
+				SemanticCMS.getInstance(servletContext),
 				linksTo,
 				nodesWithLinks,
 				nodesWithChildLinks,
@@ -319,7 +342,7 @@ final public class NavigationTreeImpl {
 			if(thisBook != null) throw new ServletException("thisPage must be provided when thisBook is provided.");
 			thisPageRef = null;
 		} else {
-			thisPageRef = PageRefResolver.getPageRef(servletContext, request, thisBook, thisPage);
+			thisPageRef = PageRefResolver.getPageRef(servletContext, request, thisDomain, thisBook, thisPage);
 		}
 
 		boolean foundThisPage = false;
@@ -348,7 +371,7 @@ final public class NavigationTreeImpl {
 						nodesWithLinks,
 						nodesWithChildLinks,
 						pageIndex,
-						null,
+						null, // parentPageRef
 						childNode,
 						yuiConfig,
 						includeElements,
@@ -429,11 +452,11 @@ final public class NavigationTreeImpl {
 			servletPath = null;
 		} else {
 			if(element == null) {
-				servletPath = pageRef.getServletPath();
+				servletPath = pageRef.getBookRef().getPrefix() + pageRef.getPath();
 			} else {
 				String elemId = element.getId();
 				assert elemId != null;
-				servletPath = pageRef.getServletPath() + '#' + elemId;
+				servletPath = pageRef.getBookRef().getPrefix() + pageRef.getPath() + '#' + elemId;
 			}
 		}
 		if(out != null) {

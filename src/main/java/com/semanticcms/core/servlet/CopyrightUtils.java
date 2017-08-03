@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.semanticcms.core.model.Book;
+import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
@@ -69,6 +69,7 @@ public class CopyrightUtils {
 			servletContext,
 			request,
 			response,
+			SemanticCMS.getInstance(servletContext),
 			page,
 			new HashMap<PageRef,Copyright>()
 		);
@@ -80,6 +81,7 @@ public class CopyrightUtils {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
+		SemanticCMS semanticCMS,
 		com.semanticcms.core.model.Page page,
 		Map<PageRef,Copyright> finished
 	) throws ServletException, IOException {
@@ -105,10 +107,10 @@ public class CopyrightUtils {
 			String parentsRightsHolder = null;
 			String parentsRights = null;
 			String parentsDateCopyrighted = null;
-			Book book = pageRef.getBook();
+			BookRef bookRef = pageRef.getBookRef();
 			for(ParentRef parentRef : page.getParentRefs()) {
 				PageRef parentPageRef = parentRef.getPageRef();
-				if(book.equals(parentPageRef.getBook())) {
+				if(bookRef.equals(parentPageRef.getBookRef())) {
 					// Check finished already
 					Copyright parentCopyright = finished.get(parentPageRef);
 					if(!finished.containsKey(parentPageRef)) {
@@ -117,6 +119,7 @@ public class CopyrightUtils {
 							servletContext,
 							request,
 							response,
+							semanticCMS,
 							CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
 							finished
 						);
@@ -151,7 +154,7 @@ public class CopyrightUtils {
 				}
 			}
 			// No parents in the same book, use book copyright fields
-			Copyright bookCopyright = book.getCopyright();
+			Copyright bookCopyright = semanticCMS.getBook(bookRef).getCopyright();
 			if(pageRightsHolder==null) {
 				if(parentsRightsHolder == null) {
 					parentsRightsHolder = bookCopyright==null ? "" : bookCopyright.getRightsHolder();
