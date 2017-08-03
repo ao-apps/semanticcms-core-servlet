@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2017-08-01T23:19:34-0500"
+		dateModified="2017-08-03T11:05:22-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -57,7 +57,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 					<li>
 						<code><ao:a href="apidocs/com/semanticcms/core/servlet/PageRefResolver.html">PageRefResolver</ao:a>.getCurrentPageRef(…)</code>
 						now accepts an optional parameter to optionally return <code>null</code> on missing book instead of throwing
-						<code><ao:a href="@{javac.link.javaeeApi.6}javax/servlet/ServletException.html">ServletException</ao:a></code>.
+						<code><ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/ServletException.html">ServletException</ao:a></code>.
 					</li>
 					<li>Books now exist within an optional domain:
 						<ol>
