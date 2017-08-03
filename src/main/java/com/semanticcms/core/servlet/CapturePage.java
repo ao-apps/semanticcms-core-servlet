@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,6 +31,7 @@ import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.concurrent.Executor;
+import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
@@ -157,7 +158,8 @@ public class CapturePage {
 						CapturePage captureContext = new CapturePage();
 						request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, captureContext);
 						// Include the page resource, discarding any direct output
-						final String capturePath = pageRef.getServletPath();
+						final BookRef bookRef = pageRef.getBookRef();
+						final String capturePath = bookRef.getPrefix() + pageRef.getPath();
 						try {
 							// Clear PageContext on include
 							PageContext.newPageContextSkip(
@@ -195,9 +197,9 @@ public class CapturePage {
 						PageRef capturedPageRef = capturedPage.getPageRef();
 						if(!capturedPageRef.equals(pageRef)) throw new ServletException(
 							"Captured page has unexpected pageRef.  Expected ("
-								+ pageRef.getBookName() + ", " + pageRef.getPath()
+								+ pageRef.getBookRef()+ ", " + pageRef.getPath()
 								+ ") but got ("
-								+ capturedPageRef.getBookName() + ", " + capturedPageRef.getPath()
+								+ capturedPageRef.getBookRef() + ", " + capturedPageRef.getPath()
 								+ ')'
 						);
 					} finally {
