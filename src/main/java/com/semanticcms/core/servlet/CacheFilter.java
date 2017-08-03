@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -72,6 +72,8 @@ public class CacheFilter implements Filter {
 	 */
 	private static class ExportPageCache {
 	
+		private final SemanticCMS semanticCMS;
+
 		/**
 		 * When concurrent subrequests are enabled, use concurrent implementation.
 		 * When export mode without subrequests, use synchronized since exports are typically
@@ -79,7 +81,8 @@ public class CacheFilter implements Filter {
 		 */
 		private final boolean concurrentSubrequests;
 
-		private ExportPageCache(boolean concurrentSubrequests) {
+		private ExportPageCache(SemanticCMS semanticCMS, boolean concurrentSubrequests) {
+			this.semanticCMS = semanticCMS;
 			this.concurrentSubrequests = concurrentSubrequests;
 		}
 
@@ -122,7 +125,7 @@ public class CacheFilter implements Filter {
 			invalidateCache(currentTime);
 			if(cache == null) {
 				cacheStart = currentTime;
-				cache = concurrentSubrequests ? new ConcurrentCache() : new SynchronizedCache();
+				cache = concurrentSubrequests ? new ConcurrentCache(semanticCMS) : new SynchronizedCache(semanticCMS);
 			}
 			return cache;
 		}
@@ -152,7 +155,7 @@ public class CacheFilter implements Filter {
 				ExportPageCache exportCache = (ExportPageCache)servletContext.getAttribute(EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME);
 				if(isExporting) {
 					if(exportCache == null) {
-						exportCache = new ExportPageCache(concurrentSubrequests);
+						exportCache = new ExportPageCache(SemanticCMS.getInstance(servletContext), concurrentSubrequests);
 						servletContext.setAttribute(EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME, exportCache);
 					}
 					cache = exportCache.getCache(System.currentTimeMillis());
@@ -167,10 +170,11 @@ public class CacheFilter implements Filter {
 			}
 			if(cache == null) {
 				// Request-level cache when not exporting
+				SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 				if(CountConcurrencyFilter.useConcurrentSubrequests(request)) {
-					cache = new ConcurrentCache();
+					cache = new ConcurrentCache(semanticCMS);
 				} else {
-					cache = new SingleThreadCache();
+					cache = new SingleThreadCache(semanticCMS);
 				}
 			}
 			try {

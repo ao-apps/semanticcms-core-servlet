@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,7 +27,7 @@ import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.ServletUtil;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
 import com.semanticcms.core.model.BookRef;
-import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.model.ResourceRef;
 import com.semanticcms.core.repository.Book;
 import java.net.MalformedURLException;
 import java.util.NoSuchElementException;
@@ -36,56 +36,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Helper utilities for resolving  {@link PageRef PageRefs}.
+ * Helper utilities for resolving {@link ResourceRef ResourceRefs}.
  */
-public class PageRefResolver {
+public class ResourceRefResolver {
 
 	/**
-	 * Finds the path to the current page.
-	 * The current page must be in a Book.
-	 *
-	 * @see  #getCurrentPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, boolean)
-	 */
-	public static PageRef getCurrentPageRef(ServletContext servletContext, HttpServletRequest request) throws ServletException {
-		return getCurrentPageRef(servletContext, request, true);
-	}
-
-	/**
-	 * Finds the path to the current page, optionally returning {@code null} when the
-	 * current page is not in a book.
-	 *
-	 * @param requireBook affects the behavior when the current page is not in a book.
-	 *                    When {@code true}, a {@link ServletException} is thrown.
-	 *                    When {@code false}, {@code null} is returned.
-	 *
-	 * @see  #getCurrentPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest)
-	 */
-	public static PageRef getCurrentPageRef(ServletContext servletContext, HttpServletRequest request, boolean requireBook) throws ServletException {
-		String pagePath = Dispatcher.getCurrentPagePath(request);
-		// TODO: get local book distinct from get published book, for local content that is not published
-		Book book = SemanticCMS.getInstance(servletContext).getPublishedBook(pagePath);
-		if(book == null) {
-			if(requireBook) {
-				throw new ServletException("Book not found for pagePath: " + pagePath);
-			} else {
-				return null;
-			}
-		}
-		BookRef bookRef = book.getBookRef();
-		String bookPrefix = bookRef.getPrefix();
-		assert pagePath.startsWith(bookPrefix);
-		return new PageRef(bookRef, pagePath.substring(bookPrefix.length()));
-	}
-
-	/**
-	 * Resolves a  {@link PageRef}.
+	 * Resolves a {@link ResourceRef}.
 	 * <p>
 	 * When domain is provided, book is required.  When domain is not provided,
 	 * defaults to the domain of the current page.
 	 * </p>
 	 * <p>
 	 * When book is not provided, defaults to the book of the current page.
-	 * TODO: Is there ever a context where there is not a "current page" with remote repositories?
 	 * </p>
 	 * <p>
 	 * When book is not provided, path may be book-relative path, which will be interpreted relative
@@ -98,10 +60,10 @@ public class PageRefResolver {
 	 *
 	 * @throws ServletException If no book provided and the current page is not within a book's content.
 	 *
-	 * @see  #getPageRef(java.lang.String, java.lang.String, java.lang.String)
-	 * @see  ResourceRefResolver#getResourceRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.String, java.lang.String)
+	 * @see  #getResourceRef(java.lang.String, java.lang.String, java.lang.String)
+	 * @see  PageRefResolver#getPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public static PageRef getPageRef(
+	public static ResourceRef getResourceRef(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		String domain,
@@ -126,7 +88,7 @@ public class PageRefResolver {
 			BookRef currentBookRef = currentBook.getBookRef();
 			String bookPrefix = currentBookRef.getPrefix();
 			assert currentPagePath.startsWith(bookPrefix);
-			return new PageRef(
+			return new ResourceRef(
 				currentBookRef,
 				ServletUtil.getAbsolutePath(
 					currentPagePath.substring(bookPrefix.length()),
@@ -146,7 +108,7 @@ public class PageRefResolver {
 			BookRef bookRef = new BookRef(domain, book);
 			// Make sure book exists
 			try {
-				return new PageRef(
+				return new ResourceRef(
 					semanticCMS.getBook(bookRef).getBookRef(), // Use BookRef from Book, since it is a shared long-lived object
 					path
 				);
@@ -157,14 +119,14 @@ public class PageRefResolver {
 	}
 
 	/**
-	 * Gets a {@link PageRef} in the current {@link PageContext page context}.
+	 * Gets a {@link ResourceRef} in the current {@link PageContext page context}.
 	 *
-	 * @see  #getPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.String, java.lang.String)
+	 * @see  #getResourceRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, java.lang.String, java.lang.String, java.lang.String)
 	 * @see  PageContext
-	 * @see  ResourceRefResolver#getResourceRef(java.lang.String, java.lang.String, java.lang.String)
+	 * @see  PageRefResolver#getPageRef(java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public static PageRef getPageRef(String domain, String book, String path) throws ServletException, MalformedURLException {
-		return getPageRef(
+	public static ResourceRef getResourceRef(String domain, String book, String path) throws ServletException, MalformedURLException {
+		return getResourceRef(
 			PageContext.getServletContext(),
 			PageContext.getRequest(),
 			domain,
@@ -176,6 +138,6 @@ public class PageRefResolver {
 	/**
 	 * Make no instances.
 	 */
-	private PageRefResolver() {
+	private ResourceRefResolver() {
 	}
 }

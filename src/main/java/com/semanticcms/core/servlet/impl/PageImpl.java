@@ -131,7 +131,7 @@ final public class PageImpl {
 				servletContext,
 				request,
 				response,
-				PageUtils.filterNotMissingBook(page.getParentRefs()),
+				PageUtils.filterNotMissingBook(servletContext, page.getParentRefs()),
 				CaptureLevel.PAGE
 			);
 			PageRef pageRef = page.getPageRef();
@@ -145,7 +145,7 @@ final public class PageImpl {
 				servletContext,
 				request,
 				response,
-				PageUtils.filterNotMissingBook(page.getChildRefs()),
+				PageUtils.filterNotMissingBook(servletContext, page.getChildRefs()),
 				CaptureLevel.PAGE
 			);
 			PageRef pageRef = page.getPageRef();
