@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,8 @@
  */
 package com.semanticcms.core.servlet.util;
 
-import com.aoindustries.io.TempFileList;
 import com.aoindustries.lang.NotImplementedException;
+import com.aoindustries.tempfiles.TempFileContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,8 +43,8 @@ public class HttpServletSubResponse extends ServletSubResponse implements HttpSe
 
 	private final HttpServletResponse resp;
 
-	public HttpServletSubResponse(HttpServletResponse resp, TempFileList tempFileList) {
-		super(resp, tempFileList);
+	public HttpServletSubResponse(HttpServletResponse resp, TempFileContext tempFileContext) {
+		super(resp, tempFileContext);
 		this.resp = resp;
 	}
 

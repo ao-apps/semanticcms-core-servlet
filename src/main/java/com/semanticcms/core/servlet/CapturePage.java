@@ -23,12 +23,12 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.encoding.MediaType;
-import com.aoindustries.io.TempFileList;
 import com.aoindustries.lang.NullArgumentException;
-import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
+import com.aoindustries.tempfiles.TempFileContext;
+import com.aoindustries.tempfiles.servlet.ServletTempFileContext;
 import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.concurrent.Executor;
 import com.semanticcms.core.model.BookRef;
@@ -300,7 +300,7 @@ public class CapturePage {
 				&& CountConcurrencyFilter.useConcurrentSubrequests(request)
 			) {
 				// Concurrent implementation
-				final TempFileList tempFileList = TempFileContext.getTempFileList(request);
+				final TempFileContext tempFileContext = ServletTempFileContext.getTempFileContext(request);
 				final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
 				final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
 				// Create the tasks
@@ -314,7 +314,7 @@ public class CapturePage {
 								return capturePage(
 									servletContext,
 									new HttpServletSubRequest(threadSafeReq),
-									new HttpServletSubResponse(threadSafeResp, tempFileList),
+									new HttpServletSubResponse(threadSafeResp, tempFileContext),
 									pageRef,
 									level,
 									cache
@@ -531,7 +531,7 @@ public class CapturePage {
 				edges,
 				edgeFilter,
 				null,
-				TempFileContext.getTempFileList(request),
+				ServletTempFileContext.getTempFileContext(request),
 				cache,
 				new HashSet<PageRef>()
 			);
@@ -573,7 +573,7 @@ public class CapturePage {
 			preferredConcurrency = executors.getPreferredConcurrency();
 			assert preferredConcurrency > 1 : "Single-CPU systems should never make it to this concurrent implementation";
 		}
-		final TempFileList tempFileList = TempFileContext.getTempFileList(request);
+		final TempFileContext tempFileContext = ServletTempFileContext.getTempFileContext(request);
 
 		int maxSize = 0;
 
@@ -707,7 +707,7 @@ public class CapturePage {
 												return capturePage(
 													servletContext,
 													new HttpServletSubRequest(finalThreadSafeReq),
-													new HttpServletSubResponse(finalThreadSafeResp, tempFileList),
+													new HttpServletSubResponse(finalThreadSafeResp, tempFileContext),
 													edge,
 													level,
 													cache
@@ -892,7 +892,7 @@ public class CapturePage {
 				edges,
 				edgeFilter,
 				postHandler,
-				TempFileContext.getTempFileList(request),
+				ServletTempFileContext.getTempFileContext(request),
 				cache,
 				new HashSet<PageRef>()
 			);
@@ -913,7 +913,7 @@ public class CapturePage {
 		TraversalEdges edges,
 		EdgeFilter edgeFilter,
 		PageDepthHandler<? extends T> postHandler,
-		TempFileList tempFileList,
+		TempFileContext tempFileContext,
 		Cache cache,
 		Set<PageRef> visited
 	) throws ServletException, IOException {
@@ -949,7 +949,7 @@ public class CapturePage {
 					edges,
 					edgeFilter,
 					postHandler,
-					tempFileList,
+					tempFileContext,
 					cache,
 					visited
 				);
