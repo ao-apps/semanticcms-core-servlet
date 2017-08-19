@@ -64,7 +64,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 			<!-- TODO: file:file once cvsworkDirectory no longer required -->
 			<ul>
 				<li><ao:a href="books-1.0.xsd">books-1.0.xsd</ao:a></li>
-				<li><ao:a href="books-2.0.xsd">books-2.0.xsd</ao:a></li>
+				<li><ao:a href="books-1.1.xsd">books-1.1.xsd</ao:a></li>
 			</ul>
 		</section:section>
 	</core:page>

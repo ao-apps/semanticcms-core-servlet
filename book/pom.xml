@@ -87,7 +87,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 									<type>jar</type>
 									<includes>
 										com/semanticcms/core/servlet/books-1.0.xsd,
-										com/semanticcms/core/servlet/books-2.0.xsd
+										com/semanticcms/core/servlet/books-1.1.xsd
 									</includes>
 								</artifactItem>
 							</artifactItems>
@@ -111,7 +111,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 									<directory>${project.build.directory}/dependency/com/semanticcms/core/servlet</directory>
 									<includes>
 										<include>books-1.0.xsd</include>
-										<include>books-2.0.xsd</include>
+										<include>books-1.1.xsd</include>
 									</includes>
 								</resource>
 							</resources>

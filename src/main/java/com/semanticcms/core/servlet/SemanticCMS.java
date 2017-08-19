@@ -133,7 +133,7 @@ public class SemanticCMS {
 	// See https://docs.oracle.com/javase/tutorial/jaxp/dom/validating.html
 	private static final String BOOKS_XML_RESOURCE = "/WEB-INF/books.xml";
 	private static final String BOOKS_XML_SCHEMA_1_0_RESOURCE = "books-1.0.xsd";
-	private static final String BOOKS_XML_SCHEMA_2_0_RESOURCE = "books-2.0.xsd";
+	private static final String BOOKS_XML_SCHEMA_1_1_RESOURCE = "books-1.1.xsd";
 
 	private static final String MISSING_BOOK_TAG_NAME = "missingBook";
 	private static final String BOOK_TAG_NAME = "book";
