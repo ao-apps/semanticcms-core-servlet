@@ -29,7 +29,7 @@ import com.aoindustries.xml.XmlUtils;
 import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
-import com.semanticcms.core.repository.Book;
+import com.semanticcms.core.pages.Book;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;

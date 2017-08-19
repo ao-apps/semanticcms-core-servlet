@@ -24,7 +24,7 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.servlet.http.ServletUtil;
 import com.semanticcms.core.model.BookRef;
-import com.semanticcms.core.repository.Book;
+import com.semanticcms.core.pages.Book;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -28,7 +28,7 @@ import com.aoindustries.servlet.http.ServletUtil;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
 import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.PageRef;
-import com.semanticcms.core.repository.Book;
+import com.semanticcms.core.pages.Book;
 import java.net.MalformedURLException;
 import java.util.NoSuchElementException;
 import javax.servlet.ServletContext;
