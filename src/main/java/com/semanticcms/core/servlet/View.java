@@ -28,7 +28,7 @@ import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
-import com.semanticcms.core.repository.Book;
+import com.semanticcms.core.pages.Book;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -210,7 +210,7 @@ abstract public class View implements Comparable<View> {
 	 * This URL is absolute and has already been response encoded.
 	 * </p>
 	 * @see  Book#getCanonicalBase()
-	 * @see  BookUtils#getCanonicalBase(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.repository.Book)
+	 * @see  BookUtils#getCanonicalBase(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.pages.Book)
 	 */
 	public String getCanonicalUrl(
 		ServletContext servletContext,
