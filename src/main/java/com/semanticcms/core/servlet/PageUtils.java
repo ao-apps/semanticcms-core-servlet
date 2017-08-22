@@ -31,6 +31,7 @@ import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.PageReferrer;
 import com.semanticcms.core.model.ParentRef;
+import com.semanticcms.core.pages.CaptureLevel;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;

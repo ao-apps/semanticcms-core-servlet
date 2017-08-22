@@ -24,6 +24,7 @@ package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.pages.CaptureLevel;
 import java.util.Map;
 import javax.servlet.ServletException;
 

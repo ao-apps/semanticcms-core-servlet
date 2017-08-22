@@ -23,6 +23,7 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.net.HttpParameters;
+import com.aoindustries.net.Path;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.semanticcms.core.servlet.impl.LinkImpl;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class Link {
 	private final HttpServletResponse response;
 
 	private String domain;
-	private String book;
+	private Path book;
 	private String page;
 	private String element;
 	private boolean allowGeneratedElement;
@@ -73,7 +74,7 @@ public class Link {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		String book,
+		Path book,
 		String page
 	) {
 		this(servletContext, request, response, page);
@@ -85,7 +86,7 @@ public class Link {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		String domain,
-		String book,
+		Path book,
 		String page
 	) {
 		this(servletContext, request, response, book, page);
@@ -120,7 +121,7 @@ public class Link {
 	 *
 	 * @see  PageContext
 	 */
-	public Link(String book, String page) {
+	public Link(Path book, String page) {
 		this(page);
 		this.book = book;
 	}
@@ -130,7 +131,7 @@ public class Link {
 	 *
 	 * @see  PageContext
 	 */
-	public Link(String domain, String book, String page) {
+	public Link(String domain, Path book, String page) {
 		this(book, page);
 		this.domain = domain;
 	}
@@ -140,7 +141,7 @@ public class Link {
 		return this;
 	}
 
-	public Link book(String book) {
+	public Link book(Path book) {
 		this.book = book;
 		return this;
 	}

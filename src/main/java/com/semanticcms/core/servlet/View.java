@@ -28,7 +28,6 @@ import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
-import com.semanticcms.core.pages.Book;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;

@@ -27,18 +27,21 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextIn
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
+import com.aoindustries.net.Path;
 import com.aoindustries.nio.charset.Charsets;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import com.aoindustries.util.StringUtility;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
+import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.PageReferrer;
-import com.semanticcms.core.servlet.CaptureLevel;
+import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
+import com.semanticcms.core.servlet.CurrentCaptureLevel;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.PageIndex;
 import com.semanticcms.core.servlet.PageRefResolver;
@@ -192,15 +195,15 @@ final public class NavigationTreeImpl {
 		boolean includeElements,
 		String target,
 		String thisDomain,
-		String thisBook,
+		Path thisBook,
 		String thisPage,
 		String linksToDomain,
-		String linksToBook,
+		Path linksToBook,
 		String linksToPage,
 		int maxDepth
 	) throws ServletException, IOException {
 		// Get the current capture state
-		CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			writeNavigationTreeImpl(
 				servletContext,
@@ -253,27 +256,39 @@ final public class NavigationTreeImpl {
 		int maxDepth
 	) throws ServletException, IOException {
 		// Get the current capture state
-		CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
-			writeNavigationTreeImpl(
-				servletContext,
-				request,
-				response,
-				out,
-				resolveValue(root, Page.class, elContext),
-				skipRoot,
-				yuiConfig,
-				includeElements,
-				target,
-				resolveValue(thisDomain, String.class, elContext),
-				resolveValue(thisBook,   String.class, elContext),
-				resolveValue(thisPage,   String.class, elContext),
-				resolveValue(linksToDomain, String.class, elContext),
-				resolveValue(linksToBook,   String.class, elContext),
-				resolveValue(linksToPage,   String.class, elContext),
-				maxDepth,
-				captureLevel
-			);
+			try {
+				writeNavigationTreeImpl(
+					servletContext,
+					request,
+					response,
+					out,
+					resolveValue(root, Page.class, elContext),
+					skipRoot,
+					yuiConfig,
+					includeElements,
+					target,
+					resolveValue(thisDomain, String.class, elContext),
+					Path.valueOf(
+						StringUtility.nullIfEmpty(
+							resolveValue(thisBook, String.class, elContext)
+						)
+					),
+					resolveValue(thisPage,   String.class, elContext),
+					resolveValue(linksToDomain, String.class, elContext),
+					Path.valueOf(
+						StringUtility.nullIfEmpty(
+							resolveValue(linksToBook,   String.class, elContext)
+						)
+					),
+					resolveValue(linksToPage,   String.class, elContext),
+					maxDepth,
+					captureLevel
+				);
+			} catch(ValidationException e) {
+				throw new ServletException(e);
+			}
 		}
 	}
 
@@ -288,10 +303,10 @@ final public class NavigationTreeImpl {
 		boolean includeElements,
 		String target,
 		String thisDomain,
-		String thisBook,
+		Path thisBook,
 		String thisPage,
 		String linksToDomain,
-		String linksToBook,
+		Path linksToBook,
 		String linksToPage,
 		int maxDepth,
 		CaptureLevel captureLevel
@@ -300,13 +315,11 @@ final public class NavigationTreeImpl {
 		final Node currentNode = CurrentNode.getCurrentNode(request);
 
 		thisDomain = nullIfEmpty(thisDomain);
-		thisBook   = nullIfEmpty(thisBook);
 		thisPage   = nullIfEmpty(thisPage);
 		if(thisDomain != null && thisBook == null) {
 			throw new ServletException("thisBook must be provided when thisDomain is provided.");
 		}
 		linksToDomain = nullIfEmpty(linksToDomain);
-		linksToBook   = nullIfEmpty(linksToBook);
 		linksToPage   = nullIfEmpty(linksToPage);
 		if(linksToDomain != null && linksToBook == null) {
 			throw new ServletException("linksToBook must be provided when linksToDomain is provided.");

@@ -36,6 +36,7 @@ import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.PageReferrer;
+import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import com.semanticcms.core.servlet.util.HttpServletSubRequest;
 import com.semanticcms.core.servlet.util.HttpServletSubResponse;
@@ -146,7 +147,7 @@ public class CapturePage {
 				// Clear request values that break captures
 				if(oldNode != null) CurrentNode.setCurrentNode(request, null);
 				if(oldPage != null) CurrentPage.setCurrentPage(request, null);
-				CaptureLevel oldCaptureLevel = CaptureLevel.getCaptureLevel(request);
+				CaptureLevel oldCaptureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 				CapturePage oldCaptureContext = CapturePage.getCaptureContext(request);
 				try {
 					// Set the response content type to "application/xhtml+xml" for a consistent starting point for captures
@@ -154,7 +155,7 @@ public class CapturePage {
 					try {
 						response.setContentType(MediaType.XHTML.getContentType());
 						// Set new capture context
-						CaptureLevel.setCaptureLevel(request, level);
+						CurrentCaptureLevel.setCaptureLevel(request, level);
 						CapturePage captureContext = new CapturePage();
 						request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, captureContext);
 						// Include the page resource, discarding any direct output
@@ -207,7 +208,7 @@ public class CapturePage {
 					}
 				} finally {
 					// Restore previous capture context
-					CaptureLevel.setCaptureLevel(request, oldCaptureLevel);
+					CurrentCaptureLevel.setCaptureLevel(request, oldCaptureLevel);
 					request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, oldCaptureContext);
 				}
 			} finally {

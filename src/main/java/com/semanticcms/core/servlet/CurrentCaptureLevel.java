@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,39 +22,28 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.semanticcms.core.pages.CaptureLevel;
 import javax.servlet.ServletRequest;
 
 /**
- * The capture modes.
+ * The current capture mode.
  */
-public enum CaptureLevel {
+public class CurrentCaptureLevel {
+
+	private static final String CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME = CurrentCaptureLevel.class.getName()+".captureLevel";
 
 	/**
-	 * Captures page meta data only, such as title, copyright, authors, parents, and children.
-	 */
-	PAGE,
-
-	/**
-	 * Captures both page and content meta data.
-	 */
-	META,
-
-	/**
-	 * Captures everything: page meta data, content meta data, and all body HTML.
-	 */
-	BODY;
-
-	private static final String CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME = CaptureLevel.class.getName()+".captureLevel";
-
-	/**
-	 * Gets the capture level or <code>BODY</code> if none occurring.
+	 * Gets the capture level or {@link CaptureLevel#BODY} if none occurring.
 	 */
 	public static CaptureLevel getCaptureLevel(ServletRequest request) {
 		CaptureLevel captureLevel = (CaptureLevel)request.getAttribute(CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME);
-		return captureLevel == null ? BODY : captureLevel;
+		return captureLevel == null ? CaptureLevel.BODY : captureLevel;
 	}
 
 	static void setCaptureLevel(ServletRequest request, CaptureLevel level) {
 		request.setAttribute(CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME, level);
 	}
+
+	/** Make no instances */
+	private CurrentCaptureLevel() {}
 }

@@ -30,10 +30,11 @@ import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
-import com.semanticcms.core.pages.Book;
+import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.servlet.ApplicationResources;
-import com.semanticcms.core.servlet.CaptureLevel;
+import com.semanticcms.core.servlet.Book;
 import com.semanticcms.core.servlet.CapturePage;
+import com.semanticcms.core.servlet.CurrentCaptureLevel;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageUtils;
@@ -224,7 +225,7 @@ final public class PageImpl {
 					// Set currentPage
 					CurrentPage.setCurrentPage(request, page);
 					try {
-						final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+						final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 						if(captureLevel == CaptureLevel.BODY) {
 							// Invoke page body, capturing output
 							page.setBody(body.doBody(false, page).trim());
@@ -353,8 +354,8 @@ final public class PageImpl {
 						throw new ServletException("Auto parent of page would be outside book: " + pageRef);
 					}
 					String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
-					// TODO: These new PageRef call String.intern - worth avoiding it?
 					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
+					// TODO: Use ResourceStore
 					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
 						page.addParentRef(new ParentRef(indexJspxPageRef, null));
 					} else {

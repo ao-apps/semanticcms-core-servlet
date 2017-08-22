@@ -29,17 +29,20 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlA
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.net.HttpParameters;
+import com.aoindustries.net.Path;
 import com.aoindustries.servlet.http.LastModifiedServlet;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
+import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
-import com.semanticcms.core.pages.Book;
-import com.semanticcms.core.servlet.CaptureLevel;
+import com.semanticcms.core.pages.CaptureLevel;
+import com.semanticcms.core.servlet.Book;
 import com.semanticcms.core.servlet.CapturePage;
+import com.semanticcms.core.servlet.CurrentCaptureLevel;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageIndex;
@@ -77,7 +80,7 @@ final public class LinkImpl {
 			.append(bookRef.getDomain())
 			.append(':')
 			.append(bookRef.getPrefix())
-			.append(pageRef.getPath())
+			.append(pageRef.getPath().toString())
 		;
 		if(targetId != null) {
 			out.append('#').append(targetId);
@@ -108,7 +111,7 @@ final public class LinkImpl {
 			+ bookRef.getDomain().length()
 			+ 1 // ':'
 			+ bookRef.getPrefix().length()
-			+ pageRef.getPath().length();
+			+ pageRef.getPath().toString().length();
 		if(targetId != null) {
 			sbLen +=
 				1 // '#'
@@ -150,7 +153,7 @@ final public class LinkImpl {
 		encodeTextInXhtml(bookRef.getDomain(), out);
 		out.append(':');
 		encodeTextInXhtml(bookRef.getPrefix(), out);
-		encodeTextInXhtml(pageRef.getPath(), out);
+		encodeTextInXhtml(pageRef.getPath().toString(), out);
 		if(targetId != null) {
 			out.append('#');
 			encodeTextInXhtml(targetId, out);
@@ -183,7 +186,7 @@ final public class LinkImpl {
 		encodeTextInXhtmlAttribute(bookRef.getDomain(), out);
 		out.append(':');
 		encodeTextInXhtmlAttribute(bookRef.getPrefix(), out);
-		encodeTextInXhtmlAttribute(pageRef.getPath(), out);
+		encodeTextInXhtmlAttribute(pageRef.getPath().toString(), out);
 		out.append('?');
 	}
 
@@ -193,7 +196,7 @@ final public class LinkImpl {
 		HttpServletResponse response,
 		Writer out,
 		String domain,
-		String book,
+		Path book,
 		String page,
 		String element,
 		boolean allowGeneratedElement,
@@ -205,7 +208,7 @@ final public class LinkImpl {
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
 		// Get the current capture state
-		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			writeLinkImpl(
 				servletContext,
@@ -258,11 +261,20 @@ final public class LinkImpl {
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
 		// Get the current capture state
-		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			// Evaluate expressions
 			String domainStr = resolveValue(domain, String.class, elContext);
-			String bookStr = resolveValue(book, String.class, elContext);
+			Path bookPath;
+			try {
+				bookPath = Path.valueOf(
+					nullIfEmpty(
+						resolveValue(book, String.class, elContext)
+					)
+				);
+			} catch(ValidationException e) {
+				throw new ServletException(e);
+			}
 			String pageStr = resolveValue(page, String.class, elContext);
 			String elementStr;
 			String anchorStr;
@@ -285,7 +297,7 @@ final public class LinkImpl {
 				response,
 				out,
 				domainStr,
-				bookStr,
+				bookPath,
 				pageStr,
 				elementStr,
 				allowGeneratedElement,
@@ -306,7 +318,7 @@ final public class LinkImpl {
 		HttpServletResponse response,
 		Writer out,
 		String domain,
-		String book,
+		Path book,
 		String page,
 		String element,
 		boolean allowGeneratedElement,
@@ -321,7 +333,6 @@ final public class LinkImpl {
 		assert captureLevel.compareTo(CaptureLevel.META) >= 0;
 
 		domain = nullIfEmpty(domain);
-		book = nullIfEmpty(book);
 		page = nullIfEmpty(page);
 
 		if(domain != null && book == null) {

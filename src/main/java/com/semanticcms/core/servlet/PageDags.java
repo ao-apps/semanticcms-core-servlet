@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.pages.CaptureLevel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;

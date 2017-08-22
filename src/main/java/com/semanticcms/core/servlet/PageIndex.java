@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 import com.aoindustries.lang.NullArgumentException;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.pages.CaptureLevel;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
