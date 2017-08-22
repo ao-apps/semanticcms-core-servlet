@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.net.DomainName;
 import com.aoindustries.net.Path;
 import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.StringUtility;
@@ -93,7 +94,7 @@ public class ServletBook extends Book {
 	) throws ValidationException, IOException {
 		super(
 			new BookRef(
-				bookProps.getProperty("domain", BookRef.DEFAULT_DOMAIN),
+				DomainName.valueOf(bookProps.getProperty("domain", BookRef.DEFAULT_DOMAIN.toString())),
 				path
 			),
 			getCanonicalBase(bookProps)
@@ -127,7 +128,7 @@ public class ServletBook extends Book {
 		for(int i=1; i<Integer.MAX_VALUE; i++) {
 			String authorName = getProperty(bookProps, usedKeys, "author." + i + ".name");
 			String authorHref = getProperty(bookProps, usedKeys, "author." + i + ".href");
-			String authorDomain = getProperty(bookProps, usedKeys, "author." + i + ".domain");
+			DomainName authorDomain = DomainName.valueOf(getProperty(bookProps, usedKeys, "author." + i + ".domain"));
 			Path authorBook = Path.valueOf(getProperty(bookProps, usedKeys, "author." + i + ".book"));
 			Path authorPage = Path.valueOf(getProperty(bookProps, usedKeys, "author." + i + ".page"));
 			if(authorName==null && authorHref==null && authorDomain==null && authorBook==null && authorPage==null) break;

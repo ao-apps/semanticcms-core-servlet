@@ -27,6 +27,7 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextIn
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
+import com.aoindustries.net.DomainName;
 import com.aoindustries.net.Path;
 import com.aoindustries.nio.charset.Charsets;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
@@ -194,10 +195,12 @@ final public class NavigationTreeImpl {
 		boolean yuiConfig,
 		boolean includeElements,
 		String target,
-		String thisDomain,
+		// TODO: PageRef
+		DomainName thisDomain,
 		Path thisBook,
 		String thisPage,
-		String linksToDomain,
+		// TODO: PageRef
+		DomainName linksToDomain,
 		Path linksToBook,
 		String linksToPage,
 		int maxDepth
@@ -269,14 +272,22 @@ final public class NavigationTreeImpl {
 					yuiConfig,
 					includeElements,
 					target,
-					resolveValue(thisDomain, String.class, elContext),
+					DomainName.valueOf(
+						nullIfEmpty(
+							resolveValue(thisDomain, String.class, elContext)
+						)
+					),
 					Path.valueOf(
 						StringUtility.nullIfEmpty(
 							resolveValue(thisBook, String.class, elContext)
 						)
 					),
 					resolveValue(thisPage,   String.class, elContext),
-					resolveValue(linksToDomain, String.class, elContext),
+					DomainName.valueOf(
+						StringUtility.nullIfEmpty(
+							resolveValue(linksToDomain, String.class, elContext)
+						)
+					),
 					Path.valueOf(
 						StringUtility.nullIfEmpty(
 							resolveValue(linksToBook,   String.class, elContext)
@@ -302,10 +313,10 @@ final public class NavigationTreeImpl {
 		boolean yuiConfig,
 		boolean includeElements,
 		String target,
-		String thisDomain,
+		DomainName thisDomain,
 		Path thisBook,
 		String thisPage,
-		String linksToDomain,
+		DomainName linksToDomain,
 		Path linksToBook,
 		String linksToPage,
 		int maxDepth,
@@ -314,13 +325,11 @@ final public class NavigationTreeImpl {
 		assert captureLevel.compareTo(CaptureLevel.META) >= 0;
 		final Node currentNode = CurrentNode.getCurrentNode(request);
 
-		thisDomain = nullIfEmpty(thisDomain);
-		thisPage   = nullIfEmpty(thisPage);
+		thisPage = nullIfEmpty(thisPage);
 		if(thisDomain != null && thisBook == null) {
 			throw new ServletException("thisBook must be provided when thisDomain is provided.");
 		}
-		linksToDomain = nullIfEmpty(linksToDomain);
-		linksToPage   = nullIfEmpty(linksToPage);
+		linksToPage = nullIfEmpty(linksToPage);
 		if(linksToDomain != null && linksToBook == null) {
 			throw new ServletException("linksToBook must be provided when linksToDomain is provided.");
 		}

@@ -28,6 +28,7 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextIn
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
+import com.aoindustries.net.DomainName;
 import com.aoindustries.net.HttpParameters;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.http.LastModifiedServlet;
@@ -77,7 +78,7 @@ final public class LinkImpl {
 		BookRef bookRef = pageRef.getBookRef();
 		out
 			.append('¿')
-			.append(bookRef.getDomain())
+			.append(bookRef.getDomain().toString())
 			.append(':')
 			.append(bookRef.getPrefix())
 			.append(pageRef.getPath().toString())
@@ -108,7 +109,7 @@ final public class LinkImpl {
 	public static String getBrokenPath(PageRef pageRef, String targetId) {
 		BookRef bookRef = pageRef.getBookRef();
 		int sbLen = 1 // '¿'
-			+ bookRef.getDomain().length()
+			+ bookRef.getDomain().toString().length()
 			+ 1 // ':'
 			+ bookRef.getPrefix().length()
 			+ pageRef.getPath().toString().length();
@@ -150,7 +151,7 @@ final public class LinkImpl {
 	public static void writeBrokenPathInXhtml(PageRef pageRef, String targetId, Appendable out) throws IOException {
 		BookRef bookRef = pageRef.getBookRef();
 		out.append('¿');
-		encodeTextInXhtml(bookRef.getDomain(), out);
+		encodeTextInXhtml(bookRef.getDomain().toString(), out);
 		out.append(':');
 		encodeTextInXhtml(bookRef.getPrefix(), out);
 		encodeTextInXhtml(pageRef.getPath().toString(), out);
@@ -183,7 +184,7 @@ final public class LinkImpl {
 	public static void writeBrokenPathInXhtmlAttribute(PageRef pageRef, Appendable out) throws IOException {
 		BookRef bookRef = pageRef.getBookRef();
 		out.append('¿');
-		encodeTextInXhtmlAttribute(bookRef.getDomain(), out);
+		encodeTextInXhtmlAttribute(bookRef.getDomain().toString(), out);
 		out.append(':');
 		encodeTextInXhtmlAttribute(bookRef.getPrefix(), out);
 		encodeTextInXhtmlAttribute(pageRef.getPath().toString(), out);
@@ -195,7 +196,7 @@ final public class LinkImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
-		String domain,
+		DomainName domain,
 		Path book,
 		String page,
 		String element,
@@ -264,9 +265,14 @@ final public class LinkImpl {
 		final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			// Evaluate expressions
-			String domainStr = resolveValue(domain, String.class, elContext);
+			DomainName domainObj;
 			Path bookPath;
 			try {
+				domainObj = DomainName.valueOf(
+					nullIfEmpty(
+						resolveValue(domain, String.class, elContext)
+					)
+				);
 				bookPath = Path.valueOf(
 					nullIfEmpty(
 						resolveValue(book, String.class, elContext)
@@ -296,7 +302,7 @@ final public class LinkImpl {
 				request,
 				response,
 				out,
-				domainStr,
+				domainObj,
 				bookPath,
 				pageStr,
 				elementStr,
@@ -317,7 +323,7 @@ final public class LinkImpl {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Writer out,
-		String domain,
+		DomainName domain,
 		Path book,
 		String page,
 		String element,
@@ -332,7 +338,6 @@ final public class LinkImpl {
 	) throws E, ServletException, IOException, SkipPageException {
 		assert captureLevel.compareTo(CaptureLevel.META) >= 0;
 
-		domain = nullIfEmpty(domain);
 		page = nullIfEmpty(page);
 
 		if(domain != null && book == null) {

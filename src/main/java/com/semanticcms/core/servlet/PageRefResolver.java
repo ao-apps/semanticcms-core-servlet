@@ -23,10 +23,10 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.lang.NullArgumentException;
+import com.aoindustries.net.DomainName;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.servlet.http.ServletUtil;
-import static com.aoindustries.util.StringUtility.nullIfEmpty;
 import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.PageRef;
@@ -100,23 +100,21 @@ public class PageRefResolver {
 	 * to the current page.
 	 * </p>
 	 *
-	 * @param  domain  empty string is treated same as null
 	 * @param  path  required non-empty
 	 *
 	 * @throws ServletException If no book provided and the current page is not within a book's content.
 	 *
-	 * @see  #getPageRef(java.lang.String, com.aoindustries.net.Path, java.lang.String)
-	 * @see  ResourceRefResolver#getResourceRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, java.lang.String, com.aoindustries.net.Path, java.lang.String)
+	 * @see  #getPageRef(com.aoindustries.net.DomainName, com.aoindustries.net.Path, java.lang.String)
+	 * @see  ResourceRefResolver#getResourceRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.aoindustries.net.DomainName, com.aoindustries.net.Path, java.lang.String)
 	 */
 	public static PageRef getPageRef(
 		ServletContext servletContext,
 		HttpServletRequest request,
-		String domain,
+		DomainName domain,
 		Path book,
 		String path
 	) throws ServletException, MalformedURLException {
 		try {
-			domain = nullIfEmpty(domain);
 			NullArgumentException.checkNotNull(path, "path");
 			if(path.isEmpty()) throw new IllegalArgumentException("path is empty");
 			if(domain != null && book == null) {
@@ -171,11 +169,11 @@ public class PageRefResolver {
 	/**
 	 * Gets a {@link PageRef} in the current {@link PageContext page context}.
 	 *
-	 * @see  #getPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, java.lang.String, com.aoindustries.net.Path, java.lang.String)
+	 * @see  #getPageRef(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.aoindustries.net.DomainName, com.aoindustries.net.Path, java.lang.String)
 	 * @see  PageContext
-	 * @see  ResourceRefResolver#getResourceRef(java.lang.String, com.aoindustries.net.Path, java.lang.String)
+	 * @see  ResourceRefResolver#getResourceRef(com.aoindustries.net.DomainName, com.aoindustries.net.Path, java.lang.String)
 	 */
-	public static PageRef getPageRef(String domain, Path book, String path) throws ServletException, MalformedURLException {
+	public static PageRef getPageRef(DomainName domain, Path book, String path) throws ServletException, MalformedURLException {
 		return getPageRef(
 			PageContext.getServletContext(),
 			PageContext.getRequest(),

@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.net.DomainName;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
@@ -271,7 +272,7 @@ public class SemanticCMS {
 	 *
 	 * @see  #getBook(com.semanticcms.core.model.BookRef)
 	 */
-	public Book getBook(String domain, Path path) throws NoSuchElementException {
+	public Book getBook(DomainName domain, Path path) throws NoSuchElementException {
 		return getBook(new BookRef(domain, path));
 	}
 
