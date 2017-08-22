@@ -99,22 +99,23 @@ abstract public class Book implements Comparable<Book> {
 	/**
 	 * Gets the {@link PageRepository} for this book.
 	 *
-	 * @return  The {@link PageRepository} or {@code null} for an inaccessible book or
-	 *          unavailable repository
+	 * @return  The {@link PageRepository} or {@code null} for an inaccessible book
 	 */
 	abstract public PageRepository getPages();
 
 	/**
 	 * Gets the {@link ResourceStore} for this book.
 	 *
-	 * @return  The {@link ResourceStore} or {@code null} for an inaccessible book or
-	 *          unavailable store
+	 * @return  The {@link ResourceStore} or {@code null} for an inaccessible book
 	 */
 	abstract public ResourceStore getResources();
 
 	/**
 	 * Gets the {@link ResourceRef} for the source of the given {@link Page}.
 	 * Although not typical, the resulting reference might be to a different domain/book.
+	 *
+	 * TODO: This belongs where?
+	 * TODO: How is this interact with remote books that have directly accessible resources?
 	 *
 	 * @return  The {@link ResourceRef} or {@code null} for unknown or an inaccessible book
 	 */
