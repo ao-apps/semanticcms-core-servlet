@@ -144,6 +144,8 @@ public class SemanticCMS {
 
 	private final Map<BookRef,Book> books = new LinkedHashMap<BookRef,Book>();
 	private final Map<BookRef,Book> unmodifiableBooks = Collections.unmodifiableMap(books);
+	private final Map<Path,Book> localBooks = new LinkedHashMap<Path,Book>();
+	private final Map<Path,Book> unmodifiableLocalBooks = Collections.unmodifiableMap(localBooks);
 	private final Map<Path,Book> publishedBooks = new LinkedHashMap<Path,Book>();
 	private final Map<Path,Book> unmodifiablePublishedBooks = Collections.unmodifiableMap(publishedBooks);
 	private final Book rootBook;
