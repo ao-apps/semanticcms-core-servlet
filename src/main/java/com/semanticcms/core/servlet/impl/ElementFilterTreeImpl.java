@@ -33,8 +33,9 @@ import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
-import com.semanticcms.core.servlet.CaptureLevel;
+import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
+import com.semanticcms.core.servlet.CurrentCaptureLevel;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.PageIndex;
 import com.semanticcms.core.servlet.SemanticCMS;
@@ -250,7 +251,7 @@ final public class ElementFilterTreeImpl {
 		boolean includeElements
 	) throws ServletException, IOException, SkipPageException {
 		// Get the current capture state
-		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			final Node currentNode = CurrentNode.getCurrentNode(request);
 			// Filter by has files

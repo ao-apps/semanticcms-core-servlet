@@ -26,7 +26,7 @@ import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
-import com.semanticcms.core.pages.Book;
+import com.semanticcms.core.pages.CaptureLevel;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;

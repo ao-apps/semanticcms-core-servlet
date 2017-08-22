@@ -26,6 +26,7 @@ import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
+import com.semanticcms.core.pages.CaptureLevel;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

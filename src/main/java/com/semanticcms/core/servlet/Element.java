@@ -31,6 +31,7 @@ import com.semanticcms.core.model.ElementWriter;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.NodeBodyWriter;
 import com.semanticcms.core.model.Page;
+import com.semanticcms.core.pages.CaptureLevel;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletContext;
@@ -102,7 +103,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 	 */
 	public void invoke(Body<? super E> body) throws ServletException, IOException, SkipPageException {
 		// Get the current capture state
-		CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+		CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			// Set currentNode
 			Node parentNode = CurrentNode.getCurrentNode(request);

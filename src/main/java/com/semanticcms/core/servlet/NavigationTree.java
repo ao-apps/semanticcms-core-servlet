@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.net.Path;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.servlet.impl.NavigationTreeImpl;
 import java.io.IOException;
@@ -43,10 +44,10 @@ public class NavigationTree {
 	private boolean includeElements;
 	private String target;
 	private String thisDomain;
-	private String thisBook;
+	private Path thisBook;
 	private String thisPage;
 	private String linksToDomain;
-	private String linksToBook;
+	private Path linksToBook;
 	private String linksToPage;
 	private int maxDepth;
 
@@ -101,7 +102,7 @@ public class NavigationTree {
 		return this;
 	}
 
-	public NavigationTree thisBook(String thisBook) {
+	public NavigationTree thisBook(Path thisBook) {
 		this.thisBook = thisBook;
 		return this;
 	}
@@ -116,7 +117,7 @@ public class NavigationTree {
 		return this;
 	}
 
-	public NavigationTree linksToBook(String linksToBook) {
+	public NavigationTree linksToBook(Path linksToBook) {
 		this.linksToBook = linksToBook;
 		return this;
 	}

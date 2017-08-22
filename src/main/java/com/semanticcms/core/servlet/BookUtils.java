@@ -24,7 +24,6 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.servlet.http.ServletUtil;
 import com.semanticcms.core.model.BookRef;
-import com.semanticcms.core.pages.Book;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,11 +60,10 @@ final public class BookUtils {
 				// Logger checked first, so if warnings enabled mid-run, will get first warning still
 				logger.isLoggable(Level.WARNING)
 			) {
-				String bookName = bookRef.getName();
-				String warningAttribute = CANONICAL_BASE_WARNED_ATTRIBUTE + bookName;
+				String warningAttribute = CANONICAL_BASE_WARNED_ATTRIBUTE + bookRef;
 				if(servletContext.getAttribute(warningAttribute) == null) {
 					servletContext.setAttribute(warningAttribute, true);
-					logger.warning("Using generated canonical base URL, please configure the \"canonicalBase\" setting in the \"" + bookName + "\" book: " + autoCanonical);
+					logger.warning("Using generated canonical base URL, please configure the \"canonicalBase\" setting in the \"" + bookRef + "\" book: " + autoCanonical);
 				}
 			}
 			return autoCanonical;

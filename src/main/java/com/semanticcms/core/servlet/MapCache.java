@@ -26,6 +26,7 @@ import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
+import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.util.Collections;
 import java.util.HashSet;

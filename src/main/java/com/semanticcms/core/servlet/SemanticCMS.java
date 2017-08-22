@@ -22,14 +22,15 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.net.Path;
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.util.WrappedException;
+import com.aoindustries.validation.ValidationException;
 import com.aoindustries.xml.XmlUtils;
 import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
-import com.semanticcms.core.pages.Book;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -142,11 +143,11 @@ public class SemanticCMS {
 
 	private final Map<BookRef,Book> books = new LinkedHashMap<BookRef,Book>();
 	private final Map<BookRef,Book> unmodifiableBooks = Collections.unmodifiableMap(books);
-	private final Map<String,Book> publishedBooks = new LinkedHashMap<String,Book>();
-	private final Map<String,Book> unmodifiablePublishedBooks = Collections.unmodifiableMap(publishedBooks);
+	private final Map<Path,Book> publishedBooks = new LinkedHashMap<Path,Book>();
+	private final Map<Path,Book> unmodifiablePublishedBooks = Collections.unmodifiableMap(publishedBooks);
 	private final Book rootBook;
 
-	private Book initBooks() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
+	private Book initBooks() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException, ValidationException {
 		Document booksXml;
 		{
 			InputStream schemaIn_1_0 = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_1_0_RESOURCE);
@@ -188,10 +189,14 @@ public class SemanticCMS {
 			if(!missingBooks.add(name)) throw new IllegalStateException(BOOKS_XML_RESOURCE+ ": Duplicate value for \"" + MISSING_BOOK_TAG_NAME + "\": " + name);
 		}
 		// Load books
-		String rootBookName = booksElem.getAttribute(ROOT_BOOK_ATTRIBUTE_NAME);
-		if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
+		Path rootBookPath;
+		{
+			String rootBookName = booksElem.getAttribute(ROOT_BOOK_ATTRIBUTE_NAME);
+			if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
+			rootBookPath = Path.valueOf(rootBookName);
+		}
 		for(org.w3c.dom.Element bookElem : XmlUtils.iterableChildElementsByTagName(booksElem, BOOK_TAG_NAME)) {
-			String name = bookElem.getAttribute("name");
+			Path name = Path.valueOf(bookElem.getAttribute("name"));
 			if(missingBooks.contains(name)) throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Book also listed in \"" + MISSING_BOOK_TAG_NAME+ "\": " + name);
 			Set<ParentRef> parentRefs = new LinkedHashSet<ParentRef>();
 			for(org.w3c.dom.Element parentElem : XmlUtils.iterableChildElementsByTagName(bookElem, PARENT_TAG_NAME)) {
@@ -204,9 +209,9 @@ public class SemanticCMS {
 				}
 				parentRefs.add(new ParentRef(new PageRef(parentBook, parentPage), parentShortTitle));
 			}
-			if(name.equals(rootBookName)) {
+			if(name.equals(rootBookPath)) {
 				if(!parentRefs.isEmpty()) {
-					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookName);
+					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookPath);
 				}
 			} else {
 				if(parentRefs.isEmpty()) {
@@ -226,7 +231,7 @@ public class SemanticCMS {
 		}
 
 		// Load rootBook
-		Book newRootBook = books.get(rootBookName);
+		Book newRootBook = books.get(rootBookPath);
 		if(newRootBook == null) throw new AssertionError();
 
 		// Successful book load
@@ -266,8 +271,8 @@ public class SemanticCMS {
 	 *
 	 * @see  #getBook(com.semanticcms.core.model.BookRef)
 	 */
-	public Book getBook(String domain, String name) throws NoSuchElementException {
-		return getBook(new BookRef(domain, name));
+	public Book getBook(String domain, Path path) throws NoSuchElementException {
+		return getBook(new BookRef(domain, path));
 	}
 
 	/**
@@ -289,7 +294,7 @@ public class SemanticCMS {
 	 * @see  #getPublishedBook(java.lang.String)
 	 * @see  #getPublishedBook(javax.servlet.http.HttpServletRequest)
 	 */
-	public Map<String,Book> getPublishedBooks() {
+	public Map<Path,Book> getPublishedBooks() {
 		return unmodifiablePublishedBooks;
 	}
 
@@ -307,7 +312,6 @@ public class SemanticCMS {
 	 * @see  #getPublishedBook(javax.servlet.http.HttpServletRequest)
 	 */
 	public Book getPublishedBook(String servletPath) {
-		if(servletPath.charAt(0) != '/') throw new IllegalArgumentException("Invalid servletPath: " + servletPath);
 		int len = servletPath.length();
 		// Quick path for initial trailing slash: avoid map lookup that will never match
 		if(servletPath.charAt(len - 1) == '/') len -= 1;
@@ -320,7 +324,7 @@ public class SemanticCMS {
 			assert lastSlash != -1 : "Starts with slash, so should always find one when len > 0";
 			len = lastSlash;
 		}
-		return publishedBooks.get("/");
+		return publishedBooks.get(Path.ROOT);
 	}
 
 	/**
