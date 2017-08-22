@@ -99,7 +99,7 @@ abstract public class Book implements Comparable<Book> {
 	/**
 	 * Gets the {@link PageRepository} for this book.
 	 *
-	 * @return  The {@link RPages} or {@code null} for an inaccessible book or
+	 * @return  The {@link PageRepository} or {@code null} for an inaccessible book or
 	 *          unavailable repository
 	 */
 	abstract public PageRepository getPages();

@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.net.DomainName;
 import com.aoindustries.net.Path;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.servlet.impl.NavigationTreeImpl;
@@ -43,10 +44,10 @@ public class NavigationTree {
 	private boolean yuiConfig;
 	private boolean includeElements;
 	private String target;
-	private String thisDomain;
+	private DomainName thisDomain;
 	private Path thisBook;
 	private String thisPage;
-	private String linksToDomain;
+	private DomainName linksToDomain;
 	private Path linksToBook;
 	private String linksToPage;
 	private int maxDepth;
@@ -97,7 +98,7 @@ public class NavigationTree {
 		return this;
 	}
 
-	public NavigationTree thisDomain(String thisDomain) {
+	public NavigationTree thisDomain(DomainName thisDomain) {
 		this.thisDomain = thisDomain;
 		return this;
 	}
@@ -112,7 +113,7 @@ public class NavigationTree {
 		return this;
 	}
 
-	public NavigationTree linksToDomain(String linksToDomain) {
+	public NavigationTree linksToDomain(DomainName linksToDomain) {
 		this.linksToDomain = linksToDomain;
 		return this;
 	}
