@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.net.DomainName;
 import com.aoindustries.net.HttpParameters;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
@@ -39,7 +40,7 @@ public class Link {
 	private final HttpServletRequest request;
 	private final HttpServletResponse response;
 
-	private String domain;
+	private DomainName domain;
 	private Path book;
 	private String page;
 	private String element;
@@ -85,7 +86,7 @@ public class Link {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		String domain,
+		DomainName domain,
 		Path book,
 		String page
 	) {
@@ -131,12 +132,12 @@ public class Link {
 	 *
 	 * @see  PageContext
 	 */
-	public Link(String domain, Path book, String page) {
+	public Link(DomainName domain, Path book, String page) {
 		this(book, page);
 		this.domain = domain;
 	}
 
-	public Link domain(String domain) {
+	public Link domain(DomainName domain) {
 		this.domain = domain;
 		return this;
 	}
