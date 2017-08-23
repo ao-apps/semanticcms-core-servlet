@@ -38,6 +38,8 @@ import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.PageReferrer;
 import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.pages.local.CurrentCaptureLevel;
+import com.semanticcms.core.pages.local.CurrentNode;
+import com.semanticcms.core.pages.local.CurrentPage;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import com.semanticcms.core.servlet.util.HttpServletSubRequest;
 import com.semanticcms.core.servlet.util.HttpServletSubResponse;
