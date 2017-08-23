@@ -86,25 +86,18 @@ public class ServletBook extends Book {
 
 	public ServletBook(
 		ServletContext servletContext,
-		Path path,
+		BookRef bookRef,
 		Collection<String> resourceDirectories,
 		boolean allowRobots,
 		Set<ParentRef> parentRefs,
 		Properties bookProps // TODO: Load from resolved resourceStore?
 	) throws ValidationException, IOException {
-		super(
-			new BookRef(
-				DomainName.valueOf(bookProps.getProperty("domain", BookRef.DEFAULT_DOMAIN.toString())),
-				path
-			),
-			getCanonicalBase(bookProps)
-		);
+		super(bookRef, getCanonicalBase(bookProps));
 
 		// Tracks each properties key used, will throw exception if any key exists in the properties file that is not used
 		Set<Object> usedKeys = new HashSet<Object>(bookProps.size() * 4/3 + 1);
 
 		// Mark as used
-		getProperty(bookProps, usedKeys, "domain");
 		getProperty(bookProps, usedKeys, "canonicalBase");
 
 		this.unmodifiableParentRefs = AoCollections.optimalUnmodifiableSet(parentRefs);
@@ -144,16 +137,16 @@ public class ServletBook extends Book {
 				// Default to this domain if nothing set
 				if(authorDomain == null) authorDomain = this.bookRef.getDomain();
 				// Default to this book if nothing set
-				if(authorBook == null) authorBook = path;
+				if(authorBook == null) authorBook = this.bookRef.getPath();
 			}
 			// Name required when referencing an author outside this book
 			if(authorName == null && authorBook != null) {
 				assert authorDomain != null;
 				if(
 					!authorDomain.equals(this.bookRef.getDomain())
-					|| !authorBook.equals(path)
+					|| !authorBook.equals(this.bookRef.getPath())
 				) {
-					throw new IllegalStateException(path + ": Author name required when author is in a different book: " + authorPage);
+					throw new IllegalStateException(this.bookRef + ": Author name required when author is in a different book: " + authorPage);
 				}
 			}
 			Author newAuthor = new Author(
@@ -163,7 +156,7 @@ public class ServletBook extends Book {
 				authorBook,
 				authorPage
 			);
-			if(!authors.add(newAuthor)) throw new IllegalStateException(path + ": Duplicate author: " + newAuthor);
+			if(!authors.add(newAuthor)) throw new IllegalStateException(this.bookRef + ": Duplicate author: " + newAuthor);
 		}
 		this.unmodifiableAuthors = AoCollections.optimalUnmodifiableSet(authors);
 		this.title = getProperty(bookProps, usedKeys, "title");
@@ -183,20 +176,20 @@ public class ServletBook extends Book {
 		this.unmodifiableParam = AoCollections.optimalUnmodifiableMap(newParam);
 
 		// Create the page refs once other aspects of the book have already been setup, since we'll be leaking "this"
-		this.contentRoot = new PageRef(bookRef, Path.valueOf(getProperty(bookProps, usedKeys, "content.root")));
+		this.contentRoot = new PageRef(this.bookRef, Path.valueOf(getProperty(bookProps, usedKeys, "content.root")));
 
 		// Make sure all keys used
 		Set<Object> unusedKeys = new HashSet<Object>();
 		for(Object key : bookProps.keySet()) {
 			if(!usedKeys.contains(key)) unusedKeys.add(key);
 		}
-		if(!unusedKeys.isEmpty()) throw new IllegalStateException(path + ": Unused keys: " + unusedKeys);
+		if(!unusedKeys.isEmpty()) throw new IllegalStateException(this.bookRef + ": Unused keys: " + unusedKeys);
 
-		pages = ServletPageRepository.getInstance(servletContext, path);
+		pages = ServletPageRepository.getInstance(servletContext, this.bookRef.getPath());
 
 		// Find the optional resource directory
 		if(resourceDirectories == null || resourceDirectories.isEmpty()) {
-			resources = ServletResourceStore.getInstance(servletContext, path);
+			resources = ServletResourceStore.getInstance(servletContext, this.bookRef.getPath());
 		} else {
 			List<File> directories = new ArrayList<File>(resourceDirectories.size());
 			for(String resourceDirectory : resourceDirectories) {

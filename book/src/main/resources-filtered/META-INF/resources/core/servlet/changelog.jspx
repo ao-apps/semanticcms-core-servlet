@@ -74,6 +74,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 							</li>
 						</ol>
 					</li>
+					<li><code>book.cvsworkDirectory</code> is now optional in <code>books.xml</code></li>
 				</ul>
 			</changelog:release>
 		</c:if>
