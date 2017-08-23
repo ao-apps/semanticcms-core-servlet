@@ -34,7 +34,10 @@ import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
 import com.semanticcms.core.model.ResourceRef;
 import com.semanticcms.core.pages.PageRepository;
+import com.semanticcms.core.pages.jsp.JspPageRepository;
+import com.semanticcms.core.pages.jspx.JspxPageRepository;
 import com.semanticcms.core.pages.servlet.ServletPageRepository;
+import com.semanticcms.core.pages.union.UnionPageRepository;
 import com.semanticcms.core.resources.ResourceStore;
 import com.semanticcms.core.resources.servlet.ServletResourceStore;
 import com.semanticcms.resources.filesystem.FilesystemResourceStore;
@@ -185,7 +188,11 @@ public class ServletBook extends Book {
 		}
 		if(!unusedKeys.isEmpty()) throw new IllegalStateException(this.bookRef + ": Unused keys: " + unusedKeys);
 
-		pages = ServletPageRepository.getInstance(servletContext, this.bookRef.getPath());
+		pages = UnionPageRepository.getInstance(
+			JspxPageRepository.getInstance(servletContext, this.bookRef.getPath()),
+			JspPageRepository.getInstance(servletContext, this.bookRef.getPath()),
+			ServletPageRepository.getInstance(servletContext, this.bookRef.getPath())
+		);
 
 		ServletResourceStore servletStore = ServletResourceStore.getInstance(servletContext, this.bookRef.getPath());
 		// Find the optional resource directory
