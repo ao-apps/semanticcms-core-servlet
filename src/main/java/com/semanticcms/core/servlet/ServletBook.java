@@ -187,9 +187,10 @@ public class ServletBook extends Book {
 
 		pages = ServletPageRepository.getInstance(servletContext, this.bookRef.getPath());
 
+		ServletResourceStore servletStore = ServletResourceStore.getInstance(servletContext, this.bookRef.getPath());
 		// Find the optional resource directory
 		if(resourceDirectories == null || resourceDirectories.isEmpty()) {
-			resources = ServletResourceStore.getInstance(servletContext, this.bookRef.getPath());
+			resources = servletStore;
 		} else {
 			List<File> directories = new ArrayList<File>(resourceDirectories.size());
 			for(String resourceDirectory : resourceDirectories) {
@@ -201,16 +202,13 @@ public class ServletBook extends Book {
 				}
 				directories.add(directory);
 			}
-			int numDirectories = directories.size();
-			if(numDirectories == 1) {
-				resources = FilesystemResourceStore.getInstance(directories.get(0));
-			} else {
-				List<ResourceStore> resourceStores = new ArrayList<ResourceStore>(numDirectories);
-				for(File directory : directories) {
-					resourceStores.add(FilesystemResourceStore.getInstance(directory));
-				}
-				resources = UnionResourceStore.getInstance(resourceStores);
+			List<ResourceStore> resourceStores = new ArrayList<ResourceStore>(directories.size() + 1);
+			for(File directory : directories) {
+				resourceStores.add(FilesystemResourceStore.getInstance(directory));
 			}
+			// Add servlet store as fall-back for when not found in source directory
+			resourceStores.add(servletStore);
+			resources = UnionResourceStore.getInstance(resourceStores);
 		}
 	}
 
