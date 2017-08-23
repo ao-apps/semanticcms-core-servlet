@@ -34,8 +34,8 @@ TODO: Path type, used for book names and paths?  Matching rules of Java implemen
 -->
 <xs:schema
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:books="https://semanticcms.com/core/servlet/"
-	targetNamespace="https://semanticcms.com/core/servlet/"
+	xmlns:books="https://semanticcms.com/core/servlet/books-1.1.xsd"
+	targetNamespace="https://semanticcms.com/core/servlet/books-1.1.xsd"
 	elementFormDefault="qualified"
 	version="1.0"
 >
@@ -264,15 +264,17 @@ TODO: Path type, used for book names and paths?  Matching rules of Java implemen
 			<xs:field xpath="@domain" />
 			<xs:field xpath="@name" />
 		</xs:unique>
+		<!-- How to do?
 		<xs:unique name="publishedBookNameUni">
 			<xs:annotation>
 				<xs:documentation xml:lang="en">
 					A published book name must be unique across both missingBooks and books.
 				</xs:documentation>
 			</xs:annotation>
-			<xs:selector xpath="books:missingBook[@published]|books:book[@published]" />
+			<xs:selector xpath="books:missingBook[@published='true']|books:book[@published='true']" />
 			<xs:field xpath="@name" />
 		</xs:unique>
+		-->
 		<xs:key name="bookRefKey">
 			<xs:annotation>
 				<xs:documentation xml:lang="en">
