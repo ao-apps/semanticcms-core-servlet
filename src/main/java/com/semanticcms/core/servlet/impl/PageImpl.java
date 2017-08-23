@@ -23,8 +23,10 @@
 package com.semanticcms.core.servlet.impl;
 
 import com.aoindustries.io.buffer.BufferResult;
+import com.aoindustries.net.Path;
 import com.aoindustries.servlet.LocalizedServletException;
-import com.aoindustries.servlet.ServletContextCache;
+import com.aoindustries.validation.ValidationException;
+import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -337,51 +339,56 @@ final public class PageImpl {
 				}
 			} else {
 				// Otherwise, try auto parents
-				ServletContextCache servletContextCache = ServletContextCache.getCache(servletContext);
-				Book pageBook = pageRef.getBook();
-				assert pageBook != null;
-				String pagePath = pageRef.getPath();
-				if(
-					pagePath.endsWith("/")
-					|| pagePath.endsWith("/index.jspx")
-					|| pagePath.endsWith("/index.jsp")
-				) {
-					// If this page URL ends in "/", "/index.jspx" or "/index.jsp", look for JSP page at "../index.jspx" or "../index.jsp" then asssume "../", error if outside book.
+				BookRef pageBookRef = pageRef.getBookRef();
+				SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+				Book pageBook = semanticCMS.getBook(pageBookRef);
+				String pagePath = pageRef.getPath().toString();
+				if(pagePath.endsWith("/")) {
+					// If this page URL ends in "/", look for page at "../", error if outside book.
 					int lastSlash = pagePath.lastIndexOf('/');
 					if(lastSlash == -1) throw new AssertionError();
 					int nextLastSlash = pagePath.lastIndexOf('/', lastSlash-1);
 					if(nextLastSlash == -1) {
 						throw new ServletException("Auto parent of page would be outside book: " + pageRef);
 					}
-					String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
-					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
-					// TODO: Use ResourceStore
-					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
-						page.addParentRef(new ParentRef(indexJspxPageRef, null));
-					} else {
-						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
-						if(servletContextCache.getResource(indexJspPageRef.getServletPath()) != null) {
-							page.addParentRef(new ParentRef(indexJspPageRef, null));
-						} else {
-							page.addParentRef(new ParentRef(new PageRef(pageBook, endSlashPath), null));
-						}
+					Path endSlashPath;
+					try {
+						endSlashPath = Path.valueOf(pagePath.substring(0, nextLastSlash + 1));
+					} catch(ValidationException e) {
+						AssertionError ae = new AssertionError("Sub paths of a valid path are also valid");
+						ae.initCause(e);
+						throw ae;
 					}
+					page.addParentRef(
+						new ParentRef(
+							new PageRef(
+								pageBookRef,
+								endSlashPath
+							),
+							null
+						)
+					);
 				} else {
-					// Look for page at "./index.jspx" or "./index.jsp" then assume "./".
+					// Assume "./".
 					int lastSlash = pagePath.lastIndexOf('/');
 					if(lastSlash == -1) throw new AssertionError();
-					String endSlashPath = pagePath.substring(0, lastSlash + 1);
-					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
-					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
-						page.addParentRef(new ParentRef(indexJspxPageRef, null));
-					} else {
-						PageRef indexJspPageRef = new PageRef(pageBook, endSlashPath + "index.jsp");
-						if(servletContextCache.getResource(indexJspPageRef.getServletPath()) != null) {
-							page.addParentRef(new ParentRef(indexJspPageRef, null));
-						} else {
-							page.addParentRef(new ParentRef(new PageRef(pageBook, endSlashPath), null));
-						}
+					Path endSlashPath;
+					try {
+						endSlashPath = Path.valueOf(pagePath.substring(0, lastSlash + 1));
+					} catch(ValidationException e) {
+						AssertionError ae = new AssertionError("Sub paths of a valid path are also valid");
+						ae.initCause(e);
+						throw ae;
 					}
+					page.addParentRef(
+						new ParentRef(
+							new PageRef(
+								pageBookRef,
+								endSlashPath
+							),
+							null
+						)
+					);
 				}
 			}
 		}

@@ -26,6 +26,7 @@ import com.aoindustries.net.DomainName;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
+import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.WrappedException;
 import com.aoindustries.validation.ValidationException;
 import com.aoindustries.xml.XmlUtils;
@@ -34,6 +35,7 @@ import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -90,12 +92,14 @@ public class SemanticCMS {
 			throw new WrappedException(e);
 		} catch(XPathExpressionException e) {
 			throw new WrappedException(e);
+		} catch(ValidationException e) {
+			throw new WrappedException(e);
 		}
 	}
 
 	private final ServletContext servletContext;
 
-	private SemanticCMS(ServletContext servletContext) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
+	private SemanticCMS(ServletContext servletContext) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException, ValidationException {
 		this.servletContext = servletContext;
 		this.demoMode = Boolean.parseBoolean(servletContext.getInitParameter(DEMO_MODE_INIT_PARAM));
 		int numProcessors = Runtime.getRuntime().availableProcessors();
@@ -140,14 +144,15 @@ public class SemanticCMS {
 	private static final String MISSING_BOOK_TAG_NAME = "missingBook";
 	private static final String BOOK_TAG_NAME = "book";
 	private static final String PARENT_TAG_NAME = "parent";
+	private static final String ROOT_DOMAIN_ATTRIBUTE_NAME = "rootDomain";
 	private static final String ROOT_BOOK_ATTRIBUTE_NAME = "rootBook";
 
 	private final Map<BookRef,Book> books = new LinkedHashMap<BookRef,Book>();
 	private final Map<BookRef,Book> unmodifiableBooks = Collections.unmodifiableMap(books);
-	private final Map<Path,Book> localBooks = new LinkedHashMap<Path,Book>();
-	private final Map<Path,Book> unmodifiableLocalBooks = Collections.unmodifiableMap(localBooks);
+
 	private final Map<Path,Book> publishedBooks = new LinkedHashMap<Path,Book>();
 	private final Map<Path,Book> unmodifiablePublishedBooks = Collections.unmodifiableMap(publishedBooks);
+
 	private final Book rootBook;
 
 	private Book initBooks() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException, ValidationException {
@@ -188,53 +193,107 @@ public class SemanticCMS {
 		org.w3c.dom.Element booksElem = booksXml.getDocumentElement();
 		// Load missingBooks
 		for(org.w3c.dom.Element missingBookElem : XmlUtils.iterableChildElementsByTagName(booksElem, MISSING_BOOK_TAG_NAME)) {
-			String name = missingBookElem.getAttribute("name");
-			if(!missingBooks.add(name)) throw new IllegalStateException(BOOKS_XML_RESOURCE+ ": Duplicate value for \"" + MISSING_BOOK_TAG_NAME + "\": " + name);
+			String domainStr = missingBookElem.getAttribute("domain");
+			BookRef missingBookRef = new BookRef(
+				domainStr.isEmpty() ? BookRef.DEFAULT_DOMAIN : DomainName.valueOf(domainStr),
+				Path.valueOf(missingBookElem.getAttribute("name"))
+			);
+			String publishedStr = StringUtility.nullIfEmpty(missingBookElem.getAttribute("published"));
+			boolean published = publishedStr != null && Boolean.valueOf(publishedStr);
+			MissingBook book = new MissingBook(
+				missingBookRef,
+				null,
+				StringUtility.nullIfEmpty(missingBookElem.getAttribute("base"))
+			);
+			if(books.put(missingBookRef, book) != null) {
+				throw new IllegalStateException(BOOKS_XML_RESOURCE+ ": Duplicate value for \"" + MISSING_BOOK_TAG_NAME + "\": " + missingBookRef);
+			}
+			if(published) {
+				if(publishedBooks.put(missingBookRef.getPath(), book) != null) {
+					throw new IllegalStateException(BOOKS_XML_RESOURCE+ ": Duplicate published book for \"" + MISSING_BOOK_TAG_NAME + "\": " + missingBookRef);
+				}
+			}
 		}
 		// Load books
-		Path rootBookPath;
+		BookRef rootBookRef;
 		{
-			String rootBookName = booksElem.getAttribute(ROOT_BOOK_ATTRIBUTE_NAME);
-			if(rootBookName == null || rootBookName.isEmpty()) throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
-			rootBookPath = Path.valueOf(rootBookName);
+			String rootDomainStr = booksElem.getAttribute(ROOT_DOMAIN_ATTRIBUTE_NAME);
+			Path rootBookPath = Path.valueOf(
+				StringUtility.nullIfEmpty(
+					booksElem.getAttribute(ROOT_BOOK_ATTRIBUTE_NAME)
+				)
+			);
+			if(rootBookPath == null) throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" not found");
+			rootBookRef = new BookRef(
+				rootDomainStr.isEmpty() ? BookRef.DEFAULT_DOMAIN : DomainName.valueOf(rootDomainStr),
+				rootBookPath
+			);
 		}
 		for(org.w3c.dom.Element bookElem : XmlUtils.iterableChildElementsByTagName(booksElem, BOOK_TAG_NAME)) {
-			Path name = Path.valueOf(bookElem.getAttribute("name"));
-			if(missingBooks.contains(name)) throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Book also listed in \"" + MISSING_BOOK_TAG_NAME+ "\": " + name);
+			BookRef bookRef;
+			{
+				String domainStr = bookElem.getAttribute("domain");
+				bookRef = new BookRef(
+					domainStr.isEmpty() ? BookRef.DEFAULT_DOMAIN : DomainName.valueOf(domainStr),
+					Path.valueOf(bookElem.getAttribute("name"))
+				);
+			}
 			Set<ParentRef> parentRefs = new LinkedHashSet<ParentRef>();
 			for(org.w3c.dom.Element parentElem : XmlUtils.iterableChildElementsByTagName(bookElem, PARENT_TAG_NAME)) {
-				String parentBookName = parentElem.getAttribute("book");
-				String parentPage = parentElem.getAttribute("page");
+				String domainStr = parentElem.getAttribute("domain");
+				BookRef parentBookRef = new BookRef(
+					domainStr.isEmpty() ? BookRef.DEFAULT_DOMAIN : DomainName.valueOf(domainStr),
+					Path.valueOf(parentElem.getAttribute("book"))
+				);
+				Path parentPage = Path.valueOf(parentElem.getAttribute("page"));
 				String parentShortTitle = parentElem.hasAttribute("shortTitle") ? parentElem.getAttribute("shortTitle") : null;
-				Book parentBook = books.get(parentBookName);
+				Book parentBook = books.get(parentBookRef);
 				if(parentBook == null) {
-					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookName);
+					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": parent book not found (loading order currently matters): " + parentBookRef);
 				}
-				parentRefs.add(new ParentRef(new PageRef(parentBook, parentPage), parentShortTitle));
+				parentRefs.add(new ParentRef(new PageRef(parentBookRef, parentPage), parentShortTitle));
 			}
-			if(name.equals(rootBookPath)) {
+			if(bookRef.equals(rootBookRef)) {
 				if(!parentRefs.isEmpty()) {
-					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookPath);
+					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": \"" + ROOT_BOOK_ATTRIBUTE_NAME + "\" may not have any parents: " + rootBookRef);
 				}
 			} else {
 				if(parentRefs.isEmpty()) {
-					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Non-root books must have at least one parent: " + name);
+					throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Non-root books must have at least one parent: " + bookRef);
 				}
 			}
-			books.put(
-				name,
-				new Book(
-					name,
-					bookElem.getAttribute("cvsworkDirectory"),
-					Boolean.valueOf(bookElem.getAttribute("allowRobots")),
-					parentRefs,
-					PropertiesUtils.loadFromResource(servletContext, ("/".equals(name) ? "" : name) + "/book.properties")
+			String publishedStr = StringUtility.nullIfEmpty(bookElem.getAttribute("published"));
+			boolean published = publishedStr == null || Boolean.valueOf(publishedStr);
+			String cvsworkDirectory = StringUtility.nullIfEmpty(bookElem.getAttribute("cvsworkDirectory"));
+			Collection<String> resourceDirectories;
+			if(cvsworkDirectory == null) {
+				resourceDirectories = Collections.emptySet();
+			} else {
+				resourceDirectories = Collections.singleton(cvsworkDirectory);
+			}
+			ServletBook book = new ServletBook(
+				servletContext,
+				bookRef,
+				resourceDirectories,
+				Boolean.valueOf(bookElem.getAttribute("allowRobots")),
+				parentRefs,
+				PropertiesUtils.loadFromResource(
+					servletContext,
+					bookRef.getPrefix() + "/book.properties"
 				)
 			);
+			if(books.put(bookRef, book) != null) {
+				throw new IllegalStateException(BOOKS_XML_RESOURCE+ ": Duplicate value for \"" + BOOK_TAG_NAME + "\": " + bookRef);
+			}
+			if(published) {
+				if(publishedBooks.put(bookRef.getPath(), book) != null) {
+					throw new IllegalStateException(BOOKS_XML_RESOURCE+ ": Duplicate published book for \"" + BOOK_TAG_NAME + "\": " + bookRef);
+				}
+			}
 		}
 
 		// Load rootBook
-		Book newRootBook = books.get(rootBookPath);
+		Book newRootBook = books.get(rootBookRef);
 		if(newRootBook == null) throw new AssertionError();
 
 		// Successful book load
@@ -315,19 +374,23 @@ public class SemanticCMS {
 	 * @see  #getPublishedBook(javax.servlet.http.HttpServletRequest)
 	 */
 	public Book getPublishedBook(String servletPath) {
-		int len = servletPath.length();
-		// Quick path for initial trailing slash: avoid map lookup that will never match
-		if(servletPath.charAt(len - 1) == '/') len -= 1;
-		while(len > 0) {
-			servletPath = servletPath.substring(0, len);
-			assert servletPath.charAt(len - 1) != '/' : "Should not end in slash: " + servletPath;
-			Book book = publishedBooks.get(servletPath);
-			if(book != null) return book;
-			int lastSlash = servletPath.lastIndexOf('/');
-			assert lastSlash != -1 : "Starts with slash, so should always find one when len > 0";
-			len = lastSlash;
+		try {
+			int len = servletPath.length();
+			// Quick path for initial trailing slash: avoid map lookup that will never match
+			if(servletPath.charAt(len - 1) == '/') len -= 1;
+			while(len > 0) {
+				servletPath = servletPath.substring(0, len);
+				assert servletPath.charAt(len - 1) != '/' : "Should not end in slash: " + servletPath;
+				Book book = publishedBooks.get(Path.valueOf(servletPath));
+				if(book != null) return book;
+				int lastSlash = servletPath.lastIndexOf('/');
+				assert lastSlash != -1 : "Starts with slash, so should always find one when len > 0";
+				len = lastSlash;
+			}
+			return publishedBooks.get(Path.ROOT);
+		} catch(ValidationException e) {
+			throw new WrappedException(e);
 		}
-		return publishedBooks.get(Path.ROOT);
 	}
 
 	/**

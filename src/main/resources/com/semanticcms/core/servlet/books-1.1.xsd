@@ -21,6 +21,17 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>.
 -->
+
+<!--
+Schema 1.1 is a minimal update to the SemanticCMS 1 method of books configuration
+that still exposes and allows interaction with the new domain feature that turns
+SemanticCMS into a distributed content management system.
+
+Schema 2.0 makes a radical departure from the configuration, being modular and
+exposing the rich features of page repositories and resource stores.
+
+TODO: Path type, used for book names and paths?  Matching rules of Java implementation?
+-->
 <xs:schema
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	xmlns:books="https://semanticcms.com/core/servlet/"
@@ -66,6 +77,13 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 							</xs:annotation>
 						</xs:attribute>
 						<xs:attribute name="name" type="books:bookName" use="required" />
+						<xs:attribute name="published" type="xs:boolean" default="false">
+							<xs:annotation>
+								<xs:documentation xml:lang="en">
+									The published flag for the missing book, defaulting to "false".
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
 						<xs:attribute name="base" type="xs:string"><!-- TODO: xs:anyURI here? -->
 							<xs:annotation>
 								<xs:documentation xml:lang="en">
@@ -100,6 +118,13 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 									</xs:documentation>
 								</xs:annotation>
 								<xs:complexType>
+									<xs:attribute name="domain" type="xs:string" default="localhost">
+										<xs:annotation>
+											<xs:documentation xml:lang="en">
+												The domain containing the parent of this book, defaulting to "localhost".
+											</xs:documentation>
+										</xs:annotation>
+									</xs:attribute>
 									<xs:attribute name="book" type="books:bookName" use="required">
 										<xs:annotation>
 											<xs:documentation xml:lang="en">
@@ -149,6 +174,13 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 								</xs:complexType>
 							</xs:element>
 						</xs:sequence>
+						<xs:attribute name="domain" type="xs:string" default="localhost">
+							<xs:annotation>
+								<xs:documentation xml:lang="en">
+									The domain of the book, defaulting to "localhost".
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
 						<xs:attribute name="name" type="books:bookName" use="required">
 							<xs:annotation>
 								<xs:documentation xml:lang="en">
@@ -156,8 +188,14 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 								</xs:documentation>
 							</xs:annotation>
 						</xs:attribute>
-						<!-- TODO: this should not be required, parts of code that assume it should be modified -->
-						<xs:attribute name="cvsworkDirectory" use="required">
+						<xs:attribute name="published" type="xs:boolean" default="true">
+							<xs:annotation>
+								<xs:documentation xml:lang="en">
+									The published flag for this book, defaulting to "true".
+								</xs:documentation>
+							</xs:annotation>
+						</xs:attribute>
+						<xs:attribute name="cvsworkDirectory">
 							<xs:annotation>
 								<xs:documentation xml:lang="en">
 									The directory containing the source files for this book.
@@ -188,16 +226,25 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 					<xs:unique name="parentUni">
 						<xs:annotation>
 							<xs:documentation xml:lang="en">
-								Each parent must be a unique combination of book and page.
+								Each parent must be a unique combination of domain, book, and page.
 								No duplicate parents per book.
 							</xs:documentation>
 						</xs:annotation>
 						<xs:selector xpath="books:parent" />
+						<xs:field xpath="@domain" />
 						<xs:field xpath="@book" />
 						<xs:field xpath="@page" />
 					</xs:unique>
 				</xs:element>
 			</xs:sequence>
+			<xs:attribute name="rootDomain" type="xs:string" default="localhost">
+				<xs:annotation>
+					<xs:documentation xml:lang="en">
+						The domain of the book representing the overall content root, defaulting to "localhost".
+						Must be the domain of one of the books defined below.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
 			<xs:attribute name="rootBook" type="books:bookName" use="required">
 				<xs:annotation>
 					<xs:documentation xml:lang="en">
@@ -207,47 +254,36 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 				</xs:annotation>
 			</xs:attribute>
 		</xs:complexType>
-		<!--
-			Must be unique in both domain and name now, but the domain is not known here for non-missing books.
-			Define the domain here instead of in books.properties?  We could then do the full check.
-			Would this also be more flexible for those who are aggregating books?
-			The major issue is that books may refer to other books by domain, and therefore the domain is
-			expected to be the same even when installed to other locations.  For example two books of a larger
-			set of books could be installed, and they would link to each other correctly.  And any links to
-			other books of the set could follow the "base" in "missingBook" to get to the external content.
-			I've convinced myself that this is the correct approach to not have domain in "book" here.
-			And if you are reading this far, hi there! (beer)
-
-		<xs:unique name="allBookNameUni">
+		<xs:unique name="allBookRefUni">
 			<xs:annotation>
 				<xs:documentation xml:lang="en">
-					A book name must be unique across both missingBooks and books.
+					A book domain and name must be unique across both missingBooks and books.
 				</xs:documentation>
 			</xs:annotation>
 			<xs:selector xpath="books:missingBook|books:book" />
-			<xs:field xpath="@name" />
-		</xs:unique>
-		-->
-		<xs:key name="missingBookDomainNameKey">
-			<xs:annotation>
-				<xs:documentation xml:lang="en">
-					A key of domain and book names (missing books only).
-				</xs:documentation>
-			</xs:annotation>
-			<xs:selector xpath="books:missingBook" />
 			<xs:field xpath="@domain" />
 			<xs:field xpath="@name" />
-		</xs:key>
-		<xs:key name="bookNameKey">
+		</xs:unique>
+		<xs:unique name="publishedBookNameUni">
 			<xs:annotation>
 				<xs:documentation xml:lang="en">
-					A key of book names (not including missing books).
+					A published book name must be unique across both missingBooks and books.
+				</xs:documentation>
+			</xs:annotation>
+			<xs:selector xpath="books:missingBook[@published]|books:book[@published]" />
+			<xs:field xpath="@name" />
+		</xs:unique>
+		<xs:key name="bookRefKey">
+			<xs:annotation>
+				<xs:documentation xml:lang="en">
+					A key of book domain and names (not including missing books).
 				</xs:documentation>
 			</xs:annotation>
 			<xs:selector xpath="books:book" />
+			<xs:field xpath="@domain" />
 			<xs:field xpath="@name" />
 		</xs:key>
-		<xs:keyref name="rootBookNameRef" refer="books:bookNameKey">
+		<xs:keyref name="rootBookRef" refer="books:bookRefKey">
 			<xs:annotation>
 				<xs:documentation xml:lang="en">
 					The rootBook must reference an existing book.
@@ -255,9 +291,10 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 				</xs:documentation>
 			</xs:annotation>
 			<xs:selector xpath="."/>
+			<xs:field xpath="@rootDomain"/>
 			<xs:field xpath="@rootBook"/>
 		</xs:keyref>
-		<xs:keyref name="parentBookNameRef" refer="books:bookNameKey">
+		<xs:keyref name="parentBookRef" refer="books:bookRefKey">
 			<xs:annotation>
 				<xs:documentation xml:lang="en">
 					Parents must reference an existing book.
@@ -265,6 +302,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 				</xs:documentation>
 			</xs:annotation>
 			<xs:selector xpath="books:book/books:parent"/>
+			<xs:field xpath="@domain"/>
 			<xs:field xpath="@book"/>
 		</xs:keyref>
 	</xs:element>
