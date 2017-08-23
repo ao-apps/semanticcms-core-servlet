@@ -32,6 +32,7 @@ import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.NodeBodyWriter;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.pages.CaptureLevel;
+import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletContext;
