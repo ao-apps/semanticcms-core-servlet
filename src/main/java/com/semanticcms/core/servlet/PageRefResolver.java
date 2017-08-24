@@ -87,7 +87,7 @@ public class PageRefResolver {
 	}
 
 	/**
-	 * Resolves a  {@link PageRef}.
+	 * Resolves a {@link PageRef}.
 	 * <p>
 	 * When domain is provided, book is required.  When domain is not provided,
 	 * defaults to the domain of the current page.
