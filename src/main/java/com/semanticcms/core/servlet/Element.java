@@ -35,6 +35,7 @@ import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
+import com.semanticcms.core.pages.local.PageContext;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletContext;

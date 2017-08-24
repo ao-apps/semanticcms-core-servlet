@@ -30,6 +30,7 @@ import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.ResourceRef;
+import com.semanticcms.core.pages.local.PageContext;
 import java.net.MalformedURLException;
 import java.util.NoSuchElementException;
 import javax.servlet.ServletContext;

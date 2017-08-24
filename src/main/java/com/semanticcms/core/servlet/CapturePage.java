@@ -37,9 +37,11 @@ import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.PageReferrer;
 import com.semanticcms.core.pages.CaptureLevel;
+import com.semanticcms.core.pages.PageRepository;
 import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
+import com.semanticcms.core.pages.local.PageContext;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import com.semanticcms.core.servlet.util.HttpServletSubRequest;
 import com.semanticcms.core.servlet.util.HttpServletSubResponse;
@@ -143,6 +145,13 @@ public class CapturePage {
 		}
 
 		if(capturedPage == null) {
+			// Find the book
+			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+			final BookRef bookRef = pageRef.getBookRef();
+			Book book = semanticCMS.getBook(bookRef);
+			if(!book.isAccessible()) throw new ServletException("Book is inaccessible: " + bookRef);
+			PageRepository repository = book.getPages();
+			if(!repository.isAvailable()) throw new ServletException("Page repository is unavailable: " + repository);
 			// Perform new capture
 			Node oldNode = CurrentNode.getCurrentNode(request);
 			Page oldPage = CurrentPage.getCurrentPage(request);
@@ -161,8 +170,10 @@ public class CapturePage {
 						CurrentCaptureLevel.setCaptureLevel(request, level);
 						CapturePage captureContext = new CapturePage();
 						request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, captureContext);
+						// TODO: Set more "current" for request and response
+						// TODO: Is PageContext useful for this?
+						// TODO: capturedPage = repository.getPage(pageRef.getPath(), level);
 						// Include the page resource, discarding any direct output
-						final BookRef bookRef = pageRef.getBookRef();
 						final String capturePath = bookRef.getPrefix() + pageRef.getPath();
 						try {
 							// Clear PageContext on include
@@ -206,6 +217,7 @@ public class CapturePage {
 								+ capturedPageRef.getBookRef() + ", " + capturedPageRef.getPath()
 								+ ')'
 						);
+
 					} finally {
 						if(oldContentType != null) response.setContentType(oldContentType);
 					}
