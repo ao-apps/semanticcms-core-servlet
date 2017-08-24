@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet.impl;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.LocalizedServletException;
+import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.model.BookRef;
 import com.semanticcms.core.model.ChildRef;
@@ -310,7 +311,7 @@ final public class PageImpl {
 
 			// Forward to theme
 			theme.doTheme(servletContext, request, response, view, page);
-			throw new SkipPageException();
+			throw ServletUtil.SKIP_PAGE_EXCEPTION;
 		}
 	}
 
