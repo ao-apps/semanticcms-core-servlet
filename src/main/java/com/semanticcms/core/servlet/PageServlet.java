@@ -135,7 +135,7 @@ abstract public class PageServlet extends HttpServlet {
 	 */
 	protected void doGet(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		throw new SkipPageException();
+		throw ServletUtil.SKIP_PAGE_EXCEPTION;
 	}
 
 	@Override
@@ -160,7 +160,7 @@ abstract public class PageServlet extends HttpServlet {
 	 */
 	protected void doPost(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		throw new SkipPageException();
+		throw ServletUtil.SKIP_PAGE_EXCEPTION;
 	}
 
 	@Override
@@ -185,7 +185,7 @@ abstract public class PageServlet extends HttpServlet {
 	 */
 	protected void doPut(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		throw new SkipPageException();
+		throw ServletUtil.SKIP_PAGE_EXCEPTION;
 	}
 
 	@Override
@@ -210,7 +210,7 @@ abstract public class PageServlet extends HttpServlet {
 	 */
 	protected void doDelete(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		throw new SkipPageException();
+		throw ServletUtil.SKIP_PAGE_EXCEPTION;
 	}
 
 	@Override
