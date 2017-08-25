@@ -58,6 +58,9 @@ import javax.servlet.ServletContext;
 
 /**
  * A book where the pages in invoked locally.
+ *
+ * TODO: Flags to enable JSPX, JSP, and Servlet repositories.  In properties file,
+ *       defaulting to ?
  */
 public class ServletBook extends Book {
 
