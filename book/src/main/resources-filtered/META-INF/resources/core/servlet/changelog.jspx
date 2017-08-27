@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2017-08-03T11:05:22-0500"
+		dateModified="2017-08-26T19:19:43-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -55,26 +55,9 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 			>
 				<ul>
 					<li>
-						<code><ao:a href="apidocs/com/semanticcms/core/servlet/PageRefResolver.html">PageRefResolver</ao:a>.getCurrentPageRef(…)</code>
-						now accepts an optional parameter to optionally return <code>null</code> on missing book instead of throwing
-						<code><ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/ServletException.html">ServletException</ao:a></code>.
+						New module <core:link book="/core/controller" page="/" /> split from <code:link page="/" />, leaving
+						<code:link page="/" /> only to generate page content from servlets.
 					</li>
-					<li>Books now exist within an optional domain:
-						<ol>
-							<li>New version of XML Schema for <code>/WEB-INF/books.xml</code> defined at
-								<!-- TODO: file:file once cvsworkDirectory no longer required -->
-								<ao:a href="books-1.1.xsd">books-1.1.xsd</ao:a>:
-								<ol type="a">
-									<li>New optional "domain" attribute on "missingBook" element, defaulting to "localhost".</li>
-									<li>
-										New optional "base" attribute on "missingBook" element, used
-										to generate links to the missing content.
-									</li>
-								</ol>
-							</li>
-						</ol>
-					</li>
-					<li><code>book.cvsworkDirectory</code> is now optional in <code>books.xml</code></li>
 				</ul>
 			</changelog:release>
 		</c:if>

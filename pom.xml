@@ -70,27 +70,16 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 									<link>${javac.link.javaApi}</link>
 									<link>${javac.link.javaeeApi.6}</link>
 									<link>http://www.joda.org/joda-time/apidocs/</link>
-									<link>https://aoindustries.com/ao-concurrent/apidocs/</link>
-									<link>https://aoindustries.com/ao-encoding/apidocs/</link>
 									<link>https://aoindustries.com/ao-io-buffer/apidocs/</link>
 									<link>https://aoindustries.com/ao-lang/apidocs/</link>
 									<link>https://aoindustries.com/ao-net-types/apidocs/</link>
-									<link>https://aoindustries.com/ao-servlet-filter/apidocs/</link>
 									<link>https://aoindustries.com/ao-taglib/apidocs/</link>
-									<link>https://aoindustries.com/ao-tempfiles/apidocs/</link>
-									<link>https://aoindustries.com/ao-tempfiles-servlet/apidocs/</link>
 									<link>https://aoindustries.com/aocode-public/apidocs/</link>
+									<link>https://semanticcms.com/core/controller/apidocs/</link>
 									<link>https://semanticcms.com/core/model/apidocs/</link>
 									<link>https://semanticcms.com/core/pages/apidocs/</link>
-									<link>https://semanticcms.com/core/pages/jsp/apidocs/</link>
-									<link>https://semanticcms.com/core/pages/jspx/apidocs/</link>
 									<link>https://semanticcms.com/core/pages/local/apidocs/</link>
-									<link>https://semanticcms.com/core/pages/servlet/apidocs/</link>
-									<link>https://semanticcms.com/core/pages/union/apidocs/</link>
-									<link>https://semanticcms.com/core/resources/apidocs/</link>
-									<link>https://semanticcms.com/core/resources/servlet/apidocs/</link>
-									<link>https://semanticcms.com/resources/filesystem/apidocs/</link>
-									<link>https://semanticcms.com/resources/union/apidocs/</link>
+									<link>https://semanticcms.com/core/renderer/html/apidocs/</link>
 								</links>
 							</configuration>
 						</plugin>
@@ -108,12 +97,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.el</groupId>
-			<artifactId>javax.el-api</artifactId>
-			<version>2.2.5</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet.jsp</groupId>
 			<artifactId>javax.servlet.jsp-api</artifactId>
 			<version>2.2.1</version>
@@ -123,16 +106,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>2.9.9</version>
-		</dependency>
-		<dependency>
-			<groupId>com.aoindustries</groupId>
-			<artifactId>ao-concurrent</artifactId>
-			<version>1.0.4-validation-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.aoindustries</groupId>
-			<artifactId>ao-encoding</artifactId>
-			<version>1.6.1-validation-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.aoindustries</groupId>
@@ -151,28 +124,18 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		</dependency>
 		<dependency>
 			<groupId>com.aoindustries</groupId>
-			<artifactId>ao-servlet-filter</artifactId>
-			<version>1.6.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.aoindustries</groupId>
 			<artifactId>ao-taglib</artifactId>
 			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.aoindustries</groupId>
-			<artifactId>ao-tempfiles</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.aoindustries</groupId>
-			<artifactId>ao-tempfiles-servlet</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.aoindustries</groupId>
 			<artifactId>aocode-public</artifactId>
 			<version>1.10.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.semanticcms</groupId>
+			<artifactId>semanticcms-core-controller</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.semanticcms</groupId>
@@ -186,55 +149,13 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		</dependency>
 		<dependency>
 			<groupId>com.semanticcms</groupId>
-			<artifactId>semanticcms-core-pages-jsp</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.semanticcms</groupId>
-			<artifactId>semanticcms-core-pages-jspx</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.semanticcms</groupId>
 			<artifactId>semanticcms-core-pages-local</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.semanticcms</groupId>
-			<artifactId>semanticcms-core-pages-servlet</artifactId>
+			<artifactId>semanticcms-core-renderer-html</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.semanticcms</groupId>
-			<artifactId>semanticcms-core-pages-union</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.semanticcms</groupId>
-			<artifactId>semanticcms-core-resources</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.semanticcms</groupId>
-			<artifactId>semanticcms-core-resources-servlet</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.semanticcms</groupId>
-			<artifactId>semanticcms-resources-filesystem</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.semanticcms</groupId>
-			<artifactId>semanticcms-resources-union</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-			<optional>true</optional>
 		</dependency>
 	</dependencies>
 </project>
