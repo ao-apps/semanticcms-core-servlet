@@ -27,8 +27,12 @@ import com.aoindustries.net.Path;
 import com.aoindustries.servlet.LocalizedServletException;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.validation.ValidationException;
+import com.semanticcms.core.controller.Book;
+import com.semanticcms.core.controller.CapturePage;
+import com.semanticcms.core.controller.PageUtils;
+import com.semanticcms.core.controller.SemanticCMS;
 import com.semanticcms.core.model.BookRef;
-import com.semanticcms.core.model.ChildRef;
+import com.semanticcms.core.model.Link;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
@@ -37,17 +41,13 @@ import com.semanticcms.core.pages.CaptureLevel;
 import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
+import com.semanticcms.core.renderer.html.HtmlRenderer;
+import com.semanticcms.core.renderer.html.Theme;
+import com.semanticcms.core.renderer.html.View;
 import com.semanticcms.core.servlet.ApplicationResources;
-import com.semanticcms.core.servlet.Book;
-import com.semanticcms.core.servlet.CapturePage;
-import com.semanticcms.core.servlet.PageUtils;
-import com.semanticcms.core.servlet.SemanticCMS;
-import com.semanticcms.core.servlet.Theme;
-import com.semanticcms.core.servlet.View;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -62,102 +62,11 @@ final public class PageImpl {
 	}
 
 	/**
-	 * Verified one child-parent relationship.
+	 * The parameter name used for views.
 	 *
-	 * @throws  ServletException  if verification failed
+	 * TODO: Move to new Link type of Element in core-model, or does this go in renderer-html?
 	 */
-	public static void verifyChildToParent(ChildRef childRef, PageRef parentPageRef, Set<ChildRef> childRefs) throws ServletException {
-		if(!childRefs.contains(childRef)) {
-			throw new ServletException(
-				"The parent page does not have this as a child.  this="
-					+ childRef
-					+ ", parent="
-					+ parentPageRef
-					+ ", parent.children="
-					+ childRefs
-			);
-		}
-	}
-
-	/**
-	 * Verified one child-parent relationship.
-	 *
-	 * @throws  ServletException  if verification failed
-	 */
-	public static void verifyChildToParent(PageRef childPageRef, PageRef parentPageRef, Set<ChildRef> childRefs) throws ServletException {
-		verifyChildToParent(new ChildRef(childPageRef), parentPageRef, childRefs);
-	}
-
-	/**
-	 * Verified one parent-child relationship.
-	 *
-	 * @throws  ServletException  if verification failed
-	 */
-	public static void verifyParentToChild(ParentRef parentRef, PageRef childPageRef, Set<ParentRef> parentRefs) throws ServletException {
-		if(!parentRefs.contains(parentRef)) {
-			throw new ServletException(
-				"The child page does not have this as a parent.  this="
-					+ parentRef
-					+ ", child="
-					+ childPageRef
-					+ ", child.parents="
-					+ parentRefs
-			);
-		}
-	}
-
-	/**
-	 * Verified one parent-child relationship.
-	 *
-	 * @throws  ServletException  if verification failed
-	 */
-	public static void verifyParentToChild(PageRef parentPageRef, PageRef childPageRef, Set<ParentRef> parentRefs) throws ServletException {
-		verifyParentToChild(new ParentRef(parentPageRef, null), childPageRef, parentRefs);
-	}
-
-	/**
-	 * Performs full parent/child verifications of the provided page.  This is normally
-	 * not needed for pages that have been added to the cache (PAGE/META level), as verification
-	 * is done within the cache.  This is used for BODY level captures which are not put in the
-	 * cache and desire full verification.
-	 *
-	 * @throws  ServletException  if verification failed
-	 */
-	public static void fullVerifyParentChild(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Page page
-	) throws ServletException, IOException {
-		// Verify parents
-		if(!page.getAllowParentMismatch()) {
-			Map<PageRef,Page> notMissingParents = CapturePage.capturePages(
-				servletContext,
-				request,
-				response,
-				PageUtils.filterNotMissingBook(servletContext, page.getParentRefs()),
-				CaptureLevel.PAGE
-			);
-			PageRef pageRef = page.getPageRef();
-			for(Map.Entry<PageRef,Page> entry : notMissingParents.entrySet()) {
-				verifyChildToParent(pageRef, entry.getKey(), entry.getValue().getChildRefs());
-			}
-		}
-		// Verify children
-		if(!page.getAllowChildMismatch()) {
-			Map<PageRef,Page> notMissingChildren = CapturePage.capturePages(
-				servletContext,
-				request,
-				response,
-				PageUtils.filterNotMissingBook(servletContext, page.getChildRefs()),
-				CaptureLevel.PAGE
-			);
-			PageRef pageRef = page.getPageRef();
-			for(Map.Entry<PageRef,Page> entry : notMissingChildren.entrySet()) {
-				verifyParentToChild(pageRef, entry.getKey(), entry.getValue().getParentRefs());
-			}
-		}
-	}
+	public static final String VIEW_PARAM = "view";
 
 	/**
 	 * @param pageRef  the default path to this page, this might be changed during page processing
@@ -265,24 +174,25 @@ final public class PageImpl {
 			capture.setCapturedPage(page);
 		} else {
 			// Perform full verification now since not interacting with the page cache
-			fullVerifyParentChild(servletContext, request, response, page);
+			PageUtils.fullVerifyParentChild(servletContext, request, response, page);
 
 			// Resolve the view
 			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+			HtmlRenderer htmlRenderer = HtmlRenderer.getInstance(servletContext);
 			View view;
 			{
-				String viewName = request.getParameter(SemanticCMS.VIEW_PARAM);
-				Map<String,View> viewsByName = semanticCMS.getViewsByName();
+				String viewName = request.getParameter(VIEW_PARAM);
+				Map<String,View> viewsByName = htmlRenderer.getViewsByName();
 				if(viewName == null) {
 					view = null;
 				} else {
-					if(SemanticCMS.DEFAULT_VIEW_NAME.equals(viewName)) throw new ServletException(SemanticCMS.VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
+					if(Link.DEFAULT_VIEW_NAME.equals(viewName)) throw new ServletException(VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
 					view = viewsByName.get(viewName);
 				}
 				if(view == null) {
 					// Find default
-					view = viewsByName.get(SemanticCMS.DEFAULT_VIEW_NAME);
-					if(view == null) throw new ServletException("Default view not found: " + SemanticCMS.DEFAULT_VIEW_NAME);
+					view = viewsByName.get(Link.DEFAULT_VIEW_NAME);
+					if(view == null) throw new ServletException("Default view not found: " + Link.DEFAULT_VIEW_NAME);
 				}
 			}
 
@@ -291,7 +201,7 @@ final public class PageImpl {
 			{
 				// Currently just picks the first non-default theme registered, the uses default
 				Theme defaultTheme = null;
-				for(Theme t : semanticCMS.getThemes().values()) {
+				for(Theme t : htmlRenderer.getThemes().values()) {
 					if(t.isDefault()) {
 						assert defaultTheme == null : "More than one default theme registered";
 						defaultTheme = t;

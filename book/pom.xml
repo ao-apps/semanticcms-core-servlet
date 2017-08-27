@@ -65,65 +65,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<tag>HEAD</tag>
 	</scm>
 
-	<build>
-		<plugins>
-			<!-- Add XML Schema resources -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack-books.xsd</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>com.semanticcms</groupId>
-									<artifactId>semanticcms-core-servlet</artifactId>
-									<version>2.0.0-SNAPSHOT</version>
-									<type>jar</type>
-									<includes>
-										com/semanticcms/core/servlet/books-1.0.xsd,
-										com/semanticcms/core/servlet/books-1.1.xsd
-									</includes>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-books.xsd</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>${project.build.directory}/dependency/com/semanticcms/core/servlet</directory>
-									<includes>
-										<include>books-1.0.xsd</include>
-										<include>books-1.1.xsd</include>
-									</includes>
-								</resource>
-							</resources>
-							<!-- Put into META-INF/resources to be accessible as website content when jar included in WEB-INF/lib -->
-							<outputDirectory>${project.build.outputDirectory}/META-INF/resources/core/servlet</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>

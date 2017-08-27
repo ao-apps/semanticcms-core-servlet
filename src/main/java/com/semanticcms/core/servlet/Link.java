@@ -25,41 +25,54 @@ package com.semanticcms.core.servlet;
 import com.aoindustries.net.DomainName;
 import com.aoindustries.net.HttpParameters;
 import com.aoindustries.net.Path;
-import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
+import com.semanticcms.core.model.ElementContext;
 import com.semanticcms.core.pages.local.PageContext;
-import com.semanticcms.core.servlet.impl.LinkImpl;
 import java.io.IOException;
+import java.io.Writer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
-public class Link {
+public class Link extends Element<com.semanticcms.core.model.Link> {
 
-	private final ServletContext servletContext;
-	private final HttpServletRequest request;
-	private final HttpServletResponse response;
-
-	private DomainName domain;
-	private Path book;
-	private String page;
-	private String element;
-	private boolean allowGeneratedElement;
-	private String anchor;
-	private String view = SemanticCMS.DEFAULT_VIEW_NAME;
-	private boolean small;
-	private HttpParameters params;
-	private Object clazz;
+	public Link(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		com.semanticcms.core.model.Link element
+	) {
+		super(
+			servletContext,
+			request,
+			response,
+			element
+		);
+	}
 
 	public Link(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response
 	) {
-		this.servletContext = servletContext;
-		this.request = request;
-		this.response = response;
+		this(
+			servletContext,
+			request,
+			response,
+			new com.semanticcms.core.model.Link()
+		);
+	}
+
+	public Link(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		com.semanticcms.core.model.Link element,
+		String page
+	) {
+		this(servletContext, request, response, element);
+		element.setPagePath(page);
 	}
 
 	public Link(
@@ -69,7 +82,19 @@ public class Link {
 		String page
 	) {
 		this(servletContext, request, response);
-		this.page = page;
+		element.setPagePath(page);
+	}
+
+	public Link(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		com.semanticcms.core.model.Link element,
+		Path book,
+		String page
+	) {
+		this(servletContext, request, response, element, page);
+		element.setBook(book);
 	}
 
 	public Link(
@@ -80,7 +105,20 @@ public class Link {
 		String page
 	) {
 		this(servletContext, request, response, page);
-		this.book = book;
+		element.setBook(book);
+	}
+
+	public Link(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		com.semanticcms.core.model.Link element,
+		DomainName domain,
+		Path book,
+		String page
+	) {
+		this(servletContext, request, response, element, book, page);
+		element.setDomain(domain);
 	}
 
 	public Link(
@@ -92,7 +130,21 @@ public class Link {
 		String page
 	) {
 		this(servletContext, request, response, book, page);
-		this.domain = domain;
+		element.setDomain(domain);
+	}
+
+	/**
+	 * Creates a new link in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Link(com.semanticcms.core.model.Link element) {
+		this(
+			PageContext.getServletContext(),
+			PageContext.getRequest(),
+			PageContext.getResponse(),
+			element
+		);
 	}
 
 	/**
@@ -113,9 +165,36 @@ public class Link {
 	 *
 	 * @see  PageContext
 	 */
+	public Link(
+		com.semanticcms.core.model.Link element,
+		String page
+	) {
+		this(element);
+		element.setPagePath(page);
+	}
+
+	/**
+	 * Creates a new link in the current page context.
+	 *
+	 * @see  PageContext
+	 */
 	public Link(String page) {
 		this();
-		this.page = page;
+		element.setPagePath(page);
+	}
+
+	/**
+	 * Creates a new link in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Link(
+		com.semanticcms.core.model.Link element,
+		Path book,
+		String page
+	) {
+		this(element, page);
+		element.setBook(book);
 	}
 
 	/**
@@ -125,7 +204,22 @@ public class Link {
 	 */
 	public Link(Path book, String page) {
 		this(page);
-		this.book = book;
+		element.setBook(book);
+	}
+
+	/**
+	 * Creates a new link in the current page context.
+	 *
+	 * @see  PageContext
+	 */
+	public Link(
+		com.semanticcms.core.model.Link element,
+		DomainName domain,
+		Path book,
+		String page
+	) {
+		this(element, book, page);
+		element.setDomain(domain);
 	}
 
 	/**
@@ -135,152 +229,74 @@ public class Link {
 	 */
 	public Link(DomainName domain, Path book, String page) {
 		this(book, page);
-		this.domain = domain;
+		element.setDomain(domain);
+	}
+
+	@Override
+	public Link id(String id) {
+		super.id(id);
+		return this;
 	}
 
 	public Link domain(DomainName domain) {
-		this.domain = domain;
+		element.setDomain(domain);
 		return this;
 	}
 
 	public Link book(Path book) {
-		this.book = book;
+		element.setBook(book);
 		return this;
 	}
 
 	public Link page(String page) {
-		this.page = page;
+		element.setPagePath(page);
 		return this;
 	}
 
 	public Link element(String element) {
-		this.element = element;
+		this.element.setElement(element);
 		return this;
 	}
 
 	public Link allowGeneratedElement(boolean allowGeneratedElement) {
-		this.allowGeneratedElement = allowGeneratedElement;
+		element.setAllowGeneratedElement(allowGeneratedElement);
 		return this;
 	}
 
 	public Link anchor(String anchor) {
-		this.anchor = anchor;
+		element.setAnchor(anchor);
 		return this;
 	}
 
 	public Link view(String view) {
-		this.view = view;
+		element.setView(view);
 		return this;
 	}
 
-	/**
-	 * <p>
-	 * When false, the default, will generate a &lt;a&gt; tag around the entire body.
-	 * Otherwise, will generate a &lt;span&gt; instead, with a small link added to
-	 * the end of the body.
-	 * </p>
-	 * <p>
-	 * Use of a small link can be helpful for usability, such as when the body is
-	 * a piece of information intended for quick copy/paste by the user.
-	 * </p>
-	 */
 	public Link small(boolean small) {
-		this.small = small;
+		element.setSmall(small);
 		return this;
 	}
 
 	public Link params(HttpParameters params) {
-		this.params = params;
+		element.setParams(params);
 		return this;
 	}
 
-	public Link clazz(Object clazz) {
-		this.clazz = clazz;
+	public Link clazz(String clazz) {
+		element.setClazz(clazz);
 		return this;
 	}
 
-	public static interface Body {
-		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
-	}
-
-	/**
-	 * <p>
-	 * Also establishes a new {@link PageContext}.
-	 * </p>
-	 *
-	 * @see  PageContext
-	 */
-	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
-		LinkImpl.writeLinkImpl(
-			servletContext,
-			request,
-			response,
-			response.getWriter(),
-			domain,
-			book,
-			page,
-			element,
-			allowGeneratedElement,
-			anchor,
-			view,
-			small,
-			params,
-			clazz,
-			body == null
-				? null
-				// Lamdba version not working with generic exceptions:
-				// discard -> body.doBody(request, discard ? new NullHttpServletResponseWrapper(response) : response)
-				: new LinkImpl.LinkImplBody<ServletException>() {
-					@Override
-					public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {
-						if(discard) {
-							final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
-							// Set PageContext
-							PageContext.newPageContextSkip(
-								servletContext,
-								request,
-								newResponse,
-								// Java 1.8: () -> body.doBody(request, newResponse)
-								new PageContext.PageContextCallableSkip() {
-									@Override
-									public void call() throws ServletException, IOException, SkipPageException {
-										body.doBody(request, newResponse);
-									}
-								}
-							);
-						} else {
-							body.doBody(request, response);
-						}
-					}
-				}
+	@Override
+	public void writeTo(Writer out, ElementContext context) throws IOException, ServletException, SkipPageException {
+		/* TODO: Move to renderer class
+		LinkRenderer.writeLinkImpl(
+			pageIndex,
+			out,
+			context,
+			element
 		);
-	}
-
-	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Link.Body)
-	 */
-	public void invoke() throws ServletException, IOException, SkipPageException {
-		invoke((Body)null);
-	}
-
-	public static interface PageContextBody {
-		void doBody() throws ServletException, IOException, SkipPageException;
-	}
-
-	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Link.Body)
-	 */
-	public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
-		invoke(
-			body == null
-				? null
-				// Java 1.8: (req, resp) -> body.doBody()
-				: new Body() {
-					@Override
-					public void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException {
-						body.doBody();
-					}
-				}
-		);
+		 */
 	}
 }

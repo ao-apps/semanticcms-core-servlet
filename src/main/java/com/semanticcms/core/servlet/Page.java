@@ -29,6 +29,7 @@ import com.aoindustries.lang.LocalizedIllegalStateException;
 import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.taglib.AutoEncodingBufferedTag;
+import com.semanticcms.core.controller.PageRefResolver;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.pages.local.PageContext;
 import com.semanticcms.core.servlet.impl.PageImpl;
