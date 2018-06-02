@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,25 +25,19 @@ package com.semanticcms.core.servlet.impl;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.LocalizedServletException;
-import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.controller.Book;
-import com.semanticcms.core.controller.CapturePage;
-import com.semanticcms.core.controller.PageUtils;
 import com.semanticcms.core.controller.SemanticCMS;
 import com.semanticcms.core.model.BookRef;
-import com.semanticcms.core.model.Link;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
 import com.semanticcms.core.pages.CaptureLevel;
+import com.semanticcms.core.pages.local.CaptureContext;
 import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
-import com.semanticcms.core.renderer.html.HtmlRenderer;
-import com.semanticcms.core.renderer.html.Theme;
-import com.semanticcms.core.renderer.html.View;
 import com.semanticcms.core.servlet.ApplicationResources;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -62,19 +56,13 @@ final public class PageImpl {
 	}
 
 	/**
-	 * The parameter name used for views.
-	 *
-	 * TODO: Move to new Link type of Element in core-model, or does this go in renderer-html?
-	 */
-	public static final String VIEW_PARAM = "view";
-
-	/**
 	 * @param pageRef  the default path to this page, this might be changed during page processing
 	 */
 	public static <E extends Throwable> void doPageImpl(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
 		final HttpServletResponse response,
+		CaptureContext capture,
 		PageRef pageRef,
 		ReadableDateTime dateCreated,
 		ReadableDateTime datePublished,
@@ -168,61 +156,8 @@ final public class PageImpl {
 		} finally {
 			page.freeze();
 		}
-		CapturePage capture = CapturePage.getCaptureContext(request);
-		if(capture != null) {
-			// Capturing, add to capture
-			capture.setCapturedPage(page);
-		} else {
-			// Perform full verification now since not interacting with the page cache
-			PageUtils.fullVerifyParentChild(servletContext, request, response, page);
-
-			// Resolve the view
-			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
-			HtmlRenderer htmlRenderer = HtmlRenderer.getInstance(servletContext);
-			View view;
-			{
-				String viewName = request.getParameter(VIEW_PARAM);
-				Map<String,View> viewsByName = htmlRenderer.getViewsByName();
-				if(viewName == null) {
-					view = null;
-				} else {
-					if(Link.DEFAULT_VIEW_NAME.equals(viewName)) throw new ServletException(VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
-					view = viewsByName.get(viewName);
-				}
-				if(view == null) {
-					// Find default
-					view = viewsByName.get(Link.DEFAULT_VIEW_NAME);
-					if(view == null) throw new ServletException("Default view not found: " + Link.DEFAULT_VIEW_NAME);
-				}
-			}
-
-			// Find the theme
-			Theme theme = null;
-			{
-				// Currently just picks the first non-default theme registered, the uses default
-				Theme defaultTheme = null;
-				for(Theme t : htmlRenderer.getThemes().values()) {
-					if(t.isDefault()) {
-						assert defaultTheme == null : "More than one default theme registered";
-						defaultTheme = t;
-					} else {
-						// Use first non-default
-						theme = t;
-						break;
-					}
-				}
-				if(theme == null) {
-					// Use default
-					if(defaultTheme == null) throw new ServletException("No themes registered");
-					theme = defaultTheme;
-				}
-				assert theme != null;
-			}
-
-			// Forward to theme
-			theme.doTheme(servletContext, request, response, view, page);
-			throw ServletUtil.SKIP_PAGE_EXCEPTION;
-		}
+		// Capturing, add to capture
+		capture.setCapturedPage(page);
 	}
 
 	// TODO: Profile this since have many books now.  Maybe create method on SemanticCMS for this lookup
