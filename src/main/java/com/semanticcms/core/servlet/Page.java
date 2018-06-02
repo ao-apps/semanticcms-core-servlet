@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,6 +31,7 @@ import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.taglib.AutoEncodingBufferedTag;
 import com.semanticcms.core.controller.PageRefResolver;
 import com.semanticcms.core.model.PageRef;
+import com.semanticcms.core.pages.local.CaptureContext;
 import com.semanticcms.core.pages.local.PageContext;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
@@ -198,12 +199,18 @@ public class Page {
 	 * @see  PageImpl#PAGE_REQUEST_ATTRIBUTE
 	 */
 	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
+		CaptureContext capture = CaptureContext.getCaptureContext(request);
+		if(capture == null) {
+			throw new ServletException("CaptureContext not set, direct access to page instead of through Controller?");
+		}
+
 		PageRef pr = pageRef;
 		if(pr == null) pr = PageRefResolver.getCurrentPageRef(servletContext, request);
 		PageImpl.doPageImpl(
 			servletContext,
 			request,
 			response,
+			capture,
 			pr,
 			dateCreated,
 			datePublished,
@@ -234,9 +241,9 @@ public class Page {
 								request,
 								newResponse,
 								// Java 1.8: () -> body.doBody(request, newResponse, page)
-								new PageContext.PageContextCallableSkip() {
+								new PageContext.PageContextRunnableSkip() {
 									@Override
-									public void call() throws ServletException, IOException, SkipPageException {
+									public void run() throws ServletException, IOException, SkipPageException {
 										body.doBody(request, newResponse, page);
 									}
 								}
@@ -263,9 +270,9 @@ public class Page {
 										request,
 										newResponse,
 										// Java 1.8: () -> body.doBody(request, newResponse, page)
-										new PageContext.PageContextCallableSkip() {
+										new PageContext.PageContextRunnableSkip() {
 											@Override
-											public void call() throws ServletException, IOException, SkipPageException {
+											public void run() throws ServletException, IOException, SkipPageException {
 												body.doBody(request, newResponse, page);
 											}
 										}
