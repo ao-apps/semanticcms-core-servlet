@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -233,9 +233,9 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 							request,
 							newResponse,
 							// Java 1.8: () -> body.doBody(request, newResponse, element)
-							new PageContext.PageContextCallableSkip() {
+							new PageContext.PageContextRunnableSkip() {
 								@Override
-								public void call() throws ServletException, IOException, SkipPageException {
+								public void run() throws ServletException, IOException, SkipPageException {
 									body.doBody(request, newResponse, element);
 								}
 							}
@@ -257,9 +257,9 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 					request,
 					newResponse,
 					// Java 1.8: () -> body.doBody(request, newResponse, element)
-					new PageContext.PageContextCallableSkip() {
+					new PageContext.PageContextRunnableSkip() {
 						@Override
-						public void call() throws ServletException, IOException, SkipPageException {
+						public void run() throws ServletException, IOException, SkipPageException {
 							body.doBody(request, newResponse, element);
 						}
 					}
