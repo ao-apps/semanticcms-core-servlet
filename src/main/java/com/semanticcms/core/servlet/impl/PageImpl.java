@@ -25,7 +25,6 @@ package com.semanticcms.core.servlet.impl;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.LocalizedServletException;
-import com.aoindustries.validation.ValidationException;
 import com.semanticcms.core.controller.Book;
 import com.semanticcms.core.controller.SemanticCMS;
 import com.semanticcms.core.model.BookRef;
@@ -188,7 +187,7 @@ final public class PageImpl {
 				BookRef pageBookRef = pageRef.getBookRef();
 				SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 				Book pageBook = semanticCMS.getBook(pageBookRef);
-				String pagePath = pageRef.getPath().toString();
+				final String pagePath = pageRef.getPath().toString();
 				if(pagePath.endsWith("/")) {
 					// If this page URL ends in "/", look for page at "../", error if outside book.
 					int lastSlash = pagePath.lastIndexOf('/');
@@ -197,14 +196,7 @@ final public class PageImpl {
 					if(nextLastSlash == -1) {
 						throw new ServletException("Auto parent of page would be outside book: " + pageRef);
 					}
-					Path endSlashPath;
-					try {
-						endSlashPath = Path.valueOf(pagePath.substring(0, nextLastSlash + 1));
-					} catch(ValidationException e) {
-						AssertionError ae = new AssertionError("Sub paths of a valid path are also valid");
-						ae.initCause(e);
-						throw ae;
-					}
+					Path endSlashPath = pageRef.getPath().prefix(nextLastSlash + 1);
 					page.addParentRef(
 						new ParentRef(
 							new PageRef(
@@ -218,14 +210,7 @@ final public class PageImpl {
 					// Assume "./".
 					int lastSlash = pagePath.lastIndexOf('/');
 					if(lastSlash == -1) throw new AssertionError();
-					Path endSlashPath;
-					try {
-						endSlashPath = Path.valueOf(pagePath.substring(0, lastSlash + 1));
-					} catch(ValidationException e) {
-						AssertionError ae = new AssertionError("Sub paths of a valid path are also valid");
-						ae.initCause(e);
-						throw ae;
-					}
+					Path endSlashPath = pageRef.getPath().prefix(lastSlash + 1);
 					page.addParentRef(
 						new ParentRef(
 							new PageRef(
