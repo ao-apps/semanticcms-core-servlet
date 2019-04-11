@@ -231,9 +231,9 @@ public class Link {
 								request,
 								newResponse,
 								// Java 1.8: () -> body.doBody(request, newResponse)
-								new PageContext.PageContextCallableSkip() {
+								new PageContext.PageContextRunnableSkip() {
 									@Override
-									public void call() throws ServletException, IOException, SkipPageException {
+									public void run() throws ServletException, IOException, SkipPageException {
 										body.doBody(request, newResponse);
 									}
 								}

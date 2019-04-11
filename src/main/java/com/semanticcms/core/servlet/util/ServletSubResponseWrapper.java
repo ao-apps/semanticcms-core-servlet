@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2017  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,12 +22,10 @@
  */
 package com.semanticcms.core.servlet.util;
 
-import com.aoindustries.io.TempFileList;
-import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.taglib.AutoEncodingBufferedTag;
+import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.util.WrappedException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -52,7 +50,7 @@ import javax.servlet.ServletResponseWrapper;
  */
 public class ServletSubResponseWrapper extends ServletResponseWrapper {
 
-	private final TempFileList tempFileList;
+	private final TempFileContext tempFileContext;
 	private String characterEncoding;
 	private String contentType;
 	private Locale locale;
@@ -62,9 +60,9 @@ public class ServletSubResponseWrapper extends ServletResponseWrapper {
 	 *             getAttribute and setAttribute must write through to the original request
 	 *             for proper temp file cleanup.
 	 */
-	public ServletSubResponseWrapper(ServletResponse resp, TempFileList tempFileList) {
+	public ServletSubResponseWrapper(ServletResponse resp, TempFileContext tempFileContext) {
 		super(resp);
-		this.tempFileList = tempFileList;
+		this.tempFileContext = tempFileContext;
 		characterEncoding = resp.getCharacterEncoding();
 		contentType = resp.getContentType();
 		locale = resp.getLocale();
@@ -91,18 +89,7 @@ public class ServletSubResponseWrapper extends ServletResponseWrapper {
 	@Override
 	public PrintWriter getWriter() throws IOException {
 		if(capturedOut == null) {
-			// Enable temp files if temp file context active
-			capturedOut = TempFileContext.wrapTempFileList(
-				AutoEncodingBufferedTag.newBufferWriter(),
-				tempFileList,
-				// Java 1.8: AutoTempFileWriter::new
-				new TempFileContext.Wrapper<BufferWriter>() {
-					@Override
-					public BufferWriter call(BufferWriter original, TempFileList tempFileList) {
-						return new AutoTempFileWriter(original, tempFileList);
-					}
-				}
-			);
+			capturedOut = AutoEncodingBufferedTag.newBufferWriter(tempFileContext);
 		}
 		if(capturedPW == null) {
 			capturedPW = new PrintWriter(capturedOut);
