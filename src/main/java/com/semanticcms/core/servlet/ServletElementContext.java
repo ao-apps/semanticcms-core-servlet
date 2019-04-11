@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2015, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -62,14 +62,14 @@ public class ServletElementContext implements ElementContext {
 		if(out instanceof PrintWriter) pw = (PrintWriter)out;
 		else pw = new PrintWriter(out);
 		// Clear PageContext on include
-		PageContext.newPageContext(
+		PageContext.newPageContextSkip(
 			null,
 			null,
 			null,
 			// Java 1.8: Lambda
-			new PageContext.PageContextCallable() {
+			new PageContext.PageContextRunnableSkip() {
 				@Override
-				public void call() throws ServletException, IOException, SkipPageException {
+				public void run() throws ServletException, IOException, SkipPageException {
 					Dispatcher.include(
 						servletContext,
 						resource,

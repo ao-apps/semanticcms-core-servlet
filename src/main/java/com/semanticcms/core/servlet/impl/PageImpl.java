@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet.impl;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.servlet.LocalizedServletException;
 import com.aoindustries.servlet.ServletContextCache;
+import com.aoindustries.servlet.http.ServletUtil;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Node;
@@ -307,13 +308,13 @@ final public class PageImpl {
 
 			// Forward to theme
 			theme.doTheme(servletContext, request, response, view, page);
-			throw new SkipPageException();
+			throw ServletUtil.SKIP_PAGE_EXCEPTION;
 		}
 	}
 
 	private static Book findBookByContentRoot(ServletContext servletContext, PageRef pageRef) {
 		for(Book book : SemanticCMS.getInstance(servletContext).getBooks().values()) {
-			if(book.getContentRoot().equals(pageRef)) {
+			if(pageRef.equals(book.getContentRoot())) {
 				return book;
 			}
 		}
@@ -352,7 +353,6 @@ final public class PageImpl {
 						throw new ServletException("Auto parent of page would be outside book: " + pageRef);
 					}
 					String endSlashPath = pagePath.substring(0, nextLastSlash + 1);
-					// TODO: These new PageRef call String.intern - worth avoiding it?
 					PageRef indexJspxPageRef = new PageRef(pageBook, endSlashPath + "index.jspx");
 					if(servletContextCache.getResource(indexJspxPageRef.getServletPath()) != null) {
 						page.addParentRef(new ParentRef(indexJspxPageRef, null));

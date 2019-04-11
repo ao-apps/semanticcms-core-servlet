@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,14 +22,11 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.io.TempFileList;
-import com.aoindustries.io.buffer.AutoTempFileWriter;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.EmptyResult;
 import com.aoindustries.lang.LocalizedIllegalStateException;
 import com.aoindustries.lang.NotImplementedException;
-import com.aoindustries.servlet.filter.TempFileContext;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.taglib.AutoEncodingBufferedTag;
 import com.semanticcms.core.model.PageRef;
@@ -235,27 +232,16 @@ public class Page {
 								request,
 								newResponse,
 								// Java 1.8: () -> body.doBody(request, newResponse, page)
-								new PageContext.PageContextCallableSkip() {
+								new PageContext.PageContextRunnableSkip() {
 									@Override
-									public void call() throws ServletException, IOException, SkipPageException {
+									public void run() throws ServletException, IOException, SkipPageException {
 										body.doBody(request, newResponse, page);
 									}
 								}
 							);
 							return EmptyResult.getInstance();
 						} else {
-							// Enable temp files if temp file context active
-							BufferWriter capturedOut = TempFileContext.wrapTempFileList(
-								AutoEncodingBufferedTag.newBufferWriter(),
-								request,
-								// Java 1.8: AutoTempFileWriter::new
-								new TempFileContext.Wrapper<BufferWriter>() {
-									@Override
-									public BufferWriter call(BufferWriter original, TempFileList tempFileList) {
-										return new AutoTempFileWriter(original, tempFileList);
-									}
-								}
-							);
+							BufferWriter capturedOut = AutoEncodingBufferedTag.newBufferWriter(request);
 							try {
 								final PrintWriter capturedPW = new PrintWriter(capturedOut);
 								try {
@@ -275,9 +261,9 @@ public class Page {
 										request,
 										newResponse,
 										// Java 1.8: () -> body.doBody(request, newResponse, page)
-										new PageContext.PageContextCallableSkip() {
+										new PageContext.PageContextRunnableSkip() {
 											@Override
-											public void call() throws ServletException, IOException, SkipPageException {
+											public void run() throws ServletException, IOException, SkipPageException {
 												body.doBody(request, newResponse, page);
 											}
 										}
