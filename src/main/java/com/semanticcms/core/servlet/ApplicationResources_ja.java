@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2017  AO Industries, Inc.
+ * Copyright (C) 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -35,7 +35,7 @@ public final class ApplicationResources_ja extends EditableResourceBundle {
 		super(
 			Locales.JAPANESE,
 			ApplicationResources.bundleSet,
-			new File(System.getProperty("user.home")+"/maven2/ao/semanticcms/core/servlet/src/main/resources/com/semanticcms/core/servlet/ApplicationResources_ja.properties")
+			new File(System.getProperty("user.home")+"/maven2/ao/semanticcms-1.x/core/servlet/src/main/resources/com/semanticcms/core/servlet/ApplicationResources_ja.properties")
 		);
 	}
 }
