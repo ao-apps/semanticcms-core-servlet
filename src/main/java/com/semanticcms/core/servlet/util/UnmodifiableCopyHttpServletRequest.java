@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.semanticcms.core.servlet.util;
 
-import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.util.MinimalList;
 import com.aoindustries.util.MinimalMap;
 import java.io.IOException;
@@ -141,8 +140,7 @@ public class UnmodifiableCopyHttpServletRequest extends UnmodifiableCopyServletR
 	@Override
 	public Enumeration<String> getHeaders(String name) {
 		List<String> values = headers.get(name);
-		if(values == null) values = Collections.emptyList();
-		// Java 1.7: Collections.emptyEnumerator()
+		if(values == null) return Collections.emptyEnumeration();
 		return Collections.enumeration(values);
 	}
 
@@ -264,13 +262,15 @@ public class UnmodifiableCopyHttpServletRequest extends UnmodifiableCopyServletR
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
-		throw new NotImplementedException();
+		throw new com.aoindustries.lang.NotImplementedException();
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void login(String username, String password) throws ServletException {
-		throw new NotImplementedException();
+		throw new com.aoindustries.lang.NotImplementedException();
 	}
 
 	@Override
@@ -283,7 +283,7 @@ public class UnmodifiableCopyHttpServletRequest extends UnmodifiableCopyServletR
 		// TODO: Cache?
 		synchronized(lock) {
 			Collection<Part> parts = req.getParts();
-			List<Part> wrapped = new ArrayList<Part>(parts.size());
+			List<Part> wrapped = new ArrayList<>(parts.size());
 			for(Part part : parts) {
 				wrapped.add(new ThreadSafePart(part, lock));
 			}

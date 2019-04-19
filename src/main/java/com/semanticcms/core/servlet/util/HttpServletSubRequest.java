@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,6 @@
  */
 package com.semanticcms.core.servlet.util;
 
-import com.aoindustries.lang.NotImplementedException;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Collection;
@@ -178,13 +177,15 @@ public class HttpServletSubRequest extends ServletSubRequest implements HttpServ
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
-		throw new NotImplementedException();
+		throw new com.aoindustries.lang.NotImplementedException();
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void login(String username, String password) throws ServletException {
-		throw new NotImplementedException();
+		throw new com.aoindustries.lang.NotImplementedException();
 	}
 
 	@Override
