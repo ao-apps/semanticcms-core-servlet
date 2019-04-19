@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -227,7 +227,7 @@ public class PageIndex {
 		);
 		int size = pageList.size();
 		// Index pages
-		Map<PageRef,Integer> newPageIndexes = new HashMap<PageRef,Integer>(size*4/3+1);
+		Map<PageRef,Integer> newPageIndexes = new HashMap<>(size*4/3+1);
 		for(int i=0; i<size; i++) {
 			newPageIndexes.put(pageList.get(i).getPageRef(), i);
 		}

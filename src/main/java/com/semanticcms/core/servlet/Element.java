@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,7 +24,6 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.lang.LocalizedIllegalStateException;
-import com.aoindustries.lang.NotImplementedException;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.taglib.AutoEncodingBufferedTag;
 import com.semanticcms.core.model.ElementWriter;
@@ -128,13 +127,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 					if(elementKey == null) {
 						try {
 							writeTo(out, new ServletElementContext(servletContext, request, response));
-						} catch(ServletException e) {
-							throw e;
-						} catch(IOException e) {
-							throw e;
-						} catch(SkipPageException e) {
-							throw e;
-						} catch(RuntimeException e) {
+						} catch(ServletException | IOException | SkipPageException | RuntimeException e) {
 							throw e;
 						} catch(Exception e) {
 							throw new ServletException(e);
@@ -210,16 +203,16 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 				// Invoke tag body, capturing output
 				BufferWriter capturedOut = AutoEncodingBufferedTag.newBufferWriter(request);
 				try {
-					final PrintWriter capturedPW = new PrintWriter(capturedOut);
-					try {
+					try (final PrintWriter capturedPW = new PrintWriter(capturedOut)) {
 						final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
 							@Override
 							public PrintWriter getWriter() throws IOException {
 								return capturedPW;
 							}
 							@Override
+							@SuppressWarnings("deprecation")
 							public ServletOutputStream getOutputStream() {
-								throw new NotImplementedException();
+								throw new com.aoindustries.lang.NotImplementedException();
 							}
 						};
 						// Set PageContext
@@ -236,8 +229,6 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 							}
 						);
 						if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
-					} finally {
-						capturedPW.close();
 					}
 				} finally {
 					capturedOut.close();

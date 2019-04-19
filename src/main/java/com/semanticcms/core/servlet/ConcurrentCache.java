@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -60,12 +60,12 @@ class ConcurrentCache extends MapCache {
 
 	@Override
 	public <K,V> ConcurrentMap<K,V> newMap() {
-		return new ConcurrentHashMap<K,V>();
+		return new ConcurrentHashMap<>();
 	}
 
 	@Override
 	public <K,V> ConcurrentMap<K,V> newMap(int size) {
-		return new ConcurrentHashMap<K,V>(size);
+		return new ConcurrentHashMap<>(size);
 	}
 
 	@Override

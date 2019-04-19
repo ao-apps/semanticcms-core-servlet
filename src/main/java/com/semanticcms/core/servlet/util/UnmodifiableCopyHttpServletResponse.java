@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -180,12 +180,12 @@ public class UnmodifiableCopyHttpServletResponse extends UnmodifiableCopyServlet
 	@Override
 	public Collection<String> getHeaders(String name) {
 		List<String> values = headers.get(name);
-		if(values == null) return new ArrayList<String>(0);
-		return new ArrayList<String>(values);
+		if(values == null) return new ArrayList<>(0);
+		return new ArrayList<>(values);
 	}
 
 	@Override
 	public Collection<String> getHeaderNames() {
-		return new ArrayList<String>(headers.keySet());
+		return new ArrayList<>(headers.keySet());
 	}
 }

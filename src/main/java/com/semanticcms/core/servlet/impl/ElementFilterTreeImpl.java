@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -253,7 +253,7 @@ final public class ElementFilterTreeImpl {
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
 			final Node currentNode = CurrentNode.getCurrentNode(request);
 			// Filter by has files
-			final Set<Node> nodesWithMatches = new HashSet<Node>();
+			final Set<Node> nodesWithMatches = new HashSet<>();
 			findElements(servletContext, request, response, elementFilter, nodesWithMatches, root, includeElements);
 
 			if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");

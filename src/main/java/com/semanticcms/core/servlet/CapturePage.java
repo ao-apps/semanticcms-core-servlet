@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -29,7 +29,6 @@ import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.tempfiles.servlet.ServletTempFileContext;
-import com.aoindustries.util.AoCollections;
 import com.aoindustries.util.concurrent.Executor;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -273,8 +272,8 @@ public class CapturePage {
 			);
 		} else {
 			final Cache cache = CacheFilter.getCache(request);
-			Map<PageRef,Page> results = new LinkedHashMap<PageRef,Page>(size * 4/3 + 1);
-			List<PageReferrer> notCachedList = new ArrayList<PageReferrer>(size);
+			Map<PageRef,Page> results = new LinkedHashMap<>(size * 4/3 + 1);
+			List<PageReferrer> notCachedList = new ArrayList<>(size);
 			if(level != CaptureLevel.BODY) {
 				// Check cache before queuing on different threads, building list of those not in cache
 				for(PageReferrer pageReferrer : pageReferrers) {
@@ -302,7 +301,7 @@ public class CapturePage {
 				final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
 				final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
 				// Create the tasks
-				List<Callable<Page>> tasks = new ArrayList<Callable<Page>>(notCachedSize);
+				List<Callable<Page>> tasks = new ArrayList<>(notCachedSize);
 				for(int i=0; i<notCachedSize; i++) {
 					final PageRef pageRef = notCachedList.get(i).getPageRef();
 					tasks.add(
@@ -574,19 +573,19 @@ public class CapturePage {
 		int maxSize = 0;
 
 		// The which pages have been visited
-		final Set<PageRef> visited = new HashSet<PageRef>();
+		final Set<PageRef> visited = new HashSet<>();
 		// The pages that are currently ready for processing
-		final List<Page> readyPages = new ArrayList<Page>();
+		final List<Page> readyPages = new ArrayList<>();
 		// New ready pages, used to add in the correct order to readyPages based on traversal direction hints
-		final List<Page> newReadyPages = new ArrayList<Page>();
+		final List<Page> newReadyPages = new ArrayList<>();
 		// Track which futures have been completed (callable put itself here once done)
-		final BlockingQueue<PageRef> finishedFutures = new ArrayBlockingQueue<PageRef>(preferredConcurrency);
+		final BlockingQueue<PageRef> finishedFutures = new ArrayBlockingQueue<>(preferredConcurrency);
 		// Does not immediately submit to the executor, waits until the readyPages are exhausted
-		final List<PageRef> edgesToAdd = new ArrayList<PageRef>();
+		final List<PageRef> edgesToAdd = new ArrayList<>();
 		// New edges to add, used to add in the correct order to edgesToAdd based on traversal direction hints
-		final List<PageRef> newEdgesToAdd = new ArrayList<PageRef>();
+		final List<PageRef> newEdgesToAdd = new ArrayList<>();
 		// The futures are queued, active, or finished but not yet processed by main thread
-		final Map<PageRef,Future<Page>> futures = new HashMap<PageRef,Future<Page>>(preferredConcurrency * 4/3+1);
+		final Map<PageRef,Future<Page>> futures = new HashMap<>(preferredConcurrency * 4/3+1);
 		try {
 			// Kick it off
 			visited.add(page.getPageRef());
@@ -981,13 +980,13 @@ public class CapturePage {
 			level,
 			new PageHandler<T>() {
 				// All of the edges visited or already set as a next
-				final Set<PageRef> visited = new HashSet<PageRef>();
+				final Set<PageRef> visited = new HashSet<>();
 				// The already resolved parents, used for postHandler
-				final List<Page> parents = new ArrayList<Page>();
+				final List<Page> parents = new ArrayList<>();
 				// The next node that is to be processed, highest on list is active
-				final List<PageRef> nexts = new ArrayList<PageRef>();
+				final List<PageRef> nexts = new ArrayList<>();
 				// Those that are to be done after what is next
-				final List<Iterator<? extends PageReferrer>> afters = new ArrayList<Iterator<? extends PageReferrer>>();
+				final List<Iterator<? extends PageReferrer>> afters = new ArrayList<>();
 				// The set of nodes we've received but are not yet ready to process
 				Map<PageRef,Page> received = null;
 
@@ -996,7 +995,7 @@ public class CapturePage {
 					PageRef pageRef = page.getPageRef();
 					visited.add(pageRef);
 					nexts.add(pageRef);
-					Iterator<? extends PageReferrer> empty = AoCollections.emptyIterator(); // Java 1.7: Use java.util.Collections.emptyIterator()
+					Iterator<? extends PageReferrer> empty = Collections.emptyIterator();
 					afters.add(empty);
 				}
 
@@ -1092,7 +1091,7 @@ public class CapturePage {
 						);
 						if(DEBUG_NOW) System.err.println("nextHint now: " + nextHint[0]);
 					} else {
-						if(received == null) received = new HashMap<PageRef,Page>();
+						if(received == null) received = new HashMap<>();
 						received.put(pageRef, page);
 						if(DEBUG_NOW) {
 							System.err.println("Received " + pageRef + ", size = " + received.size() + ", next = " + nextHint[0]);

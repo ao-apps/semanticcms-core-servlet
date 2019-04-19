@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -200,7 +200,7 @@ final public class PageUtils {
 				return Collections.emptySet();
 			}
 		} else {
-			Set<PR> notMissingBooks = new LinkedHashSet<PR>(size *4/3+1);
+			Set<PR> notMissingBooks = new LinkedHashSet<>(size *4/3+1);
 			for(PR pageReferrer : pageReferrers) {
 				if(pageReferrer.getPageRef().getBook() != null) {
 					if(!notMissingBooks.add(pageReferrer)) throw new AssertionError();
@@ -248,7 +248,7 @@ final public class PageUtils {
 			filterNotMissingBook(page.getParentRefs()),
 			CaptureLevel.META // TODO: View provide capture level required for isApplicable check, might be PAGE or (null for none) for some views.
 		).values();
-		Set<Page> applicableParents = new LinkedHashSet<Page>(parents.size() *4/3+1);
+		Set<Page> applicableParents = new LinkedHashSet<>(parents.size() *4/3+1);
 		for(Page parent : parents) {
 			if(view.isApplicable(servletContext, request, response, parent)) {
 				applicableParents.add(parent);
