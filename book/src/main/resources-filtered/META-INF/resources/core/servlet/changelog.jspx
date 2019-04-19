@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2019-04-19T05:31:58-0500"
+		dateModified="2019-04-19T05:37:16-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -52,17 +52,26 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				groupId="@{documented.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{documented.scm.url}"
-			>
-				<ul>
-					<li>Minimum Java version changed from 1.6 to 1.7.</li>
-					<li>
-						<code><ao:a href="apidocs/com/semanticcms/core/servlet/PageRefResolver.html">PageRefResolver</ao:a>.getCurrentPageRef(…)</code>
-						now accepts an optional parameter to optionally return <code>null</code> on missing book instead of throwing
-						<code><ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/ServletException.html">ServletException</ao:a></code>.
-					</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="1.12.0"
+			datePublished="2019-04-19T05:37:16-0500"
+			groupId="@{documented.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{documented.scm.url}"
+		>
+			<ul>
+				<li>Minimum Java version changed from 1.6 to 1.7.</li>
+				<li>
+					<code><ao:a href="apidocs/com/semanticcms/core/servlet/PageRefResolver.html">PageRefResolver</ao:a>.getCurrentPageRef(…)</code>
+					now accepts an optional parameter to optionally return <code>null</code> on missing book instead of throwing
+					<code><ao:a rel="nofollow" href="@{javac.link.javaeeApi.6}javax/servlet/ServletException.html">ServletException</ao:a></code>.
+				</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
