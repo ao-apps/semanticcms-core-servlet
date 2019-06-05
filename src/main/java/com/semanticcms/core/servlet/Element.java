@@ -203,7 +203,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 				// Invoke tag body, capturing output
 				BufferWriter capturedOut = AutoEncodingBufferedTag.newBufferWriter(request);
 				try {
-					try (final PrintWriter capturedPW = new PrintWriter(capturedOut)) {
+					try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
 						final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
 							@Override
 							public PrintWriter getWriter() throws IOException {
