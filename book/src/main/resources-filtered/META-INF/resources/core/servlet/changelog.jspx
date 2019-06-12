@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2019-06-04T01:23:30-0500"
+		dateModified="2019-06-12T03:09:29-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -60,6 +60,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 							<li>This project's managed dependencies may also be imported by other projects.</li>
 						</ol>
 					</li>
+					<li>Now supporting media="print" stylesheets.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
