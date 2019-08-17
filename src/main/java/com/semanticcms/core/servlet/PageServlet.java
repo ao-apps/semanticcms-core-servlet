@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,6 +26,8 @@ import com.aoindustries.servlet.http.Includer;
 import com.aoindustries.servlet.http.ServletUtil;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +43,8 @@ import javax.servlet.jsp.SkipPageException;
 abstract public class PageServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final Charset ENCODING = StandardCharsets.UTF_8;
 
 	/**
 	 * @see  Page#getTitle()
@@ -101,7 +105,7 @@ abstract public class PageServlet extends HttpServlet {
 						@Override
 						public void doBody(HttpServletRequest req1, HttpServletResponse resp1, Page page) throws ServletException, IOException, SkipPageException {
 							resp1.setContentType("application/xhtml+xml");
-							resp1.setCharacterEncoding("UTF-8");
+							resp1.setCharacterEncoding(ENCODING.name());
 							method.doMethod(page);
 						}
 					}
@@ -130,7 +134,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to UTF-8.
+	 * The response character encoding has been set to {@link ENCODING}.
 	 */
 	protected void doGet(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -155,7 +159,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to UTF-8.
+	 * The response character encoding has been set to {@link ENCODING}.
 	 */
 	protected void doPost(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -180,7 +184,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to UTF-8.
+	 * The response character encoding has been set to {@link ENCODING}.
 	 */
 	protected void doPut(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -205,7 +209,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to UTF-8.
+	 * The response character encoding has been set to {@link ENCODING}.
 	 */
 	protected void doDelete(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -230,7 +234,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to UTF-8.
+	 * The response character encoding has been set to {@link ENCODING}.
 	 */
 	protected void doOptions(Page page) throws ServletException, IOException, SkipPageException {
 		ServletUtil.doOptions(
