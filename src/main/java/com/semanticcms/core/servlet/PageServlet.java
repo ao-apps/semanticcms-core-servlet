@@ -22,8 +22,9 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.servlet.ServletUtil;
+import com.aoindustries.servlet.http.HttpServletUtil;
 import com.aoindustries.servlet.http.Includer;
-import com.aoindustries.servlet.http.ServletUtil;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -237,7 +238,7 @@ abstract public class PageServlet extends HttpServlet {
 	 * The response character encoding has been set to {@link ENCODING}.
 	 */
 	protected void doOptions(Page page) throws ServletException, IOException, SkipPageException {
-		ServletUtil.doOptions(
+		HttpServletUtil.doOptions(
 			PageContext.getResponse(),
 			PageServlet.class,
 			this.getClass(),

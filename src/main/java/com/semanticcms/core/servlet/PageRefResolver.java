@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2015, 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -23,8 +23,8 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.lang.NullArgumentException;
+import com.aoindustries.net.URIResolver;
 import com.aoindustries.servlet.http.Dispatcher;
-import com.aoindustries.servlet.http.ServletUtil;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
@@ -100,7 +100,7 @@ public class PageRefResolver {
 			if(currentBook == null) throw new ServletException("book attribute required when not in a book's content");
 			return new PageRef(
 				currentBook,
-				ServletUtil.getAbsolutePath(
+				URIResolver.getAbsolutePath(
 					currentPagePath.substring(currentBook.getPathPrefix().length()),
 					path
 				)
