@@ -25,8 +25,8 @@ package com.semanticcms.core.servlet;
 import com.aoindustries.encoding.MediaType;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.http.Dispatcher;
+import com.aoindustries.servlet.http.HttpServletUtil;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
-import com.aoindustries.servlet.http.ServletUtil;
 import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.tempfiles.servlet.ServletTempFileContext;
 import com.aoindustries.util.concurrent.Executor;
@@ -170,14 +170,14 @@ public class CapturePage {
 											servletContext,
 											capturePath,
 											// Always capture as "GET" request
-											ServletUtil.METHOD_GET.equals(request.getMethod())
+											HttpServletUtil.METHOD_GET.equals(request.getMethod())
 												// Is already "GET"
 												? request
 												// Wrap to make "GET"
 												: new HttpServletRequestWrapper(request) {
 													@Override
 													public String getMethod() {
-														return ServletUtil.METHOD_GET;
+														return HttpServletUtil.METHOD_GET;
 													}
 												},
 											new NullHttpServletResponseWrapper(response)
