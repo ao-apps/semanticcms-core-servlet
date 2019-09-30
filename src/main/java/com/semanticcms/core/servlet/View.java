@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,14 +22,14 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.servlet.ServletUtil;
+import com.aoindustries.servlet.URIComponent;
 import com.aoindustries.taglib.Link;
 import com.semanticcms.core.model.Author;
-import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -218,29 +218,36 @@ abstract public class View implements Comparable<View> {
 		Page page
 	) throws ServletException, IOException {
 		PageRef pageRef = page.getPageRef();
-		Book book = pageRef.getBook();
 		// TODO: Should we use servletPath here, then remove the book prefix?
 		//       We're passing a partial path to response.encodeURL
+		String encodedBookPrefix = ServletUtil.encodeURI(pageRef.getBookPrefix(), response);
 		String encodedServletPath;
 		{
-			String servletPath = pageRef.getServletPath();
+			StringBuilder servletPath = new StringBuilder();
+			servletPath.append(encodedBookPrefix);
+			ServletUtil.encodeURI(pageRef.getPath(), response, servletPath);
 			if(!isDefault()) {
-				servletPath += "?view=" + URLEncoder.encode(getName(), response.getCharacterEncoding());
+				servletPath.append("?view=");
+				URIComponent.QUERY.encode(getName(), response, servletPath);
 			}
-			encodedServletPath = response.encodeURL(servletPath);
+			encodedServletPath = response.encodeURL(servletPath.toString());
 		}
 		// To be safe, we're encoding the servletPath, then picking it back into a bookPath
+		// TODO: How would this interact with things like PrettyUrlFilter?
 		String encodedBookPath;
 		{
-			String bookPrefix = book.getPathPrefix();
-			if(bookPrefix.isEmpty()) {
+			if(encodedBookPrefix.isEmpty()) {
 				encodedBookPath = encodedServletPath;
 			} else {
-				if(!encodedServletPath.startsWith(bookPrefix)) throw new IllegalStateException("Encoded servlet path is outside this book, unable to canonicalize: encodedServletPath = " + encodedServletPath);
-				encodedBookPath = encodedServletPath.substring(bookPrefix.length());
+				if(!encodedServletPath.startsWith(encodedBookPrefix)) throw new IllegalStateException("Encoded servlet path is outside this book, unable to canonicalize: encodedServletPath = " + encodedServletPath);
+				encodedBookPath = encodedServletPath.substring(encodedBookPrefix.length());
 			}
 		}
-		return BookUtils.getCanonicalBase(servletContext, request, book) + encodedBookPath;
+		return BookUtils.getCanonicalBase(
+			servletContext,
+			request,
+			pageRef.getBook()
+		) + encodedBookPath;
 	}
 
 	/**

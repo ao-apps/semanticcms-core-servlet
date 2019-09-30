@@ -28,7 +28,8 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextIn
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
-import com.aoindustries.net.HttpParameters;
+import com.aoindustries.net.URIParameters;
+import com.aoindustries.servlet.URIComponent;
 import com.aoindustries.servlet.http.LastModifiedServlet;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
@@ -46,7 +47,6 @@ import com.semanticcms.core.servlet.SemanticCMS;
 import com.semanticcms.core.servlet.View;
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URLEncoder;
 import javax.el.ELContext;
 import javax.el.ValueExpression;
 import javax.servlet.ServletContext;
@@ -64,12 +64,12 @@ final public class LinkImpl {
 	/**
 	 * Writes a broken path reference as "¿/book/path{#targetId}?", no encoding.
 	 */
+	// TODO: Encoder variants
 	public static void writeBrokenPath(PageRef pageRef, String targetId, Appendable out) throws IOException {
 		out.append('¿');
 		out.append(pageRef.getServletPath());
 		if(targetId != null) {
-			out.append('#');
-			out.append(targetId);
+			out.append('#').append(targetId);
 		}
 		out.append('?');
 	}
@@ -82,7 +82,8 @@ final public class LinkImpl {
 	}
 
 	public static String getBrokenPath(PageRef pageRef, String targetId) {
-		int sbLen = 1 // '¿'
+		int sbLen =
+			1 // '¿'
 			+ pageRef.getServletPath().length();
 		if(targetId != null) {
 			sbLen +=
@@ -107,6 +108,7 @@ final public class LinkImpl {
 	/**
 	 * Writes a broken path reference as "¿/book/path{#targetId}?", encoding for XHTML.
 	 */
+	// TODO: Convert to a single Encoder variant
 	public static void writeBrokenPathInXhtml(PageRef pageRef, String targetId, Appendable out) throws IOException {
 		out.append('¿');
 		encodeTextInXhtml(pageRef.getServletPath(), out);
@@ -145,7 +147,7 @@ final public class LinkImpl {
 		String anchor,
 		String viewName,
 		boolean small,
-	    HttpParameters params,
+	    URIParameters params,
 		Object clazz,
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
@@ -195,7 +197,7 @@ final public class LinkImpl {
 		ValueExpression anchor,
 		ValueExpression viewName,
 		boolean small,
-	    HttpParameters params,
+	    URIParameters params,
 		ValueExpression clazz,
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
@@ -252,7 +254,7 @@ final public class LinkImpl {
 		String anchor,
 		String viewName,
 		boolean small,
-	    HttpParameters params,
+	    URIParameters params,
 		Object clazz,
 		LinkImplBody<E> body,
 		CaptureLevel captureLevel
@@ -277,8 +279,6 @@ final public class LinkImpl {
 		// Add page links
 		if(currentNode != null) currentNode.addPageLink(targetPageRef);
 		if(captureLevel == CaptureLevel.BODY) {
-			final String responseEncoding = response.getCharacterEncoding();
-
 			element = nullIfEmpty(element);
 			anchor = nullIfEmpty(anchor);
 			if(element != null && anchor != null) {
@@ -342,15 +342,14 @@ final public class LinkImpl {
 					if(anchor == null) {
 						// Link to page
 						if(index != null && isDefaultView) {
-							href = '#' + URLEncoder.encode(PageIndex.getRefId(index, null), responseEncoding);
+							href = '#' + URIComponent.FRAGMENT.encode(PageIndex.getRefId(index, null), response);
 						} else {
 							StringBuilder url = new StringBuilder();
 							targetPageRef.appendServletPath(url);
 							if(!isDefaultView) {
 								boolean hasQuestion = url.lastIndexOf("?") != -1;
-								url
-									.append(hasQuestion ? "&view=" : "?view=")
-									.append(URLEncoder.encode(viewName, responseEncoding));
+								url.append(hasQuestion ? "&view=" : "?view=");
+								URIComponent.QUERY.encode(viewName, response, url);
 							}
 							href = url.toString();
 						}
@@ -358,42 +357,42 @@ final public class LinkImpl {
 						// Link to anchor in page
 						if(index != null && isDefaultView) {
 							// Link to target in indexed page (view=all mode)
-							href = '#' + URLEncoder.encode(PageIndex.getRefId(index, anchor), responseEncoding);
+							href = '#' + URIComponent.FRAGMENT.encode(PageIndex.getRefId(index, anchor), response);
 						} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
 							// Link to target on same page
-							href = '#' + URLEncoder.encode(anchor, responseEncoding);
+							href = '#' + URIComponent.FRAGMENT.encode(anchor, response);
 						} else {
 							// Link to target on different page (or same page, different view)
 							StringBuilder url = new StringBuilder();
 							targetPageRef.appendServletPath(url);
 							if(!isDefaultView) {
 								boolean hasQuestion = url.lastIndexOf("?") != -1;
-								url
-									.append(hasQuestion ? "&view=" : "?view=")
-									.append(URLEncoder.encode(viewName, responseEncoding));
+								url.append(hasQuestion ? "&view=" : "?view=");
+								URIComponent.QUERY.encode(viewName, response, url);
 							}
-							url.append('#').append(URLEncoder.encode(anchor, responseEncoding));
+							url.append('#');
+							URIComponent.FRAGMENT.encode(anchor, response, url);
 							href = url.toString();
 						}
 					}
 				} else {
 					if(index != null && isDefaultView) {
 						// Link to target in indexed page (view=all mode)
-						href = '#' + URLEncoder.encode(PageIndex.getRefId(index, element), responseEncoding);
+						href = '#' + URIComponent.FRAGMENT.encode(PageIndex.getRefId(index, element), response);
 					} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
 						// Link to target on same page
-						href = '#' + URLEncoder.encode(element, responseEncoding);
+						href = '#' + URIComponent.FRAGMENT.encode(element, response);
 					} else {
 						// Link to target on different page (or same page, different view)
 						StringBuilder url = new StringBuilder();
 						targetPageRef.appendServletPath(url);
 						if(!isDefaultView) {
 							boolean hasQuestion = url.lastIndexOf("?") != -1;
-							url
-								.append(hasQuestion ? "&view=" : "?view=")
-								.append(URLEncoder.encode(viewName, responseEncoding));
+							url.append(hasQuestion ? "&view=" : "?view=");
+							URIComponent.QUERY.encode(viewName, response, url);
 						}
-						url.append('#').append(URLEncoder.encode(element, responseEncoding));
+						url.append('#');
+						URIComponent.FRAGMENT.encode(element, response, url);
 						href = url.toString();
 					}
 				}
