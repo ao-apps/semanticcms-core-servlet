@@ -22,8 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.servlet.ServletUtil;
-import com.aoindustries.servlet.URIComponent;
+import com.aoindustries.net.URIEncoder;
 import com.aoindustries.taglib.Link;
 import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.Copyright;
@@ -220,15 +219,15 @@ abstract public class View implements Comparable<View> {
 		PageRef pageRef = page.getPageRef();
 		// TODO: Should we use servletPath here, then remove the book prefix?
 		//       We're passing a partial path to response.encodeURL
-		String encodedBookPrefix = ServletUtil.encodeURI(pageRef.getBookPrefix(), response);
+		String encodedBookPrefix = URIEncoder.encodeURI(pageRef.getBookPrefix());
 		String encodedServletPath;
 		{
 			StringBuilder servletPath = new StringBuilder();
 			servletPath.append(encodedBookPrefix);
-			ServletUtil.encodeURI(pageRef.getPath(), response, servletPath);
+			URIEncoder.encodeURI(pageRef.getPath(), servletPath);
 			if(!isDefault()) {
 				servletPath.append("?view=");
-				URIComponent.QUERY.encode(getName(), response, servletPath);
+				URIEncoder.encodeURIComponent(getName(), servletPath);
 			}
 			encodedServletPath = response.encodeURL(servletPath.toString());
 		}
