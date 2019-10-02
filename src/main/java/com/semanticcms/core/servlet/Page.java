@@ -192,7 +192,7 @@ public class Page {
 	 * </p>
 	 *
 	 * @see  PageContext
-	 * @see  PageImpl#PAGE_REQUEST_ATTRIBUTE
+	 * @see  CurrentPage#CURRENT_PAGE_REQUEST_ATTRIBUTE_NAME
 	 */
 	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
 		PageRef pr = pageRef;

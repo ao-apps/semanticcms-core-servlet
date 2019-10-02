@@ -84,7 +84,7 @@ public class PageRefResolver {
 	 * @param  book  empty string is treated same as null
 	 * @param  path  required non-empty
 	 *
-	 * @see  #getBookName
+	 * @see  PageRef#getBookName()
 	 *
 	 * @throws ServletException If no book provided and the current page is not within a book's content.
 	 */
