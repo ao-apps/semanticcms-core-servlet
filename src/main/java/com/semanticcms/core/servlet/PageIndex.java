@@ -227,7 +227,7 @@ public class PageIndex {
 	 *
 	 * @param  id  optional, id not added when null or empty
 	 *
-	 * @see  #getRefIdInPage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.model.Page, java.lang.String)
+	 * @see  #getRefIdInPage(javax.servlet.http.HttpServletRequest, com.semanticcms.core.model.Page, java.lang.String)
 	 */
 	public static void appendIdInPage(PageIndex pageIndex, Page page, String id, Appendable out) throws IOException {
 		if(pageIndex != null && page != null) {

@@ -181,7 +181,7 @@ final public class LinkImpl {
 	 *                 Conflicts with {@code anchor}.
 	 * @param anchor  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only.
 	 *                Conflicts with {@code element}.
-	 * @param view  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only
+	 * @param viewName   ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only
 	 * @param clazz  ValueExpression that returns Object, evaluated at {@link CaptureLevel#BODY} only
 	 */
 	public static <E extends Throwable> void writeLinkImpl(

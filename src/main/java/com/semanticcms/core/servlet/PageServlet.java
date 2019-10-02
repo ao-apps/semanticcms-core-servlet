@@ -25,7 +25,6 @@ package com.semanticcms.core.servlet;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.HttpServletUtil;
 import com.aoindustries.servlet.http.Includer;
-import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +37,7 @@ import javax.servlet.jsp.SkipPageException;
 /**
  * Automatically sets up the Page and the PageContext.
  *
- * @see  Page
+ * @see  com.semanticcms.core.model.Page
  * @see  PageContext
  */
 abstract public class PageServlet extends HttpServlet {
@@ -48,26 +47,26 @@ abstract public class PageServlet extends HttpServlet {
 	public static final Charset ENCODING = StandardCharsets.UTF_8;
 
 	/**
-	 * @see  Page#getTitle()
+	 * @see  com.semanticcms.core.model.Page#getTitle()
 	 */
 	abstract public String getTitle();
 
 	/**
-	 * @see  Page#getShortTitle()
+	 * @see  com.semanticcms.core.model.Page#getShortTitle()
 	 */
 	public String getShortTitle() {
 		return null;
 	}
 
 	/**
-	 * @see  Page#getDescription()
+	 * @see  com.semanticcms.core.model.Page#getDescription()
 	 */
 	public String getDescription() {
 		return null;
 	}
 
 	/**
-	 * @see  Page#getKeywords()
+	 * @see  com.semanticcms.core.model.Page#getKeywords()
 	 */
 	public String getKeywords() {
 		return null;
@@ -76,35 +75,35 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Defaults to null for "auto".
 	 *
-	 * @see  Page#getToc()
+	 * @see  com.semanticcms.core.model.Page#getToc()
 	 */
 	public Boolean getToc() {
 		return null;
 	}
 
 	/**
-	 * @see  Page#getTocLevels()
-	 * @see  Page#DEFAULT_TOC_LEVELS
+	 * @see  com.semanticcms.core.model.Page#getTocLevels()
+	 * @see  com.semanticcms.core.model.Page#DEFAULT_TOC_LEVELS
 	 */
 	public int getTocLevels() {
-		return Page.DEFAULT_TOC_LEVELS;
+		return com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
 	}
 
 	private static interface DoMethodCallable {
-		void doMethod(Page page) throws ServletException, IOException, SkipPageException;
+		void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
 	}
 
 	private void callInPage(HttpServletRequest req, HttpServletResponse resp, final DoMethodCallable method) throws ServletException, IOException {
 		try {
-			new com.semanticcms.core.servlet.Page(getServletContext(), req, resp, getTitle())
+			new Page(getServletContext(), req, resp, getTitle())
 				.shortTitle(getShortTitle())
 				.description(getDescription())
 				.keywords(getKeywords())
 				.toc(getToc())
 				.tocLevels(getTocLevels())
-				.invoke(new com.semanticcms.core.servlet.Page.Body() {
+				.invoke(new Page.Body() {
 						@Override
-						public void doBody(HttpServletRequest req1, HttpServletResponse resp1, Page page) throws ServletException, IOException, SkipPageException {
+						public void doBody(HttpServletRequest req1, HttpServletResponse resp1, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 							resp1.setContentType("application/xhtml+xml");
 							resp1.setCharacterEncoding(ENCODING.name());
 							method.doMethod(page);
@@ -125,7 +124,7 @@ abstract public class PageServlet extends HttpServlet {
 			resp,
 			new DoMethodCallable() {
 				@Override
-				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 					doGet(page);
 				}
 			}
@@ -135,9 +134,9 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
-	protected void doGet(Page page) throws ServletException, IOException, SkipPageException {
+	protected void doGet(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw ServletUtil.SKIP_PAGE_EXCEPTION;
 	}
@@ -150,7 +149,7 @@ abstract public class PageServlet extends HttpServlet {
 			resp,
 			new DoMethodCallable() {
 				@Override
-				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 					doPost(page);
 				}
 			}
@@ -160,9 +159,9 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
-	protected void doPost(Page page) throws ServletException, IOException, SkipPageException {
+	protected void doPost(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw ServletUtil.SKIP_PAGE_EXCEPTION;
 	}
@@ -175,7 +174,7 @@ abstract public class PageServlet extends HttpServlet {
 			resp,
 			new DoMethodCallable() {
 				@Override
-				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 					doPut(page);
 				}
 			}
@@ -185,9 +184,9 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
-	protected void doPut(Page page) throws ServletException, IOException, SkipPageException {
+	protected void doPut(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw ServletUtil.SKIP_PAGE_EXCEPTION;
 	}
@@ -200,7 +199,7 @@ abstract public class PageServlet extends HttpServlet {
 			resp,
 			new DoMethodCallable() {
 				@Override
-				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 					doDelete(page);
 				}
 			}
@@ -210,9 +209,9 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
-	protected void doDelete(Page page) throws ServletException, IOException, SkipPageException {
+	protected void doDelete(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		throw ServletUtil.SKIP_PAGE_EXCEPTION;
 	}
@@ -225,7 +224,7 @@ abstract public class PageServlet extends HttpServlet {
 			resp,
 			new DoMethodCallable() {
 				@Override
-				public void doMethod(Page page) throws ServletException, IOException, SkipPageException {
+				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 					doOptions(page);
 				}
 			}
@@ -235,9 +234,9 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
-	protected void doOptions(Page page) throws ServletException, IOException, SkipPageException {
+	protected void doOptions(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
 		HttpServletUtil.doOptions(
 			PageContext.getResponse(),
 			PageServlet.class,
@@ -247,7 +246,7 @@ abstract public class PageServlet extends HttpServlet {
 			"doPut",
 			"doDelete",
 			new Class<?>[] {
-				Page.class
+				com.semanticcms.core.model.Page.class
 			}
 		);
 	}

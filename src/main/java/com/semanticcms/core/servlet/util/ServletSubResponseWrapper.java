@@ -55,9 +55,7 @@ public class ServletSubResponseWrapper extends ServletResponseWrapper {
 	private Locale locale;
 
 	/**
-	 * @param req  The request context that contains the temp file list for auto temp files;
-	 *             getAttribute and setAttribute must write through to the original request
-	 *             for proper temp file cleanup.
+	 * @param tempFileContext  The temp file list for auto temp files.
 	 */
 	public ServletSubResponseWrapper(ServletResponse resp, TempFileContext tempFileContext) {
 		super(resp);
