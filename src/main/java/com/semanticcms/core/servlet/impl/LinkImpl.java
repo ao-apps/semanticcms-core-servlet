@@ -336,65 +336,62 @@ final public class LinkImpl {
 			Integer index = pageIndex==null ? null : pageIndex.getPageIndex(targetPageRef);
 
 			out.write(small ? "<span" : "<a");
-			String href;
-			{
-				if(element == null) {
-					if(anchor == null) {
-						// Link to page
-						if(index != null && isDefaultView) {
-							href = '#' + URIEncoder.encodeURIComponent(PageIndex.getRefId(index, null));
-						} else {
-							StringBuilder url = new StringBuilder();
-							targetPageRef.appendServletPath(url);
-							if(!isDefaultView) {
-								boolean hasQuestion = url.lastIndexOf("?") != -1;
-								url.append(hasQuestion ? "&view=" : "?view=");
-								URIEncoder.encodeURIComponent(viewName, url);
-							}
-							href = url.toString();
-						}
+			StringBuilder href = new StringBuilder();
+			if(element == null) {
+				if(anchor == null) {
+					// Link to page
+					if(index != null && isDefaultView) {
+						href.append('#');
+						URIEncoder.encodeURIComponent(PageIndex.getRefId(index, null), href);
 					} else {
-						// Link to anchor in page
-						if(index != null && isDefaultView) {
-							// Link to target in indexed page (view=all mode)
-							href = '#' + URIEncoder.encodeURIComponent(PageIndex.getRefId(index, anchor));
-						} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
-							// Link to target on same page
-							href = '#' + URIEncoder.encodeURIComponent(anchor);
-						} else {
-							// Link to target on different page (or same page, different view)
-							StringBuilder url = new StringBuilder();
-							targetPageRef.appendServletPath(url);
-							if(!isDefaultView) {
-								boolean hasQuestion = url.lastIndexOf("?") != -1;
-								url.append(hasQuestion ? "&view=" : "?view=");
-								URIEncoder.encodeURIComponent(viewName, url);
-							}
-							url.append('#');
-							URIEncoder.encodeURIComponent(anchor, url);
-							href = url.toString();
+						targetPageRef.appendServletPath(href);
+						if(!isDefaultView) {
+							boolean hasQuestion = href.lastIndexOf("?") != -1;
+							href.append(hasQuestion ? "&view=" : "?view=");
+							URIEncoder.encodeURIComponent(viewName, href);
 						}
 					}
 				} else {
+					// Link to anchor in page
 					if(index != null && isDefaultView) {
 						// Link to target in indexed page (view=all mode)
-						href = '#' + URIEncoder.encodeURIComponent(PageIndex.getRefId(index, element));
+						href.append('#');
+						URIEncoder.encodeURIComponent(PageIndex.getRefId(index, anchor), href);
 					} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
 						// Link to target on same page
-						href = '#' + URIEncoder.encodeURIComponent(element);
+						href.append('#');
+						URIEncoder.encodeURIComponent(anchor, href);
 					} else {
 						// Link to target on different page (or same page, different view)
-						StringBuilder url = new StringBuilder();
-						targetPageRef.appendServletPath(url);
+						targetPageRef.appendServletPath(href);
 						if(!isDefaultView) {
-							boolean hasQuestion = url.lastIndexOf("?") != -1;
-							url.append(hasQuestion ? "&view=" : "?view=");
-							URIEncoder.encodeURIComponent(viewName, url);
+							boolean hasQuestion = href.lastIndexOf("?") != -1;
+							href.append(hasQuestion ? "&view=" : "?view=");
+							URIEncoder.encodeURIComponent(viewName, href);
 						}
-						url.append('#');
-						URIEncoder.encodeURIComponent(element, url);
-						href = url.toString();
+						href.append('#');
+						URIEncoder.encodeURIComponent(anchor, href);
 					}
+				}
+			} else {
+				if(index != null && isDefaultView) {
+					// Link to target in indexed page (view=all mode)
+					href.append('#');
+					URIEncoder.encodeURIComponent(PageIndex.getRefId(index, element), href);
+				} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
+					// Link to target on same page
+					href.append('#');
+					URIEncoder.encodeURIComponent(element, href);
+				} else {
+					// Link to target on different page (or same page, different view)
+					targetPageRef.appendServletPath(href);
+					if(!isDefaultView) {
+						boolean hasQuestion = href.lastIndexOf("?") != -1;
+						href.append(hasQuestion ? "&view=" : "?view=");
+						URIEncoder.encodeURIComponent(viewName, href);
+					}
+					href.append('#');
+					URIEncoder.encodeURIComponent(element, href);
 				}
 			}
 			if(!small) {
@@ -403,7 +400,7 @@ final public class LinkImpl {
 					request,
 					response,
 					out,
-					href,
+					href.toString(),
 					params,
 					false,
 					LastModifiedServlet.AddLastModifiedWhen.FALSE
@@ -454,7 +451,7 @@ final public class LinkImpl {
 					request,
 					response,
 					out,
-					href,
+					href.toString(),
 					params,
 					false,
 					LastModifiedServlet.AddLastModifiedWhen.FALSE
