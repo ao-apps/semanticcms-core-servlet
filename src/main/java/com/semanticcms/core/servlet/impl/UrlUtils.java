@@ -50,6 +50,7 @@ final public class UrlUtils {
 		String href,
 		URIParameters params,
 		boolean hrefAbsolute,
+		boolean canonical,
 		LastModifiedServlet.AddLastModifiedWhen addLastModified
 	) throws ServletException, IOException {
 		if(href != null) {
@@ -62,6 +63,7 @@ final public class UrlUtils {
 					href,
 					params,
 					hrefAbsolute,
+					canonical,
 					addLastModified
 				),
 				out
@@ -72,6 +74,32 @@ final public class UrlUtils {
 		}
 	}
 
+	/**
+	 * Writes a non-canonical href attribute with parameters.
+	 * Adds contextPath to URLs that begin with a slash (/).
+	 * Encodes the URL.
+	 *
+	 * @deprecated  Please use {@link #writeHref(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Appendable, java.lang.String, com.aoindustries.net.URIParameters, boolean, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)}
+	 */
+	@Deprecated
+	public static void writeHref(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Appendable out,
+		String href,
+		URIParameters params,
+		boolean hrefAbsolute,
+		LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws ServletException, IOException {
+		writeHref(servletContext, request, response, out, href, params, hrefAbsolute, false, addLastModified);
+	}
+
+	/**
+	 * Writes a src attribute with parameters.
+	 * Adds contextPath to URLs that begin with a slash (/).
+	 * Encodes the URL.
+	 */
 	public static void writeSrc(
 		ServletContext servletContext,
 		HttpServletRequest request,
@@ -80,6 +108,7 @@ final public class UrlUtils {
 		String src,
 		URIParameters params,
 		boolean srcAbsolute,
+		boolean canonical,
 		LastModifiedServlet.AddLastModifiedWhen addLastModified
 	) throws ServletException, IOException {
 		if(src != null) {
@@ -92,6 +121,7 @@ final public class UrlUtils {
 					src,
 					params,
 					srcAbsolute,
+					canonical,
 					addLastModified
 				),
 				out
@@ -100,6 +130,27 @@ final public class UrlUtils {
 		} else {
 			if(params != null) throw new ServletException("parameters provided without src");
 		}
+	}
+
+	/**
+	 * Writes a non-canonical src attribute with parameters.
+	 * Adds contextPath to URLs that begin with a slash (/).
+	 * Encodes the URL.
+	 *
+	 * @deprecated  Please use {@link #writeSrc(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Appendable, java.lang.String, com.aoindustries.net.URIParameters, boolean, boolean, com.aoindustries.servlet.http.LastModifiedServlet.AddLastModifiedWhen)}
+	 */
+	@Deprecated
+	public static void writeSrc(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Appendable out,
+		String src,
+		URIParameters params,
+		boolean srcAbsolute,
+		LastModifiedServlet.AddLastModifiedWhen addLastModified
+	) throws ServletException, IOException {
+		writeSrc(servletContext, request, response, out, src, params, srcAbsolute, false, addLastModified);
 	}
 
 	/**
