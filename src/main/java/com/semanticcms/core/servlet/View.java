@@ -23,6 +23,7 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.net.URIEncoder;
+import com.aoindustries.servlet.http.Canonical;
 import com.aoindustries.taglib.Link;
 import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.Copyright;
@@ -234,7 +235,8 @@ abstract public class View implements Comparable<View> {
 				servletPath.append("?view=");
 				URIEncoder.encodeURIComponent(getName(), servletPath);
 			}
-			encodedServletPath = response.encodeURL(servletPath.toString());
+			// TODO: canonical
+			encodedServletPath = Canonical.encodeCanonicalURL(response, servletPath.toString());
 		}
 		// To be safe, we're encoding the servletPath, then picking it back into a bookPath
 		// TODO: How would this interact with things like PrettyUrlFilter?
