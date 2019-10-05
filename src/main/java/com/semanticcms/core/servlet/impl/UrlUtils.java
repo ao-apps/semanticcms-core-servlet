@@ -49,7 +49,7 @@ final public class UrlUtils {
 		Appendable out,
 		String href,
 		URIParameters params,
-		boolean hrefAbsolute,
+		boolean absolute,
 		boolean canonical,
 		LastModifiedServlet.AddLastModifiedWhen addLastModified
 	) throws ServletException, IOException {
@@ -62,7 +62,7 @@ final public class UrlUtils {
 					response,
 					href,
 					params,
-					hrefAbsolute,
+					absolute,
 					canonical,
 					addLastModified
 				),
@@ -89,10 +89,10 @@ final public class UrlUtils {
 		Appendable out,
 		String href,
 		URIParameters params,
-		boolean hrefAbsolute,
+		boolean absolute,
 		LastModifiedServlet.AddLastModifiedWhen addLastModified
 	) throws ServletException, IOException {
-		writeHref(servletContext, request, response, out, href, params, hrefAbsolute, false, addLastModified);
+		writeHref(servletContext, request, response, out, href, params, absolute, false, addLastModified);
 	}
 
 	/**
@@ -107,7 +107,7 @@ final public class UrlUtils {
 		Appendable out,
 		String src,
 		URIParameters params,
-		boolean srcAbsolute,
+		boolean absolute,
 		boolean canonical,
 		LastModifiedServlet.AddLastModifiedWhen addLastModified
 	) throws ServletException, IOException {
@@ -120,7 +120,7 @@ final public class UrlUtils {
 					response,
 					src,
 					params,
-					srcAbsolute,
+					absolute,
 					canonical,
 					addLastModified
 				),
@@ -147,10 +147,10 @@ final public class UrlUtils {
 		Appendable out,
 		String src,
 		URIParameters params,
-		boolean srcAbsolute,
+		boolean absolute,
 		LastModifiedServlet.AddLastModifiedWhen addLastModified
 	) throws ServletException, IOException {
-		writeSrc(servletContext, request, response, out, src, params, srcAbsolute, false, addLastModified);
+		writeSrc(servletContext, request, response, out, src, params, absolute, false, addLastModified);
 	}
 
 	/**
