@@ -148,6 +148,8 @@ final public class LinkImpl {
 		String viewName,
 		boolean small,
 	    URIParameters params,
+		boolean absolute,
+		boolean canonical,
 		Object clazz,
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
@@ -167,11 +169,53 @@ final public class LinkImpl {
 				viewName,
 				small,
 				params,
+				absolute,
+				canonical,
 				clazz,
 				body,
 				captureLevel
 			);
 		}
+	}
+
+	/**
+	 * @deprecated  Please use {@link #writeLinkImpl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.io.Writer, java.lang.String, java.lang.String, java.lang.String, boolean, java.lang.String, java.lang.String, boolean, com.aoindustries.net.URIParameters, boolean, boolean, java.lang.Object, com.semanticcms.core.servlet.impl.LinkImpl.LinkImplBody)}
+	 */
+	@Deprecated
+	public static <E extends Throwable> void writeLinkImpl(
+		ServletContext servletContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Writer out,
+		String book,
+		String page,
+		String element,
+		boolean allowGeneratedElement,
+		String anchor,
+		String viewName,
+		boolean small,
+	    URIParameters params,
+		Object clazz,
+		LinkImplBody<E> body
+	) throws E, ServletException, IOException, SkipPageException {
+		writeLinkImpl(
+			servletContext,
+			request,
+			response,
+			out,
+			book,
+			page,
+			element,
+			allowGeneratedElement,
+			anchor,
+			viewName,
+			small,
+			params,
+			false, // absolute
+			false, // canonical
+			clazz,
+			body
+		);
 	}
 
 	/**
@@ -198,6 +242,8 @@ final public class LinkImpl {
 		ValueExpression viewName,
 		boolean small,
 	    URIParameters params,
+		boolean absolute,
+		boolean canonical,
 		ValueExpression clazz,
 		LinkImplBody<E> body
 	) throws E, ServletException, IOException, SkipPageException {
@@ -235,11 +281,55 @@ final public class LinkImpl {
 				viewNameStr,
 				small,
 				params,
+				absolute,
+				canonical,
 				clazzObj,
 				body,
 				captureLevel
 			);
 		}
+	}
+
+	/**
+	 * @deprecated  Please use {@link #writeLinkImpl(javax.servlet.ServletContext, javax.el.ELContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.io.Writer, javax.el.ValueExpression, javax.el.ValueExpression, javax.el.ValueExpression, boolean, javax.el.ValueExpression, javax.el.ValueExpression, boolean, com.aoindustries.net.URIParameters, boolean, boolean, javax.el.ValueExpression, com.semanticcms.core.servlet.impl.LinkImpl.LinkImplBody)}
+	 */
+	@Deprecated
+	public static <E extends Throwable> void writeLinkImpl(
+		ServletContext servletContext,
+		ELContext elContext,
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Writer out,
+		ValueExpression book,
+		ValueExpression page,
+		ValueExpression element,
+		boolean allowGeneratedElement,
+		ValueExpression anchor,
+		ValueExpression viewName,
+		boolean small,
+	    URIParameters params,
+		ValueExpression clazz,
+		LinkImplBody<E> body
+	) throws E, ServletException, IOException, SkipPageException {
+		writeLinkImpl(
+			servletContext,
+			elContext,
+			request,
+			response,
+			out,
+			book,
+			page,
+			element,
+			allowGeneratedElement,
+			anchor,
+			viewName,
+			small,
+			params,
+			false, // absolute
+			false, // canonical
+			clazz,
+			body
+		);
 	}
 
 	private static <E extends Throwable> void writeLinkImpl(
@@ -255,6 +345,8 @@ final public class LinkImpl {
 		String viewName,
 		boolean small,
 	    URIParameters params,
+		boolean absolute,
+		boolean canonical,
 		Object clazz,
 		LinkImplBody<E> body,
 		CaptureLevel captureLevel
@@ -402,8 +494,8 @@ final public class LinkImpl {
 					out,
 					href.toString(),
 					params,
-					false,
-					false,
+					absolute,
+					canonical,
 					LastModifiedServlet.AddLastModifiedWhen.FALSE
 				);
 			}
@@ -454,8 +546,8 @@ final public class LinkImpl {
 					out,
 					href.toString(),
 					params,
-					false,
-					false,
+					absolute,
+					canonical,
 					LastModifiedServlet.AddLastModifiedWhen.FALSE
 				);
 				out.write(">[link]</a></sup></span>");
