@@ -46,6 +46,8 @@ public class Link {
 	private String view = SemanticCMS.DEFAULT_VIEW_NAME;
 	private boolean small;
 	private URIParameters params;
+	private boolean absolute;
+	private boolean canonical;
 	private Object clazz;
 
 	public Link(
@@ -185,6 +187,16 @@ public class Link {
 		return this;
 	}
 
+	public Link absolute(boolean absolute) {
+		this.absolute = absolute;
+		return this;
+	}
+
+	public Link canonical(boolean canonical) {
+		this.canonical = canonical;
+		return this;
+	}
+
 	public Link clazz(Object clazz) {
 		this.clazz = clazz;
 		return this;
@@ -215,6 +227,8 @@ public class Link {
 			view,
 			small,
 			params,
+			absolute,
+			canonical,
 			clazz,
 			body == null
 				? null
