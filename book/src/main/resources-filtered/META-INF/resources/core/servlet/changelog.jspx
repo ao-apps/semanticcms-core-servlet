@@ -36,7 +36,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2019-09-30T00:47:20-0500"
+		dateModified="2019-10-06T00:12:52-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -58,6 +58,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 						<code:link page="/" /> only to generate page content from servlets.
 					</li>
 					<li>Element IDs may now contain the full range of <ao:a href="https://www.w3.org/TR/REC-xml/#id">valid XML identifiers</ao:a>.</li>
+					<li>Added absolute URL and <ao:a href="https://aoindustries.com/ao-servlet-util/apidocs/com/aoindustries/servlet/http/Canonical.html">Canonical URL</ao:a> support.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
