@@ -283,6 +283,16 @@ public class Link extends Element<com.semanticcms.core.model.Link> {
 		return this;
 	}
 
+	public Link absolute(boolean absolute) {
+		element.setAbsolute(absolute);
+		return this;
+	}
+
+	public Link canonical(boolean canonical) {
+		element.setCanonical(canonical);
+		return this;
+	}
+
 	public Link clazz(String clazz) {
 		element.setClazz(clazz);
 		return this;
