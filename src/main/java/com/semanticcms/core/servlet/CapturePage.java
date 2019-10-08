@@ -294,7 +294,7 @@ public class CapturePage {
 			int notCachedSize = notCachedList.size();
 			if(
 				notCachedSize > 1
-				&& CountConcurrencyFilter.useConcurrentSubrequests(request)
+				&& CountConcurrencyListener.useConcurrentSubrequests(request)
 			) {
 				// Concurrent implementation
 				final TempFileContext tempFileContext = ServletTempFileContext.getTempFileContext(request);
@@ -495,7 +495,7 @@ public class CapturePage {
 		Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
 		if(
 			CONCURRENT_TRAVERSALS_ENABLED
-			&& CountConcurrencyFilter.useConcurrentSubrequests(request)
+			&& CountConcurrencyListener.useConcurrentSubrequests(request)
 		) {
 			return traversePagesAnyOrderConcurrent(
 				servletContext,
@@ -859,7 +859,7 @@ public class CapturePage {
 		Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
 		if(
 			CONCURRENT_TRAVERSALS_ENABLED
-			&& CountConcurrencyFilter.useConcurrentSubrequests(request)
+			&& CountConcurrencyListener.useConcurrentSubrequests(request)
 		) {
 			return traversePagesDepthFirstConcurrent(
 				servletContext,
