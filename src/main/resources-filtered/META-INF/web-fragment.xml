@@ -48,17 +48,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<url-pattern>/*</url-pattern>
 		<dispatcher>REQUEST</dispatcher>
 	</filter-mapping>
-	<!-- Cleans-up temp files created during request processing. -->
-	<filter>
-		<filter-name>TempFileContext</filter-name>
-		<filter-class>com.aoindustries.servlet.filter.TempFileContext</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>TempFileContext</filter-name>
-		<url-pattern>/*</url-pattern>
-		<dispatcher>REQUEST</dispatcher>
-		<dispatcher>ERROR</dispatcher>
-	</filter-mapping>
 	<!-- Sets up the cache for the request. -->
 	<filter>
 		<filter-name>CacheFilter</filter-name>
