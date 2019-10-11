@@ -235,7 +235,6 @@ abstract public class View implements Comparable<View> {
 				servletPath.append("?view=");
 				URIEncoder.encodeURIComponent(getName(), servletPath);
 			}
-			// TODO: canonical
 			encodedServletPath = Canonical.encodeCanonicalURL(response, servletPath.toString());
 		}
 		// To be safe, we're encoding the servletPath, then picking it back into a bookPath
