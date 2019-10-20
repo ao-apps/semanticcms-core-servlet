@@ -155,7 +155,8 @@ public class CapturePage {
 						// Set the response content type to "application/xhtml+xml" for a consistent starting point for captures
 						String oldContentType = response.getContentType();
 						try {
-							response.setContentType(MediaType.XHTML.getContentType());
+							response.setContentType(Html.Serialization.select(servletContext, request).getContentType());
+							response.setCharacterEncoding(Html.ENCODING.name());
 							// Set new capture context
 							CaptureLevel.setCaptureLevel(request, level);
 							CapturePage captureContext = new CapturePage();

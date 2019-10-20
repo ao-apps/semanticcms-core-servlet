@@ -36,7 +36,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2019-10-20T03:16:42-0500"
+		dateModified="2019-10-20T03:36:22-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -53,7 +53,13 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				scmUrl="@{documented.scm.url}"
 			>
 				<ul>
-					<li>Registering doctype "html5" with new methods <code>Html.DocType.set(…)</code> and <code>Html.DocType.get(…)</code> during captures.</li>
+					<li>Setting more values during captures:
+						<ol>
+							<li>Registering doctype "html5" with new methods <code>Html.DocType.set(…)</code> and <code>Html.DocType.get(…)</code>.</li>
+							<li>Setting response content type to match the default serialization (HTML / XHTML) that will be applied during final render.</li>
+							<li>Setting response character set to <code>UTF-8</code>.</li>
+						</ol>
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
