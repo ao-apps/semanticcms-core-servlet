@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 import com.aoindustries.encoding.MediaType;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.http.Dispatcher;
+import com.aoindustries.servlet.http.Html;
 import com.aoindustries.servlet.http.HttpServletUtil;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.tempfiles.TempFileContext;
@@ -147,60 +148,67 @@ public class CapturePage {
 				CaptureLevel oldCaptureLevel = CaptureLevel.getCaptureLevel(request);
 				CapturePage oldCaptureContext = CapturePage.getCaptureContext(request);
 				try {
-					// Set the response content type to "application/xhtml+xml" for a consistent starting point for captures
-					String oldContentType = response.getContentType();
+					// Set the doctype to html5 for all captures
+					Object oldDocType = request.getAttribute(Html.DocType.class.getName());
 					try {
-						response.setContentType(MediaType.XHTML.getContentType());
-						// Set new capture context
-						CaptureLevel.setCaptureLevel(request, level);
-						CapturePage captureContext = new CapturePage();
-						request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, captureContext);
-						// Include the page resource, discarding any direct output
-						final String capturePath = pageRef.getServletPath();
+						Html.DocType.set(request, Html.DocType.html5);
+						// Set the response content type to "application/xhtml+xml" for a consistent starting point for captures
+						String oldContentType = response.getContentType();
 						try {
-							// Clear PageContext on include
-							PageContext.newPageContextSkip(
-								null,
-								null,
-								null,
-								new PageContext.PageContextRunnableSkip() {
-									@Override
-									public void run() throws ServletException, IOException, SkipPageException {
-										Dispatcher.include(
-											servletContext,
-											capturePath,
-											// Always capture as "GET" request
-											HttpServletUtil.METHOD_GET.equals(request.getMethod())
-												// Is already "GET"
-												? request
-												// Wrap to make "GET"
-												: new HttpServletRequestWrapper(request) {
-													@Override
-													public String getMethod() {
-														return HttpServletUtil.METHOD_GET;
-													}
-												},
-											new NullHttpServletResponseWrapper(response)
-										);
+							response.setContentType(MediaType.XHTML.getContentType());
+							// Set new capture context
+							CaptureLevel.setCaptureLevel(request, level);
+							CapturePage captureContext = new CapturePage();
+							request.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, captureContext);
+							// Include the page resource, discarding any direct output
+							final String capturePath = pageRef.getServletPath();
+							try {
+								// Clear PageContext on include
+								PageContext.newPageContextSkip(
+									null,
+									null,
+									null,
+									new PageContext.PageContextRunnableSkip() {
+										@Override
+										public void run() throws ServletException, IOException, SkipPageException {
+											Dispatcher.include(
+												servletContext,
+												capturePath,
+												// Always capture as "GET" request
+												HttpServletUtil.METHOD_GET.equals(request.getMethod())
+													// Is already "GET"
+													? request
+													// Wrap to make "GET"
+													: new HttpServletRequestWrapper(request) {
+														@Override
+														public String getMethod() {
+															return HttpServletUtil.METHOD_GET;
+														}
+													},
+												new NullHttpServletResponseWrapper(response)
+											);
+										}
 									}
-								}
+								);
+							} catch(SkipPageException e) {
+								// An individual page may throw SkipPageException which only terminates
+								// the capture, not the request overall
+							}
+							capturedPage = captureContext.getCapturedPage();
+							if(capturedPage==null) throw new ServletException("No page captured, page=" + capturePath);
+							PageRef capturedPageRef = capturedPage.getPageRef();
+							if(!capturedPageRef.equals(pageRef)) throw new ServletException(
+								"Captured page has unexpected pageRef.  Expected ("
+									+ pageRef.getBookName() + ", " + pageRef.getPath()
+									+ ") but got ("
+									+ capturedPageRef.getBookName() + ", " + capturedPageRef.getPath()
+									+ ')'
 							);
-						} catch(SkipPageException e) {
-							// An individual page may throw SkipPageException which only terminates
-							// the capture, not the request overall
+						} finally {
+							if(oldContentType != null) response.setContentType(oldContentType);
 						}
-						capturedPage = captureContext.getCapturedPage();
-						if(capturedPage==null) throw new ServletException("No page captured, page=" + capturePath);
-						PageRef capturedPageRef = capturedPage.getPageRef();
-						if(!capturedPageRef.equals(pageRef)) throw new ServletException(
-							"Captured page has unexpected pageRef.  Expected ("
-								+ pageRef.getBookName() + ", " + pageRef.getPath()
-								+ ") but got ("
-								+ capturedPageRef.getBookName() + ", " + capturedPageRef.getPath()
-								+ ')'
-						);
 					} finally {
-						if(oldContentType != null) response.setContentType(oldContentType);
+						request.setAttribute(Html.DocType.class.getName(), oldDocType);
 					}
 				} finally {
 					// Restore previous capture context
