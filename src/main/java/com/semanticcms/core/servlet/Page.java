@@ -22,6 +22,8 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.html.Doctype;
+import com.aoindustries.html.Serialization;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.EmptyResult;
@@ -59,6 +61,9 @@ public class Page {
 	private ReadableDateTime datePublished;
 	private ReadableDateTime dateModified;
 	private ReadableDateTime dateReviewed;
+
+	private Serialization serialization;
+	private Doctype doctype = Doctype.HTML5;
 
 	private final String title;
 
@@ -120,6 +125,16 @@ public class Page {
 
 	public Page dateReviewed(ReadableDateTime dateReviewed) {
 		this.dateReviewed = dateReviewed;
+		return this;
+	}
+
+	public Page serialization(Serialization serialization) {
+		this.serialization = serialization;
+		return this;
+	}
+
+	public Page doctype(Doctype doctype) {
+		this.doctype = doctype;
 		return this;
 	}
 
@@ -216,6 +231,8 @@ public class Page {
 			datePublished,
 			dateModified,
 			dateReviewed,
+			serialization,
+			doctype,
 			title,
 			shortTitle,
 			description,

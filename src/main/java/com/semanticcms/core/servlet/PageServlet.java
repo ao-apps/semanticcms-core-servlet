@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.html.Html;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.HttpServletUtil;
 import com.aoindustries.servlet.http.Includer;
@@ -29,7 +30,6 @@ import com.semanticcms.core.model.Page;
 import com.semanticcms.core.pages.local.PageContext;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +46,7 @@ abstract public class PageServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final Charset ENCODING = StandardCharsets.UTF_8;
+	public static final Charset ENCODING = Html.ENCODING;
 
 	/**
 	 * @see  Page#getTitle()

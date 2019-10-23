@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,10 @@
  */
 package com.semanticcms.core.servlet.impl;
 
+import com.aoindustries.html.Doctype;
+import com.aoindustries.html.Serialization;
+import com.aoindustries.html.servlet.DoctypeEE;
+import com.aoindustries.html.servlet.SerializationEE;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.LocalizedServletException;
@@ -57,6 +61,12 @@ final public class PageImpl {
 	/**
 	 * @param pageRef  the default path to this page, this might be changed during page processing
 	 */
+	// TODO: Doctype and Serialization set before this - document here like in WebPageLayout.startHtml
+	// TODO: doctype and serialization on Page and PageTag like in ao:html tag
+	// TODO: themes adhere to current doctype and serialization, don't reset in ao:html tag itself
+	// TODO: page captures reset to default null on request
+	// TODO: All theme/layout/skin support both HTML 4 and 5?
+	// TODO: Fall-back to div without semantic tags?
 	public static <E extends Throwable> void doPageImpl(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
@@ -67,6 +77,8 @@ final public class PageImpl {
 		ReadableDateTime datePublished,
 		ReadableDateTime dateModified,
 		ReadableDateTime dateReviewed,
+		Serialization serialization,
+		Doctype doctype,
 		String title,
 		String shortTitle,
 		String description,
@@ -113,50 +125,78 @@ final public class PageImpl {
 				}
 			}
 		}
-		// Freeze page once body done
-		try {
-			// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
-			// is done to catch parents and childen.
-			if(body != null) {
-				// Set currentNode
-				CurrentNode.setCurrentNode(request, page);
-				try {
-					// Set currentPage
-					CurrentPage.setCurrentPage(request, page);
-					try {
-						final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
-						if(captureLevel == CaptureLevel.BODY) {
-							// Invoke page body, capturing output
-							page.setBody(body.doBody(false, page).trim());
-						} else {
-							// Invoke page body, discarding output
-							body.doBody(true, page);
-						}
-						// Page may not move itself to a different book
-						PageRef newPageRef = page.getPageRef();
-						if(!newPageRef.getBookRef().equals(pageRef.getBookRef())) {
-							throw new ServletException(
-								"Page may not move itself into a different book.  pageRef="
-									+ pageRef
-									+ ", newPageRef="
-									+ newPageRef
-							);
-						}
-					} finally {
-						// Restore previous currentPage
-						CurrentPage.setCurrentPage(request, null);
-					}
-				} finally {
-					// Restore previous currentNode
-					CurrentNode.setCurrentNode(request, null);
-				}
-			}
-			doAutoParents(servletContext, page);
-		} finally {
-			page.freeze();
+		Serialization oldSerialization;
+		boolean setSerialization;
+		if(serialization == null) {
+			serialization = SerializationEE.get(servletContext, request);
+			oldSerialization = null;
+			setSerialization = false;
+		} else {
+			oldSerialization = SerializationEE.replace(request, serialization);
+			setSerialization = true;
 		}
-		// Capturing, add to capture
-		capture.setCapturedPage(page);
+		try {
+			Doctype oldDoctype;
+			boolean setDoctype;
+			if(doctype == null) {
+				doctype = DoctypeEE.get(servletContext, request);
+				oldDoctype = null;
+				setDoctype = false;
+			} else {
+				oldDoctype = DoctypeEE.replace(request, doctype);
+				setDoctype = true;
+			}
+			try {
+				// Freeze page once body done
+				try {
+					// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
+					// is done to catch parents and childen.
+					if(body != null) {
+						// Set currentNode
+						CurrentNode.setCurrentNode(request, page);
+						try {
+							// Set currentPage
+							CurrentPage.setCurrentPage(request, page);
+							try {
+								final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
+								if(captureLevel == CaptureLevel.BODY) {
+									// Invoke page body, capturing output
+									page.setBody(body.doBody(false, page).trim());
+								} else {
+									// Invoke page body, discarding output
+									body.doBody(true, page);
+								}
+								// Page may not move itself to a different book
+								PageRef newPageRef = page.getPageRef();
+								if(!newPageRef.getBookRef().equals(pageRef.getBookRef())) {
+									throw new ServletException(
+										"Page may not move itself into a different book.  pageRef="
+											+ pageRef
+											+ ", newPageRef="
+											+ newPageRef
+									);
+								}
+							} finally {
+								// Restore previous currentPage
+								CurrentPage.setCurrentPage(request, null);
+							}
+						} finally {
+							// Restore previous currentNode
+							CurrentNode.setCurrentNode(request, null);
+						}
+					}
+					doAutoParents(servletContext, page);
+				} finally {
+					page.freeze();
+				}
+				// Capturing, add to capture
+				capture.setCapturedPage(page);
+			} finally {
+				if(setDoctype) DoctypeEE.set(request, oldDoctype);
+			}
+		} finally {
+			if(setSerialization) SerializationEE.set(request, oldSerialization);
+		}
 	}
 
 	// TODO: Profile this since have many books now.  Maybe create method on SemanticCMS for this lookup
