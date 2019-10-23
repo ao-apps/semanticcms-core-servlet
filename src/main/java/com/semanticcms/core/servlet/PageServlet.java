@@ -22,12 +22,12 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.html.Html;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.HttpServletUtil;
 import com.aoindustries.servlet.http.Includer;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +44,7 @@ abstract public class PageServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final Charset ENCODING = StandardCharsets.UTF_8;
+	public static final Charset ENCODING = Html.ENCODING;
 
 	/**
 	 * @see  com.semanticcms.core.model.Page#getTitle()
