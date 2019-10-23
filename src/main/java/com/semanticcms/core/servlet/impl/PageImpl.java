@@ -22,6 +22,11 @@
  */
 package com.semanticcms.core.servlet.impl;
 
+import com.aoindustries.html.Doctype;
+import com.aoindustries.html.Html;
+import com.aoindustries.html.Serialization;
+import com.aoindustries.html.servlet.DoctypeEE;
+import com.aoindustries.html.servlet.SerializationEE;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.servlet.LocalizedServletException;
 import com.aoindustries.servlet.ServletContextCache;
@@ -159,6 +164,12 @@ final public class PageImpl {
 	/**
 	 * @param pageRef  the default path to this page, this might be changed during page processing
 	 */
+	// TODO: Doctype and Serialization set before this - document here like in WebPageLayout.startHtml
+	// TODO: doctype and serialization on Page and PageTag like in ao:html tag
+	// TODO: themes adhere to current doctype and serialization, don't reset in ao:html tag itself
+	// TODO: page captures reset to default null on request
+	// TODO: All theme/layout/skin support both HTML 4 and 5?
+	// TODO: Fall-back to div without semantic tags?
 	public static <E extends Throwable> void doPageImpl(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
@@ -168,6 +179,8 @@ final public class PageImpl {
 		ReadableDateTime datePublished,
 		ReadableDateTime dateModified,
 		ReadableDateTime dateReviewed,
+		Serialization serialization,
+		Doctype doctype,
 		String title,
 		String shortTitle,
 		String description,
@@ -214,101 +227,135 @@ final public class PageImpl {
 				}
 			}
 		}
-		// Freeze page once body done
-		try {
-			// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
-			// is done to catch parents and childen.
-			if(body != null) {
-				// Set currentNode
-				CurrentNode.setCurrentNode(request, page);
-				try {
-					// Set currentPage
-					CurrentPage.setCurrentPage(request, page);
-					try {
-						final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
-						if(captureLevel == CaptureLevel.BODY) {
-							// Invoke page body, capturing output
-							page.setBody(body.doBody(false, page).trim());
-						} else {
-							// Invoke page body, discarding output
-							body.doBody(true, page);
-						}
-						// Page may not move itself to a different book
-						PageRef newPageRef = page.getPageRef();
-						if(!newPageRef.getBook().equals(pageRef.getBook())) {
-							throw new ServletException(
-								"Page may not move itself into a different book.  pageRef="
-									+ pageRef
-									+ ", newPageRef="
-									+ newPageRef
-							);
-						}
-					} finally {
-						// Restore previous currentPage
-						CurrentPage.setCurrentPage(request, null);
-					}
-				} finally {
-					// Restore previous currentNode
-					CurrentNode.setCurrentNode(request, null);
-				}
-			}
-			doAutoParents(servletContext, page);
-		} finally {
-			page.freeze();
-		}
-		CapturePage capture = CapturePage.getCaptureContext(request);
-		if(capture != null) {
-			// Capturing, add to capture
-			capture.setCapturedPage(page);
+		Serialization oldSerialization;
+		boolean setSerialization;
+		if(serialization == null) {
+			serialization = SerializationEE.get(servletContext, request);
+			oldSerialization = null;
+			setSerialization = false;
 		} else {
-			// Perform full verification now since not interacting with the page cache
-			fullVerifyParentChild(servletContext, request, response, page);
-
-			// Resolve the view
-			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
-			View view;
-			{
-				String viewName = request.getParameter(SemanticCMS.VIEW_PARAM);
-				Map<String,View> viewsByName = semanticCMS.getViewsByName();
-				if(viewName == null) {
-					view = null;
-				} else {
-					if(SemanticCMS.DEFAULT_VIEW_NAME.equals(viewName)) throw new ServletException(SemanticCMS.VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
-					view = viewsByName.get(viewName);
-				}
-				if(view == null) {
-					// Find default
-					view = viewsByName.get(SemanticCMS.DEFAULT_VIEW_NAME);
-					if(view == null) throw new ServletException("Default view not found: " + SemanticCMS.DEFAULT_VIEW_NAME);
-				}
+			oldSerialization = SerializationEE.replace(request, serialization);
+			setSerialization = true;
+		}
+		try {
+			Doctype oldDoctype;
+			boolean setDoctype;
+			if(doctype == null) {
+				doctype = DoctypeEE.get(servletContext, request);
+				oldDoctype = null;
+				setDoctype = false;
+			} else {
+				oldDoctype = DoctypeEE.replace(request, doctype);
+				setDoctype = true;
 			}
-
-			// Find the theme
-			Theme theme = null;
-			{
-				// Currently just picks the first non-default theme registered, the uses default
-				Theme defaultTheme = null;
-				for(Theme t : semanticCMS.getThemes().values()) {
-					if(t.isDefault()) {
-						assert defaultTheme == null : "More than one default theme registered";
-						defaultTheme = t;
-					} else {
-						// Use first non-default
-						theme = t;
-						break;
+			try {
+				// Freeze page once body done
+				try {
+					// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
+					// is done to catch parents and childen.
+					if(body != null) {
+						// Set currentNode
+						CurrentNode.setCurrentNode(request, page);
+						try {
+							// Set currentPage
+							CurrentPage.setCurrentPage(request, page);
+							try {
+								final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
+								if(captureLevel == CaptureLevel.BODY) {
+									// Invoke page body, capturing output
+									page.setBody(body.doBody(false, page).trim());
+								} else {
+									// Invoke page body, discarding output
+									body.doBody(true, page);
+								}
+								// Page may not move itself to a different book
+								PageRef newPageRef = page.getPageRef();
+								if(!newPageRef.getBook().equals(pageRef.getBook())) {
+									throw new ServletException(
+										"Page may not move itself into a different book.  pageRef="
+											+ pageRef
+											+ ", newPageRef="
+											+ newPageRef
+									);
+								}
+							} finally {
+								// Restore previous currentPage
+								CurrentPage.setCurrentPage(request, null);
+							}
+						} finally {
+							// Restore previous currentNode
+							CurrentNode.setCurrentNode(request, null);
+						}
 					}
+					doAutoParents(servletContext, page);
+				} finally {
+					page.freeze();
 				}
-				if(theme == null) {
-					// Use default
-					if(defaultTheme == null) throw new ServletException("No themes registered");
-					theme = defaultTheme;
-				}
-				assert theme != null;
-			}
+				CapturePage capture = CapturePage.getCaptureContext(request);
+				if(capture != null) {
+					// Capturing, add to capture
+					capture.setCapturedPage(page);
+				} else {
+					// Perform full verification now since not interacting with the page cache
+					fullVerifyParentChild(servletContext, request, response, page);
 
-			// Forward to theme
-			theme.doTheme(servletContext, request, response, view, page);
-			throw ServletUtil.SKIP_PAGE_EXCEPTION;
+					// Resolve the view
+					SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+					View view;
+					{
+						String viewName = request.getParameter(SemanticCMS.VIEW_PARAM);
+						Map<String,View> viewsByName = semanticCMS.getViewsByName();
+						if(viewName == null) {
+							view = null;
+						} else {
+							if(SemanticCMS.DEFAULT_VIEW_NAME.equals(viewName)) throw new ServletException(SemanticCMS.VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
+							view = viewsByName.get(viewName);
+						}
+						if(view == null) {
+							// Find default
+							view = viewsByName.get(SemanticCMS.DEFAULT_VIEW_NAME);
+							if(view == null) throw new ServletException("Default view not found: " + SemanticCMS.DEFAULT_VIEW_NAME);
+						}
+					}
+
+					// Find the theme
+					Theme theme = null;
+					{
+						// Currently just picks the first non-default theme registered, the uses default
+						Theme defaultTheme = null;
+						for(Theme t : semanticCMS.getThemes().values()) {
+							if(t.isDefault()) {
+								assert defaultTheme == null : "More than one default theme registered";
+								defaultTheme = t;
+							} else {
+								// Use first non-default
+								theme = t;
+								break;
+							}
+						}
+						if(theme == null) {
+							// Use default
+							if(defaultTheme == null) throw new ServletException("No themes registered");
+							theme = defaultTheme;
+						}
+						assert theme != null;
+					}
+
+					// Clear the output buffer
+					response.resetBuffer();
+
+					// Set the content type
+					ServletUtil.setContentType(response, serialization.getContentType(), Html.ENCODING.name());
+
+					// Forward to theme
+					theme.doTheme(servletContext, request, response, view, page);
+					throw ServletUtil.SKIP_PAGE_EXCEPTION;
+				}
+			} finally {
+				if(setDoctype) DoctypeEE.set(request, oldDoctype);
+			}
+		} finally {
+			if(setSerialization) SerializationEE.set(request, oldSerialization);
 		}
 	}
 

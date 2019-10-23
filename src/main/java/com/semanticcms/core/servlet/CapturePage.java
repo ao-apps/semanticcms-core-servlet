@@ -22,10 +22,14 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.html.Doctype;
+import com.aoindustries.html.Html;
+import com.aoindustries.html.Serialization;
+import com.aoindustries.html.servlet.DoctypeEE;
+import com.aoindustries.html.servlet.SerializationEE;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.Dispatcher;
-import com.aoindustries.servlet.http.Html;
 import com.aoindustries.servlet.http.HttpServletUtil;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.aoindustries.servlet.subrequest.HttpServletSubRequest;
@@ -166,11 +170,11 @@ public class CapturePage {
 			CurrentNode.setCurrentNode(subRequest, null);
 			CurrentPage.setCurrentPage(subRequest, null);
 			// Set the content type
-			Html.Serialization currentSerialization = Html.Serialization.getDefault(servletContext, subRequest);
-			Html.Serialization.set(subRequest, currentSerialization);
+			Serialization currentSerialization = SerializationEE.getDefault(servletContext, subRequest);
+			SerializationEE.set(subRequest, currentSerialization);
 			ServletUtil.setContentType(subResponse, currentSerialization.getContentType(), Html.ENCODING);
 			// Set the doctype to html5 for all captures
-			Html.DocType.set(subRequest, Html.DocType.html5);
+			DoctypeEE.set(subRequest, Doctype.HTML5);
 			// Set new capture context
 			CaptureLevel.setCaptureLevel(subRequest, level);
 			CapturePage captureContext = new CapturePage();

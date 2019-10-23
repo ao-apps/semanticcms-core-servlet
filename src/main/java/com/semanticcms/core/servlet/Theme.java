@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -80,6 +80,13 @@ abstract public class Theme {
 
 	/**
 	 * Renders the theme.
+	 * <p>
+	 * Both the {@link Serialization} and {@link Doctype} may have been set
+	 * on the request, and these must be considered in the HTML generation.
+	 * </p>
+	 *
+	 * @see Serialization#get(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest)
+	 * @see Doctype#get(javax.servlet.ServletContext, javax.servlet.ServletRequest)
 	 *
 	 * TODO: Is SkipPageException acceptable at the view rendering stage?
 	 */
