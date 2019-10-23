@@ -36,7 +36,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2019-10-20T03:36:22-0500"
+		dateModified="2019-10-22T17:29:57-0500"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -60,6 +60,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 							<li>Setting response character set to <code>UTF-8</code>.</li>
 						</ol>
 					</li>
+					<li>Moved Servlet subrequest utilities to new <ao:a href="https://aoindustries.com/ao-servlet-subrequest/">AO Servlet Subrequest</ao:a> project.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
