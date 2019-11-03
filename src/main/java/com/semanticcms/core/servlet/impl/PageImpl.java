@@ -59,6 +59,7 @@ import org.joda.time.ReadableDateTime;
 
 final public class PageImpl {
 
+	@FunctionalInterface
 	public static interface PageImplBody<E extends Throwable> {
 		BufferResult doBody(boolean discard, Page page) throws E, IOException, SkipPageException;
 	}

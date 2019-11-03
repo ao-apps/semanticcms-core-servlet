@@ -193,6 +193,7 @@ public class Page {
 		return this;
 	}
 
+	@FunctionalInterface
 	public static interface Body {
 		void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
 	}
@@ -291,6 +292,7 @@ public class Page {
 		invoke((Body)null);
 	}
 
+	@FunctionalInterface
 	public static interface PageContextBody {
 		void doBody(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
 	}
@@ -312,6 +314,7 @@ public class Page {
 		);
 	}
 
+	@FunctionalInterface
 	public static interface PageContextNoPageBody {
 		void doBody() throws ServletException, IOException, SkipPageException;
 	}

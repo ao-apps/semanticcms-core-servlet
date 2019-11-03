@@ -202,6 +202,7 @@ public class Link {
 		return this;
 	}
 
+	@FunctionalInterface
 	public static interface Body {
 		void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
 	}
@@ -261,6 +262,7 @@ public class Link {
 		invoke((Body)null);
 	}
 
+	@FunctionalInterface
 	public static interface PageContextBody {
 		void doBody() throws ServletException, IOException, SkipPageException;
 	}

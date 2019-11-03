@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
  * A component is able to render itself within the page.  The theme will
  * call all registered components at the correct stages of page rendering.
  */
+@FunctionalInterface
 public interface Component {
 
 	/**

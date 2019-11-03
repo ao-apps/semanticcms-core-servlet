@@ -378,6 +378,7 @@ public class CapturePage {
 		);
 	}
 
+	@FunctionalInterface
 	public static interface TraversalEdges {
 		/**
 		 * Gets the child pages to consider for the given page during a traversal.
@@ -388,6 +389,7 @@ public class CapturePage {
 		Collection<? extends PageReferrer> getEdges(Page page);
 	}
 
+	@FunctionalInterface
 	public static interface EdgeFilter {
 		/**
 		 * Each edge returned is filtered through this, must return true for the
@@ -399,6 +401,7 @@ public class CapturePage {
 		boolean applyEdge(PageRef edge);
 	}
 
+	@FunctionalInterface
 	public static interface PageHandler<T> {
 		/**
 		 * Called after page captured but before or after children captured.
@@ -408,6 +411,7 @@ public class CapturePage {
 		T handlePage(Page page) throws ServletException, IOException;
 	}
 
+	@FunctionalInterface
 	public static interface PageDepthHandler<T> {
 		/**
 		 * Called after page captured but before or after children captured.
