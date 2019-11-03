@@ -253,17 +253,10 @@ public class Page {
 						if(discard) {
 							final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 							// Set PageContext
-							PageContext.newPageContextSkip(
-								servletContext,
+							PageContext.newPageContextSkip(servletContext,
 								request,
 								newResponse,
-								// Java 1.8: () -> body.doBody(request, newResponse, page)
-								new PageContext.PageContextRunnableSkip() {
-									@Override
-									public void run() throws ServletException, IOException, SkipPageException {
-										body.doBody(request, newResponse, page);
-									}
-								}
+								() -> body.doBody(request, newResponse, page)
 							);
 							return EmptyResult.getInstance();
 						} else {
@@ -282,17 +275,10 @@ public class Page {
 										}
 									};
 									// Set PageContext
-									PageContext.newPageContextSkip(
-										servletContext,
+									PageContext.newPageContextSkip(servletContext,
 										request,
 										newResponse,
-										// Java 1.8: () -> body.doBody(request, newResponse, page)
-										new PageContext.PageContextRunnableSkip() {
-											@Override
-											public void run() throws ServletException, IOException, SkipPageException {
-												body.doBody(request, newResponse, page);
-											}
-										}
+										() -> body.doBody(request, newResponse, page)
 									);
 									if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
 								}
