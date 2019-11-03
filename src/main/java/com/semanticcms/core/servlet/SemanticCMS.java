@@ -519,6 +519,7 @@ public class SemanticCMS {
 	/**
 	 * Resolves the link CSS class for the given types of elements.
 	 */
+	@FunctionalInterface
 	public static interface LinkCssClassResolver<E extends com.semanticcms.core.model.Element> {
 		/**
 		 * Gets the CSS class to use in links to the given element.
@@ -592,6 +593,7 @@ public class SemanticCMS {
 	/**
 	 * Resolves the list item CSS class for the given types of nodes.
 	 */
+	@FunctionalInterface
 	public static interface ListItemCssClassResolver<N extends com.semanticcms.core.model.Node> {
 		/**
 		 * Gets the CSS class to use in list items to the given node.

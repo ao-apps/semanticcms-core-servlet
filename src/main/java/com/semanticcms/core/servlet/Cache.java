@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -153,6 +153,7 @@ public abstract class Cache {
 	/**
 	 * Constrains allowed exception type.
 	 */
+	@FunctionalInterface
 	public static interface Callable<V,E extends Exception> extends java.util.concurrent.Callable<V> {
 		@Override
 		public V call() throws E;
