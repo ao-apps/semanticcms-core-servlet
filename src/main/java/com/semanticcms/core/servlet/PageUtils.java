@@ -63,8 +63,8 @@ final public class PageUtils {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Page page,
-		final Class<? extends Element> elementType,
-		final boolean recursive
+		Class<? extends Element> elementType,
+		boolean recursive
 	) throws ServletException, IOException {
 		if(recursive) {
 			return CapturePage.traversePagesAnyOrder(
@@ -73,30 +73,17 @@ final public class PageUtils {
 				response,
 				page,
 				CaptureLevel.META,
-				new CapturePage.PageHandler<Boolean>() {
-					@Override
-					public Boolean handlePage(Page page) {
-						for(Element element : page.getElements()) {
-							if(elementType.isAssignableFrom(element.getClass())) {
-								return true;
-							}
+				(Page page1) -> {
+					for(Element element : page1.getElements()) {
+						if(elementType.isAssignableFrom(element.getClass())) {
+							return true;
 						}
-						return null;
 					}
+					return null;
 				},
-				new CapturePage.TraversalEdges() {
-					@Override
-					public Collection<ChildRef> getEdges(Page page) {
-						return page.getChildRefs();
-					}
-				},
-				new CapturePage.EdgeFilter() {
-					@Override
-					public boolean applyEdge(PageRef childPage) {
-						// Child not in missing book
-						return childPage.getBook() != null;
-					}
-				}
+				Page::getChildRefs,
+				// Child not in missing book
+				(PageRef childPage) -> childPage.getBook() != null
 			) != null;
 		} else {
 			for(Element element : page.getElements()) {
@@ -136,7 +123,7 @@ final public class PageUtils {
 			request,
 			response,
 			page,
-			new HashMap<PageRef,Boolean>()
+			new HashMap<>()
 		);
 	}
 

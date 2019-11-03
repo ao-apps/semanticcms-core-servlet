@@ -101,16 +101,11 @@ abstract public class PageServlet extends HttpServlet {
 				.keywords(getKeywords())
 				.toc(getToc())
 				.tocLevels(getTocLevels())
-				.invoke(new Page.Body() {
-						@Override
-						public void doBody(HttpServletRequest req1, HttpServletResponse resp1, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-							resp1.setContentType("application/xhtml+xml");
-							resp1.setCharacterEncoding(ENCODING.name());
-							method.doMethod(page);
-						}
-					}
-				)
-			;
+				.invoke((HttpServletRequest req1, HttpServletResponse resp1, com.semanticcms.core.model.Page page) -> {
+					resp1.setContentType("application/xhtml+xml");
+					resp1.setCharacterEncoding(ENCODING.name());
+					method.doMethod(page);
+				});
 		} catch(SkipPageException e) {
 			Includer.setPageSkipped(req);
 		}
@@ -118,17 +113,7 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// Java 1.8: callInPage(req, resp, this::doGet);
-		callInPage(
-			req,
-			resp,
-			new DoMethodCallable() {
-				@Override
-				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-					doGet(page);
-				}
-			}
-		);
+		callInPage(req, resp, this::doGet);
 	}
 
 	/**
@@ -143,17 +128,7 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// Java 1.8: callInPage(req, resp, this::doPost);
-		callInPage(
-			req,
-			resp,
-			new DoMethodCallable() {
-				@Override
-				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-					doPost(page);
-				}
-			}
-		);
+		callInPage(req, resp, this::doPost);
 	}
 
 	/**
@@ -168,17 +143,7 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// Java 1.8: callInPage(req, resp, this::doPut);
-		callInPage(
-			req,
-			resp,
-			new DoMethodCallable() {
-				@Override
-				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-					doPut(page);
-				}
-			}
-		);
+		callInPage(req, resp, this::doPut);
 	}
 
 	/**
@@ -193,17 +158,7 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// Java 1.8: callInPage(req, resp, this::doDelete);
-		callInPage(
-			req,
-			resp,
-			new DoMethodCallable() {
-				@Override
-				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-					doDelete(page);
-				}
-			}
-		);
+		callInPage(req, resp, this::doDelete);
 	}
 
 	/**
@@ -218,17 +173,7 @@ abstract public class PageServlet extends HttpServlet {
 
 	@Override
 	final protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// Java 1.8: callInPage(req, resp, this::doOptions);
-		callInPage(
-			req,
-			resp,
-			new DoMethodCallable() {
-				@Override
-				public void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-					doOptions(page);
-				}
-			}
-		);
+		callInPage(req, resp, this::doOptions);
 	}
 
 	/**

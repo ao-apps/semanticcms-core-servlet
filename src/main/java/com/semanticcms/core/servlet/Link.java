@@ -244,13 +244,7 @@ public class Link {
 								servletContext,
 								request,
 								newResponse,
-								// Java 1.8: () -> body.doBody(request, newResponse)
-								new PageContext.PageContextRunnableSkip() {
-									@Override
-									public void run() throws ServletException, IOException, SkipPageException {
-										body.doBody(request, newResponse);
-									}
-								}
+								() -> body.doBody(request, newResponse)
 							);
 						} else {
 							body.doBody(request, response);

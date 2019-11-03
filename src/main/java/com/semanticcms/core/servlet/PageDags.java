@@ -22,12 +22,10 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -54,26 +52,13 @@ final public class PageDags {
 			response,
 			rootPage,
 			level,
-			new CapturePage.PageDepthHandler<Void>() {
-				@Override
-				public Void handlePage(Page page, int depth) throws ServletException, IOException {
-					list.add(page);
-					return null;
-				}
+			(Page page, int depth) -> {
+				list.add(page);
+				return null;
 			},
-			new CapturePage.TraversalEdges() {
-				@Override
-				public Collection<ChildRef> getEdges(Page page) {
-					return page.getChildRefs();
-				}
-			},
-			new CapturePage.EdgeFilter() {
-				@Override
-				public boolean applyEdge(PageRef childPage) {
-					// Child not in missing book
-					return childPage.getBook() != null;
-				}
-			},
+			Page::getChildRefs,
+			// Child not in missing book
+			(PageRef childPage) -> childPage.getBook() != null,
 			null
 		);
 		return Collections.unmodifiableList(list);

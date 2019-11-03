@@ -32,7 +32,6 @@ import com.semanticcms.core.model.ParentRef;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -342,12 +341,7 @@ public class SemanticCMS {
 		// independent of the order components happened to be registered.
 		Collections.sort(
 			components,
-			new Comparator<Component>() {
-				@Override
-				public int compare(Component o1, Component o2) {
-					return o1.getClass().getName().compareTo(o2.getClass().getName());
-				}
-			}
+			(o1, o2) -> o1.getClass().getName().compareTo(o2.getClass().getName())
 		);
 	}
 	// </editor-fold>
@@ -587,17 +581,9 @@ public class SemanticCMS {
 	 */
 	public <E extends com.semanticcms.core.model.Element> void addLinkCssClass(
 		Class<E> elementType,
-		final String cssLinkClass
+		String cssLinkClass
 	) throws IllegalStateException {
-		addLinkCssClassResolver(
-			elementType,
-			new LinkCssClassResolver<E>() {
-				@Override
-				public String getCssLinkClass(E element) {
-					return cssLinkClass;
-				}
-			}
-		);
+		addLinkCssClassResolver(elementType, element -> cssLinkClass);
 	}
 	// </editor-fold>
 
@@ -668,17 +654,9 @@ public class SemanticCMS {
 	 */
 	public <N extends com.semanticcms.core.model.Node> void addListItemCssClass(
 		Class<N> nodeType,
-		final String listItemCssClass
+		String listItemCssClass
 	) throws IllegalStateException {
-		addListItemCssClassResolver(
-			nodeType,
-			new ListItemCssClassResolver<N>() {
-				@Override
-				public String getListItemCssClass(N node) {
-					return listItemCssClass;
-				}
-			}
-		);
+		addListItemCssClassResolver(nodeType, node -> listItemCssClass);
 	}
 	// </editor-fold>
 
