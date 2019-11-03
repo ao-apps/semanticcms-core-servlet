@@ -88,6 +88,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 		return this;
 	}
 
+	@FunctionalInterface
 	public static interface Body<E extends com.semanticcms.core.model.Element> {
 		void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException;
 	}
@@ -157,6 +158,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 		invoke((Body<? super E>)null);
 	}
 
+	@FunctionalInterface
 	public static interface PageContextBody<E extends com.semanticcms.core.model.Element> {
 		void doBody(E element) throws ServletException, IOException, SkipPageException;
 	}
@@ -178,6 +180,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 		);
 	}
 
+	@FunctionalInterface
 	public static interface PageContextNoElementBody {
 		void doBody() throws ServletException, IOException, SkipPageException;
 	}
