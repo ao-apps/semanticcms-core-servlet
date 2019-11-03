@@ -65,28 +65,24 @@ public class ServletElementContext implements ElementContext {
 			null,
 			null,
 			null,
-			// Java 1.8: Lambda
-			new PageContext.PageContextRunnableSkip() {
-				@Override
-				public void run() throws ServletException, IOException, SkipPageException {
-					Dispatcher.include(
-						servletContext,
-						resource,
-						request,
-						new HttpServletResponseWrapper(response) {
-							@Override
-							public PrintWriter getWriter() {
-								return pw;
-							}
-							@Override
-							@SuppressWarnings("deprecation")
-							public ServletOutputStream getOutputStream() {
-								throw new com.aoindustries.lang.NotImplementedException();
-							}
-						},
-						args
-					);
-				}
+			() -> {
+				Dispatcher.include(
+					servletContext,
+					resource,
+					request,
+					new HttpServletResponseWrapper(response) {
+						@Override
+						public PrintWriter getWriter() {
+							return pw;
+						}
+						@Override
+						@SuppressWarnings("deprecation")
+						public ServletOutputStream getOutputStream() {
+							throw new com.aoindustries.lang.NotImplementedException();
+						}
+					},
+					args
+				);
 			}
 		);
 		if(pw.checkError()) throw new IOException("Error on include PrintWriter");

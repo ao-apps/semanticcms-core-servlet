@@ -220,13 +220,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 							servletContext,
 							request,
 							newResponse,
-							// Java 1.8: () -> body.doBody(request, newResponse, element)
-							new PageContext.PageContextRunnableSkip() {
-								@Override
-								public void run() throws ServletException, IOException, SkipPageException {
-									body.doBody(request, newResponse, element);
-								}
-							}
+							() -> body.doBody(request, newResponse, element)
 						);
 						if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
 					}
@@ -242,13 +236,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 					servletContext,
 					request,
 					newResponse,
-					// Java 1.8: () -> body.doBody(request, newResponse, element)
-					new PageContext.PageContextRunnableSkip() {
-						@Override
-						public void run() throws ServletException, IOException, SkipPageException {
-							body.doBody(request, newResponse, element);
-						}
-					}
+					() -> body.doBody(request, newResponse, element)
 				);
 			} else {
 				throw new AssertionError();
