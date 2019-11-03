@@ -189,18 +189,13 @@ public class CapturePage {
 					null,
 					null,
 					null,
-					new PageContext.PageContextRunnableSkip() {
-						@Override
-						public void run() throws ServletException, IOException, SkipPageException {
-							Dispatcher.include(
-								servletContext,
-								capturePath,
-								subRequest,
-								// Discard all output
-								new NullHttpServletResponseWrapper(subResponse)
-							);
-						}
-					}
+					() -> Dispatcher.include(
+						servletContext,
+						capturePath,
+						subRequest,
+						// Discard all output
+						new NullHttpServletResponseWrapper(subResponse)
+					)
 				);
 			} catch(SkipPageException e) {
 				// An individual page may throw SkipPageException which only terminates
@@ -310,21 +305,16 @@ public class CapturePage {
 				for(int i=0; i<notCachedSize; i++) {
 					final PageRef pageRef = notCachedList.get(i).getPageRef();
 					tasks.add(
-						new Callable<Page>() {
-							@Override
-							public Page call() throws ServletException, IOException {
-								return capturePage(
-									servletContext,
-									threadSafeReq,
-									threadSafeResp,
-									new HttpServletSubRequest(threadSafeReq),
-									new HttpServletSubResponse(threadSafeResp, tempFileContext),
-									pageRef,
-									level,
-									cache
-								);
-							}
-						}
+						() -> capturePage(
+							servletContext,
+							threadSafeReq,
+							threadSafeResp,
+							new HttpServletSubRequest(threadSafeReq),
+							new HttpServletSubResponse(threadSafeResp, tempFileContext),
+							pageRef,
+							level,
+							cache
+						)
 					);
 				}
 				List<Page> notCachedResults;
@@ -528,18 +518,13 @@ public class CapturePage {
 				root,
 				0,
 				level,
-				new PageDepthHandler<T>() {
-					@Override
-					public T handlePage(Page page, int depth) throws ServletException, IOException {
-						return pageHandler.handlePage(page);
-					}
-				},
+				(Page page, int depth) -> pageHandler.handlePage(page),
 				edges,
 				edgeFilter,
 				null,
 				ServletTempFileContext.getTempFileContext(request),
 				cache,
-				new HashSet<PageRef>()
+				new HashSet<>()
 			);
 		}
 	}
@@ -705,29 +690,24 @@ public class CapturePage {
 							final PageRef edge = edgesToAdd.remove(edgesToAdd.size() - 1);
 							futures.put(
 								edge,
-								concurrentSubrequestExecutor.submit(
-									new Callable<Page>() {
-										@Override
-										public Page call() throws ServletException, IOException, InterruptedException {
-											try {
-												return capturePage(
-													servletContext,
-													finalThreadSafeReq,
-													finalThreadSafeResp,
-													new HttpServletSubRequest(finalThreadSafeReq),
-													new HttpServletSubResponse(finalThreadSafeResp, tempFileContext),
-													edge,
-													level,
-													cache
-												);
-											} finally {
-												// This one is ready now
-												// There should always be enough room in the queue since the futures are limited going in
-												finishedFutures.add(edge);
-											}
-										}
+								concurrentSubrequestExecutor.submit(() -> {
+									try {
+										return capturePage(
+											servletContext,
+											finalThreadSafeReq,
+											finalThreadSafeResp,
+											new HttpServletSubRequest(finalThreadSafeReq),
+											new HttpServletSubResponse(finalThreadSafeResp, tempFileContext),
+											edge,
+											level,
+											cache
+										);
+									} finally {
+										// This one is ready now
+										// There should always be enough room in the queue since the futures are limited going in
+										finishedFutures.add(edge);
 									}
-								)
+								})
 							);
 						}
 						if(DEBUG) {
@@ -900,7 +880,7 @@ public class CapturePage {
 				postHandler,
 				ServletTempFileContext.getTempFileContext(request),
 				cache,
-				new HashSet<PageRef>()
+				new HashSet<>()
 			);
 		}
 	}
