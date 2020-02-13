@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,11 +22,11 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.Doctype;
+import com.aoindustries.encoding.EncodingContext;
+import com.aoindustries.encoding.Serialization;
+import com.aoindustries.encoding.servlet.DoctypeEE;
+import com.aoindustries.encoding.servlet.SerializationEE;
 import com.aoindustries.html.Html;
-import com.aoindustries.html.Serialization;
-import com.aoindustries.html.servlet.DoctypeEE;
-import com.aoindustries.html.servlet.SerializationEE;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.Dispatcher;
@@ -173,8 +173,8 @@ public class CapturePage {
 			Serialization currentSerialization = SerializationEE.getDefault(servletContext, subRequest);
 			SerializationEE.set(subRequest, currentSerialization);
 			ServletUtil.setContentType(subResponse, currentSerialization.getContentType(), Html.ENCODING);
-			// Set the doctype to html5 for all captures
-			DoctypeEE.set(subRequest, Doctype.HTML5);
+			// Set the default doctype for all captures
+			DoctypeEE.set(subRequest, EncodingContext.DEFAULT_DOCTYPE);
 			// Set new capture context
 			CaptureLevel.setCaptureLevel(subRequest, level);
 			CapturePage captureContext = new CapturePage();
