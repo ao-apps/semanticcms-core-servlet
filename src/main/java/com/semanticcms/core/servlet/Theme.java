@@ -22,10 +22,10 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.Doctype;
-import com.aoindustries.html.Serialization;
-import com.aoindustries.html.servlet.DoctypeEE;
-import com.aoindustries.html.servlet.SerializationEE;
+import com.aoindustries.encoding.Doctype;
+import com.aoindustries.encoding.Serialization;
+import com.aoindustries.encoding.servlet.DoctypeEE;
+import com.aoindustries.encoding.servlet.SerializationEE;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import javax.servlet.ServletContext;
