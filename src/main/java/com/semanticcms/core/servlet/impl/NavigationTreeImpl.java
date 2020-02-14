@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,8 +24,8 @@ package com.semanticcms.core.servlet.impl;
 
 import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
-import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
+import com.aoindustries.html.Html;
 import com.aoindustries.net.URIDecoder;
 import com.aoindustries.net.URIEncoder;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
@@ -45,7 +45,6 @@ import com.semanticcms.core.servlet.PageRefResolver;
 import com.semanticcms.core.servlet.PageUtils;
 import com.semanticcms.core.servlet.SemanticCMS;
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -185,7 +184,7 @@ final public class NavigationTreeImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Writer out,
+		Html html,
 		Page root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -204,7 +203,7 @@ final public class NavigationTreeImpl {
 				servletContext,
 				request,
 				response,
-				out,
+				html,
 				root,
 				skipRoot,
 				yuiConfig,
@@ -232,7 +231,7 @@ final public class NavigationTreeImpl {
 		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Writer out,
+		Html html,
 		ValueExpression root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -251,7 +250,7 @@ final public class NavigationTreeImpl {
 				servletContext,
 				request,
 				response,
-				out,
+				html,
 				resolveValue(root, Page.class, elContext),
 				skipRoot,
 				yuiConfig,
@@ -271,7 +270,7 @@ final public class NavigationTreeImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Writer out,
+		Html html,
 		Page root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -339,13 +338,13 @@ final public class NavigationTreeImpl {
 				childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithChildLinks);
 			}
 			if(!childNodes.isEmpty()) {
-				if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
+				if(captureLevel == CaptureLevel.BODY) html.out.write("<ul>\n");
 				for(Node childNode : childNodes) {
 					foundThisPage = writeNode(
 						servletContext,
 						request,
 						response,
-						captureLevel == CaptureLevel.BODY ? out : null,
+						captureLevel == CaptureLevel.BODY ? html : null,
 						currentNode,
 						nodesWithLinks,
 						nodesWithChildLinks,
@@ -361,15 +360,15 @@ final public class NavigationTreeImpl {
 						1
 					);
 				}
-				if(captureLevel == CaptureLevel.BODY) out.write("</ul>\n");
+				if(captureLevel == CaptureLevel.BODY) html.out.write("</ul>\n");
 			}
 		} else {
-			if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
+			if(captureLevel == CaptureLevel.BODY) html.out.write("<ul>\n");
 			/*foundThisPage =*/ writeNode(
 				servletContext,
 				request,
 				response,
-				captureLevel == CaptureLevel.BODY ? out : null,
+				captureLevel == CaptureLevel.BODY ? html : null,
 				currentNode,
 				nodesWithLinks,
 				nodesWithChildLinks,
@@ -384,7 +383,7 @@ final public class NavigationTreeImpl {
 				maxDepth,
 				1
 			);
-			if(captureLevel == CaptureLevel.BODY) out.write("</ul>\n");
+			if(captureLevel == CaptureLevel.BODY) html.out.write("</ul>\n");
 		}
 	}
 
@@ -392,7 +391,7 @@ final public class NavigationTreeImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Writer out,
+		Html html,
 		Node currentNode,
 		Set<Node> nodesWithLinks,
 		Set<Node> nodesWithChildLinks,
@@ -426,7 +425,7 @@ final public class NavigationTreeImpl {
 			currentNode.addPageLink(pageRef);
 		}
 		final String servletPath;
-		if(out == null) {
+		if(html == null) {
 			// Will be unused
 			servletPath = null;
 		} else {
@@ -453,62 +452,62 @@ final public class NavigationTreeImpl {
 				servletPath = sb.toString();
 			}
 		}
-		if(out != null) {
-			out.write("<li");
+		if(html != null) {
+			html.out.write("<li");
 			if(yuiConfig) {
-				out.write(" yuiConfig='{\"data\":\"");
-				encodeTextInXhtmlAttribute(encodeHexData(servletPath), out);
-				out.write("\"}'");
+				html.out.write(" yuiConfig='{\"data\":\"");
+				encodeTextInXhtmlAttribute(encodeHexData(servletPath), html.out);
+				html.out.write("\"}'");
 			}
 			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 			String listItemCssClass = semanticCMS.getListItemCssClass(node);
 			if(listItemCssClass != null || level == 1) {
-				out.write(" class=\"");
+				html.out.write(" class=\"");
 				boolean didClass = false;
 				if(listItemCssClass != null) {
-					encodeTextInXhtmlAttribute(listItemCssClass, out);
+					encodeTextInXhtmlAttribute(listItemCssClass, html.out);
 					didClass = true;
 				}
 				if(level == 1) {
-					if(didClass) out.write(' ');
-					out.write("expanded");
+					if(didClass) html.out.write(' ');
+					html.out.write("expanded");
 				}
-				out.write('"');
+				html.out.write('"');
 			}
-			out.write("><a");
+			html.out.write("><a");
 		}
 		// Look for thisPage match
 		boolean thisPageClass = false;
 		if(pageRef.equals(thisPageRef) && element == null) {
 			if(!foundThisPage) {
-				if(out != null) out.write(" id=\"semanticcms-core-tree-this-page\"");
+				if(html != null) html.out.write(" id=\"semanticcms-core-tree-this-page\"");
 				foundThisPage = true;
 			}
 			thisPageClass = true;
 		}
 		// Look for linkToPage match
 		boolean linksToPageClass = nodesWithLinks!=null && nodesWithLinks.contains(node);
-		if(out != null && (thisPageClass || linksToPageClass)) {
-			out.write(" class=\"");
+		if(html != null && (thisPageClass || linksToPageClass)) {
+			html.out.write(" class=\"");
 			if(thisPageClass && nodesWithLinks!=null && !linksToPageClass) {
-				out.write("semanticcms-core-no-link-to-this-page");
+				html.out.write("semanticcms-core-no-link-to-this-page");
 			} else if(thisPageClass) {
-				out.write("semanticcms-core-tree-this-page");
+				html.out.write("semanticcms-core-tree-this-page");
 			} else if(linksToPageClass) {
-				out.write("semanticcms-core-links-to-page");
+				html.out.write("semanticcms-core-links-to-page");
 			} else {
 				throw new AssertionError();
 			}
-			out.write('"');
+			html.out.write('"');
 		}
-		if(out != null) {
+		if(html != null) {
 			if(target != null) {
-				out.write(" target=\"");
-				encodeTextInXhtmlAttribute(target, out);
-				out.write('"');
+				html.out.write(" target=\"");
+				encodeTextInXhtmlAttribute(target, html.out);
+				html.out.write('"');
 			}
 			Integer index = pageIndex==null ? null : pageIndex.getPageIndex(pageRef);
-			out.write(" href=\"");
+			html.out.write(" href=\"");
 			StringBuilder href = new StringBuilder();
 			if(index != null) {
 				href.append('#');
@@ -527,24 +526,21 @@ final public class NavigationTreeImpl {
 				response.encodeURL(
 					href.toString()
 				),
-				out
+				html.out
 			);
-			out.write("\">");
+			html.out.write("\">");
 			if(node instanceof Page) {
 				// Use shortTitle for pages
-				encodeTextInXhtml(
-					PageUtils.getShortTitle(parentPageRef, (Page)node),
-					out
-				);
+				html.text(PageUtils.getShortTitle(parentPageRef, (Page)node));
 			} else {
-				node.appendLabel(new MediaWriter(textInXhtmlEncoder, out));
+				node.appendLabel(new MediaWriter(textInXhtmlEncoder, html.out));
 			}
 			if(index != null) {
-				out.write("<sup>[");
-				encodeTextInXhtml(Integer.toString(index+1), out);
-				out.write("]</sup>");
+				html.out.write("<sup>[");
+				html.text(index + 1);
+				html.out.write("]</sup>");
 			}
-			out.write("</a>");
+			html.out.write("</a>");
 		}
 		if(maxDepth==0 || level < maxDepth) {
 			List<Node> childNodes = NavigationTreeImpl.getChildNodes(servletContext, request, response, includeElements, false, node);
@@ -552,16 +548,16 @@ final public class NavigationTreeImpl {
 				childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithChildLinks);
 			}
 			if(!childNodes.isEmpty()) {
-				if(out != null) {
-					out.write('\n');
-					out.write("<ul>\n");
+				if(html != null) {
+					html.out.write("\n"
+						+ "<ul>\n");
 				}
 				for(Node childNode : childNodes) {
 					foundThisPage = writeNode(
 						servletContext,
 						request,
 						response,
-						out,
+						html,
 						currentNode,
 						nodesWithLinks,
 						nodesWithChildLinks,
@@ -577,10 +573,10 @@ final public class NavigationTreeImpl {
 						level+1
 					);
 				}
-				if(out != null) out.write("</ul>\n");
+				if(html != null) html.out.write("</ul>\n");
 			}
 		}
-		if(out != null) out.write("</li>\n");
+		if(html != null) html.out.write("</li>\n");
 		return foundThisPage;
 	}
 

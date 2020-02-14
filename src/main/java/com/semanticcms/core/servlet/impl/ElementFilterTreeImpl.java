@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,8 +24,8 @@ package com.semanticcms.core.servlet.impl;
 
 import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
-import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
+import com.aoindustries.html.Html;
 import com.aoindustries.net.URIEncoder;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
@@ -38,7 +38,6 @@ import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.PageIndex;
 import com.semanticcms.core.servlet.SemanticCMS;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -149,7 +148,7 @@ final public class ElementFilterTreeImpl {
 		Node currentNode,
 		Set<Node> nodesWithMatches,
 		PageIndex pageIndex,
-		Writer out,
+		Html html,
 		Node node,
 		boolean includeElements
 	) throws ServletException, IOException, SkipPageException {
@@ -170,16 +169,16 @@ final public class ElementFilterTreeImpl {
 			// Add page links
 			currentNode.addPageLink(pageRef);
 		}
-		if(out != null) {
-			out.write("<li");
+		if(html != null) {
+			html.out.write("<li");
 			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 			String listItemCssClass = semanticCMS.getListItemCssClass(node);
 			if(listItemCssClass != null) {
-				out.write(" class=\"");
-				encodeTextInXhtmlAttribute(listItemCssClass, out);
-				out.write('"');
+				html.out.write(" class=\"");
+				encodeTextInXhtmlAttribute(listItemCssClass, html.out);
+				html.out.write('"');
 			}
-			out.write("><a href=\"");
+			html.out.write("><a href=\"");
 			StringBuilder url = new StringBuilder();
 			Integer index = pageIndex==null ? null : pageIndex.getPageIndex(pageRef);
 			if(index != null) {
@@ -205,30 +204,33 @@ final public class ElementFilterTreeImpl {
 				response.encodeURL(
 					url.toString()
 				),
-				out
+				html.out
 			);
-			out.write("\">");
-			node.appendLabel(new MediaWriter(textInXhtmlEncoder, out));
+			html.out.write("\">");
+			node.appendLabel(new MediaWriter(textInXhtmlEncoder, html.out));
 			if(index != null) {
-				out.write("<sup>[");
-				encodeTextInXhtml(Integer.toString(index+1), out);
-				out.write("]</sup>");
+				html.out.write("<sup>[");
+				html.text(index + 1);
+				html.out.write("]</sup>");
 			}
-			out.write("</a>");
+			html.out.write("</a>");
 		}
 		List<Node> childNodes = NavigationTreeImpl.getChildNodes(servletContext, request, response, includeElements, true, node);
 		childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithMatches);
 		if(!childNodes.isEmpty()) {
-			if(out != null) {
-				out.write('\n');
-				out.write("<ul>\n");
+			if(html != null) {
+				html.out.write("\n<ul>\n");
 			}
 			for(Node childNode : childNodes) {
-				writeNode(servletContext, request, response, currentNode, nodesWithMatches, pageIndex, out, childNode, includeElements);
+				writeNode(servletContext, request, response, currentNode, nodesWithMatches, pageIndex, html, childNode, includeElements);
 			}
-			if(out != null) out.write("</ul>\n");
+			if(html != null) {
+				html.out.write("</ul>\n");
+			}
 		}
-		if(out != null) out.write("</li>\n");
+		if(html != null) {
+			html.out.write("</li>\n");
+		}
 	}
 
 	// Traversal-based implementation is proving too complicated due to needing to
@@ -238,7 +240,7 @@ final public class ElementFilterTreeImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Writer out,
+		Html html,
 		ElementFilter elementFilter,
 		Node root,
 		boolean includeElements
@@ -251,7 +253,9 @@ final public class ElementFilterTreeImpl {
 			final Set<Node> nodesWithMatches = new HashSet<>();
 			findElements(servletContext, request, response, elementFilter, nodesWithMatches, root, includeElements);
 
-			if(captureLevel == CaptureLevel.BODY) out.write("<ul>\n");
+			if(captureLevel == CaptureLevel.BODY) {
+				html.out.write("<ul>\n");
+			}
 			writeNode(
 				servletContext,
 				request,
@@ -259,11 +263,13 @@ final public class ElementFilterTreeImpl {
 				currentNode,
 				nodesWithMatches,
 				PageIndex.getCurrentPageIndex(request),
-				captureLevel == CaptureLevel.BODY ? out : null,
+				captureLevel == CaptureLevel.BODY ? html : null,
 				root,
 				includeElements
 			);
-			if(captureLevel == CaptureLevel.BODY) out.write("</ul>\n");
+			if(captureLevel == CaptureLevel.BODY) {
+				html.out.write("</ul>\n");
+			}
 		}
 	}
 
@@ -271,7 +277,7 @@ final public class ElementFilterTreeImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Writer out,
+		Html html,
 		Class<? extends Element> elementType,
 		Node root,
 		boolean includeElements
@@ -280,7 +286,7 @@ final public class ElementFilterTreeImpl {
 			servletContext,
 			request,
 			response,
-			out,
+			html,
 			new ClassFilter(elementType),
 			root,
 			includeElements
