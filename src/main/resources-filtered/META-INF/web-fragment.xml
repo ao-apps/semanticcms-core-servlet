@@ -101,13 +101,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<servlet-name>com.aoindustries.servlet.http.LastModifiedServlet</servlet-name>
 		<url-pattern>*.css</url-pattern>
 	</servlet-mapping>
+
 	<!-- Tracks the request concurrency, used to decide to use concurrent or sequential implementations. -->
+	<!-- TODO: via annotation -->
 	<listener>
 		<listener-class>com.semanticcms.core.servlet.CountConcurrencyListener</listener-class>
-	</listener>
-	<!-- Sets request character encoding to UTF-8 when not provided by client -->
-	<listener>
-		<listener-class>com.aoindustries.servlet.filter.Utf8RequestCharacterEncodingListener</listener-class>
 	</listener>
 
 	<!--
