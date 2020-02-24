@@ -32,12 +32,14 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 	<display-name>@{project.name}</display-name>
 	-->
 	<description>@{project.description}</description>
+
 	<!-- The UTF-8 filter must be first, declare before all other fragments -->
 	<ordering>
 		<before>
 			<others />
 		</before>
 	</ordering>
+
 	<!-- Filter to strip invalid XML characters from incoming parameters -->
 	<filter>
 		<filter-name>com.aoindustries.servlet.filter.StripInvalidXmlCharactersFilter</filter-name>
@@ -49,6 +51,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<dispatcher>REQUEST</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
+
 	<!-- Sets up the cache for the request. -->
 	<filter>
 		<filter-name>com.semanticcms.core.servlet.CacheFilter</filter-name>
@@ -60,6 +63,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<dispatcher>REQUEST</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
+
 	<!-- Add cache-control header to requests with lastModified parameter -->
 	<filter>
 		<description><![CDATA[
@@ -84,6 +88,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<dispatcher>REQUEST</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
+
 	<!-- Servlet to rewrite CSS files to include lastModified parameters -->
 	<servlet>
 		<servlet-name>com.aoindustries.servlet.http.LastModifiedServlet</servlet-name>
@@ -187,4 +192,5 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 		<extension>rss</extension>
 		<mime-type>application/rss+xml;charset=UTF-8</mime-type>
 	</mime-mapping>
+
 </web-fragment>
