@@ -73,10 +73,12 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 								<link>https://aoindustries.com/ao-encoding/apidocs/</link>
 								<link>https://aoindustries.com/ao-encoding/servlet/apidocs/</link>
 								<link>https://aoindustries.com/ao-fluent-html/apidocs/</link>
+								<link>https://aoindustries.com/ao-fluent-html/servlet/apidocs/</link>
 								<link>https://aoindustries.com/ao-io-buffer/apidocs/</link>
 								<link>https://aoindustries.com/ao-lang/apidocs/</link>
 								<link>https://aoindustries.com/ao-net-types/apidocs/</link>
 								<link>https://aoindustries.com/ao-servlet-filter/apidocs/</link>
+								<link>https://aoindustries.com/ao-servlet-last-modified/apidocs/</link>
 								<link>https://aoindustries.com/ao-servlet-subrequest/apidocs/</link>
 								<link>https://aoindustries.com/ao-servlet-util/apidocs/</link>
 								<link>https://aoindustries.com/ao-taglib/apidocs/</link>
@@ -115,6 +117,9 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				<groupId>com.aoindustries</groupId><artifactId>ao-fluent-html</artifactId><version>0.1.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
 			</dependency>
 			<dependency>
+				<groupId>com.aoindustries</groupId><artifactId>ao-fluent-html-servlet</artifactId><version>0.1.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
+			</dependency>
+			<dependency>
 				<groupId>com.aoindustries</groupId><artifactId>ao-io-buffer</artifactId><version>3.2.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
 			</dependency>
 			<dependency>
@@ -125,6 +130,9 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 			</dependency>
 			<dependency>
 				<groupId>com.aoindustries</groupId><artifactId>ao-servlet-filter</artifactId><version>2.1.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
+			</dependency>
+			<dependency>
+				<groupId>com.aoindustries</groupId><artifactId>ao-servlet-last-modified</artifactId><version>1.0.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
 			</dependency>
 			<dependency>
 				<groupId>com.aoindustries</groupId><artifactId>ao-servlet-subrequest</artifactId><version>1.0.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
@@ -181,6 +189,9 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 			<groupId>com.aoindustries</groupId><artifactId>ao-fluent-html</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.aoindustries</groupId><artifactId>ao-fluent-html-servlet</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.aoindustries</groupId><artifactId>ao-io-buffer</artifactId>
 		</dependency>
 		<dependency>
@@ -191,6 +202,9 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		</dependency>
 		<dependency>
 			<groupId>com.aoindustries</groupId><artifactId>ao-servlet-filter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.aoindustries</groupId><artifactId>ao-servlet-last-modified</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.aoindustries</groupId><artifactId>ao-servlet-subrequest</artifactId>
