@@ -31,7 +31,6 @@ import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.html.Html;
 import com.aoindustries.net.URIEncoder;
 import com.aoindustries.net.URIParameters;
-import com.aoindustries.servlet.http.LastModifiedServlet;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import static com.aoindustries.util.StringUtility.nullIfEmpty;
 import com.semanticcms.core.model.Element;
@@ -180,46 +179,6 @@ final public class LinkImpl {
 	}
 
 	/**
-	 * @deprecated  Please use {@link #writeLinkImpl(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.io.Writer, java.lang.String, java.lang.String, java.lang.String, boolean, java.lang.String, java.lang.String, boolean, com.aoindustries.net.URIParameters, boolean, boolean, java.lang.Object, com.semanticcms.core.servlet.impl.LinkImpl.LinkImplBody)}
-	 */
-	@Deprecated
-	public static <E extends Throwable> void writeLinkImpl(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Html html,
-		String book,
-		String page,
-		String element,
-		boolean allowGeneratedElement,
-		String anchor,
-		String viewName,
-		boolean small,
-	    URIParameters params,
-		Object clazz,
-		LinkImplBody<E> body
-	) throws E, ServletException, IOException, SkipPageException {
-		writeLinkImpl(
-			servletContext,
-			request,
-			response,
-			html,
-			book,
-			page,
-			element,
-			allowGeneratedElement,
-			anchor,
-			viewName,
-			small,
-			params,
-			false, // absolute
-			false, // canonical
-			clazz,
-			body
-		);
-	}
-
-	/**
 	 * @param book  ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
 	 * @param page  ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
 	 * @param element  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only.
@@ -289,48 +248,6 @@ final public class LinkImpl {
 				captureLevel
 			);
 		}
-	}
-
-	/**
-	 * @deprecated  Please use {@link #writeLinkImpl(javax.servlet.ServletContext, javax.el.ELContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.io.Writer, javax.el.ValueExpression, javax.el.ValueExpression, javax.el.ValueExpression, boolean, javax.el.ValueExpression, javax.el.ValueExpression, boolean, com.aoindustries.net.URIParameters, boolean, boolean, javax.el.ValueExpression, com.semanticcms.core.servlet.impl.LinkImpl.LinkImplBody)}
-	 */
-	@Deprecated
-	public static <E extends Throwable> void writeLinkImpl(
-		ServletContext servletContext,
-		ELContext elContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Html html,
-		ValueExpression book,
-		ValueExpression page,
-		ValueExpression element,
-		boolean allowGeneratedElement,
-		ValueExpression anchor,
-		ValueExpression viewName,
-		boolean small,
-	    URIParameters params,
-		ValueExpression clazz,
-		LinkImplBody<E> body
-	) throws E, ServletException, IOException, SkipPageException {
-		writeLinkImpl(
-			servletContext,
-			elContext,
-			request,
-			response,
-			html,
-			book,
-			page,
-			element,
-			allowGeneratedElement,
-			anchor,
-			viewName,
-			small,
-			params,
-			false, // absolute
-			false, // canonical
-			clazz,
-			body
-		);
 	}
 
 	private static <E extends Throwable> void writeLinkImpl(
@@ -489,15 +406,13 @@ final public class LinkImpl {
 			}
 			if(!small) {
 				UrlUtils.writeHref(
-					servletContext,
 					request,
 					response,
 					html.out,
 					href.toString(),
 					params,
 					absolute,
-					canonical,
-					LastModifiedServlet.AddLastModifiedWhen.FALSE
+					canonical
 				);
 			}
 			if(clazz != null) {
@@ -541,15 +456,13 @@ final public class LinkImpl {
 			if(small) {
 				html.out.write("<sup><a");
 				UrlUtils.writeHref(
-					servletContext,
 					request,
 					response,
 					html.out,
 					href.toString(),
 					params,
 					absolute,
-					canonical,
-					LastModifiedServlet.AddLastModifiedWhen.FALSE
+					canonical
 				);
 				// TODO: Make [link] not copied during select/copy/paste, to not corrupt semantic meaning (and make more useful in copy/pasted code and scripts)?
 				// TODO: https://stackoverflow.com/questions/3271231/how-to-exclude-portions-of-text-when-copying
