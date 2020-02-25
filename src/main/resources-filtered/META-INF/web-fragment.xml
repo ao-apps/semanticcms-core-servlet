@@ -33,27 +33,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>
 	-->
 	<description>@{project.description}</description>
 
-	<!-- The UTF-8 filter must be first, declare before all other fragments -->
-	<!-- TODO: Move to ao-servlet-util web-fragment.xml? -->
-	<ordering>
-		<before>
-			<others />
-		</before>
-	</ordering>
-
-	<!-- Filter to strip invalid XML characters from incoming parameters -->
-	<!-- TODO: Move to ao-servlet-util web-fragment.xml? -->
-	<filter>
-		<filter-name>com.aoindustries.servlet.filter.StripInvalidXmlCharactersFilter</filter-name>
-		<filter-class>com.aoindustries.servlet.filter.StripInvalidXmlCharactersFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>com.aoindustries.servlet.filter.StripInvalidXmlCharactersFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-		<dispatcher>REQUEST</dispatcher>
-		<dispatcher>ERROR</dispatcher>
-	</filter-mapping>
-
 	<!-- Sets up the cache for the request. -->
 	<filter>
 		<filter-name>com.semanticcms.core.servlet.CacheFilter</filter-name>
