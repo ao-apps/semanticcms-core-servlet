@@ -72,7 +72,7 @@ import javax.servlet.jsp.SkipPageException;
 
 public class CapturePage {
 
-	private static final String CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME = CapturePage.class.getName()+".captureContext";
+	private static final String REQUEST_ATTRIBUTE = CapturePage.class.getName();
 
 	private static final boolean CONCURRENT_TRAVERSALS_ENABLED = true;
 
@@ -83,7 +83,7 @@ public class CapturePage {
 	 * Gets the capture context or <code>null</code> if none occurring.
 	 */
 	public static CapturePage getCaptureContext(ServletRequest request) {
-		return (CapturePage)request.getAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME);
+		return (CapturePage)request.getAttribute(REQUEST_ATTRIBUTE);
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class CapturePage {
 			// Set new capture context
 			CaptureLevel.setCaptureLevel(subRequest, level);
 			CapturePage captureContext = new CapturePage();
-			subRequest.setAttribute(CAPTURE_CONTEXT_REQUEST_ATTRIBUTE_NAME, captureContext);
+			subRequest.setAttribute(REQUEST_ATTRIBUTE, captureContext);
 			// Always capture as "GET" request
 			subRequest.setMethod(HttpServletUtil.METHOD_GET);
 			// Include the page resource, discarding any direct output
@@ -294,7 +294,7 @@ public class CapturePage {
 			int notCachedSize = notCachedList.size();
 			if(
 				notCachedSize > 1
-				&& ConcurrencyController.useConcurrentSubrequests(request)
+				&& ConcurrencyCoordinator.useConcurrentSubrequests(request)
 			) {
 				// Concurrent implementation
 				final TempFileContext tempFileContext = ServletTempFileContext.getTempFileContext(request);
@@ -496,7 +496,7 @@ public class CapturePage {
 		Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
 		if(
 			CONCURRENT_TRAVERSALS_ENABLED
-			&& ConcurrencyController.useConcurrentSubrequests(request)
+			&& ConcurrencyCoordinator.useConcurrentSubrequests(request)
 		) {
 			return traversePagesAnyOrderConcurrent(
 				servletContext,
@@ -852,7 +852,7 @@ public class CapturePage {
 		Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
 		if(
 			CONCURRENT_TRAVERSALS_ENABLED
-			&& ConcurrencyController.useConcurrentSubrequests(request)
+			&& ConcurrencyCoordinator.useConcurrentSubrequests(request)
 		) {
 			return traversePagesDepthFirstConcurrent(
 				servletContext,

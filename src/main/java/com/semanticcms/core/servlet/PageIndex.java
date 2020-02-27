@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -47,7 +47,7 @@ public class PageIndex {
 	/**
 	 * The request scope variable containing any active page index.
 	 */
-	public static final String PAGE_INDEX_REQUEST_ATTRIBUTE_NAME = "pageIndex";
+	public static final String REQUEST_ATTRIBUTE = "pageIndex";
 
 	/**
 	 * Gets the current page index setup by a combined view or <code>null</code>
@@ -55,7 +55,7 @@ public class PageIndex {
 	 */
 	public static PageIndex getCurrentPageIndex(ServletRequest request) {
 		NullArgumentException.checkNotNull(request, "request");
-		return (PageIndex)request.getAttribute(PAGE_INDEX_REQUEST_ATTRIBUTE_NAME);
+		return (PageIndex)request.getAttribute(REQUEST_ATTRIBUTE);
 	}
 
 	/**
