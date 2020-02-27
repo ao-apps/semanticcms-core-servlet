@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2019  AO Industries, Inc.
+ * Copyright (C) 2016, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -62,6 +62,7 @@ final public class BookUtils {
 			) {
 				String bookName = book.getName();
 				String warningAttribute = CANONICAL_BASE_WARNED_ATTRIBUTE + bookName;
+				// Acceptable race condition: logging multiple times would not cause any harm
 				if(servletContext.getAttribute(warningAttribute) == null) {
 					servletContext.setAttribute(warningAttribute, true);
 					logger.warning("Using generated canonical base URL, please configure the \"canonicalBase\" setting in the \"" + bookName + "\" book: " + autoCanonical);

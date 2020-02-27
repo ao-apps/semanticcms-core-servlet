@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -44,17 +44,17 @@ public enum CaptureLevel {
 	 */
 	BODY;
 
-	private static final String CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME = CaptureLevel.class.getName()+".captureLevel";
+	private static final String CAPTURE_LEVEL_REQUEST_ATTRIBUTE = CaptureLevel.class.getName()+".captureLevel";
 
 	/**
 	 * Gets the capture level or <code>BODY</code> if none occurring.
 	 */
 	public static CaptureLevel getCaptureLevel(ServletRequest request) {
-		CaptureLevel captureLevel = (CaptureLevel)request.getAttribute(CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME);
+		CaptureLevel captureLevel = (CaptureLevel)request.getAttribute(CAPTURE_LEVEL_REQUEST_ATTRIBUTE);
 		return captureLevel == null ? BODY : captureLevel;
 	}
 
 	static void setCaptureLevel(ServletRequest request, CaptureLevel level) {
-		request.setAttribute(CAPTURE_LEVEL_REQUEST_ATTRIBUTE_NAME, level);
+		request.setAttribute(CAPTURE_LEVEL_REQUEST_ATTRIBUTE, level);
 	}
 }

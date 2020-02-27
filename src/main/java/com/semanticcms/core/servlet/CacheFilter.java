@@ -35,16 +35,13 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Resolves the cache to use for the current request.
  *
- * @see  ConcurrencyController
+ * @see  ConcurrencyCoordinator
  */
 public class CacheFilter implements Filter {
 
-	private static final String CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME = CacheFilter.class.getName();
+	private static final String CAPTURE_CACHE_REQUEST_ATTRIBUTE = CacheFilter.class.getName();
 
-	private static final String EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME = CacheFilter.class.getName()+".exportCache";
-
-	private static class ExportCacheLock {}
-	private static final ExportCacheLock exportCacheLock = new ExportCacheLock();
+	private static final String EXPORT_CACHE_APPLICATION_ATTRIBUTE = CacheFilter.class.getName() + ".exportCache";
 
 	/**
 	 * The number of milliseconds after the export cache is no longer considered valid.
@@ -58,7 +55,7 @@ public class CacheFilter implements Filter {
 	 * @throws IllegalStateException if the filter is not active on the current request
 	 */
 	public static Cache getCache(ServletRequest request) throws IllegalStateException {
-		Cache cache = (Cache)request.getAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME);
+		Cache cache = (Cache)request.getAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE);
 		if(cache == null) throw new IllegalStateException("cache not active on the current request");
 		return cache;
 	}
@@ -72,6 +69,8 @@ public class CacheFilter implements Filter {
 	 */
 	private static class ExportPageCache {
 	
+		private final CacheFilter filter;
+
 		/**
 		 * When concurrent subrequests are enabled, use concurrent implementation.
 		 * When export mode without subrequests, use synchronized since exports are typically
@@ -79,7 +78,8 @@ public class CacheFilter implements Filter {
 		 */
 		private final boolean concurrentSubrequests;
 
-		private ExportPageCache(boolean concurrentSubrequests) {
+		private ExportPageCache(CacheFilter filter, boolean concurrentSubrequests) {
+			this.filter = filter;
 			this.concurrentSubrequests = concurrentSubrequests;
 		}
 
@@ -99,7 +99,7 @@ public class CacheFilter implements Filter {
 		 * @return true when the cache is now invalid
 		 */
 		boolean invalidateCache(long currentTime) {
-			assert Thread.holdsLock(exportCacheLock);
+			assert Thread.holdsLock(filter.exportCacheLock);
 			if(cache == null) {
 				return true;
 			} else if(
@@ -118,7 +118,7 @@ public class CacheFilter implements Filter {
 		 * Invalidates the cache, if needed, then gets the resulting cache.
 		 */
 		Cache getCache(long currentTime) {
-			assert Thread.holdsLock(exportCacheLock);
+			assert Thread.holdsLock(filter.exportCacheLock);
 			invalidateCache(currentTime);
 			if(cache == null) {
 				cacheStart = currentTime;
@@ -131,6 +131,9 @@ public class CacheFilter implements Filter {
 	private ServletContext servletContext;
 	private boolean concurrentSubrequests;
 
+	private static class ExportCacheLock {}
+	private final ExportCacheLock exportCacheLock = new ExportCacheLock();
+
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		servletContext = config.getServletContext();
@@ -140,7 +143,7 @@ public class CacheFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		@SuppressWarnings("unchecked")
-		Cache cache = (Cache)request.getAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME);
+		Cache cache = (Cache)request.getAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE);
 		if(cache == null) {
 			boolean isExporting;
 			if(request instanceof HttpServletRequest) {
@@ -149,35 +152,35 @@ public class CacheFilter implements Filter {
 				isExporting = false;
 			}
 			synchronized(exportCacheLock) {
-				ExportPageCache exportCache = (ExportPageCache)servletContext.getAttribute(EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME);
+				ExportPageCache exportCache = (ExportPageCache)servletContext.getAttribute(EXPORT_CACHE_APPLICATION_ATTRIBUTE);
 				if(isExporting) {
 					if(exportCache == null) {
-						exportCache = new ExportPageCache(concurrentSubrequests);
-						servletContext.setAttribute(EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME, exportCache);
+						exportCache = new ExportPageCache(this, concurrentSubrequests);
+						servletContext.setAttribute(EXPORT_CACHE_APPLICATION_ATTRIBUTE, exportCache);
 					}
 					cache = exportCache.getCache(System.currentTimeMillis());
 				} else {
 					// Clean-up stale export cache
 					if(exportCache != null) {
 						if(exportCache.invalidateCache(System.currentTimeMillis())) {
-							servletContext.removeAttribute(EXPORT_CACHE_CONTEXT_ATTRIBUTE_NAME);
+							servletContext.removeAttribute(EXPORT_CACHE_APPLICATION_ATTRIBUTE);
 						}
 					}
 				}
 			}
 			if(cache == null) {
 				// Request-level cache when not exporting
-				if(ConcurrencyController.useConcurrentSubrequests(request)) {
+				if(ConcurrencyCoordinator.useConcurrentSubrequests(request)) {
 					cache = new ConcurrentCache();
 				} else {
 					cache = new SingleThreadCache();
 				}
 			}
 			try {
-				request.setAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME, cache);
+				request.setAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE, cache);
 				chain.doFilter(request, response);
 			} finally {
-				request.removeAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE_NAME);
+				request.removeAttribute(CAPTURE_CACHE_REQUEST_ATTRIBUTE);
 			}
 		} else {
 			// Cache already set
