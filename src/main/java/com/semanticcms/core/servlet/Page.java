@@ -34,7 +34,6 @@ import com.aoindustries.taglib.AutoEncodingBufferedTag;
 import com.semanticcms.core.controller.PageRefResolver;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.pages.local.CaptureContext;
-import com.semanticcms.core.pages.local.CurrentPage;
 import com.semanticcms.core.pages.local.PageContext;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
@@ -213,7 +212,7 @@ public class Page {
 	 * </p>
 	 *
 	 * @see  PageContext
-	 * @see  CurrentPage#CURRENT_PAGE_REQUEST_ATTRIBUTE_NAME
+	 * @see  CaptureContext#REQUEST_ATTRIBUTE
 	 */
 	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
 		CaptureContext capture = CaptureContext.getCaptureContext(request);
