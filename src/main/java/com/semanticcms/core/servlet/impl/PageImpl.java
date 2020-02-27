@@ -384,7 +384,7 @@ final public class PageImpl {
 				}
 			} else {
 				// Otherwise, try auto parents
-				ServletContextCache servletContextCache = ServletContextCache.getCache(servletContext);
+				ServletContextCache servletContextCache = ServletContextCache.getInstance(servletContext);
 				Book pageBook = pageRef.getBook();
 				assert pageBook != null;
 				String pagePath = pageRef.getPath();
