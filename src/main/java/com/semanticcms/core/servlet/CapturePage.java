@@ -128,7 +128,7 @@ public class CapturePage {
 			request,
 			response,
 			new HttpServletSubRequestWrapper(request),
-			new HttpServletSubResponseWrapper(response, ServletTempFileContext.getTempFileContext(request)),
+			new HttpServletSubResponseWrapper(response, ServletTempFileContext.getInstance(request)),
 			pageReferrer,
 			level,
 			cache
@@ -297,7 +297,7 @@ public class CapturePage {
 				&& ConcurrencyCoordinator.useConcurrentSubrequests(request)
 			) {
 				// Concurrent implementation
-				final TempFileContext tempFileContext = ServletTempFileContext.getTempFileContext(request);
+				final TempFileContext tempFileContext = ServletTempFileContext.getInstance(request);
 				final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
 				final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
 				// Create the tasks
@@ -522,7 +522,7 @@ public class CapturePage {
 				edges,
 				edgeFilter,
 				null,
-				ServletTempFileContext.getTempFileContext(request),
+				ServletTempFileContext.getInstance(request),
 				cache,
 				new HashSet<>()
 			);
@@ -564,7 +564,7 @@ public class CapturePage {
 			preferredConcurrency = executors.getPreferredConcurrency();
 			assert preferredConcurrency > 1 : "Single-CPU systems should never make it to this concurrent implementation";
 		}
-		final TempFileContext tempFileContext = ServletTempFileContext.getTempFileContext(request);
+		final TempFileContext tempFileContext = ServletTempFileContext.getInstance(request);
 
 		int maxSize = 0;
 
@@ -878,7 +878,7 @@ public class CapturePage {
 				edges,
 				edgeFilter,
 				postHandler,
-				ServletTempFileContext.getTempFileContext(request),
+				ServletTempFileContext.getInstance(request),
 				cache,
 				new HashSet<>()
 			);
