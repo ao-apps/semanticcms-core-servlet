@@ -23,11 +23,9 @@
 package com.semanticcms.core.servlet.impl;
 
 import com.aoindustries.encoding.Coercion;
-import com.aoindustries.encoding.MediaWriter;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
-import static com.aoindustries.encoding.TextInXhtmlEncoder.textInXhtmlEncoder;
 import com.aoindustries.html.Html;
 import com.aoindustries.net.URIEncoder;
 import com.aoindustries.net.URIParameters;
@@ -439,8 +437,8 @@ final public class LinkImpl {
 
 			if(body == null) {
 				if(targetElement != null) {
-					targetElement.appendLabel(new MediaWriter(textInXhtmlEncoder, html.out));
-				} else if(targetPage!=null) {
+					html.text(targetElement.getLabel());
+				} else if(targetPage != null) {
 					html.text(targetPage.getTitle());
 				} else {
 					writeBrokenPathInXhtml(targetPageRef, element, html.out);
