@@ -41,7 +41,7 @@ import com.aoindustries.servlet.subrequest.IHttpServletSubResponse;
 import com.aoindustries.servlet.subrequest.UnmodifiableCopyHttpServletRequest;
 import com.aoindustries.servlet.subrequest.UnmodifiableCopyHttpServletResponse;
 import com.aoindustries.tempfiles.TempFileContext;
-import com.aoindustries.tempfiles.servlet.ServletTempFileContext;
+import com.aoindustries.tempfiles.servlet.TempFileContextEE;
 import com.aoindustries.util.concurrent.Executor;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
@@ -123,12 +123,11 @@ public class CapturePage {
 		CaptureLevel level,
 		Cache cache
 	) throws ServletException, IOException {
-		return capturePage(
-			servletContext,
+		return capturePage(servletContext,
 			request,
 			response,
 			new HttpServletSubRequestWrapper(request),
-			new HttpServletSubResponseWrapper(response, ServletTempFileContext.getInstance(request)),
+			new HttpServletSubResponseWrapper(response, TempFileContextEE.get(request)),
 			pageReferrer,
 			level,
 			cache
@@ -297,7 +296,7 @@ public class CapturePage {
 				&& ConcurrencyCoordinator.useConcurrentSubrequests(request)
 			) {
 				// Concurrent implementation
-				final TempFileContext tempFileContext = ServletTempFileContext.getInstance(request);
+				final TempFileContext tempFileContext = TempFileContextEE.get(request);
 				final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
 				final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
 				// Create the tasks
@@ -511,8 +510,7 @@ public class CapturePage {
 				null
 			);
 		} else {
-			return traversePagesDepthFirstRecurseSequential(
-				servletContext,
+			return traversePagesDepthFirstRecurseSequential(servletContext,
 				request,
 				response,
 				root,
@@ -522,7 +520,7 @@ public class CapturePage {
 				edges,
 				edgeFilter,
 				null,
-				ServletTempFileContext.getInstance(request),
+				TempFileContextEE.get(request),
 				cache,
 				new HashSet<>()
 			);
@@ -564,7 +562,7 @@ public class CapturePage {
 			preferredConcurrency = executors.getPreferredConcurrency();
 			assert preferredConcurrency > 1 : "Single-CPU systems should never make it to this concurrent implementation";
 		}
-		final TempFileContext tempFileContext = ServletTempFileContext.getInstance(request);
+		final TempFileContext tempFileContext = TempFileContextEE.get(request);
 
 		int maxSize = 0;
 
@@ -867,8 +865,7 @@ public class CapturePage {
 				cache
 			);
 		} else {
-			return traversePagesDepthFirstRecurseSequential(
-				servletContext,
+			return traversePagesDepthFirstRecurseSequential(servletContext,
 				request,
 				response,
 				root,
@@ -878,7 +875,7 @@ public class CapturePage {
 				edges,
 				edgeFilter,
 				postHandler,
-				ServletTempFileContext.getInstance(request),
+				TempFileContextEE.get(request),
 				cache,
 				new HashSet<>()
 			);
