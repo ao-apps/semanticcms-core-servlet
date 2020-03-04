@@ -25,6 +25,9 @@ package com.semanticcms.core.servlet;
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.util.WrappedException;
+import com.aoindustries.web.resources.registry.Style;
+import com.aoindustries.web.resources.registry.Styles;
+import com.aoindustries.web.resources.servlet.RegistryEE;
 import com.aoindustries.xml.XmlUtils;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
@@ -400,27 +403,62 @@ public class SemanticCMS {
 	// <editor-fold defaultstate="collapsed" desc="CSS Links">
 	/**
 	 * The CSS links in the order added.
+	 * <p>
+	 * The value stores if the style was registered with {@link RegistryEE}.
+	 * When true, if the style is removed, it should also be removed from the
+	 * registry. (There is currently no way to remove CSS links from here anyway).
+	 * </p>
+	 *
+	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
-	private final Set<String> cssLinks = new LinkedHashSet<>();
+	@Deprecated
+	private final Map<String,Boolean> cssLinks = new LinkedHashMap<>();
 
 	/**
 	 * Gets the CSS links, in the order added.
+	 *
+	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
+	@Deprecated
 	public Set<String> getCssLinks() {
 		synchronized(cssLinks) {
 			// Not returning a copy since CSS links are normally only registered on app start-up.
-			return Collections.unmodifiableSet(cssLinks);
+			return Collections.unmodifiableSet(cssLinks.keySet());
 		}
 	}
+
+	/**
+	 * The last CSS link added.  Used to enforce a dependency ordering
+	 * consistent with classic SemanticCMS ordering.
+	 */
+	private Style lastStyle;
 
 	/**
 	 * Registers a new CSS link.
 	 *
 	 * @throws  IllegalStateException  if the link is already registered.
+	 *
+	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
+	@Deprecated
 	public void addCssLink(String cssLink) throws IllegalStateException {
 		synchronized(cssLinks) {
-			if(!cssLinks.add(cssLink)) throw new IllegalStateException("CSS link already registered: " + cssLink);
+			if(cssLinks.containsKey(cssLink)) throw new IllegalStateException("CSS link already registered: " + cssLink);
+			Styles styles = RegistryEE.get(servletContext).global.styles;
+			Style newStyle = Style.builder().uri(cssLink).build();
+			cssLinks.put(cssLink, styles.add(newStyle));
+			if(firstPrintStyle != null) {
+				if(lastStyle != null) {
+					// Maintain the first printCssLink must be done after the last cssLink
+					styles.removeOrdering(lastStyle, firstPrintStyle);
+				}
+				styles.addOrdering(newStyle, firstPrintStyle);
+			}
+			if(lastStyle != null) {
+				// This new style must be done after the last style, to maintain classic SemanticCMS ordering
+				styles.addOrdering(lastStyle, newStyle);
+			}
+			this.lastStyle = newStyle;
 		}
 	}
 	// </editor-fold>
@@ -428,27 +466,69 @@ public class SemanticCMS {
 	// <editor-fold defaultstate="collapsed" desc="Print CSS Links">
 	/**
 	 * The print CSS links in the order added.
+	 * <p>
+	 * The value stores if the style was registered with {@link RegistryEE}.
+	 * When true, if the style is removed, it should also be removed from the
+	 * registry. (There is currently no way to remove CSS links from here anyway).
+	 * </p>
+	 *
+	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
-	private final Set<String> printCssLinks = new LinkedHashSet<>();
+	@Deprecated
+	private final Map<String,Boolean> printCssLinks = new LinkedHashMap<>();
 
 	/**
 	 * Gets the print CSS links, in the order added.
+	 *
+	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
+	@Deprecated
 	public Set<String> getPrintCssLinks() {
 		synchronized(printCssLinks) {
 			// Not returning a copy since CSS links are normally only registered on app start-up.
-			return Collections.unmodifiableSet(printCssLinks);
+			return Collections.unmodifiableSet(printCssLinks.keySet());
 		}
 	}
+
+	/**
+	 * The first CSS print link added.  Used to enforce a dependency ordering
+	 * consistent with classic SemanticCMS ordering.
+	 */
+	private Style firstPrintStyle;
+
+	/**
+	 * The last CSS print link added.  Used to enforce a dependency ordering
+	 * consistent with classic SemanticCMS ordering.
+	 */
+	private Style lastPrintStyle;
 
 	/**
 	 * Registers a new print CSS link.
 	 *
 	 * @throws  IllegalStateException  if the link is already registered.
+	 *
+	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
+	@Deprecated
 	public void addPrintCssLink(String printCssLink) throws IllegalStateException {
 		synchronized(printCssLinks) {
-			if(!printCssLinks.add(printCssLink)) throw new IllegalStateException("Print CSS link already registered: " + printCssLink);
+			if(printCssLinks.containsKey(printCssLink)) throw new IllegalStateException("Print CSS link already registered: " + printCssLink);
+			Styles styles = RegistryEE.get(servletContext).global.styles;
+			Style newStyle = Style.builder().uri(printCssLink).media("print").build();
+			printCssLinks.put(printCssLink, styles.add(newStyle));
+			if(firstPrintStyle == null) {
+				if(lastStyle != null) {
+					// Maintain the first printCssLink must be done after the last cssLink
+					styles.addOrdering(lastStyle, newStyle);
+				}
+				firstPrintStyle = newStyle;
+			}
+			if(lastPrintStyle != null) {
+				// This new style must be done after the last style, to maintain classic SemanticCMS ordering
+				styles.addOrdering(lastPrintStyle, newStyle);
+			}
+			this.lastPrintStyle = newStyle;
+
 		}
 	}
 	// </editor-fold>
@@ -457,11 +537,13 @@ public class SemanticCMS {
 	/**
 	 * The scripts in the order added.
 	 */
+	// TODO: RegistryEE
 	private final Map<String,String> scripts = new LinkedHashMap<>();
 
 	/**
 	 * Gets the scripts, in the order added.
 	 */
+	// TODO: RegistryEE
 	public Map<String,String> getScripts() {
 		synchronized(scripts) {
 			// Not returning a copy since scripts are normally only registered on app start-up.
@@ -479,6 +561,7 @@ public class SemanticCMS {
 	 *
 	 * @throws  IllegalStateException  if the script already registered but with a different src.
 	 */
+	// TODO: RegistryEE
 	public void addScript(String name, String src) throws IllegalStateException {
 		synchronized(scripts) {
 			String existingSrc = scripts.get(name);
