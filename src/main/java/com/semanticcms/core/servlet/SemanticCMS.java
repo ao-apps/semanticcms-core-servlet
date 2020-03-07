@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
 import com.aoindustries.util.WrappedException;
+import com.aoindustries.web.resources.registry.Group;
 import com.aoindustries.web.resources.registry.Style;
 import com.aoindustries.web.resources.registry.Styles;
 import com.aoindustries.web.resources.servlet.RegistryEE;
@@ -433,6 +434,12 @@ public class SemanticCMS {
 	 */
 	private Style lastStyle;
 
+	private static final Group.Name RESOURCE_GROUP = new Group.Name(SemanticCMS.class.getName() + "semanticcms-core-servlet.cssLinks");
+
+	private Styles getCssLinkStyles() {
+		return RegistryEE.Application.get(servletContext).getGroup(RESOURCE_GROUP).styles;
+	}
+
 	/**
 	 * Registers a new CSS link.
 	 *
@@ -444,7 +451,7 @@ public class SemanticCMS {
 	public void addCssLink(String cssLink) throws IllegalStateException {
 		synchronized(cssLinks) {
 			if(cssLinks.containsKey(cssLink)) throw new IllegalStateException("CSS link already registered: " + cssLink);
-			Styles styles = RegistryEE.get(servletContext).global.styles;
+			Styles styles = getCssLinkStyles();
 			Style newStyle = Style.builder().uri(cssLink).build();
 			cssLinks.put(cssLink, styles.add(newStyle));
 			if(firstPrintStyle != null) {
@@ -513,7 +520,7 @@ public class SemanticCMS {
 	public void addPrintCssLink(String printCssLink) throws IllegalStateException {
 		synchronized(printCssLinks) {
 			if(printCssLinks.containsKey(printCssLink)) throw new IllegalStateException("Print CSS link already registered: " + printCssLink);
-			Styles styles = RegistryEE.get(servletContext).global.styles;
+			Styles styles = getCssLinkStyles();
 			Style newStyle = Style.builder().uri(printCssLink).media("print").build();
 			printCssLinks.put(printCssLink, styles.add(newStyle));
 			if(firstPrintStyle == null) {
@@ -679,6 +686,7 @@ public class SemanticCMS {
 	 *
 	 * @throws  IllegalStateException  if the element type is already registered.
 	 */
+	// TODO: Take a set of Group.Name activations, too
 	public <E extends com.semanticcms.core.model.Element> void addLinkCssClass(
 		Class<E> elementType,
 		String cssLinkClass
@@ -753,6 +761,7 @@ public class SemanticCMS {
 	 *
 	 * @throws  IllegalStateException  if the node type is already registered.
 	 */
+	// TODO: Take a set of Group.Name activations, too
 	public <N extends com.semanticcms.core.model.Node> void addListItemCssClass(
 		Class<N> nodeType,
 		String listItemCssClass
