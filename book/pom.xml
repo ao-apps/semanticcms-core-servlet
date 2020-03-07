@@ -35,8 +35,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 	<properties>
 		<!-- These values are copied from the project being documented -->
 		<documented.artifactId>semanticcms-core-servlet</documented.artifactId>
-		<documented.javaVersion>1.8</documented.javaVersion>
-		<documented.javac.link.javaApi>${javac.link.javaApi.jdk8}</documented.javac.link.javaApi>
 		<documented.name>SemanticCMS Core Servlet</documented.name>
 		<documented.shortTitle>Servlet</documented.shortTitle>
 		<documented.description>Java API for modeling web page content and relationships in a Servlet environment.</documented.description>
