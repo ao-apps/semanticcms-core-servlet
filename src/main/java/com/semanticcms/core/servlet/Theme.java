@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2016, 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,10 +26,12 @@ import com.aoindustries.encoding.Doctype;
 import com.aoindustries.encoding.Serialization;
 import com.aoindustries.encoding.servlet.DoctypeEE;
 import com.aoindustries.encoding.servlet.SerializationEE;
+import com.aoindustries.web.resources.registry.Registry;
 import com.semanticcms.core.model.Page;
 import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
@@ -38,6 +40,25 @@ import javax.servlet.jsp.SkipPageException;
  * A theme is responsible for the overall view of the site.
  */
 abstract public class Theme {
+
+	/**
+	 * The request-scope attribute that will store the currently active theme.
+	 */
+	private static final String REQUEST_ATTRIBUTE = Theme.class.getName();
+
+	/**
+	 * Gets the current theme on the given request or {@code null} when none active.
+	 */
+	public static Theme getTheme(ServletRequest request) {
+		return (Theme)request.getAttribute(REQUEST_ATTRIBUTE);
+	}
+
+	/**
+	 * Sets the current theme on the given request or {@code null} for none active.
+	 */
+	public static void setTheme(ServletRequest request, Theme theme) {
+		request.setAttribute(REQUEST_ATTRIBUTE, theme);
+	}
 
 	/**
 	 * Two themes with the same name are considered equal.
@@ -80,6 +101,16 @@ abstract public class Theme {
 	 */
 	final public boolean isDefault() {
 		return SemanticCMS.DEFAULT_THEME_NAME.equals(getName());
+	}
+
+	/**
+	 * Configures the {@linkplain com.aoindustries.web.resources.servlet.RegistryEE.Request request-scope web resources} that this theme uses.
+	 * <p>
+	 * Implementers should call <code>super.configureResources(…)</code> as a matter of convention, despite this default implementation doing nothing.
+	 * </p>
+	 */
+	public void configureResources(ServletContext servletContext, HttpServletRequest req, HttpServletResponse resp, View view, Page page, Registry requestRegistry) {
+		// Do nothing
 	}
 
 	/**

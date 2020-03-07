@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2016, 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -26,6 +26,7 @@ import com.aoindustries.html.Html;
 import com.aoindustries.net.URIEncoder;
 import com.aoindustries.servlet.http.Canonical;
 import com.aoindustries.taglib.Link;
+import com.aoindustries.web.resources.registry.Registry;
 import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
@@ -339,14 +340,30 @@ abstract public class View implements Comparable<View> {
 	abstract public String getKeywords(Page page);
 
 	/**
+	 * Configures the {@linkplain com.aoindustries.web.resources.servlet.RegistryEE.Request request-scope web resources} that this view uses.
+	 * <p>
+	 * Implementers should call <code>super.configureResources(…)</code> as a matter of convention, despite this default implementation doing nothing.
+	 * </p>
+	 */
+	public void configureResources(ServletContext servletContext, HttpServletRequest req, HttpServletResponse resp, Theme theme, Page page, Registry requestRegistry) {
+		// Do nothing
+	}
+
+	/**
 	 * Gets an optional set of additional links to include for this view
 	 * in the order they should be added.
+	 * <p>
+	 * Please note, that any links to stylesheets here are never optimized.  Please
+	 * prefer {@link #configureResources(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.servlet.Theme, com.semanticcms.core.model.Page, com.aoindustries.web.resources.registry.Registry)}.
+	 * </p>
+	 *
+	 * @see  #configureResources(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.servlet.Theme, com.semanticcms.core.model.Page, com.aoindustries.web.resources.registry.Registry)
 	 */
-	// TODO: RegistryEE
 	public Collection<Link> getLinks(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
+		// TODO: Theme here, too?
 		Page page
 	) throws ServletException, IOException {
 		return Collections.emptySet();
