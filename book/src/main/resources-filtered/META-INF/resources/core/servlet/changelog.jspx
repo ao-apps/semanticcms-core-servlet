@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2020-02-26T20:09:57-0600"
+		dateModified="2020-03-06T19:57:35-0600"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -67,6 +67,10 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 					<li>Moved Servlet subrequest utilities to new <ao:a href="https://aoindustries.com/ao-servlet-subrequest/">AO Servlet Subrequest</ao:a> project.</li>
 					<li>Using <ao:a href="https://aoindustries.com/ao-fluent-html/">AO Fluent HTML</ao:a> for HTML generation.</li>
 					<li>Optimized ServletContext attribute initialization and concurrency.</li>
+					<li>
+						<ao:a href="apidocs/com/semanticcms/core/servlet/impl/PageImpl.html">PageImpl</ao:a> now establishes
+						a page context for <ao:a href="https://aoindustries.com/ao-web-resources/">AO Web Resources</ao:a>.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
