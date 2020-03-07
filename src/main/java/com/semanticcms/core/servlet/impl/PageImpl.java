@@ -29,6 +29,8 @@ import com.aoindustries.encoding.servlet.SerializationEE;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
 import com.aoindustries.servlet.LocalizedServletException;
+import com.aoindustries.web.resources.registry.Registry;
+import com.aoindustries.web.resources.servlet.RegistryEE;
 import com.semanticcms.core.controller.Book;
 import com.semanticcms.core.controller.SemanticCMS;
 import com.semanticcms.core.model.BookRef;
@@ -150,41 +152,50 @@ final public class PageImpl {
 			try {
 				// Freeze page once body done
 				try {
-					// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
-					// is done to catch parents and childen.
-					if(body != null) {
-						// Set currentNode
-						CurrentNode.setCurrentNode(request, page);
-						try {
-							// Set currentPage
-							CurrentPage.setCurrentPage(request, page);
+					Registry oldPageRegistry = RegistryEE.Page.get(request);
+					try {
+						Registry pageRegistry = new Registry();
+						page.setRegistry(pageRegistry);
+						RegistryEE.Page.set(request, pageRegistry);
+
+						// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
+						// is done to catch parents and childen.
+						if(body != null) {
+							// Set currentNode
+							CurrentNode.setCurrentNode(request, page);
 							try {
-								final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
-								if(captureLevel == CaptureLevel.BODY) {
-									// Invoke page body, capturing output
-									page.setBody(body.doBody(false, page).trim());
-								} else {
-									// Invoke page body, discarding output
-									body.doBody(true, page);
-								}
-								// Page may not move itself to a different book
-								PageRef newPageRef = page.getPageRef();
-								if(!newPageRef.getBookRef().equals(pageRef.getBookRef())) {
-									throw new ServletException(
-										"Page may not move itself into a different book.  pageRef="
-											+ pageRef
-											+ ", newPageRef="
-											+ newPageRef
-									);
+								// Set currentPage
+								CurrentPage.setCurrentPage(request, page);
+								try {
+									final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
+									if(captureLevel == CaptureLevel.BODY) {
+										// Invoke page body, capturing output
+										page.setBody(body.doBody(false, page).trim());
+									} else {
+										// Invoke page body, discarding output
+										body.doBody(true, page);
+									}
+									// Page may not move itself to a different book
+									PageRef newPageRef = page.getPageRef();
+									if(!newPageRef.getBookRef().equals(pageRef.getBookRef())) {
+										throw new ServletException(
+											"Page may not move itself into a different book.  pageRef="
+												+ pageRef
+												+ ", newPageRef="
+												+ newPageRef
+										);
+									}
+								} finally {
+									// Restore previous currentPage
+									CurrentPage.setCurrentPage(request, null);
 								}
 							} finally {
-								// Restore previous currentPage
-								CurrentPage.setCurrentPage(request, null);
+								// Restore previous currentNode
+								CurrentNode.setCurrentNode(request, null);
 							}
-						} finally {
-							// Restore previous currentNode
-							CurrentNode.setCurrentNode(request, null);
 						}
+					} finally {
+						RegistryEE.Page.set(request, oldPageRegistry);
 					}
 					doAutoParents(servletContext, page);
 				} finally {
