@@ -40,7 +40,7 @@ import javax.servlet.jsp.SkipPageException;
 /**
  * Automatically sets up the Page and the PageContext.
  *
- * @see  Page
+ * @see  com.semanticcms.core.model.Page
  * @see  PageContext
  */
 abstract public class PageServlet extends HttpServlet {
@@ -50,26 +50,26 @@ abstract public class PageServlet extends HttpServlet {
 	public static final Charset ENCODING = Html.ENCODING;
 
 	/**
-	 * @see  Page#getTitle()
+	 * @see  com.semanticcms.core.model.Page#getTitle()
 	 */
 	abstract public String getTitle();
 
 	/**
-	 * @see  Page#getShortTitle()
+	 * @see  com.semanticcms.core.model.Page#getShortTitle()
 	 */
 	public String getShortTitle() {
 		return null;
 	}
 
 	/**
-	 * @see  Page#getDescription()
+	 * @see  com.semanticcms.core.model.Page#getDescription()
 	 */
 	public String getDescription() {
 		return null;
 	}
 
 	/**
-	 * @see  Page#getKeywords()
+	 * @see  com.semanticcms.core.model.Page#getKeywords()
 	 */
 	public String getKeywords() {
 		return null;
@@ -78,15 +78,15 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Defaults to null for "auto".
 	 *
-	 * @see  Page#getToc()
+	 * @see  com.semanticcms.core.model.Page#getToc()
 	 */
 	public Boolean getToc() {
 		return null;
 	}
 
 	/**
-	 * @see  Page#getTocLevels()
-	 * @see  Page#DEFAULT_TOC_LEVELS
+	 * @see  com.semanticcms.core.model.Page#getTocLevels()
+	 * @see  com.semanticcms.core.model.Page#DEFAULT_TOC_LEVELS
 	 */
 	public int getTocLevels() {
 		return Page.DEFAULT_TOC_LEVELS;
@@ -122,7 +122,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
 	protected void doGet(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -137,7 +137,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
 	protected void doPost(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -152,7 +152,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
 	protected void doPut(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -167,7 +167,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
 	protected void doDelete(Page page) throws ServletException, IOException, SkipPageException {
 		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -182,7 +182,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * Page and the PageContext are already setup.
 	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link ENCODING}.
+	 * The response character encoding has been set to {@link #ENCODING}.
 	 */
 	protected void doOptions(Page page) throws ServletException, IOException, SkipPageException {
 		HttpServletUtil.doOptions(
