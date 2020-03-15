@@ -30,7 +30,7 @@ import com.aoindustries.html.Html;
 import com.aoindustries.net.URIEncoder;
 import com.aoindustries.net.URIParameters;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
-import static com.aoindustries.util.StringUtility.nullIfEmpty;
+import static com.aoindustries.lang.Strings.nullIfEmpty;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
