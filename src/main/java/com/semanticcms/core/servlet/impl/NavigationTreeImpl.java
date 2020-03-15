@@ -27,8 +27,8 @@ import com.aoindustries.html.Html;
 import com.aoindustries.net.URIDecoder;
 import com.aoindustries.net.URIEncoder;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
-import com.aoindustries.util.StringUtility;
-import static com.aoindustries.util.StringUtility.nullIfEmpty;
+import com.aoindustries.lang.Strings;
+import static com.aoindustries.lang.Strings.nullIfEmpty;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
@@ -175,7 +175,7 @@ final public class NavigationTreeImpl {
 
 	public static String encodeHexData(String data) {
 		// Note: This is always UTF-8 encoded and does not depend on response encoding
-		return StringUtility.convertToHex(data.getBytes(StandardCharsets.UTF_8));
+		return Strings.convertToHex(data.getBytes(StandardCharsets.UTF_8));
 	}
 
 	public static void writeNavigationTreeImpl(
