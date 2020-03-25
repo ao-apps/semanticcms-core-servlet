@@ -22,9 +22,9 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.exception.WrappedException;
 import com.aoindustries.servlet.PropertiesUtils;
 import com.aoindustries.servlet.http.Dispatcher;
-import com.aoindustries.util.WrappedException;
 import com.aoindustries.web.resources.registry.Group;
 import com.aoindustries.web.resources.registry.Style;
 import com.aoindustries.web.resources.registry.Styles;
