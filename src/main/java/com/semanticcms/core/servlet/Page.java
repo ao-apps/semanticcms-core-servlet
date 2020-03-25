@@ -272,7 +272,7 @@ public class Page {
 										@Override
 										@SuppressWarnings("deprecation")
 										public ServletOutputStream getOutputStream() {
-											throw new com.aoindustries.lang.NotImplementedException();
+											throw new com.aoindustries.exception.NotImplementedException();
 										}
 									};
 									// Set PageContext

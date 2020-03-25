@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2015, 2016, 2017, 2018, 2019  AO Industries, Inc.
+ * Copyright (C) 2015, 2016, 2017, 2018, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -79,7 +79,7 @@ public class ServletElementContext implements ElementContext {
 						@Override
 						@SuppressWarnings("deprecation")
 						public ServletOutputStream getOutputStream() {
-							throw new com.aoindustries.lang.NotImplementedException();
+							throw new com.aoindustries.exception.NotImplementedException();
 						}
 					},
 					args
