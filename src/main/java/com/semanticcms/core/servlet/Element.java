@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.jsp.SkipPageException;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * The base for capturing elements.
@@ -218,9 +219,8 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 								return capturedPW;
 							}
 							@Override
-							@SuppressWarnings("deprecation")
 							public ServletOutputStream getOutputStream() {
-								throw new com.aoindustries.exception.NotImplementedException();
+								throw new NotImplementedException("getOutputStream not expected");
 							}
 						};
 						// Set PageContext
