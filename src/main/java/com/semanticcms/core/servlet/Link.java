@@ -220,7 +220,7 @@ public class Link {
 			servletContext,
 			request,
 			response,
-			HtmlEE.get(servletContext, request, response.getWriter()),
+			HtmlEE.get(servletContext, request, response),
 			book,
 			page,
 			element,
