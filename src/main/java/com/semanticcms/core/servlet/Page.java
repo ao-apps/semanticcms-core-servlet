@@ -23,7 +23,6 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.encoding.Doctype;
-import com.aoindustries.encoding.EncodingContext;
 import com.aoindustries.encoding.Serialization;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.io.buffer.BufferWriter;
@@ -64,7 +63,7 @@ public class Page {
 	private ReadableDateTime dateReviewed;
 
 	private Serialization serialization;
-	private Doctype doctype = EncodingContext.DEFAULT_DOCTYPE;
+	private Doctype doctype = Doctype.DEFAULT;
 
 	private final String title;
 
