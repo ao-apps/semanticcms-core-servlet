@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2020-03-15T00:27:10-05:00"
+		dateModified="2020-03-26T18:55:53-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -80,6 +80,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 						for <ao:a href="apidocs/com/semanticcms/core/servlet/Theme.html">Theme</ao:a>
 						and <ao:a href="apidocs/com/semanticcms/core/servlet/View.html">View</ao:a>.
 					</li>
+					<li>Removed <code>UrlUtils</code>, with the sole remaining method <code>writeHref</code> moved to <code>LinkImpl</code>.</li>
 					<li>Updated dependencies.</li>
 				</ul>
 			</changelog:release>
