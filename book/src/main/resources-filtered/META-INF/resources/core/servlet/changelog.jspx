@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2020-03-26T18:55:53-05:00"
+		dateModified="2020-03-27T14:15:03-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -52,39 +52,48 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				groupId="@{project.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{project.scm.url}"
-			>
-				<ul>
-					<li>Minimum Java version changed from 1.7 to 1.8.</li>
-					<li>
-						Reduced use of property substitutions in <code>pom.xml</code>.
-						This is to help 3rd-party parsers that fail to perform full Maven-compatible substitutions.
-					</li>
-					<li>Now supports page attributes for <code>serialization</code> (default "auto") and <code>doctype</code> (default "HTML5").</li>
-					<li>Setting more values during captures:
-						<ol>
-							<li>Registering doctype with new methods <code>DoctypeEE.set(…)</code> and <code>DoctypeEE.get(…)</code>.</li>
-							<li>Setting response content type to match the default serialization (HTML / XHTML) that will be applied during final render.</li>
-							<li>Setting response character set to <code>UTF-8</code>.</li>
-							<li>Better shielding non-concurrency sub-requests during captures with request and response wrappers.</li>
-						</ol>
-					</li>
-					<li>Moved Servlet subrequest utilities to new <ao:a href="https://aoindustries.com/ao-servlet-subrequest/">AO Servlet Subrequest</ao:a> project.</li>
-					<li>Using <ao:a href="https://aoindustries.com/ao-fluent-html/">AO Fluent HTML</ao:a> for HTML generation.</li>
-					<li>Optimized ServletContext attribute initialization and concurrency.</li>
-					<li>
-						<ao:a href="apidocs/com/semanticcms/core/servlet/impl/PageImpl.html">PageImpl</ao:a> now establishes
-						a page context for <ao:a href="https://aoindustries.com/ao-web-resources/">AO Web Resources</ao:a>.
-					</li>
-					<li>
-						Now configures <ao:a href="https://aoindustries.com/ao-web-resources/">AO Web Resources</ao:a>
-						for <ao:a href="apidocs/com/semanticcms/core/servlet/Theme.html">Theme</ao:a>
-						and <ao:a href="apidocs/com/semanticcms/core/servlet/View.html">View</ao:a>.
-					</li>
-					<li>Removed <code>UrlUtils</code>, with the sole remaining method <code>writeHref</code> moved to <code>LinkImpl</code>.</li>
-					<li>Updated dependencies.</li>
-				</ul>
-			</changelog:release>
+			/>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="1.15.0"
+			datePublished="2020-03-27T14:15:03-05:00"
+			groupId="@{project.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{project.scm.url}"
+		>
+			<ul>
+				<li>Minimum Java version changed from 1.7 to 1.8.</li>
+				<li>
+					Reduced use of property substitutions in <code>pom.xml</code>.
+					This is to help 3rd-party parsers that fail to perform full Maven-compatible substitutions.
+				</li>
+				<li>Now supports page attributes for <code>serialization</code> (default "auto") and <code>doctype</code> (default "HTML5").</li>
+				<li>Setting more values during captures:
+					<ol>
+						<li>Registering doctype with new methods <code>DoctypeEE.set(…)</code> and <code>DoctypeEE.get(…)</code>.</li>
+						<li>Setting response content type to match the default serialization (HTML / XHTML) that will be applied during final render.</li>
+						<li>Setting response character set to <code>UTF-8</code>.</li>
+						<li>Better shielding non-concurrency sub-requests during captures with request and response wrappers.</li>
+					</ol>
+				</li>
+				<li>Moved Servlet subrequest utilities to new <ao:a href="https://aoindustries.com/ao-servlet-subrequest/">AO Servlet Subrequest</ao:a> project.</li>
+				<li>Using <ao:a href="https://aoindustries.com/ao-fluent-html/">AO Fluent HTML</ao:a> for HTML generation.</li>
+				<li>Optimized ServletContext attribute initialization and concurrency.</li>
+				<li>
+					<ao:a href="apidocs/com/semanticcms/core/servlet/impl/PageImpl.html">PageImpl</ao:a> now establishes
+					a page context for <ao:a href="https://aoindustries.com/ao-web-resources/">AO Web Resources</ao:a>.
+				</li>
+				<li>
+					Now configures <ao:a href="https://aoindustries.com/ao-web-resources/">AO Web Resources</ao:a>
+					for <ao:a href="apidocs/com/semanticcms/core/servlet/Theme.html">Theme</ao:a>
+					and <ao:a href="apidocs/com/semanticcms/core/servlet/View.html">View</ao:a>.
+				</li>
+				<li>Removed <code>UrlUtils</code>, with the sole remaining method <code>writeHref</code> moved to <code>LinkImpl</code>.</li>
+				<li>Updated dependencies.</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
