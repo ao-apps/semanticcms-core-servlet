@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2020-03-27T14:15:03-05:00"
+		dateModified="2020-06-28T23:44:14-05:00"
 	>
 		<!-- The current snapshot, unreleased version -->
 		<c:set var="version" value="@{com.semanticcms:semanticcms-core-servlet:pom.version}" />
@@ -52,7 +52,16 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				groupId="@{project.groupId}"
 				artifactId="@{documented.artifactId}"
 				scmUrl="@{project.scm.url}"
-			/>
+			>
+				<ul>
+					<li>
+						Fixed bug for absolute links to elements on the same page.
+						Previously, links to the same page were always written as
+						anchor-only, which would then prevent rewriting into absolute
+						form.
+					</li>
+				</ul>
+			</changelog:release>
 		</c:if>
 
 		<changelog:release

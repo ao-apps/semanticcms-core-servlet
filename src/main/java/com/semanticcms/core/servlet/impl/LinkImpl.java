@@ -399,12 +399,12 @@ final public class LinkImpl {
 						// Link to target in indexed page (view=all mode)
 						href.append('#');
 						URIEncoder.encodeURIComponent(PageIndex.getRefId(index, anchor), href);
-					} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
+					} else if(!absolute && currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
 						// Link to target on same page
 						href.append('#');
 						URIEncoder.encodeURIComponent(anchor, href);
 					} else {
-						// Link to target on different page (or same page, different view)
+						// Link to target on different page (or same page, absolute or different view)
 						targetPageRef.appendServletPath(href);
 						if(!isDefaultView) {
 							boolean hasQuestion = href.lastIndexOf("?") != -1;
@@ -420,12 +420,12 @@ final public class LinkImpl {
 					// Link to target in indexed page (view=all mode)
 					href.append('#');
 					URIEncoder.encodeURIComponent(PageIndex.getRefId(index, element), href);
-				} else if(currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
+				} else if(!absolute && currentPage!=null && currentPage.equals(targetPage) && isDefaultView) {
 					// Link to target on same page
 					href.append('#');
 					URIEncoder.encodeURIComponent(element, href);
 				} else {
-					// Link to target on different page (or same page, different view)
+					// Link to target on different page (or same page, absolute or different view)
 					targetPageRef.appendServletPath(href);
 					if(!isDefaultView) {
 						boolean hasQuestion = href.lastIndexOf("?") != -1;
