@@ -23,9 +23,9 @@
 package com.semanticcms.core.servlet;
 
 import com.aoindustries.lang.NullArgumentException;
+import static com.aoindustries.lang.Strings.nullIfEmpty;
 import com.aoindustries.net.URIResolver;
 import com.aoindustries.servlet.http.Dispatcher;
-import static com.aoindustries.lang.Strings.nullIfEmpty;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
 import java.net.MalformedURLException;

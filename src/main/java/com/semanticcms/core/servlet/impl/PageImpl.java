@@ -240,6 +240,7 @@ final public class PageImpl {
 			oldSerialization = SerializationEE.replace(request, serialization);
 			setSerialization = true;
 		}
+		assert serialization != null;
 		try {
 			Doctype oldDoctype;
 			boolean setDoctype;
@@ -251,6 +252,7 @@ final public class PageImpl {
 				oldDoctype = DoctypeEE.replace(request, doctype);
 				setDoctype = true;
 			}
+			assert doctype != null;
 			try {
 				// Freeze page once body done
 				try {

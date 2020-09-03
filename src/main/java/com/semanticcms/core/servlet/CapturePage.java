@@ -70,6 +70,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class CapturePage {
 
 	private static final String REQUEST_ATTRIBUTE = CapturePage.class.getName();
