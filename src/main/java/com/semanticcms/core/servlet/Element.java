@@ -106,6 +106,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 	 *
 	 * @see  PageContext
 	 */
+	@SuppressWarnings({"UseSpecificCatch", "TooBroadCatch"})
 	public void invoke(Body<? super E> body) throws ServletException, IOException, SkipPageException {
 		// Get the current capture state
 		CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
@@ -134,10 +135,10 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 					if(elementKey == null) {
 						try {
 							writeTo(out, new ServletElementContext(servletContext, request, response));
-						} catch(ServletException | IOException | SkipPageException | RuntimeException e) {
+						} catch(Error | RuntimeException | ServletException | IOException | SkipPageException e) {
 							throw e;
-						} catch(Exception e) {
-							throw new ServletException(e);
+						} catch(Throwable t) {
+							throw new ServletException(t);
 						}
 					} else {
 						// Write an element marker instead
