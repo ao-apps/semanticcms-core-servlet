@@ -43,6 +43,7 @@ import com.aoindustries.servlet.subrequest.UnmodifiableCopyHttpServletRequest;
 import com.aoindustries.servlet.subrequest.UnmodifiableCopyHttpServletResponse;
 import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.tempfiles.servlet.TempFileContextEE;
+import com.aoindustries.util.concurrent.ExecutionExceptions;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.PageReferrer;
@@ -323,11 +324,9 @@ public class CapturePage {
 				} catch(InterruptedException e) {
 					throw new ServletException(e);
 				} catch(ExecutionException e) {
-					Throwable cause = e.getCause();
-					if(cause instanceof RuntimeException) throw (RuntimeException)cause;
-					if(cause instanceof ServletException) throw (ServletException)cause;
-					if(cause instanceof IOException) throw (IOException)cause;
-					throw new ServletException(cause);
+					// Maintain expected exception types while not losing stack trace
+					ExecutionExceptions.wrapAndThrow(e, IOException.class, IOException::new);
+					throw new ServletException(e);
 				}
 				for(int i=0; i<notCachedSize; i++) {
 					results.put(
@@ -750,11 +749,9 @@ public class CapturePage {
 		} catch(InterruptedException e) {
 			throw new ServletException(e);
 		} catch(ExecutionException e) {
-			Throwable cause = e.getCause();
-			if(cause instanceof RuntimeException) throw (RuntimeException)cause;
-			if(cause instanceof ServletException) throw (ServletException)cause;
-			if(cause instanceof IOException) throw (IOException)cause;
-			throw new ServletException(cause);
+			// Maintain expected exception types while not losing stack trace
+			ExecutionExceptions.wrapAndThrow(e, IOException.class, IOException::new);
+			throw new ServletException(e);
 		} finally {
 			// Always cancel unfinished futures on the way out, but do not delay for any in progress
 			if(!futures.isEmpty()) {
