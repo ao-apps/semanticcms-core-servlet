@@ -22,12 +22,12 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.collections.AoCollections;
 import com.aoindustries.lang.NullArgumentException;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletContext;
@@ -261,7 +261,7 @@ public class PageIndex {
 		);
 		int size = pageList.size();
 		// Index pages
-		Map<PageRef,Integer> newPageIndexes = new HashMap<>(size*4/3+1);
+		Map<PageRef,Integer> newPageIndexes = AoCollections.newHashMap(size);
 		for(int i=0; i<size; i++) {
 			newPageIndexes.put(pageList.get(i).getPageRef(), i);
 		}

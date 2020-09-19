@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.collections.AoCollections;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import static com.semanticcms.core.servlet.Cache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
@@ -68,7 +69,7 @@ class SynchronizedCache extends MapCache {
 
 	@Override
 	public <K,V> Map<K,V> newMap(int size) {
-		return Collections.synchronizedMap(new HashMap<>(size *4/3+1));
+		return Collections.synchronizedMap(AoCollections.newHashMap(size));
 	}
 
 	@Override

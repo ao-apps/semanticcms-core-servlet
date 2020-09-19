@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
@@ -187,7 +186,7 @@ final public class PageUtils {
 				return Collections.emptySet();
 			}
 		} else {
-			Set<PR> notMissingBooks = new LinkedHashSet<>(size *4/3+1);
+			Set<PR> notMissingBooks = AoCollections.newLinkedHashSet(size);
 			for(PR pageReferrer : pageReferrers) {
 				if(pageReferrer.getPageRef().getBook() != null) {
 					if(!notMissingBooks.add(pageReferrer)) throw new AssertionError();
@@ -235,7 +234,7 @@ final public class PageUtils {
 			filterNotMissingBook(page.getParentRefs()),
 			CaptureLevel.META // TODO: View provide capture level required for isApplicable check, might be PAGE or (null for none) for some views.
 		).values();
-		Set<Page> applicableParents = new LinkedHashSet<>(parents.size() *4/3+1);
+		Set<Page> applicableParents = AoCollections.newLinkedHashSet(parents.size());
 		for(Page parent : parents) {
 			if(view.isApplicable(servletContext, request, response, parent)) {
 				applicableParents.add(parent);

@@ -22,6 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
+import com.aoindustries.collections.AoCollections;
 import com.aoindustries.concurrent.Executor;
 import com.aoindustries.encoding.Doctype;
 import com.aoindustries.encoding.Serialization;
@@ -55,7 +56,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -273,7 +273,7 @@ public class CapturePage {
 			);
 		} else {
 			final Cache cache = CacheFilter.getCache(request);
-			Map<PageRef,Page> results = new LinkedHashMap<>(size * 4/3 + 1);
+			Map<PageRef,Page> results = AoCollections.newLinkedHashMap(size);
 			List<PageReferrer> notCachedList = new ArrayList<>(size);
 			if(level != CaptureLevel.BODY) {
 				// Check cache before queuing on different threads, building list of those not in cache
@@ -579,7 +579,7 @@ public class CapturePage {
 		// New edges to add, used to add in the correct order to edgesToAdd based on traversal direction hints
 		final List<PageRef> newEdgesToAdd = new ArrayList<>();
 		// The futures are queued, active, or finished but not yet processed by main thread
-		final Map<PageRef,Future<Page>> futures = new HashMap<>(preferredConcurrency * 4/3+1);
+		final Map<PageRef,Future<Page>> futures = AoCollections.newHashMap(preferredConcurrency);
 		try {
 			// Kick it off
 			visited.add(page.getPageRef());
