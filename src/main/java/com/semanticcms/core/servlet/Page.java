@@ -24,12 +24,12 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.encoding.Doctype;
 import com.aoindustries.encoding.Serialization;
+import com.aoindustries.encoding.taglib.EncodingBufferedSimpleTag;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.EmptyResult;
 import com.aoindustries.lang.LocalizedIllegalStateException;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
-import com.aoindustries.taglib.AutoEncodingBufferedTag;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
@@ -253,7 +253,7 @@ public class Page {
 							);
 							return EmptyResult.getInstance();
 						} else {
-							BufferWriter capturedOut = AutoEncodingBufferedTag.newBufferWriter(request);
+							BufferWriter capturedOut = EncodingBufferedSimpleTag.newBufferWriter(request);
 							try {
 								try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
 									final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
