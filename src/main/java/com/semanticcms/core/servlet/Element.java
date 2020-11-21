@@ -22,7 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.encoding.taglib.EncodingBufferedSimpleTag;
+import com.aoindustries.encoding.taglib.EncodingBufferedTag;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.lang.LocalizedIllegalStateException;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
@@ -206,7 +206,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 		if(body != null) {
 			if(captureLevel == CaptureLevel.BODY) {
 				// Invoke tag body, capturing output
-				BufferWriter capturedOut = EncodingBufferedSimpleTag.newBufferWriter(request);
+				BufferWriter capturedOut = EncodingBufferedTag.newBufferWriter(request);
 				try {
 					try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
 						final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
