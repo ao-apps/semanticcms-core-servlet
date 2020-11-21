@@ -24,7 +24,7 @@ package com.semanticcms.core.servlet;
 
 import com.aoindustries.encoding.Doctype;
 import com.aoindustries.encoding.Serialization;
-import com.aoindustries.encoding.taglib.EncodingBufferedSimpleTag;
+import com.aoindustries.encoding.taglib.EncodingBufferedTag;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.io.buffer.BufferWriter;
 import com.aoindustries.io.buffer.EmptyResult;
@@ -261,7 +261,7 @@ public class Page {
 							);
 							return EmptyResult.getInstance();
 						} else {
-							BufferWriter capturedOut = EncodingBufferedSimpleTag.newBufferWriter(request);
+							BufferWriter capturedOut = EncodingBufferedTag.newBufferWriter(request);
 							try {
 								try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
 									final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
