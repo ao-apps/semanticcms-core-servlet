@@ -34,6 +34,7 @@ import com.semanticcms.core.controller.PageRefResolver;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.pages.local.CaptureContext;
 import com.semanticcms.core.pages.local.PageContext;
+import static com.semanticcms.core.servlet.Resources.RESOURCES;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -188,7 +189,7 @@ public class Page {
 			properties = new LinkedHashMap<>();
 		} else if(properties.containsKey(name)) {
 			throw new LocalizedIllegalStateException(
-				ApplicationResources.accessor,
+				RESOURCES,
 				"error.duplicatePageProperty",
 				name
 			);
@@ -254,7 +255,8 @@ public class Page {
 						if(discard) {
 							final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
 							// Set PageContext
-							PageContext.newPageContextSkip(servletContext,
+							PageContext.newPageContextSkip(
+								servletContext,
 								request,
 								newResponse,
 								() -> body.doBody(request, newResponse, page)
@@ -275,7 +277,8 @@ public class Page {
 										}
 									};
 									// Set PageContext
-									PageContext.newPageContextSkip(servletContext,
+									PageContext.newPageContextSkip(
+										servletContext,
 										request,
 										newResponse,
 										() -> body.doBody(request, newResponse, page)

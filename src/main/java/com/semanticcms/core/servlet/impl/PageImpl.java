@@ -43,7 +43,7 @@ import com.semanticcms.core.pages.local.CaptureContext;
 import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
-import com.semanticcms.core.servlet.ApplicationResources;
+import static com.semanticcms.core.servlet.Resources.RESOURCES;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
@@ -121,7 +121,7 @@ final public class PageImpl {
 				String name = entry.getKey();
 				if(!page.setProperty(name, entry.getValue())) {
 					throw new LocalizedServletException(
-						ApplicationResources.accessor,
+						RESOURCES,
 						"error.duplicatePageProperty",
 						name
 					);
