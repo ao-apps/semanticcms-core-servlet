@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2017, 2019  AO Industries, Inc.
+ * Copyright (C) 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,20 +22,16 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.util.i18n.EditableResourceBundle;
-import com.aoindustries.util.i18n.Locales;
-import java.io.File;
+/**
+ * Provides a simplified interface for obtaining localized values from the ApplicationResources.properties files.
+ */
+final public class Resources {
 
-public final class ApplicationResources_ja extends EditableResourceBundle {
+	public static final com.aoindustries.i18n.Resources RESOURCES =
+		com.aoindustries.i18n.Resources.getResources(Resources.class.getPackage());
 
 	/**
-	 * Do not use directly.
+	 * Make no instances.
 	 */
-	public ApplicationResources_ja() {
-		super(
-			Locales.JAPANESE,
-			ApplicationResources.bundleSet,
-			new File(System.getProperty("user.home")+"/maven2/ao/semanticcms-1.x/core/servlet/src/main/resources/com/semanticcms/core/servlet/ApplicationResources_ja.properties")
-		);
-	}
+	private Resources() {}
 }

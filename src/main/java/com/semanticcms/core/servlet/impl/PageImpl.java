@@ -39,12 +39,12 @@ import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;
-import com.semanticcms.core.servlet.ApplicationResources;
 import com.semanticcms.core.servlet.CaptureLevel;
 import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageUtils;
+import static com.semanticcms.core.servlet.Resources.RESOURCES;
 import com.semanticcms.core.servlet.SemanticCMS;
 import com.semanticcms.core.servlet.Theme;
 import com.semanticcms.core.servlet.View;
@@ -223,7 +223,7 @@ final public class PageImpl {
 				String name = entry.getKey();
 				if(!page.setProperty(name, entry.getValue())) {
 					throw new LocalizedServletException(
-						ApplicationResources.accessor,
+						RESOURCES,
 						"error.duplicatePageProperty",
 						name
 					);
@@ -402,6 +402,7 @@ final public class PageImpl {
 		}
 	}
 
+	// TODO: Profile this since have many books now.  Maybe create method on SemanticCMS for this lookup
 	private static Book findBookByContentRoot(ServletContext servletContext, PageRef pageRef) {
 		for(Book book : SemanticCMS.getInstance(servletContext).getBooks().values()) {
 			if(pageRef.equals(book.getContentRoot())) {
