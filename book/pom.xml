@@ -114,6 +114,12 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 						</configuration>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.16.0${POST-SNAPSHOT}</version>
+						<type>jar</type>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId><artifactId>maven-resources-plugin</artifactId>
