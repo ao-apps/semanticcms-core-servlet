@@ -31,7 +31,7 @@ import com.aoindustries.io.buffer.EmptyResult;
 import com.aoindustries.lang.LocalizedIllegalStateException;
 import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
 import com.semanticcms.core.model.PageRef;
-import static com.semanticcms.core.servlet.Resources.RESOURCES;
+import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -186,7 +186,7 @@ public class Page {
 			properties = new LinkedHashMap<>();
 		} else if(properties.containsKey(name)) {
 			throw new LocalizedIllegalStateException(
-				RESOURCES,
+				PACKAGE_RESOURCES,
 				"error.duplicatePageProperty",
 				name
 			);

@@ -44,7 +44,7 @@ import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageUtils;
-import static com.semanticcms.core.servlet.Resources.RESOURCES;
+import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
 import com.semanticcms.core.servlet.SemanticCMS;
 import com.semanticcms.core.servlet.Theme;
 import com.semanticcms.core.servlet.View;
@@ -223,7 +223,7 @@ final public class PageImpl {
 				String name = entry.getKey();
 				if(!page.setProperty(name, entry.getValue())) {
 					throw new LocalizedServletException(
-						RESOURCES,
+						PACKAGE_RESOURCES,
 						"error.duplicatePageProperty",
 						name
 					);
