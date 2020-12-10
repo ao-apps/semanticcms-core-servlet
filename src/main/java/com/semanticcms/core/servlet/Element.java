@@ -35,7 +35,7 @@ import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
 import com.semanticcms.core.pages.local.PageContext;
-import static com.semanticcms.core.servlet.Resources.RESOURCES;
+import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletContext;
@@ -82,7 +82,7 @@ abstract public class Element<E extends com.semanticcms.core.model.Element> impl
 	public Element<E> property(String name, Object value) throws IllegalStateException {
 		if(!this.element.setProperty(name, value)) {
 			throw new LocalizedIllegalStateException(
-				RESOURCES,
+				PACKAGE_RESOURCES,
 				"error.duplicateElementProperty",
 				name
 			);
