@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -24,11 +24,11 @@ package com.semanticcms.core.servlet.impl;
 
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
 import com.aoindustries.html.Html;
+import com.aoindustries.lang.Strings;
+import static com.aoindustries.lang.Strings.nullIfEmpty;
 import com.aoindustries.net.URIDecoder;
 import com.aoindustries.net.URIEncoder;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
-import com.aoindustries.lang.Strings;
-import static com.aoindustries.lang.Strings.nullIfEmpty;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
@@ -173,6 +173,7 @@ final public class NavigationTreeImpl {
 		return hasChildLink;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static String encodeHexData(String data) {
 		// Note: This is always UTF-8 encoded and does not depend on response encoding
 		return Strings.convertToHex(data.getBytes(StandardCharsets.UTF_8));
