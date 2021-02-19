@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2017, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2016, 2017, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.Html;
+import com.aoindustries.html.Document;
 import com.aoindustries.net.URIEncoder;
 import com.aoindustries.servlet.http.Canonical;
 import com.aoindustries.taglib.Link;
@@ -404,7 +404,7 @@ abstract public class View implements Comparable<View> {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Html html,
+		Document document,
 		Page page
 	) throws ServletException, IOException, SkipPageException;
 }

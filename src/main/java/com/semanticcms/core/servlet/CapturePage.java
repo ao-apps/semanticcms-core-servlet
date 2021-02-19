@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -28,7 +28,7 @@ import com.aoindustries.encoding.Doctype;
 import com.aoindustries.encoding.Serialization;
 import com.aoindustries.encoding.servlet.DoctypeEE;
 import com.aoindustries.encoding.servlet.SerializationEE;
-import com.aoindustries.html.Html;
+import com.aoindustries.html.Document;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.Dispatcher;
@@ -173,7 +173,7 @@ public class CapturePage {
 			// Set the content type
 			Serialization currentSerialization = SerializationEE.getDefault(servletContext, subRequest);
 			SerializationEE.set(subRequest, currentSerialization);
-			ServletUtil.setContentType(subResponse, currentSerialization.getContentType(), Html.ENCODING);
+			ServletUtil.setContentType(subResponse, currentSerialization.getContentType(), Document.ENCODING);
 			// Set the default doctype for all captures
 			DoctypeEE.set(subRequest, Doctype.DEFAULT);
 			// Set new capture context

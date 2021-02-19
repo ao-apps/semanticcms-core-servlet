@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2020  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,7 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.servlet.HtmlEE;
+import com.aoindustries.html.servlet.DocumentEE;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.servlet.impl.NavigationTreeImpl;
 import java.io.IOException;
@@ -121,11 +121,10 @@ public class NavigationTree {
 	}
 
 	public void invoke() throws ServletException, IOException, SkipPageException {
-		NavigationTreeImpl.writeNavigationTreeImpl(
-			servletContext,
+		NavigationTreeImpl.writeNavigationTreeImpl(servletContext,
 			request,
 			response,
-			HtmlEE.get(servletContext, request, response),
+			DocumentEE.get(servletContext, request, response),
 			root,
 			skipRoot,
 			yuiConfig,

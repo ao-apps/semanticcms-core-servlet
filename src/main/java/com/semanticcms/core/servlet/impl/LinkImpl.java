@@ -25,7 +25,7 @@ package com.semanticcms.core.servlet.impl;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
-import com.aoindustries.html.Html;
+import com.aoindustries.html.Document;
 import com.aoindustries.lang.Coercion;
 import static com.aoindustries.lang.Strings.nullIfEmpty;
 import com.aoindustries.net.URIEncoder;
@@ -171,7 +171,7 @@ final public class LinkImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Html html,
+		Document document,
 		String book,
 		String page,
 		String element,
@@ -192,7 +192,7 @@ final public class LinkImpl {
 				servletContext,
 				request,
 				response,
-				html,
+				document,
 				book,
 				page,
 				element,
@@ -225,7 +225,7 @@ final public class LinkImpl {
 		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Html html,
+		Document document,
 		ValueExpression book,
 		ValueExpression page,
 		ValueExpression element,
@@ -264,7 +264,7 @@ final public class LinkImpl {
 				servletContext,
 				request,
 				response,
-				html,
+				document,
 				bookStr,
 				pageStr,
 				elementStr,
@@ -286,7 +286,7 @@ final public class LinkImpl {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Html html,
+		Document document,
 		String book,
 		String page,
 		String element,
@@ -377,7 +377,7 @@ final public class LinkImpl {
 			PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
 			Integer index = pageIndex==null ? null : pageIndex.getPageIndex(targetPageRef);
 
-			html.out.write(small ? "<span" : "<a");
+			document.out.write(small ? "<span" : "<a");
 			StringBuilder href = new StringBuilder();
 			if(element == null) {
 				if(anchor == null) {
@@ -440,7 +440,7 @@ final public class LinkImpl {
 				writeHref(
 					request,
 					response,
-					html.out,
+					document.out,
 					href.toString(),
 					params,
 					absolute,
@@ -449,48 +449,48 @@ final public class LinkImpl {
 			}
 			if(clazz != null) {
 				if(!Coercion.isEmpty(clazz)) {
-					html.out.write(" class=\"");
-					Coercion.write(clazz, textInXhtmlAttributeEncoder, html.out);
-					html.out.write('"');
+					document.out.write(" class=\"");
+					Coercion.write(clazz, textInXhtmlAttributeEncoder, document.out);
+					document.out.write('"');
 				}
 			} else {
 				if(targetElement != null) {
 					String linkCssClass = semanticCMS.getLinkCssClass(targetElement);
 					if(linkCssClass != null) {
-						html.out.write(" class=\"");
-						encodeTextInXhtmlAttribute(linkCssClass, html.out);
-						html.out.write('"');
+						document.out.write(" class=\"");
+						encodeTextInXhtmlAttribute(linkCssClass, document.out);
+						document.out.write('"');
 					}
 				}
 			}
 			// Add nofollow consistent with view and page settings.
 			if(targetPage != null && !view.getAllowRobots(servletContext, request, response, targetPage)) {
-				html.out.write(" rel=\"nofollow\"");
+				document.out.write(" rel=\"nofollow\"");
 			}
-			html.out.write('>');
+			document.out.write('>');
 
 			if(body == null) {
 				if(targetElement != null) {
-					html.text(targetElement.getLabel());
+					document.text(targetElement.getLabel());
 				} else if(targetPage != null) {
-					html.text(targetPage.getTitle());
+					document.text(targetPage.getTitle());
 				} else {
-					writeBrokenPathInXhtml(targetPageRef, element, html.out);
+					writeBrokenPathInXhtml(targetPageRef, element, document.out);
 				}
 				if(index != null) {
-					html.out.write("<sup>[");
-					html.text(index + 1);
-					html.out.write("]</sup>");
+					document.out.write("<sup>[");
+					document.text(index + 1);
+					document.out.write("]</sup>");
 				}
 			} else {
 				body.doBody(false);
 			}
 			if(small) {
-				html.out.write("<sup><a");
+				document.out.write("<sup><a");
 				writeHref(
 					request,
 					response,
-					html.out,
+					document.out,
 					href.toString(),
 					params,
 					absolute,
@@ -498,9 +498,9 @@ final public class LinkImpl {
 				);
 				// TODO: Make [link] not copied during select/copy/paste, to not corrupt semantic meaning (and make more useful in copy/pasted code and scripts)?
 				// TODO: https://stackoverflow.com/questions/3271231/how-to-exclude-portions-of-text-when-copying
-				html.out.write(">[link]</a></sup></span>");
+				document.out.write(">[link]</a></sup></span>");
 			} else {
-				html.out.write("</a>");
+				document.out.write("</a>");
 			}
 		} else {
 			// Invoke body for any meta data, but discard any output
