@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -64,7 +64,8 @@ public class Page {
 	private ReadableDateTime dateReviewed;
 
 	private Serialization serialization;
-	private Doctype doctype = Doctype.DEFAULT;
+	private Doctype doctype;
+	private Boolean indent;
 
 	private final String title;
 
@@ -136,6 +137,11 @@ public class Page {
 
 	public Page doctype(Doctype doctype) {
 		this.doctype = doctype;
+		return this;
+	}
+
+	public Page indent(Boolean indent) {
+		this.indent = indent;
 		return this;
 	}
 
@@ -235,6 +241,7 @@ public class Page {
 			dateReviewed,
 			serialization,
 			doctype,
+			indent,
 			title,
 			shortTitle,
 			description,
