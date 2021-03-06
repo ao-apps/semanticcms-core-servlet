@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2016, 2017, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,9 @@
  */
 package com.semanticcms.core.servlet.impl;
 
-import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
-import com.aoindustries.html.Document;
+import com.aoindustries.html.LI_c;
+import com.aoindustries.html.PalpableContent;
+import com.aoindustries.html.UL_c;
 import com.aoindustries.net.URIEncoder;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
@@ -139,14 +140,14 @@ final public class ElementFilterTreeImpl {
 		return hasMatch;
 	}
 
-	private static void writeNode(
+	private static <__ extends PalpableContent<__>> void writeNode(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Node currentNode,
 		Set<Node> nodesWithMatches,
 		PageIndex pageIndex,
-		Document document,
+		UL_c<__> ul__,
 		Node node,
 		boolean includeElements
 	) throws ServletException, IOException, SkipPageException {
@@ -167,16 +168,8 @@ final public class ElementFilterTreeImpl {
 			// Add page links
 			currentNode.addPageLink(pageRef);
 		}
-		if(document != null) {
-			document.out.write("<li");
-			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
-			String listItemCssClass = semanticCMS.getListItemCssClass(node);
-			if(listItemCssClass != null) {
-				document.out.write(" class=\"");
-				encodeTextInXhtmlAttribute(listItemCssClass, document.out);
-				document.out.write('"');
-			}
-			document.out.write("><a href=\"");
+		LI_c<UL_c<__>> li_c;
+		if(ul__ != null) {
 			StringBuilder url = new StringBuilder();
 			Integer index = pageIndex==null ? null : pageIndex.getPageIndex(pageRef);
 			if(index != null) {
@@ -198,47 +191,40 @@ final public class ElementFilterTreeImpl {
 					URIEncoder.encodeURIComponent(elemId, url);
 				}
 			}
-			encodeTextInXhtmlAttribute(
-				response.encodeURL(
-					url.toString()
-				),
-				document.out
-			);
-			document.out.write("\">");
-			document.text(node.getLabel());
-			if(index != null) {
-				document.out.write("<sup>[");
-				document.text(index + 1);
-				document.out.write("]</sup>");
-			}
-			document.out.write("</a>");
+			li_c = ul__.li()
+				.clazz(SemanticCMS.getInstance(servletContext).getListItemCssClass(node))
+				._c();
+			li_c.a(response.encodeURL(url.toString())).__(a -> {
+				a.text(node);
+				if(index != null) {
+					a.sup__(sup -> sup
+						.text('[').text(index + 1).text(']')
+					);
+				}
+			});
+		} else {
+			li_c = null;
 		}
 		List<Node> childNodes = NavigationTreeImpl.getChildNodes(servletContext, request, response, includeElements, true, node);
 		childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithMatches);
 		if(!childNodes.isEmpty()) {
-			if(document != null) {
-				document.out.write("\n<ul>\n");
-			}
+			UL_c<LI_c<UL_c<__>>> ul_c = (li_c != null) ? li_c.ul_c() : null;
 			for(Node childNode : childNodes) {
-				writeNode(servletContext, request, response, currentNode, nodesWithMatches, pageIndex, document, childNode, includeElements);
+				writeNode(servletContext, request, response, currentNode, nodesWithMatches, pageIndex, ul_c, childNode, includeElements);
 			}
-			if(document != null) {
-				document.out.write("</ul>\n");
-			}
+			if(ul_c != null) ul_c.__();
 		}
-		if(document != null) {
-			document.out.write("</li>\n");
-		}
+		if(li_c != null) li_c.__();
 	}
 
 	// Traversal-based implementation is proving too complicated due to needing to
 	// look ahead to know which elements to show.
 	// TODO: Caching?
-	public static void writeElementFilterTreeImpl(
+	public static <__ extends PalpableContent<__>> void writeElementFilterTreeImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Document document,
+		__ content,
 		ElementFilter elementFilter,
 		Node root,
 		boolean includeElements
@@ -249,11 +235,16 @@ final public class ElementFilterTreeImpl {
 			final Node currentNode = CurrentNode.getCurrentNode(request);
 			// Filter by has files
 			final Set<Node> nodesWithMatches = new HashSet<>();
-			findElements(servletContext, request, response, elementFilter, nodesWithMatches, root, includeElements);
-
-			if(captureLevel == CaptureLevel.BODY) {
-				document.out.write("<ul>\n");
-			}
+			findElements(
+				servletContext,
+				request,
+				response,
+				elementFilter,
+				nodesWithMatches,
+				root,
+				includeElements
+			);
+			UL_c<__> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
 			writeNode(
 				servletContext,
 				request,
@@ -261,21 +252,19 @@ final public class ElementFilterTreeImpl {
 				currentNode,
 				nodesWithMatches,
 				PageIndex.getCurrentPageIndex(request),
-				captureLevel == CaptureLevel.BODY ? document : null,
+				ul_c,
 				root,
 				includeElements
 			);
-			if(captureLevel == CaptureLevel.BODY) {
-				document.out.write("</ul>\n");
-			}
+			if(ul_c != null) ul_c.__();
 		}
 	}
 
-	public static void writeElementFilterTreeImpl(
+	public static <__ extends PalpableContent<__>> void writeElementFilterTreeImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Document document,
+		__ content,
 		Class<? extends Element> elementType,
 		Node root,
 		boolean includeElements
@@ -284,7 +273,7 @@ final public class ElementFilterTreeImpl {
 			servletContext,
 			request,
 			response,
-			document,
+			content,
 			new ClassFilter(elementType),
 			root,
 			includeElements

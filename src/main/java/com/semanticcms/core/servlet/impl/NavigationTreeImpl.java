@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,8 +22,11 @@
  */
 package com.semanticcms.core.servlet.impl;
 
-import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
-import com.aoindustries.html.Document;
+import com.aoindustries.html.A;
+import com.aoindustries.html.LI;
+import com.aoindustries.html.LI_c;
+import com.aoindustries.html.PalpableContent;
+import com.aoindustries.html.UL_c;
 import com.aoindustries.lang.Strings;
 import static com.aoindustries.lang.Strings.nullIfEmpty;
 import com.aoindustries.net.URIDecoder;
@@ -179,11 +182,11 @@ final public class NavigationTreeImpl {
 		return Strings.convertToHex(data.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public static void writeNavigationTreeImpl(
+	public static <__ extends PalpableContent<__>> void writeNavigationTreeImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Document document,
+		__ content,
 		Page root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -202,7 +205,7 @@ final public class NavigationTreeImpl {
 				servletContext,
 				request,
 				response,
-				document,
+				content,
 				root,
 				skipRoot,
 				yuiConfig,
@@ -225,12 +228,12 @@ final public class NavigationTreeImpl {
 	 * @param linksToBook  ValueExpression that returns String
 	 * @param linksToPage  ValueExpression that returns String
 	 */
-	public static void writeNavigationTreeImpl(
+	public static <__ extends PalpableContent<__>> void writeNavigationTreeImpl(
 		ServletContext servletContext,
 		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Document document,
+		__ content,
 		ValueExpression root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -249,7 +252,7 @@ final public class NavigationTreeImpl {
 				servletContext,
 				request,
 				response,
-				document,
+				content,
 				resolveValue(root, Page.class, elContext),
 				skipRoot,
 				yuiConfig,
@@ -265,11 +268,11 @@ final public class NavigationTreeImpl {
 		}
 	}
 
-	private static void writeNavigationTreeImpl(
+	private static <__ extends PalpableContent<__>> void writeNavigationTreeImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Document document,
+		__ content,
 		Page root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -337,18 +340,18 @@ final public class NavigationTreeImpl {
 				childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithChildLinks);
 			}
 			if(!childNodes.isEmpty()) {
-				if(captureLevel == CaptureLevel.BODY) document.out.write("<ul>\n");
+				UL_c<__> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
 				for(Node childNode : childNodes) {
 					foundThisPage = writeNode(
 						servletContext,
 						request,
 						response,
-						captureLevel == CaptureLevel.BODY ? document : null,
+						ul_c,
 						currentNode,
 						nodesWithLinks,
 						nodesWithChildLinks,
 						pageIndex,
-						null,
+						null, // parentPageRef
 						childNode,
 						yuiConfig,
 						includeElements,
@@ -359,20 +362,20 @@ final public class NavigationTreeImpl {
 						1
 					);
 				}
-				if(captureLevel == CaptureLevel.BODY) document.out.write("</ul>\n");
+				if(ul_c != null) ul_c.__();
 			}
 		} else {
-			if(captureLevel == CaptureLevel.BODY) document.out.write("<ul>\n");
+			UL_c<__> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
 			/*foundThisPage =*/ writeNode(
 				servletContext,
 				request,
 				response,
-				captureLevel == CaptureLevel.BODY ? document : null,
+				ul_c,
 				currentNode,
 				nodesWithLinks,
 				nodesWithChildLinks,
 				pageIndex,
-				null,
+				null, // parentPageRef
 				root,
 				yuiConfig,
 				includeElements,
@@ -382,15 +385,16 @@ final public class NavigationTreeImpl {
 				maxDepth,
 				1
 			);
-			if(captureLevel == CaptureLevel.BODY) document.out.write("</ul>\n");
+			if(ul_c != null) ul_c.__();
 		}
 	}
 
-	private static boolean writeNode(
+	@SuppressWarnings("deprecation")
+	private static <__ extends PalpableContent<__>> boolean writeNode(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Document document,
+		UL_c<__> ul__,
 		Node currentNode,
 		Set<Node> nodesWithLinks,
 		Set<Node> nodesWithChildLinks,
@@ -424,7 +428,7 @@ final public class NavigationTreeImpl {
 			currentNode.addPageLink(pageRef);
 		}
 		final String servletPath;
-		if(document == null) {
+		if(ul__ == null) {
 			// Will be unused
 			servletPath = null;
 		} else {
@@ -451,62 +455,50 @@ final public class NavigationTreeImpl {
 				servletPath = sb.toString();
 			}
 		}
-		if(document != null) {
-			document.out.write("<li");
+		LI_c<UL_c<__>> li_c;
+		A<LI_c<UL_c<__>>> a;
+		if(ul__ != null) {
+			LI<UL_c<__>> li = ul__.li();
 			if(yuiConfig) {
-				document.out.write(" yuiConfig='{\"data\":\"");
-				encodeTextInXhtmlAttribute(encodeHexData(servletPath), document.out);
-				document.out.write("\"}'");
+				li.attribute("yuiConfig", attr -> attr
+					.append("{\"data\":\"").append(encodeHexData(servletPath)).append("\"}")
+				);
 			}
-			SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
-			String listItemCssClass = semanticCMS.getListItemCssClass(node);
-			if(listItemCssClass != null || level == 1) {
-				document.out.write(" class=\"");
-				boolean didClass = false;
-				if(listItemCssClass != null) {
-					encodeTextInXhtmlAttribute(listItemCssClass, document.out);
-					didClass = true;
-				}
-				if(level == 1) {
-					if(didClass) document.out.write(' ');
-					document.out.write("expanded");
-				}
-				document.out.write('"');
-			}
-			document.out.write("><a");
+			li.clazz(
+				SemanticCMS.getInstance(servletContext).getListItemCssClass(node),
+				level == 1 ? "expanded" : null
+			);
+			li_c = li._c();
+			a = li_c.a();
+		} else {
+			li_c = null;
+			a = null;
 		}
 		// Look for thisPage match
 		boolean thisPageClass = false;
 		if(pageRef.equals(thisPageRef) && element == null) {
 			if(!foundThisPage) {
-				if(document != null) document.out.write(" id=\"semanticcms-core-tree-this-page\"");
+				if(a != null) a.id("semanticcms-core-tree-this-page");
 				foundThisPage = true;
 			}
 			thisPageClass = true;
 		}
 		// Look for linkToPage match
 		boolean linksToPageClass = nodesWithLinks!=null && nodesWithLinks.contains(node);
-		if(document != null && (thisPageClass || linksToPageClass)) {
-			document.out.write(" class=\"");
-			if(thisPageClass && nodesWithLinks!=null && !linksToPageClass) {
-				document.out.write("semanticcms-core-no-link-to-this-page");
-			} else if(thisPageClass) {
-				document.out.write("semanticcms-core-tree-this-page");
-			} else if(linksToPageClass) {
-				document.out.write("semanticcms-core-links-to-page");
-			} else {
-				throw new AssertionError();
+		if(a != null) {
+			if(thisPageClass || linksToPageClass) {
+				if(thisPageClass && nodesWithLinks!=null && !linksToPageClass) {
+					a.clazz("semanticcms-core-no-link-to-this-page");
+				} else if(thisPageClass) {
+					a.clazz("semanticcms-core-tree-this-page");
+				} else if(linksToPageClass) {
+					a.clazz("semanticcms-core-links-to-page");
+				} else {
+					throw new AssertionError();
+				}
 			}
-			document.out.write('"');
-		}
-		if(document != null) {
-			if(target != null) {
-				document.out.write(" target=\"");
-				encodeTextInXhtmlAttribute(target, document.out);
-				document.out.write('"');
-			}
+			a.target(target);
 			Integer index = pageIndex==null ? null : pageIndex.getPageIndex(pageRef);
-			document.out.write(" href=\"");
 			StringBuilder href = new StringBuilder();
 			if(index != null) {
 				href.append('#');
@@ -521,25 +513,20 @@ final public class NavigationTreeImpl {
 				URIEncoder.encodeURI(request.getContextPath(), href);
 				URIEncoder.encodeURI(servletPath, href);
 			}
-			encodeTextInXhtmlAttribute(
-				response.encodeURL(
-					href.toString()
-				),
-				document.out
-			);
-			document.out.write("\">");
-			if(node instanceof Page) {
-				// Use shortTitle for pages
-				document.text(PageUtils.getShortTitle(parentPageRef, (Page)node));
-			} else {
-				document.text(node.getLabel());
-			}
-			if(index != null) {
-				document.out.write("<sup>[");
-				document.text(index + 1);
-				document.out.write("]</sup>");
-			}
-			document.out.write("</a>");
+			a.href(response.encodeURL(href.toString()));
+			a.__(a__ -> {
+				if(node instanceof Page) {
+					// Use shortTitle for pages
+					a__.text(PageUtils.getShortTitle(parentPageRef, (Page)node));
+				} else {
+					a__.text(node);
+				}
+				if(index != null) {
+					a__.sup__(sup -> sup
+						.text('[').text(index + 1).text(']')
+					);
+				}
+			});
 		}
 		if(maxDepth==0 || level < maxDepth) {
 			List<Node> childNodes = NavigationTreeImpl.getChildNodes(servletContext, request, response, includeElements, false, node);
@@ -547,16 +534,13 @@ final public class NavigationTreeImpl {
 				childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithChildLinks);
 			}
 			if(!childNodes.isEmpty()) {
-				if(document != null) {
-					document.out.write("\n"
-						+ "<ul>\n");
-				}
+				UL_c<LI_c<UL_c<__>>> ul_c = (li_c != null) ? li_c.ul_c() : null;
 				for(Node childNode : childNodes) {
 					foundThisPage = writeNode(
 						servletContext,
 						request,
 						response,
-						document,
+						ul_c,
 						currentNode,
 						nodesWithLinks,
 						nodesWithChildLinks,
@@ -572,10 +556,10 @@ final public class NavigationTreeImpl {
 						level+1
 					);
 				}
-				if(document != null) document.out.write("</ul>\n");
+				if(ul_c != null) ul_c.__();
 			}
 		}
-		if(document != null) document.out.write("</li>\n");
+		if(li_c != null) li_c.__();
 		return foundThisPage;
 	}
 
