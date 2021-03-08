@@ -65,6 +65,7 @@ public class Page {
 
 	private Serialization serialization;
 	private Doctype doctype;
+	private Boolean autonli;
 	private Boolean indent;
 
 	private final String title;
@@ -137,6 +138,11 @@ public class Page {
 
 	public Page doctype(Doctype doctype) {
 		this.doctype = doctype;
+		return this;
+	}
+
+	public Page autonli(Boolean autonli) {
+		this.autonli = autonli;
 		return this;
 	}
 
@@ -241,6 +247,7 @@ public class Page {
 			dateReviewed,
 			serialization,
 			doctype,
+			autonli,
 			indent,
 			title,
 			shortTitle,

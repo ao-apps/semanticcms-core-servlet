@@ -83,6 +83,7 @@ final public class PageImpl {
 		ReadableDateTime dateReviewed,
 		Serialization serialization,
 		Doctype doctype,
+		Boolean autonli,
 		Boolean indent,
 		String title,
 		String shortTitle,
@@ -154,73 +155,88 @@ final public class PageImpl {
 			}
 			assert doctype != null;
 			try {
-				Boolean oldIndent;
-				boolean setIndent;
-				if(indent == null) {
-					indent = DocumentEE.getIndent(servletContext, request);
-					oldIndent = null;
-					setIndent = false;
+				Boolean oldAutonli;
+				boolean setAutonli;
+				if(autonli == null) {
+					autonli = DocumentEE.getAutonli(servletContext, request);
+					oldAutonli = null;
+					setAutonli = false;
 				} else {
-					oldIndent = DocumentEE.replaceIndent(request, indent);
-					setIndent = true;
+					oldAutonli = DocumentEE.replaceAutonli(request, autonli);
+					setAutonli = true;
 				}
-				assert indent != null;
+				assert autonli != null;
 				try {
-					// Freeze page once body done
+					Boolean oldIndent;
+					boolean setIndent;
+					if(indent == null) {
+						indent = DocumentEE.getIndent(servletContext, request);
+						oldIndent = null;
+						setIndent = false;
+					} else {
+						oldIndent = DocumentEE.replaceIndent(request, indent);
+						setIndent = true;
+					}
+					assert indent != null;
 					try {
-						Registry oldPageRegistry = RegistryEE.Page.get(request);
+						// Freeze page once body done
 						try {
-							Registry pageRegistry = new Registry();
-							page.setRegistry(pageRegistry);
-							RegistryEE.Page.set(request, pageRegistry);
+							Registry oldPageRegistry = RegistryEE.Page.get(request);
+							try {
+								Registry pageRegistry = new Registry();
+								page.setRegistry(pageRegistry);
+								RegistryEE.Page.set(request, pageRegistry);
 
-							// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
-							// is done to catch parents and childen.
-							if(body != null) {
-								// Set currentNode
-								CurrentNode.setCurrentNode(request, page);
-								try {
-									// Set currentPage
-									CurrentPage.setCurrentPage(request, page);
+								// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
+								// is done to catch parents and childen.
+								if(body != null) {
+									// Set currentNode
+									CurrentNode.setCurrentNode(request, page);
 									try {
-										final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
-										if(captureLevel == CaptureLevel.BODY) {
-											// Invoke page body, capturing output
-											page.setBody(body.doBody(false, page).trim());
-										} else {
-											// Invoke page body, discarding output
-											body.doBody(true, page);
-										}
-										// Page may not move itself to a different book
-										PageRef newPageRef = page.getPageRef();
-										if(!newPageRef.getBookRef().equals(pageRef.getBookRef())) {
-											throw new ServletException(
-												"Page may not move itself into a different book.  pageRef="
-													+ pageRef
-													+ ", newPageRef="
-													+ newPageRef
-											);
+										// Set currentPage
+										CurrentPage.setCurrentPage(request, page);
+										try {
+											final CaptureLevel captureLevel = CurrentCaptureLevel.getCaptureLevel(request);
+											if(captureLevel == CaptureLevel.BODY) {
+												// Invoke page body, capturing output
+												page.setBody(body.doBody(false, page).trim());
+											} else {
+												// Invoke page body, discarding output
+												body.doBody(true, page);
+											}
+											// Page may not move itself to a different book
+											PageRef newPageRef = page.getPageRef();
+											if(!newPageRef.getBookRef().equals(pageRef.getBookRef())) {
+												throw new ServletException(
+													"Page may not move itself into a different book.  pageRef="
+														+ pageRef
+														+ ", newPageRef="
+														+ newPageRef
+												);
+											}
+										} finally {
+											// Restore previous currentPage
+											CurrentPage.setCurrentPage(request, null);
 										}
 									} finally {
-										// Restore previous currentPage
-										CurrentPage.setCurrentPage(request, null);
+										// Restore previous currentNode
+										CurrentNode.setCurrentNode(request, null);
 									}
-								} finally {
-									// Restore previous currentNode
-									CurrentNode.setCurrentNode(request, null);
 								}
+							} finally {
+								RegistryEE.Page.set(request, oldPageRegistry);
 							}
+							doAutoParents(servletContext, page);
 						} finally {
-							RegistryEE.Page.set(request, oldPageRegistry);
+							page.freeze();
 						}
-						doAutoParents(servletContext, page);
+						// Capturing, add to capture
+						capture.setCapturedPage(page);
 					} finally {
-						page.freeze();
+						if(setIndent) DocumentEE.setIndent(request, oldIndent);
 					}
-					// Capturing, add to capture
-					capture.setCapturedPage(page);
 				} finally {
-					if(setIndent) DocumentEE.setIndent(request, oldIndent);
+					if(setAutonli) DocumentEE.setAutonli(request, oldAutonli);
 				}
 			} finally {
 				if(setDoctype) DoctypeEE.set(request, oldDoctype);
