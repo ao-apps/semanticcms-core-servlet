@@ -57,12 +57,16 @@ import org.joda.time.ReadableDateTime;
 
 final public class PageImpl {
 
+	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
+	 */
 	@FunctionalInterface
-	public static interface PageImplBody<E extends Throwable> {
-		BufferResult doBody(boolean discard, Page page) throws E, IOException, SkipPageException;
+	public static interface PageImplBody<Ex extends Throwable> {
+		BufferResult doBody(boolean discard, Page page) throws Ex, IOException, SkipPageException;
 	}
 
 	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
 	 * @param pageRef  the default path to this page, this might be changed during page processing
 	 */
 	// TODO: Doctype and Serialization set before this - document here like in WebPageLayout.startHtml
@@ -71,7 +75,7 @@ final public class PageImpl {
 	// TODO: page captures reset to default null on request
 	// TODO: All theme/layout/skin support both HTML 4 and 5?
 	// TODO: Fall-back to div without semantic tags?
-	public static <E extends Throwable> void doPageImpl(
+	public static <Ex extends Throwable> void doPageImpl(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
 		final HttpServletResponse response,
@@ -94,9 +98,9 @@ final public class PageImpl {
 		int tocLevels,
 		boolean allowParentMismatch,
 		boolean allowChildMismatch,
-		Map<String,Object> properties,
-		PageImplBody<E> body
-	) throws E, ServletException, IOException, SkipPageException {
+		Map<String, Object> properties,
+		PageImplBody<Ex> body
+	) throws Ex, ServletException, IOException, SkipPageException {
 		final Page page = new Page();
 		page.setPageRef(pageRef);
 		{
@@ -120,7 +124,7 @@ final public class PageImpl {
 		page.setAllowParentMismatch(allowParentMismatch);
 		page.setAllowChildMismatch(allowChildMismatch);
 		if(properties != null) {
-			for(Map.Entry<String,Object> entry : properties.entrySet()) {
+			for(Map.Entry<String, Object> entry : properties.entrySet()) {
 				String name = entry.getKey();
 				if(!page.setProperty(name, entry.getValue())) {
 					throw new LocalizedServletException(

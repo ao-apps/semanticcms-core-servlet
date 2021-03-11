@@ -78,7 +78,7 @@ public class Page {
 	private int tocLevels = com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
 	private boolean allowParentMismatch;
 	private boolean allowChildMismatch;
-	private Map<String,Object> properties;
+	private Map<String, Object> properties;
 
 	public Page(
 		ServletContext servletContext,
