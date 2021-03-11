@@ -26,7 +26,7 @@ import com.aoindustries.encoding.Doctype;
 import com.aoindustries.encoding.Serialization;
 import com.aoindustries.encoding.servlet.DoctypeEE;
 import com.aoindustries.encoding.servlet.SerializationEE;
-import com.aoindustries.html.Document;
+import com.aoindustries.html.AnyDocument;
 import com.aoindustries.html.servlet.DocumentEE;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.servlet.LocalizedServletException;
@@ -62,9 +62,12 @@ import org.joda.time.ReadableDateTime;
 
 final public class PageImpl {
 
+	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
+	 */
 	@FunctionalInterface
-	public static interface PageImplBody<E extends Throwable> {
-		BufferResult doBody(boolean discard, Page page) throws E, IOException, SkipPageException;
+	public static interface PageImplBody<Ex extends Throwable> {
+		BufferResult doBody(boolean discard, Page page) throws Ex, IOException, SkipPageException;
 	}
 
 	/**
@@ -137,7 +140,7 @@ final public class PageImpl {
 	) throws ServletException, IOException {
 		// Verify parents
 		if(!page.getAllowParentMismatch()) {
-			Map<PageRef,Page> notMissingParents = CapturePage.capturePages(
+			Map<PageRef, Page> notMissingParents = CapturePage.capturePages(
 				servletContext,
 				request,
 				response,
@@ -145,13 +148,13 @@ final public class PageImpl {
 				CaptureLevel.PAGE
 			);
 			PageRef pageRef = page.getPageRef();
-			for(Map.Entry<PageRef,Page> entry : notMissingParents.entrySet()) {
+			for(Map.Entry<PageRef, Page> entry : notMissingParents.entrySet()) {
 				verifyChildToParent(pageRef, entry.getKey(), entry.getValue().getChildRefs());
 			}
 		}
 		// Verify children
 		if(!page.getAllowChildMismatch()) {
-			Map<PageRef,Page> notMissingChildren = CapturePage.capturePages(
+			Map<PageRef, Page> notMissingChildren = CapturePage.capturePages(
 				servletContext,
 				request,
 				response,
@@ -159,13 +162,14 @@ final public class PageImpl {
 				CaptureLevel.PAGE
 			);
 			PageRef pageRef = page.getPageRef();
-			for(Map.Entry<PageRef,Page> entry : notMissingChildren.entrySet()) {
+			for(Map.Entry<PageRef, Page> entry : notMissingChildren.entrySet()) {
 				verifyParentToChild(pageRef, entry.getKey(), entry.getValue().getParentRefs());
 			}
 		}
 	}
 
 	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
 	 * @param pageRef  the default path to this page, this might be changed during page processing
 	 */
 	// TODO: Doctype and Serialization set before this - document here like in WebPageLayout.startHtml
@@ -174,7 +178,7 @@ final public class PageImpl {
 	// TODO: page captures reset to default null on request
 	// TODO: All theme/layout/skin support both HTML 4 and 5?
 	// TODO: Fall-back to div without semantic tags?
-	public static <E extends Throwable> void doPageImpl(
+	public static <Ex extends Throwable> void doPageImpl(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
 		final HttpServletResponse response,
@@ -196,9 +200,9 @@ final public class PageImpl {
 		int tocLevels,
 		boolean allowParentMismatch,
 		boolean allowChildMismatch,
-		Map<String,Object> properties,
-		PageImplBody<E> body
-	) throws E, ServletException, IOException, SkipPageException {
+		Map<String, Object> properties,
+		PageImplBody<Ex> body
+	) throws Ex, ServletException, IOException, SkipPageException {
 		final Page page = new Page();
 		page.setPageRef(pageRef);
 		{
@@ -222,7 +226,7 @@ final public class PageImpl {
 		page.setAllowParentMismatch(allowParentMismatch);
 		page.setAllowChildMismatch(allowChildMismatch);
 		if(properties != null) {
-			for(Map.Entry<String,Object> entry : properties.entrySet()) {
+			for(Map.Entry<String, Object> entry : properties.entrySet()) {
 				String name = entry.getKey();
 				if(!page.setProperty(name, entry.getValue())) {
 					throw new LocalizedServletException(
@@ -345,7 +349,7 @@ final public class PageImpl {
 							View view;
 							{
 								String viewName = request.getParameter(SemanticCMS.VIEW_PARAM);
-								Map<String,View> viewsByName = semanticCMS.getViewsByName();
+								Map<String, View> viewsByName = semanticCMS.getViewsByName();
 								if(viewName == null) {
 									view = null;
 								} else {
@@ -386,7 +390,7 @@ final public class PageImpl {
 							response.resetBuffer();
 
 							// Set the content type
-							ServletUtil.setContentType(response, serialization.getContentType(), Document.ENCODING.name());
+							ServletUtil.setContentType(response, serialization.getContentType(), AnyDocument.ENCODING.name());
 
 							Theme oldTheme = Theme.getTheme(request);
 							try {

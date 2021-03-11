@@ -124,7 +124,7 @@ public class NavigationTree {
 		NavigationTreeImpl.writeNavigationTreeImpl(servletContext,
 			request,
 			response,
-			DocumentEE.get(servletContext, request, response),
+			new DocumentEE(servletContext, request, response),
 			root,
 			skipRoot,
 			yuiConfig,

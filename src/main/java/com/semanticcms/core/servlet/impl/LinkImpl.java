@@ -27,6 +27,7 @@ import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import com.aoindustries.exception.WrappedException;
 import com.aoindustries.html.A;
 import com.aoindustries.html.A_factory;
+import com.aoindustries.html.AnyDocument;
 import com.aoindustries.html.SPAN;
 import com.aoindustries.html.SPAN_c;
 import com.aoindustries.html.SPAN_factory;
@@ -59,9 +60,12 @@ import javax.servlet.jsp.SkipPageException;
 
 final public class LinkImpl {
 
+	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
+	 */
 	@FunctionalInterface
-	public static interface LinkImplBody<E extends Throwable> {
-		void doBody(boolean discard) throws E, IOException, SkipPageException;
+	public static interface LinkImplBody<Ex extends Throwable> {
+		void doBody(boolean discard) throws Ex, IOException, SkipPageException;
 	}
 
 	/**
@@ -171,7 +175,14 @@ final public class LinkImpl {
 		}
 	}
 
-	public static <__ extends Union_Palpable_Phrasing<__>, E extends Throwable> void writeLinkImpl(
+	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
+	 */
+	public static <
+		D extends AnyDocument<D>,
+		__ extends Union_Palpable_Phrasing<D, __>,
+		Ex extends Throwable
+	> void writeLinkImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -187,8 +198,8 @@ final public class LinkImpl {
 		boolean absolute,
 		boolean canonical,
 		Object clazz,
-		LinkImplBody<E> body
-	) throws E, ServletException, IOException, SkipPageException {
+		LinkImplBody<Ex> body
+	) throws Ex, ServletException, IOException, SkipPageException {
 		// Get the current capture state
 		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
@@ -215,6 +226,7 @@ final public class LinkImpl {
 	}
 
 	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
 	 * @param book  ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
 	 * @param page  ValueExpression that returns String, evaluated at {@link CaptureLevel#META} or higher
 	 * @param element  ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only.
@@ -224,7 +236,11 @@ final public class LinkImpl {
 	 * @param viewName   ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only
 	 * @param clazz  ValueExpression that returns Object, evaluated at {@link CaptureLevel#BODY} only
 	 */
-	public static <__ extends Union_Palpable_Phrasing<__>, E extends Throwable> void writeLinkImpl(
+	public static <
+		D extends AnyDocument<D>,
+		__ extends Union_Palpable_Phrasing<D, __>,
+		Ex extends Throwable
+	> void writeLinkImpl(
 		ServletContext servletContext,
 		ELContext elContext,
 		HttpServletRequest request,
@@ -241,8 +257,8 @@ final public class LinkImpl {
 		boolean absolute,
 		boolean canonical,
 		ValueExpression clazz,
-		LinkImplBody<E> body
-	) throws E, ServletException, IOException, SkipPageException {
+		LinkImplBody<Ex> body
+	) throws Ex, ServletException, IOException, SkipPageException {
 		// Get the current capture state
 		final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
 		if(captureLevel.compareTo(CaptureLevel.META) >= 0) {
@@ -287,9 +303,14 @@ final public class LinkImpl {
 	}
 
 	/**
-	 * @param <__>  {@link Union_Palpable_Phrasing} provides both {@link A_factory} and {@link SPAN_factory}.
+	 * @param  <__>  {@link Union_Palpable_Phrasing} provides both {@link A_factory} and {@link SPAN_factory}.
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
 	 */
-	private static <__ extends Union_Palpable_Phrasing<__>, E extends Throwable> void writeLinkImpl(
+	private static <
+		D extends AnyDocument<D>,
+		__ extends Union_Palpable_Phrasing<D, __>,
+		Ex extends Throwable
+	> void writeLinkImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -305,9 +326,9 @@ final public class LinkImpl {
 		boolean absolute,
 		boolean canonical,
 		Object clazz,
-		LinkImplBody<E> body,
+		LinkImplBody<Ex> body,
 		CaptureLevel captureLevel
-	) throws E, ServletException, IOException, SkipPageException {
+	) throws Ex, ServletException, IOException, SkipPageException {
 		assert captureLevel.compareTo(CaptureLevel.META) >= 0;
 
 		book = nullIfEmpty(book);
@@ -447,7 +468,7 @@ final public class LinkImpl {
 
 			final String element_ = element;
 			if(small) {
-				SPAN<__> span = content.span();
+				SPAN<D, __> span = content.span();
 				if(clazz != null) {
 					span.clazz(clazz);
 				} else {
@@ -455,7 +476,7 @@ final public class LinkImpl {
 						span.clazz(semanticCMS.getLinkCssClass(targetElement));
 					}
 				}
-				try (SPAN_c<__> span__ = span._c()) {
+				try (SPAN_c<D, __> span__ = span._c()) {
 					if(body == null) {
 						if(targetElement != null) {
 							span__.text(targetElement);
@@ -493,7 +514,7 @@ final public class LinkImpl {
 					);
 				}
 			} else {
-				A<__> a = content.a(
+				A<D, __> a = content.a(
 					HttpServletUtil.buildURL(
 						request,
 						response,

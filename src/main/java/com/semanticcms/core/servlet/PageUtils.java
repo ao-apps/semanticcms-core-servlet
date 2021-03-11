@@ -131,7 +131,7 @@ final public class PageUtils {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		com.semanticcms.core.model.Page page,
-		Map<PageRef,Boolean> finished
+		Map<PageRef, Boolean> finished
 	) throws ServletException, IOException {
 		PageRef pageRef = page.getPageRef();
 		assert !finished.containsKey(pageRef);

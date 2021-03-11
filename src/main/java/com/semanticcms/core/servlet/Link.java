@@ -219,7 +219,7 @@ public class Link {
 		LinkImpl.writeLinkImpl(servletContext,
 			request,
 			response,
-			DocumentEE.get(servletContext, request, response),
+			new DocumentEE(servletContext, request, response),
 			book,
 			page,
 			element,

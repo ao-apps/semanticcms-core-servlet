@@ -22,7 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.Document;
+import com.aoindustries.html.AnyDocument;
 import com.aoindustries.io.ContentType;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.HttpServletUtil;
@@ -45,7 +45,7 @@ abstract public class PageServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final Charset ENCODING = Document.ENCODING;
+	public static final Charset ENCODING = AnyDocument.ENCODING;
 
 	/**
 	 * @see  com.semanticcms.core.model.Page#getTitle()

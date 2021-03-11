@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -42,9 +42,9 @@ class SingleThreadCache extends MapCache {
 	@SuppressWarnings("AssertWithSideEffects")
 	SingleThreadCache() {
 		super(
-			new HashMap<CaptureKey,Page>(),
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
+			new HashMap<CaptureKey, Page>(),
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef, Set<PageRef>>() : null,
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef, Set<PageRef>>() : null,
 			new HashMap<String, Object>()
 		);
 		Thread t = null;
@@ -66,13 +66,13 @@ class SingleThreadCache extends MapCache {
 	}
 
 	@Override
-	public <K,V> Map<K,V> newMap() {
+	public <K, V> Map<K, V> newMap() {
 		assert assertingThread == Thread.currentThread();
 		return new HashMap<>();
 	}
 
 	@Override
-	public <K,V> Map<K,V> newMap(int size) {
+	public <K, V> Map<K, V> newMap(int size) {
 		assert assertingThread == Thread.currentThread();
 		return AoCollections.newHashMap(size);
 	}
@@ -89,8 +89,12 @@ class SingleThreadCache extends MapCache {
 		return super.getAttribute(key);
 	}
 
+	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
+	 */
 	@Override
-	public <V, E extends Exception> V getAttribute(String key, Class<V> clazz, Callable<? extends V, E> callable) throws E {
+	// TODO: Ex extends Throwable
+	public <V, Ex extends Exception> V getAttribute(String key, Class<V> clazz, Callable<? extends V, Ex> callable) throws Ex {
 		assert assertingThread == Thread.currentThread();
 		return super.getAttribute(key, clazz, callable);
 	}

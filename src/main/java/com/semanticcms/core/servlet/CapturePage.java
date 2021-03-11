@@ -28,7 +28,7 @@ import com.aoindustries.encoding.Doctype;
 import com.aoindustries.encoding.Serialization;
 import com.aoindustries.encoding.servlet.DoctypeEE;
 import com.aoindustries.encoding.servlet.SerializationEE;
-import com.aoindustries.html.Document;
+import com.aoindustries.html.AnyDocument;
 import com.aoindustries.lang.NullArgumentException;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.Dispatcher;
@@ -173,7 +173,7 @@ public class CapturePage {
 			// Set the content type
 			Serialization currentSerialization = SerializationEE.getDefault(servletContext, subRequest);
 			SerializationEE.set(subRequest, currentSerialization);
-			ServletUtil.setContentType(subResponse, currentSerialization.getContentType(), Document.ENCODING);
+			ServletUtil.setContentType(subResponse, currentSerialization.getContentType(), AnyDocument.ENCODING);
 			// Set the default doctype for all captures
 			DoctypeEE.set(subRequest, Doctype.DEFAULT);
 			// Set new capture context
@@ -255,7 +255,7 @@ public class CapturePage {
 	 *
 	 * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.PageReferrer, com.semanticcms.core.servlet.CaptureLevel)
 	 */
-	public static Map<PageRef,Page> capturePages(
+	public static Map<PageRef, Page> capturePages(
 		final ServletContext servletContext,
 		final HttpServletRequest request,
 		final HttpServletResponse response,
@@ -273,7 +273,7 @@ public class CapturePage {
 			);
 		} else {
 			final Cache cache = CacheFilter.getCache(request);
-			Map<PageRef,Page> results = AoCollections.newLinkedHashMap(size);
+			Map<PageRef, Page> results = AoCollections.newLinkedHashMap(size);
 			List<PageReferrer> notCachedList = new ArrayList<>(size);
 			if(level != CaptureLevel.BODY) {
 				// Check cache before queuing on different threads, building list of those not in cache
@@ -354,7 +354,7 @@ public class CapturePage {
 	 * @see  #capturePages(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Set, com.semanticcms.core.servlet.CaptureLevel)
 	 * @see  PageContext
 	 */
-	public static Map<PageRef,Page> capturePages(
+	public static Map<PageRef, Page> capturePages(
 		Set<? extends PageReferrer> pageReferrers,
 		CaptureLevel level
 	) throws ServletException, IOException {
@@ -579,7 +579,7 @@ public class CapturePage {
 		// New edges to add, used to add in the correct order to edgesToAdd based on traversal direction hints
 		final List<PageRef> newEdgesToAdd = new ArrayList<>();
 		// The futures are queued, active, or finished but not yet processed by main thread
-		final Map<PageRef,Future<Page>> futures = AoCollections.newHashMap(preferredConcurrency);
+		final Map<PageRef, Future<Page>> futures = AoCollections.newHashMap(preferredConcurrency);
 		try {
 			// Kick it off
 			visited.add(page.getPageRef());
@@ -976,7 +976,7 @@ public class CapturePage {
 				// Those that are to be done after what is next
 				final List<Iterator<? extends PageReferrer>> afters = new ArrayList<>();
 				// The set of nodes we've received but are not yet ready to process
-				Map<PageRef,Page> received = null;
+				Map<PageRef, Page> received = null;
 
 				// Kick it off
 				{

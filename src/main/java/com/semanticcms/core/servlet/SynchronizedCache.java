@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2020  AO Industries, Inc.
+ * Copyright (C) 2016, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -39,9 +39,9 @@ class SynchronizedCache extends MapCache {
 
 	SynchronizedCache() {
 		super(
-			new HashMap<CaptureKey,Page>(),
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef,Set<PageRef>>() : null,
+			new HashMap<CaptureKey, Page>(),
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef, Set<PageRef>>() : null,
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef, Set<PageRef>>() : null,
 			new HashMap<String, Object>()
 		);
 	}
@@ -63,12 +63,12 @@ class SynchronizedCache extends MapCache {
 	}
 
 	@Override
-	public <K,V> Map<K,V> newMap() {
+	public <K, V> Map<K, V> newMap() {
 		return Collections.synchronizedMap(new HashMap<>());
 	}
 
 	@Override
-	public <K,V> Map<K,V> newMap(int size) {
+	public <K, V> Map<K, V> newMap(int size) {
 		return Collections.synchronizedMap(AoCollections.newHashMap(size));
 	}
 
@@ -86,8 +86,12 @@ class SynchronizedCache extends MapCache {
 		}
 	}
 
+	/**
+	 * @param  <Ex>  An arbitrary exception type that may be thrown
+	 */
 	@Override
-	public <V, E extends Exception> V getAttribute(String key, Class<V> clazz, Callable<? extends V, E> callable) throws E {
+	// TODO: Ex extends Throwable
+	public <V, Ex extends Exception> V getAttribute(String key, Class<V> clazz, Callable<? extends V, Ex> callable) throws Ex {
 		synchronized(attributes) {
 			return super.getAttribute(key, clazz, callable);
 		}

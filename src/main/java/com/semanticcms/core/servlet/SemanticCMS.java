@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2014, 2015, 2016, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2014, 2015, 2016, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -150,7 +150,7 @@ public class SemanticCMS {
 	private static final String PARENT_TAG = "parent";
 	private static final String ROOT_BOOK_ATTRIBUTE = "rootBook";
 
-	private final Map<String,Book> books = new LinkedHashMap<>();
+	private final Map<String, Book> books = new LinkedHashMap<>();
 	private final Set<String> missingBooks = new LinkedHashSet<>();
 	private final Book rootBook;
 
@@ -229,7 +229,7 @@ public class SemanticCMS {
 		return newRootBook;
 	}
 
-	public Map<String,Book> getBooks() {
+	public Map<String, Book> getBooks() {
 		return Collections.unmodifiableMap(books);
 	}
 
@@ -292,7 +292,7 @@ public class SemanticCMS {
 	/**
 	 * The views by name in order added.
 	 */
-	private final Map<String,View> viewsByName = new LinkedHashMap<>();
+	private final Map<String, View> viewsByName = new LinkedHashMap<>();
 
 	private static final Set<View.Group> viewGroups = Collections.unmodifiableSet(EnumSet.allOf(View.Group.class));
 
@@ -306,7 +306,7 @@ public class SemanticCMS {
 	/**
 	 * Gets the views in order added.
 	 */
-	public Map<String,View> getViewsByName() {
+	public Map<String, View> getViewsByName() {
 		return Collections.unmodifiableMap(viewsByName);
 	}
 
@@ -375,12 +375,12 @@ public class SemanticCMS {
 	/**
 	 * The themes in order added.
 	 */
-	private final Map<String,Theme> themes = new LinkedHashMap<>();
+	private final Map<String, Theme> themes = new LinkedHashMap<>();
 
 	/**
 	 * Gets the themes, in the order added.
 	 */
-	public Map<String,Theme> getThemes() {
+	public Map<String, Theme> getThemes() {
 		synchronized(themes) {
 			// Not returning a copy since themes are normally only registered on app start-up.
 			return Collections.unmodifiableMap(themes);
@@ -413,7 +413,7 @@ public class SemanticCMS {
 	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
 	@Deprecated
-	private final Map<String,Boolean> cssLinks = new LinkedHashMap<>();
+	private final Map<String, Boolean> cssLinks = new LinkedHashMap<>();
 
 	/**
 	 * Gets the CSS links, in the order added.
@@ -482,7 +482,7 @@ public class SemanticCMS {
 	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
 	@Deprecated
-	private final Map<String,Boolean> printCssLinks = new LinkedHashMap<>();
+	private final Map<String, Boolean> printCssLinks = new LinkedHashMap<>();
 
 	/**
 	 * Gets the print CSS links, in the order added.
@@ -545,13 +545,13 @@ public class SemanticCMS {
 	 * The scripts in the order added.
 	 */
 	// TODO: RegistryEE
-	private final Map<String,String> scripts = new LinkedHashMap<>();
+	private final Map<String, String> scripts = new LinkedHashMap<>();
 
 	/**
 	 * Gets the scripts, in the order added.
 	 */
 	// TODO: RegistryEE
-	public Map<String,String> getScripts() {
+	public Map<String, String> getScripts() {
 		synchronized(scripts) {
 			// Not returning a copy since scripts are normally only registered on app start-up.
 			return Collections.unmodifiableMap(scripts);
@@ -639,7 +639,7 @@ public class SemanticCMS {
 	/**
 	 * The CSS classes used in links.
 	 */
-	private final Map<Class<? extends com.semanticcms.core.model.Element>,LinkCssClassResolver<?>> linkCssClassResolverByElementType = new LinkedHashMap<>();
+	private final Map<Class<? extends com.semanticcms.core.model.Element>, LinkCssClassResolver<?>> linkCssClassResolverByElementType = new LinkedHashMap<>();
 
 	/**
 	 * Gets the CSS class to use in links to the given element.
@@ -714,7 +714,7 @@ public class SemanticCMS {
 	/**
 	 * The CSS classes used in list items.
 	 */
-	private final Map<Class<? extends com.semanticcms.core.model.Node>,ListItemCssClassResolver<?>> listItemCssClassResolverByNodeType = new LinkedHashMap<>();
+	private final Map<Class<? extends com.semanticcms.core.model.Node>, ListItemCssClassResolver<?>> listItemCssClassResolverByNodeType = new LinkedHashMap<>();
 
 	/**
 	 * Gets the CSS class to use in list items to the given node.

@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016  AO Industries, Inc.
+ * Copyright (C) 2016, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -93,7 +93,7 @@ public class AuthorUtils {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		com.semanticcms.core.model.Page page,
-		Map<PageRef,Set<Author>> finished
+		Map<PageRef, Set<Author>> finished
 	) throws ServletException, IOException {
 		PageRef pageRef = page.getPageRef();
 		assert !finished.containsKey(pageRef);
