@@ -22,7 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.AnyDocument;
+import com.aoindustries.html.any.AnyDocument;
 import com.aoindustries.io.ContentType;
 import com.aoindustries.servlet.ServletUtil;
 import com.aoindustries.servlet.http.HttpServletUtil;
