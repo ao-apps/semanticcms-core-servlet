@@ -22,10 +22,10 @@
  */
 package com.semanticcms.core.servlet.impl;
 
-import com.aoindustries.html.AnyDocument;
-import com.aoindustries.html.LI_c;
-import com.aoindustries.html.PalpableContent;
-import com.aoindustries.html.UL_c;
+import com.aoindustries.html.any.AnyDocument;
+import com.aoindustries.html.any.AnyLI_c;
+import com.aoindustries.html.any.AnyPalpableContent;
+import com.aoindustries.html.any.AnyUL_c;
 import com.aoindustries.net.URIEncoder;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
@@ -141,9 +141,13 @@ final public class ElementFilterTreeImpl {
 		return hasMatch;
 	}
 
+	/**
+	 * @param  <D>   This document type
+	 * @param  <__>  This content model, which will be the parent content model of child elements
+	 */
 	private static <
 		D extends AnyDocument<D>,
-		__ extends PalpableContent<D, __>
+		__ extends AnyPalpableContent<D, __>
 	> void writeNode(
 		ServletContext servletContext,
 		HttpServletRequest request,
@@ -151,7 +155,7 @@ final public class ElementFilterTreeImpl {
 		Node currentNode,
 		Set<Node> nodesWithMatches,
 		PageIndex pageIndex,
-		UL_c<D, __> ul__,
+		AnyUL_c<D, __, ?> ul__,
 		Node node,
 		boolean includeElements
 	) throws ServletException, IOException, SkipPageException {
@@ -172,7 +176,7 @@ final public class ElementFilterTreeImpl {
 			// Add page links
 			currentNode.addPageLink(pageRef);
 		}
-		LI_c<D, UL_c<D, __>> li_c;
+		AnyLI_c<D, ?, ?> li_c;
 		if(ul__ != null) {
 			StringBuilder url = new StringBuilder();
 			Integer index = pageIndex==null ? null : pageIndex.getPageIndex(pageRef);
@@ -201,7 +205,7 @@ final public class ElementFilterTreeImpl {
 			li_c.a(response.encodeURL(url.toString())).__(a -> {
 				a.text(node);
 				if(index != null) {
-					a.sup__(sup -> sup
+					a.sup__any(sup -> sup
 						.text('[').text(index + 1).text(']')
 					);
 				}
@@ -212,7 +216,7 @@ final public class ElementFilterTreeImpl {
 		List<Node> childNodes = NavigationTreeImpl.getChildNodes(servletContext, request, response, includeElements, true, node);
 		childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithMatches);
 		if(!childNodes.isEmpty()) {
-			UL_c<D, LI_c<D, UL_c<D, __>>> ul_c = (li_c != null) ? li_c.ul_c() : null;
+			AnyUL_c<D, ?, ?> ul_c = (li_c != null) ? li_c.ul_c() : null;
 			for(Node childNode : childNodes) {
 				writeNode(servletContext, request, response, currentNode, nodesWithMatches, pageIndex, ul_c, childNode, includeElements);
 			}
@@ -226,7 +230,7 @@ final public class ElementFilterTreeImpl {
 	// TODO: Caching?
 	public static <
 		D extends AnyDocument<D>,
-		__ extends PalpableContent<D, __>
+		__ extends AnyPalpableContent<D, __>
 	> void writeElementFilterTreeImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
@@ -251,7 +255,7 @@ final public class ElementFilterTreeImpl {
 				root,
 				includeElements
 			);
-			UL_c<D, __> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
+			AnyUL_c<D, __, ?> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
 			writeNode(
 				servletContext,
 				request,
@@ -269,7 +273,7 @@ final public class ElementFilterTreeImpl {
 
 	public static <
 		D extends AnyDocument<D>,
-		__ extends PalpableContent<D, __>
+		__ extends AnyPalpableContent<D, __>
 	> void writeElementFilterTreeImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,

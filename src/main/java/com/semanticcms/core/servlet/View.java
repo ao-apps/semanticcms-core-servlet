@@ -22,8 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.FlowContent;
-import com.aoindustries.html.servlet.DocumentEE;
+import com.aoindustries.html.servlet.FlowContent;
 import com.aoindustries.net.URIEncoder;
 import com.aoindustries.servlet.http.Canonical;
 import com.aoindustries.taglib.Link;
@@ -401,7 +400,7 @@ abstract public class View implements Comparable<View> {
 	 *
 	 * TODO: Is SkipPageException acceptable at the view rendering stage?
 	 */
-	abstract public <__ extends FlowContent<DocumentEE, __>> void doView(
+	abstract public <__ extends FlowContent<__>> void doView(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
