@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-0500"
-		dateModified="2021-03-06T23:34:43-06:00"
+		dateModified="2021-03-18T05:02:06-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -52,11 +52,23 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 						New module <core:link book="/core/controller" page="/" /> split from <code:link page="/" />, leaving
 						<code:link page="/" /> only to generate page content from servlets.
 					</li>
-					<li>Updated dependencies.</li>
-					<li>Implemented automatic newline and tab indentation.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
+
+		<changelog:release
+			projectName="@{documented.name}"
+			version="1.17.1"
+			datePublished="2021-03-18T05:02:06-05:00"
+			groupId="@{project.groupId}"
+			artifactId="@{documented.artifactId}"
+			scmUrl="@{project.scm.url}"
+		>
+			<ul>
+				<li>Updated dependencies.</li>
+				<li>Implemented automatic newline and tab indentation.</li>
+			</ul>
+		</changelog:release>
 
 		<changelog:release
 			projectName="@{documented.name}"
