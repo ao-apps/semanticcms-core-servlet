@@ -26,7 +26,6 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextIn
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import com.aoindustries.exception.WrappedException;
 import com.aoindustries.html.any.AnyA;
-import com.aoindustries.html.any.AnyDocument;
 import com.aoindustries.html.any.AnySPAN;
 import com.aoindustries.html.any.AnySPAN_c;
 import com.aoindustries.html.any.AnyUnion_Palpable_Phrasing;
@@ -176,15 +175,11 @@ final public class LinkImpl {
 	/**
 	 * @param  <Ex>  An arbitrary exception type that may be thrown
 	 */
-	public static <
-		D extends AnyDocument<D>,
-		__ extends AnyUnion_Palpable_Phrasing<D, __>,
-		Ex extends Throwable
-	> void writeLinkImpl(
+	public static <Ex extends Throwable> void writeLinkImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		__ content,
+		AnyUnion_Palpable_Phrasing<?, ?> content,
 		String book,
 		String page,
 		String element,
@@ -234,16 +229,12 @@ final public class LinkImpl {
 	 * @param viewName   ValueExpression that returns String, evaluated at {@link CaptureLevel#BODY} only
 	 * @param clazz  ValueExpression that returns Object, evaluated at {@link CaptureLevel#BODY} only
 	 */
-	public static <
-		D extends AnyDocument<D>,
-		__ extends AnyUnion_Palpable_Phrasing<D, __>,
-		Ex extends Throwable
-	> void writeLinkImpl(
+	public static <Ex extends Throwable> void writeLinkImpl(
 		ServletContext servletContext,
 		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		__ content,
+		AnyUnion_Palpable_Phrasing<?, ?> content,
 		ValueExpression book,
 		ValueExpression page,
 		ValueExpression element,
@@ -301,19 +292,14 @@ final public class LinkImpl {
 	}
 
 	/**
-	 * @param  <D>   This document type
-	 * @param  <__>  {@link AnyUnion_Palpable_Phrasing} provides both {@link A} and {@link SPAN}.
+	 * @param  content  {@link AnyUnion_Palpable_Phrasing} provides both {@link AnyA} and {@link AnySPAN}.
 	 * @param  <Ex>  An arbitrary exception type that may be thrown
 	 */
-	private static <
-		D extends AnyDocument<D>,
-		__ extends AnyUnion_Palpable_Phrasing<D, __>,
-		Ex extends Throwable
-	> void writeLinkImpl(
+	private static <Ex extends Throwable> void writeLinkImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		__ content,
+		AnyUnion_Palpable_Phrasing<?, ?> content,
 		String book,
 		String page,
 		String element,
@@ -467,7 +453,7 @@ final public class LinkImpl {
 
 			final String element_ = element;
 			if(small) {
-				AnySPAN<D, __, ?, ?, ?> span = content.span();
+				AnySPAN<?, ?, ?, ?, ?> span = content.span();
 				if(clazz != null) {
 					span.clazz(clazz);
 				} else {
@@ -475,7 +461,7 @@ final public class LinkImpl {
 						span.clazz(semanticCMS.getLinkCssClass(targetElement));
 					}
 				}
-				try (AnySPAN_c<D, __, ?> span__ = span._c()) {
+				try (AnySPAN_c<?, ?, ?> span__ = span._c()) {
 					if(body == null) {
 						if(targetElement != null) {
 							span__.text(targetElement);
@@ -513,7 +499,7 @@ final public class LinkImpl {
 					);
 				}
 			} else {
-				AnyA<D, __, ?, ?> a = content.a(
+				AnyA<?, ? extends AnyUnion_Palpable_Phrasing<?, ?>, ?, ?> a = content.a(
 					HttpServletUtil.buildURL(
 						request,
 						response,

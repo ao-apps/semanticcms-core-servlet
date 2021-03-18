@@ -23,7 +23,6 @@
 package com.semanticcms.core.servlet.impl;
 
 import com.aoindustries.html.any.AnyA;
-import com.aoindustries.html.any.AnyDocument;
 import com.aoindustries.html.any.AnyLI;
 import com.aoindustries.html.any.AnyLI_c;
 import com.aoindustries.html.any.AnyPalpableContent;
@@ -184,14 +183,11 @@ final public class NavigationTreeImpl {
 		return Strings.convertToHex(data.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public static <
-		D extends AnyDocument<D>,
-		__ extends AnyPalpableContent<D, __>
-	> void writeNavigationTreeImpl(
+	public static void writeNavigationTreeImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		__ content,
+		AnyPalpableContent<?, ?> content,
 		Page root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -233,15 +229,12 @@ final public class NavigationTreeImpl {
 	 * @param linksToBook  ValueExpression that returns String
 	 * @param linksToPage  ValueExpression that returns String
 	 */
-	public static <
-		D extends AnyDocument<D>,
-		__ extends AnyPalpableContent<D, __>
-	> void writeNavigationTreeImpl(
+	public static void writeNavigationTreeImpl(
 		ServletContext servletContext,
 		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		__ content,
+		AnyPalpableContent<?, ?> content,
 		ValueExpression root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -276,14 +269,11 @@ final public class NavigationTreeImpl {
 		}
 	}
 
-	private static <
-		D extends AnyDocument<D>,
-		__ extends AnyPalpableContent<D, __>
-	> void writeNavigationTreeImpl(
+	private static void writeNavigationTreeImpl(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		__ content,
+		AnyPalpableContent<?, ?> content,
 		Page root,
 		boolean skipRoot,
 		boolean yuiConfig,
@@ -351,7 +341,7 @@ final public class NavigationTreeImpl {
 				childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithChildLinks);
 			}
 			if(!childNodes.isEmpty()) {
-				AnyUL_c<D, __, ?> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
+				AnyUL_c<?, ?, ?> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
 				for(Node childNode : childNodes) {
 					foundThisPage = writeNode(
 						servletContext,
@@ -376,7 +366,7 @@ final public class NavigationTreeImpl {
 				if(ul_c != null) ul_c.__();
 			}
 		} else {
-			AnyUL_c<D, __, ?> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
+			AnyUL_c<?, ?, ?> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
 			/*foundThisPage =*/ writeNode(
 				servletContext,
 				request,
@@ -401,14 +391,11 @@ final public class NavigationTreeImpl {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static <
-		D extends AnyDocument<D>,
-		__ extends AnyPalpableContent<D, __>
-	> boolean writeNode(
+	private static boolean writeNode(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		AnyUL_c<D, __, ?> ul__,
+		AnyUL_c<?, ?, ?> ul__,
 		Node currentNode,
 		Set<Node> nodesWithLinks,
 		Set<Node> nodesWithChildLinks,
@@ -469,10 +456,10 @@ final public class NavigationTreeImpl {
 				servletPath = sb.toString();
 			}
 		}
-		AnyLI_c<D, ?, ?> li_c;
-		AnyA<D, ? extends AnyUnion_Palpable_Phrasing<?, ?>, ?, ?> a;
+		AnyLI_c<?, ?, ?> li_c;
+		AnyA<?, ? extends AnyUnion_Palpable_Phrasing<?, ?>, ?, ?> a;
 		if(ul__ != null) {
-			AnyLI<D, ?, ?, ?, ?> li = ul__.li();
+			AnyLI<?, ?, ?, ?, ?> li = ul__.li();
 			if(yuiConfig) {
 				li.attribute("yuiConfig", attr -> attr
 					.append("{\"data\":\"").append(encodeHexData(servletPath)).append("\"}")
@@ -548,7 +535,7 @@ final public class NavigationTreeImpl {
 				childNodes = NavigationTreeImpl.filterNodes(childNodes, nodesWithChildLinks);
 			}
 			if(!childNodes.isEmpty()) {
-				AnyUL_c<D, ?, ?> ul_c = (li_c != null) ? li_c.ul_c() : null;
+				AnyUL_c<?, ?, ?> ul_c = (li_c != null) ? li_c.ul_c() : null;
 				for(Node childNode : childNodes) {
 					foundThisPage = writeNode(
 						servletContext,
