@@ -192,7 +192,7 @@ final public class PageImpl {
 								RegistryEE.Page.set(request, pageRegistry);
 
 								// Unlike elements, the page body is still invoked on captureLevel=PAGE, this
-								// is done to catch parents and childen.
+								// is done to catch parents and children.
 								if(body != null) {
 									// Set currentNode
 									CurrentNode.setCurrentNode(request, page);
