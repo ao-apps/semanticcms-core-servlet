@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2015, 2016, 2017, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2015, 2016, 2017, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,10 +22,10 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.lang.NullArgumentException;
-import static com.aoindustries.lang.Strings.nullIfEmpty;
-import com.aoindustries.net.URIResolver;
-import com.aoindustries.servlet.http.Dispatcher;
+import com.aoapps.lang.NullArgumentException;
+import static com.aoapps.lang.Strings.nullIfEmpty;
+import com.aoapps.net.URIResolver;
+import com.aoapps.servlet.http.Dispatcher;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
 import java.net.MalformedURLException;

@@ -22,18 +22,18 @@
  */
 package com.semanticcms.core.servlet.impl;
 
-import com.aoindustries.encoding.Doctype;
-import com.aoindustries.encoding.Serialization;
-import com.aoindustries.encoding.servlet.DoctypeEE;
-import com.aoindustries.encoding.servlet.SerializationEE;
-import com.aoindustries.html.any.AnyDocument;
-import com.aoindustries.html.servlet.DocumentEE;
-import com.aoindustries.io.buffer.BufferResult;
-import com.aoindustries.servlet.LocalizedServletException;
-import com.aoindustries.servlet.ServletContextCache;
-import com.aoindustries.servlet.ServletUtil;
-import com.aoindustries.web.resources.registry.Registry;
-import com.aoindustries.web.resources.servlet.RegistryEE;
+import com.aoapps.encoding.Doctype;
+import com.aoapps.encoding.Serialization;
+import com.aoapps.encoding.servlet.DoctypeEE;
+import com.aoapps.encoding.servlet.SerializationEE;
+import com.aoapps.html.any.AnyDocument;
+import com.aoapps.html.servlet.DocumentEE;
+import com.aoapps.io.buffer.BufferResult;
+import com.aoapps.servlet.LocalizedServletException;
+import com.aoapps.servlet.ServletContextCache;
+import com.aoapps.servlet.ServletUtil;
+import com.aoapps.web.resources.registry.Registry;
+import com.aoapps.web.resources.servlet.RegistryEE;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Node;

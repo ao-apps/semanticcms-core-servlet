@@ -22,8 +22,8 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.collections.AoCollections;
-import com.aoindustries.lang.NullArgumentException;
+import com.aoapps.collections.AoCollections;
+import com.aoapps.lang.NullArgumentException;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import java.io.IOException;

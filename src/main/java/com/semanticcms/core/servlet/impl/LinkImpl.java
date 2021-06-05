@@ -22,18 +22,18 @@
  */
 package com.semanticcms.core.servlet.impl;
 
-import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
-import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
-import com.aoindustries.html.any.AnyA;
-import com.aoindustries.html.any.AnyA_c;
-import com.aoindustries.html.any.AnySPAN;
-import com.aoindustries.html.any.AnySPAN_c;
-import com.aoindustries.html.any.AnyUnion_Palpable_Phrasing;
-import static com.aoindustries.lang.Strings.nullIfEmpty;
-import com.aoindustries.net.URIEncoder;
-import com.aoindustries.net.URIParameters;
-import com.aoindustries.servlet.http.HttpServletUtil;
-import static com.aoindustries.taglib.AttributeUtils.resolveValue;
+import static com.aoapps.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
+import static com.aoapps.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
+import com.aoapps.html.any.AnyA;
+import com.aoapps.html.any.AnyA_c;
+import com.aoapps.html.any.AnySPAN;
+import com.aoapps.html.any.AnySPAN_c;
+import com.aoapps.html.any.AnyUnion_Palpable_Phrasing;
+import static com.aoapps.lang.Strings.nullIfEmpty;
+import com.aoapps.net.URIEncoder;
+import com.aoapps.net.URIParameters;
+import com.aoapps.servlet.http.HttpServletUtil;
+import static com.aoapps.taglib.AttributeUtils.resolveValue;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;

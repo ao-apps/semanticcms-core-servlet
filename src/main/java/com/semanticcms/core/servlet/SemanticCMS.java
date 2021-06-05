@@ -22,14 +22,14 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.exception.WrappedException;
-import com.aoindustries.servlet.PropertiesUtils;
-import com.aoindustries.servlet.http.Dispatcher;
-import com.aoindustries.web.resources.registry.Group;
-import com.aoindustries.web.resources.registry.Style;
-import com.aoindustries.web.resources.registry.Styles;
-import com.aoindustries.web.resources.servlet.RegistryEE;
-import com.aoindustries.xml.XmlUtils;
+import com.aoapps.lang.exception.WrappedException;
+import com.aoapps.lang.xml.XmlUtils;
+import com.aoapps.servlet.PropertiesUtils;
+import com.aoapps.servlet.http.Dispatcher;
+import com.aoapps.web.resources.registry.Group;
+import com.aoapps.web.resources.registry.Style;
+import com.aoapps.web.resources.registry.Styles;
+import com.aoapps.web.resources.servlet.RegistryEE;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.model.ParentRef;

@@ -22,9 +22,9 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.servlet.DocumentEE;
-import com.aoindustries.net.URIParameters;
-import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
+import com.aoapps.html.servlet.DocumentEE;
+import com.aoapps.net.URIParameters;
+import com.aoapps.servlet.http.NullHttpServletResponseWrapper;
 import com.semanticcms.core.servlet.impl.LinkImpl;
 import java.io.IOException;
 import javax.servlet.ServletContext;

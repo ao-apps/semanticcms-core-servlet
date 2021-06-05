@@ -22,7 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.collections.AoCollections;
+import com.aoapps.collections.AoCollections;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.model.PageRef;
 import static com.semanticcms.core.servlet.Cache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;

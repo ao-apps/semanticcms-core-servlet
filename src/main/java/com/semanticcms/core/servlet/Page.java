@@ -22,14 +22,14 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.encoding.Doctype;
-import com.aoindustries.encoding.Serialization;
-import com.aoindustries.encoding.taglib.EncodingBufferedTag;
-import com.aoindustries.io.buffer.BufferResult;
-import com.aoindustries.io.buffer.BufferWriter;
-import com.aoindustries.io.buffer.EmptyResult;
-import com.aoindustries.lang.LocalizedIllegalStateException;
-import com.aoindustries.servlet.http.NullHttpServletResponseWrapper;
+import com.aoapps.encoding.Doctype;
+import com.aoapps.encoding.Serialization;
+import com.aoapps.encoding.taglib.EncodingBufferedTag;
+import com.aoapps.io.buffer.BufferResult;
+import com.aoapps.io.buffer.BufferWriter;
+import com.aoapps.io.buffer.EmptyResult;
+import com.aoapps.lang.LocalizedIllegalStateException;
+import com.aoapps.servlet.http.NullHttpServletResponseWrapper;
 import com.semanticcms.core.model.PageRef;
 import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
 import com.semanticcms.core.servlet.impl.PageImpl;

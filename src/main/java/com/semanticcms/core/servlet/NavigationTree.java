@@ -22,7 +22,7 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.servlet.DocumentEE;
+import com.aoapps.html.servlet.DocumentEE;
 import com.semanticcms.core.model.Page;
 import com.semanticcms.core.servlet.impl.NavigationTreeImpl;
 import java.io.IOException;

@@ -22,11 +22,11 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.servlet.FlowContent;
-import com.aoindustries.net.URIEncoder;
-import com.aoindustries.servlet.http.Canonical;
-import com.aoindustries.taglib.Link;
-import com.aoindustries.web.resources.registry.Registry;
+import com.aoapps.html.servlet.FlowContent;
+import com.aoapps.net.URIEncoder;
+import com.aoapps.servlet.http.Canonical;
+import com.aoapps.taglib.Link;
+import com.aoapps.web.resources.registry.Registry;
 import com.semanticcms.core.model.Author;
 import com.semanticcms.core.model.Copyright;
 import com.semanticcms.core.model.Page;
@@ -340,7 +340,7 @@ abstract public class View implements Comparable<View> {
 	abstract public String getKeywords(Page page);
 
 	/**
-	 * Configures the {@linkplain com.aoindustries.web.resources.servlet.RegistryEE.Request request-scope web resources} that this view uses.
+	 * Configures the {@linkplain com.aoapps.web.resources.servlet.RegistryEE.Request request-scope web resources} that this view uses.
 	 * <p>
 	 * Implementers should call <code>super.configureResources(…)</code> as a matter of convention, despite this default implementation doing nothing.
 	 * </p>
@@ -355,10 +355,10 @@ abstract public class View implements Comparable<View> {
 	 * in the order they should be added.
 	 * <p>
 	 * Please note, that any links to stylesheets here are never optimized.  Please
-	 * prefer {@link #configureResources(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.servlet.Theme, com.semanticcms.core.model.Page, com.aoindustries.web.resources.registry.Registry)}.
+	 * prefer {@link #configureResources(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.servlet.Theme, com.semanticcms.core.model.Page, com.aoapps.web.resources.registry.Registry)}.
 	 * </p>
 	 *
-	 * @see  #configureResources(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.servlet.Theme, com.semanticcms.core.model.Page, com.aoindustries.web.resources.registry.Registry)
+	 * @see  #configureResources(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.servlet.Theme, com.semanticcms.core.model.Page, com.aoapps.web.resources.registry.Registry)
 	 */
 	public Collection<Link> getLinks(
 		ServletContext servletContext,

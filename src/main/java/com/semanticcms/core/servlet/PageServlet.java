@@ -22,11 +22,11 @@
  */
 package com.semanticcms.core.servlet;
 
-import com.aoindustries.html.any.AnyDocument;
-import com.aoindustries.io.ContentType;
-import com.aoindustries.servlet.ServletUtil;
-import com.aoindustries.servlet.http.HttpServletUtil;
-import com.aoindustries.servlet.http.Includer;
+import com.aoapps.html.any.AnyDocument;
+import com.aoapps.lang.io.ContentType;
+import com.aoapps.servlet.ServletUtil;
+import com.aoapps.servlet.http.HttpServletUtil;
+import com.aoapps.servlet.http.Includer;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import javax.servlet.ServletException;
