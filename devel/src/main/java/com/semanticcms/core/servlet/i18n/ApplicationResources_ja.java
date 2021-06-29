@@ -20,20 +20,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.semanticcms.core.servlet;
+package com.semanticcms.core.servlet.i18n;
 
-import java.util.ResourceBundle;
+import com.aoapps.hodgepodge.i18n.EditableResourceBundle;
+import java.util.Locale;
 
-/**
- * Provides a simplified interface for obtaining localized values from the ApplicationResources.properties files.
- */
-public final class Resources {
+public final class ApplicationResources_ja extends EditableResourceBundle {
 
-	public static final com.aoapps.lang.i18n.Resources PACKAGE_RESOURCES =
-		com.aoapps.lang.i18n.Resources.getResources(ResourceBundle::getBundle, Resources.class.getPackage());
-
-	/**
-	 * Make no instances.
-	 */
-	private Resources() {}
+	public ApplicationResources_ja() {
+		super(
+			Locale.JAPANESE,
+			ApplicationResources.bundleSet,
+			ApplicationResources.getSourceFile("ApplicationResources_ja.properties")
+		);
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2017, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -20,18 +20,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.semanticcms.core.servlet;
-
-import com.aoapps.hodgepodge.i18n.EditableResourceBundle;
-import java.util.Locale;
-
-public final class ApplicationResources_ja extends EditableResourceBundle {
-
-	public ApplicationResources_ja() {
-		super(
-			Locale.JAPANESE,
-			ApplicationResources.bundleSet,
-			ApplicationResources.getSourceFile("ApplicationResources_ja.properties")
-		);
-	}
+module com.semanticcms.core.servlet.devel {
+	exports com.semanticcms.core.servlet.i18n;
+	// Direct
+	requires com.aoapps.hodgepodge; // <groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId>
 }
