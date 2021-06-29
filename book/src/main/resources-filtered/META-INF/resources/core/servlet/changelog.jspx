@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-05:00"
-		dateModified="2021-06-03T22:53:21-05:00"
+		dateModified="2021-06-27T16:13:41-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -55,6 +55,12 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 					</li>
 					<li>Updated to <ao:a rel="nofollow" href="https://www.oracle.com/java/technologies/javaee/javaeetechnologies.html#javaee7">Java™ EE 7 Web Profile</ao:a> (Servlet 3.1, JSP 2.3, EL 3.0, and JSTL 1.2).</li>
 					<li>Minimum Java version changed from 1.8 to 11.</li>
+					<li>
+						Now supports Java 9+ modules.  Due to still having filename-based automatic module dependencies,
+						*-SNAPSHOT versions include <code>module-info.class</code> while releases include the
+						<code>Automatic-Module-Name</code> manifest entry.  To minimize the difference between these
+						modes, <code>module-info.java</code> does not perform any transitive requires.
+					</li>
 				</ul>
 			</changelog:release>
 		</c:if>
@@ -147,13 +153,13 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				<li>Using <ao:a href="https://oss.aoapps.com/fluent-html/">AO Fluent HTML</ao:a> for HTML generation.</li>
 				<li>Optimized ServletContext attribute initialization and concurrency.</li>
 				<li>
-					<ao:a href="apidocs/com/semanticcms/core/servlet/impl/PageImpl.html">PageImpl</ao:a> now establishes
+					<ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/impl/PageImpl.html">PageImpl</ao:a> now establishes
 					a page context for <ao:a href="https://oss.aoapps.com/web-resources/">AO Web Resources</ao:a>.
 				</li>
 				<li>
 					Now configures <ao:a href="https://oss.aoapps.com/web-resources/">AO Web Resources</ao:a>
-					for <ao:a href="apidocs/com/semanticcms/core/servlet/Theme.html">Theme</ao:a>
-					and <ao:a href="apidocs/com/semanticcms/core/servlet/View.html">View</ao:a>.
+					for <ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/Theme.html">Theme</ao:a>
+					and <ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/View.html">View</ao:a>.
 				</li>
 				<li>Removed <code>UrlUtils</code>, with the sole remaining method <code>writeHref</code> moved to <code>LinkImpl</code>.</li>
 				<li>Updated dependencies.</li>
@@ -170,18 +176,18 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		>
 			<ul>
 				<li>Element IDs may now contain the full range of <ao:a href="https://www.w3.org/TR/REC-xml/#id">valid XML identifiers</ao:a>.</li>
-				<li>Added absolute URL and <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com/aoapps/servlet/http/Canonical.html">Canonical URL</ao:a> support.</li>
+				<li>Added absolute URL and <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/http/Canonical.html">Canonical URL</ao:a> support.</li>
 				<li>
-					Activated new filter <ao:a href="https://oss.aoapps.com/servlet-last-modified/apidocs/com/aoapps/servlet/lastmodified/LastModifiedCacheControlFilter.html">LastModifiedCacheControlFilter</ao:a>
+					Activated new filter <ao:a href="https://oss.aoapps.com/servlet-last-modified/apidocs/com.aoapps.servlet.lastmodified/com/aoapps/servlet/lastmodified/LastModifiedCacheControlFilter.html">LastModifiedCacheControlFilter</ao:a>
 					that adds a <ao:a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">cache-control</ao:a> header to any request with a 
-					<ao:a href="https://oss.aoapps.com/servlet-last-modified/apidocs/com/aoapps/servlet/lastmodified/LastModifiedServlet.html#LAST_MODIFIED_PARAMETER_NAME">LAST_MODIFIED_PARAMETER_NAME</ao:a>
+					<ao:a href="https://oss.aoapps.com/servlet-last-modified/apidocs/com.aoapps.servlet.lastmodified/com/aoapps/servlet/lastmodified/LastModifiedServlet.html#LAST_MODIFIED_PARAMETER_NAME">LAST_MODIFIED_PARAMETER_NAME</ao:a>
 					parameter.  Defaults to a very aggressive setting of public, one-year, allowing stale, and immutable.
 				</li>
 				<li>Defined MIME types, with a <code>UTF-8</code> default, in shared <code>web-fragment.xml</code></li>
 				<li>
 					Changed <code>CountConcurrencyFilter</code> from a <code><![CDATA[&lt;filter&gt;]]></code>
 					to a <code><![CDATA[&lt;listener&gt;]]></code> named
-					<ao:a href="apidocs/com/semanticcms/core/servlet/CountConcurrencyListener.html">CountConcurrencyListener</ao:a>.
+					<ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/CountConcurrencyListener.html">CountConcurrencyListener</ao:a>.
 				</li>
 			</ul>
 		</changelog:release>
@@ -216,7 +222,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 			<ul>
 				<li>Minimum Java version changed from 1.6 to 1.7.</li>
 				<li>
-					<code><ao:a href="apidocs/com/semanticcms/core/servlet/PageRefResolver.html">PageRefResolver</ao:a>.getCurrentPageRef(…)</code>
+					<code><ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/PageRefResolver.html">PageRefResolver</ao:a>.getCurrentPageRef(…)</code>
 					now accepts an optional parameter to optionally return <code>null</code> on missing book instead of throwing
 					<code><ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/ServletException.html">ServletException</ao:a></code>.
 				</li>
