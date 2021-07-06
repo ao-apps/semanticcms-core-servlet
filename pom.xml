@@ -84,6 +84,15 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId><artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<ignoredDependencies>
+						<!-- No "module-info.java" in some release builds -->
+						<dependency>com.aoapps:ao-hodgepodge</dependency>
+					</ignoredDependencies>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.felix</groupId><artifactId>maven-bundle-plugin</artifactId>
 				<configuration>
 					<instructions>
@@ -106,12 +115,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 								<id>unpack.offlineLinks</id><phase>generate-sources</phase><goals><goal>unpack</goal></goals>
 								<configuration>
 									<artifactItems>
-										<!-- Javadoc-only -->
-										<artifactItem>
-											<groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId><classifier>javadoc</classifier>
-											<includes>element-list, package-list</includes>
-											<outputDirectory>${project.build.directory}/offlineLinks/com.aoapps/ao-hodgepodge</outputDirectory>
-										</artifactItem>
 										<!-- Direct -->
 										<artifactItem>
 											<groupId>com.aoapps</groupId><artifactId>ao-collections</artifactId><classifier>javadoc</classifier>
@@ -147,6 +150,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 											<groupId>com.aoapps</groupId><artifactId>ao-fluent-html-servlet</artifactId><classifier>javadoc</classifier>
 											<includes>element-list, package-list</includes>
 											<outputDirectory>${project.build.directory}/offlineLinks/com.aoapps/ao-fluent-html-servlet</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId><classifier>javadoc</classifier>
+											<includes>element-list, package-list</includes>
+											<outputDirectory>${project.build.directory}/offlineLinks/com.aoapps/ao-hodgepodge</outputDirectory>
 										</artifactItem>
 										<artifactItem>
 											<groupId>com.aoapps</groupId><artifactId>ao-io-buffer</artifactId><classifier>javadoc</classifier>
@@ -230,11 +238,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 						<groupId>org.apache.maven.plugins</groupId><artifactId>maven-javadoc-plugin</artifactId>
 						<configuration>
 							<offlineLinks>
-								<!-- Javadoc-only -->
-								<offlineLink>
-									<url>https://oss.aoapps.com/hodgepodge/apidocs/</url>
-									<location>${project.build.directory}/offlineLinks/com.aoapps/ao-hodgepodge</location>
-								</offlineLink>
 								<!-- Direct -->
 								<offlineLink>
 									<url>https://oss.aoapps.com/collections/apidocs/</url>
@@ -263,6 +266,10 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 								<offlineLink>
 									<url>https://oss.aoapps.com/fluent-html/servlet/apidocs/</url>
 									<location>${project.build.directory}/offlineLinks/com.aoapps/ao-fluent-html-servlet</location>
+								</offlineLink>
+								<offlineLink>
+									<url>https://oss.aoapps.com/hodgepodge/apidocs/</url>
+									<location>${project.build.directory}/offlineLinks/com.aoapps/ao-hodgepodge</location>
 								</offlineLink>
 								<offlineLink>
 									<url>https://oss.aoapps.com/io-buffer/apidocs/</url>
@@ -363,11 +370,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- Javadoc-only -->
-			<dependency>
-				<groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId><version>5.0.0${POST-SNAPSHOT}</version>
-				<exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions>
-			</dependency>
 			<!-- Direct -->
 			<dependency>
 				<groupId>com.aoapps</groupId><artifactId>ao-collections</artifactId><version>2.0.0${POST-SNAPSHOT}</version>
@@ -389,6 +391,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 			</dependency>
 			<dependency>
 				<groupId>com.aoapps</groupId><artifactId>ao-fluent-html-servlet</artifactId><version>0.5.0${POST-SNAPSHOT}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId><version>5.0.0${POST-SNAPSHOT}</version>
+				<!-- Javadoc-only -->
+				<exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.aoapps</groupId><artifactId>ao-io-buffer</artifactId><version>4.0.0${POST-SNAPSHOT}</version>
@@ -452,11 +459,6 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 	</dependencyManagement>
 
 	<dependencies>
-		<!-- Javadoc-only -->
-		<dependency>
-			<groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId>
-			<optional>true</optional>
-		</dependency>
 		<!-- Direct -->
 		<dependency>
 			<groupId>com.aoapps</groupId><artifactId>ao-collections</artifactId>
@@ -478,6 +480,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		</dependency>
 		<dependency>
 			<groupId>com.aoapps</groupId><artifactId>ao-fluent-html-servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId>
+			<!-- Javadoc-only -->
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.aoapps</groupId><artifactId>ao-io-buffer</artifactId>
