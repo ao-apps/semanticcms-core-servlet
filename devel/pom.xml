@@ -76,6 +76,11 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 		<url>https://github.com/aoindustries/semanticcms-core-servlet/issues</url>
 	</issueManagement>
 
+	<ciManagement>
+		<system>GitHub Actions</system>
+		<url>https://github.com/aoindustries/semanticcms-core-servlet/actions</url>
+	</ciManagement>
+
 	<repositories>
 		<!-- Repository required here, too, so can find parent -->
 		<repository>
