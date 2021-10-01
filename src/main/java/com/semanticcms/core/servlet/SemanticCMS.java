@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 import com.aoapps.lang.exception.WrappedException;
 import com.aoapps.lang.xml.XmlUtils;
 import com.aoapps.servlet.PropertiesUtils;
+import com.aoapps.servlet.attribute.ScopeEE;
 import com.aoapps.servlet.http.Dispatcher;
 import com.aoapps.web.resources.registry.Group;
 import com.aoapps.web.resources.registry.Style;
@@ -60,14 +61,14 @@ import org.xml.sax.SAXException;
 
 /**
  * The SemanticCMS application context.
- * 
+ *
  * TODO: Consider custom EL resolver for this variable: http://stackoverflow.com/questions/5016965/how-to-add-a-custom-variableresolver-in-pure-jsp
  */
 public class SemanticCMS {
 
 	// <editor-fold defaultstate="collapsed" desc="Singleton Instance (per application)">
 
-	@WebListener("Exposes the application context as an application-scope SemanticCMS instance named \"" + APPLICATION_ATTRIBUTE + "\".")
+	@WebListener("Exposes the application context as an application-scope SemanticCMS instance named \"" + APPLICATION_ATTRIBUTE_NAME + "\".")
 	public static class Initializer implements ServletContextListener {
 
 		private SemanticCMS instance;
@@ -83,27 +84,27 @@ public class SemanticCMS {
 				instance.destroy();
 				instance = null;
 			}
-			event.getServletContext().removeAttribute(APPLICATION_ATTRIBUTE);
+			APPLICATION_ATTRIBUTE.context(event.getServletContext()).remove();
 		}
 	}
 
-	public static final String APPLICATION_ATTRIBUTE = "semanticCMS";
+	private static final String APPLICATION_ATTRIBUTE_NAME = "semanticCMS";
+
+	public static final ScopeEE.Application.Attribute<SemanticCMS> APPLICATION_ATTRIBUTE =
+		ScopeEE.APPLICATION.attribute(APPLICATION_ATTRIBUTE_NAME);
 
 	/**
 	 * Gets the SemanticCMS instance, creating it if necessary.
 	 */
 	public static SemanticCMS getInstance(ServletContext servletContext) {
-		try {
-			SemanticCMS semanticCMS = (SemanticCMS)servletContext.getAttribute(APPLICATION_ATTRIBUTE);
-			if(semanticCMS == null) {
+		return APPLICATION_ATTRIBUTE.context(servletContext).computeIfAbsent(__ -> {
+			try {
 				// TODO: Support custom implementations via context-param?
-				semanticCMS = new SemanticCMS(servletContext);
-				servletContext.setAttribute(APPLICATION_ATTRIBUTE, semanticCMS);
+				return new SemanticCMS(servletContext);
+			} catch(IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
+				throw new WrappedException(e);
 			}
-			return semanticCMS;
-		} catch(IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
-			throw new WrappedException(e);
-		}
+		});
 	}
 
 	private final ServletContext servletContext;
@@ -644,7 +645,7 @@ public class SemanticCMS {
 	/**
 	 * Gets the CSS class to use in links to the given element.
 	 * Also looks for match on parent classes up to and including Element itself.
-	 * 
+	 *
 	 * @return  The CSS class or {@code null} when element is null or no class registered for it or any super class.
 	 *
 	 * @see  LinkCssClassResolver#getCssLinkClass(com.semanticcms.core.model.Element)

@@ -31,6 +31,7 @@ import com.aoapps.encoding.servlet.SerializationEE;
 import com.aoapps.html.any.AnyDocument;
 import com.aoapps.lang.NullArgumentException;
 import com.aoapps.lang.concurrent.ExecutionExceptions;
+import com.aoapps.servlet.attribute.ScopeEE;
 import com.aoapps.servlet.ServletUtil;
 import com.aoapps.servlet.http.Dispatcher;
 import com.aoapps.servlet.http.HttpServletUtil;
@@ -74,7 +75,8 @@ import javax.servlet.jsp.SkipPageException;
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class CapturePage {
 
-	private static final String REQUEST_ATTRIBUTE = CapturePage.class.getName();
+	private static final ScopeEE.Request.Attribute<CapturePage> REQUEST_ATTRIBUTE =
+		ScopeEE.REQUEST.attribute(CapturePage.class.getName());
 
 	private static final boolean CONCURRENT_TRAVERSALS_ENABLED = true;
 
@@ -85,7 +87,7 @@ public class CapturePage {
 	 * Gets the capture context or <code>null</code> if none occurring.
 	 */
 	public static CapturePage getCaptureContext(ServletRequest request) {
-		return (CapturePage)request.getAttribute(REQUEST_ATTRIBUTE);
+		return REQUEST_ATTRIBUTE.context(request).get();
 	}
 
 	/**
@@ -179,7 +181,7 @@ public class CapturePage {
 			// Set new capture context
 			CaptureLevel.setCaptureLevel(subRequest, level);
 			CapturePage captureContext = new CapturePage();
-			subRequest.setAttribute(REQUEST_ATTRIBUTE, captureContext);
+			REQUEST_ATTRIBUTE.context(subRequest).set(captureContext);
 			// Always capture as "GET" request
 			subRequest.setMethod(HttpServletUtil.METHOD_GET);
 			// Include the page resource, discarding any direct output
