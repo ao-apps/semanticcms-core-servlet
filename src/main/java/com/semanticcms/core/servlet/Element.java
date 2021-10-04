@@ -50,7 +50,7 @@ import org.apache.commons.lang3.NotImplementedException;
 /**
  * The base for capturing elements.
  */
-abstract public class Element<E extends com.semanticcms.core.model.Element> implements ElementWriter {
+public abstract class Element<E extends com.semanticcms.core.model.Element> implements ElementWriter {
 
 	protected final ServletContext servletContext;
 	protected final HttpServletRequest request;
