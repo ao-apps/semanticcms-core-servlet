@@ -47,7 +47,7 @@ import org.joda.time.ReadableDateTime;
 /**
  * Utilities for working with pages.
  */
-final public class PageUtils {
+public final class PageUtils {
 
 	public static boolean hasChild(Page page) {
 		for(ChildRef childRef : page.getChildRefs()) {

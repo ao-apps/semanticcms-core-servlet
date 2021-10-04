@@ -61,7 +61,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-final public class NavigationTreeImpl {
+public final class NavigationTreeImpl {
 
 	public static <T extends Node> List<T> filterNodes(Collection<T> children, Set<T> nodesToInclude) {
 		int size = children.size();

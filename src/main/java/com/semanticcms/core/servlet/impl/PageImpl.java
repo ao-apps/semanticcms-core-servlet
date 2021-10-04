@@ -60,7 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 import org.joda.time.ReadableDateTime;
 
-final public class PageImpl {
+public final class PageImpl {
 
 	/**
 	 * @param  <Ex>  An arbitrary exception type that may be thrown

@@ -55,7 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
-final public class LinkImpl {
+public final class LinkImpl {
 
 	/**
 	 * @param  <Ex>  An arbitrary exception type that may be thrown

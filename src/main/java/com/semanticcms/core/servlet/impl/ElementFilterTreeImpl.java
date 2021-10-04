@@ -49,7 +49,7 @@ import javax.servlet.jsp.SkipPageException;
 /**
  * Builds a tree, filtering for a specific element type.
  */
-final public class ElementFilterTreeImpl {
+public final class ElementFilterTreeImpl {
 
 	/**
 	 * A filter to select elements by arbitrary conditions.

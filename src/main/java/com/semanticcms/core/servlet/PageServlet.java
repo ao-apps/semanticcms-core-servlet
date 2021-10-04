@@ -41,7 +41,7 @@ import javax.servlet.jsp.SkipPageException;
  * @see  com.semanticcms.core.model.Page
  * @see  PageContext
  */
-abstract public class PageServlet extends HttpServlet {
+public abstract class PageServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
@@ -50,7 +50,7 @@ abstract public class PageServlet extends HttpServlet {
 	/**
 	 * @see  com.semanticcms.core.model.Page#getTitle()
 	 */
-	abstract public String getTitle();
+	public abstract String getTitle();
 
 	/**
 	 * @see  com.semanticcms.core.model.Page#getShortTitle()
@@ -113,7 +113,7 @@ abstract public class PageServlet extends HttpServlet {
 	}
 
 	@Override
-	final protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(req, resp, this::doGet);
 	}
 
@@ -128,7 +128,7 @@ abstract public class PageServlet extends HttpServlet {
 	}
 
 	@Override
-	final protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected final void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(req, resp, this::doPost);
 	}
 
@@ -143,7 +143,7 @@ abstract public class PageServlet extends HttpServlet {
 	}
 
 	@Override
-	final protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected final void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(req, resp, this::doPut);
 	}
 
@@ -158,7 +158,7 @@ abstract public class PageServlet extends HttpServlet {
 	}
 
 	@Override
-	final protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected final void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(req, resp, this::doDelete);
 	}
 
@@ -173,7 +173,7 @@ abstract public class PageServlet extends HttpServlet {
 	}
 
 	@Override
-	final protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected final void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		callInPage(req, resp, this::doOptions);
 	}
 
