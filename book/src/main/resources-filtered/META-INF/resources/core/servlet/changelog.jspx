@@ -448,7 +448,7 @@ along with semanticcms-core-servlet.  If not, see <http://www.gnu.org/licenses /
 				<li>May now exclude robots from specific views.</li>
 				<li>New tree view where filters for a given element type.</li>
 				<li>Now passing arguments through includes.</li>
-				<li><![CDATA[Passing args as Map&lt;String,?&gt; instead of forcing Map&lt;String,Object&gt;]]></li>
+				<li>Passing args as <code><![CDATA[Map&lt;String, ?&gt;]]></code> instead of forcing <code><![CDATA[Map&lt;String, Object&gt;]]></code></li>
 				<li>Pulled files out of core and made files be elements.</li>
 				<li>May now filter elements by arbitrary conditions.</li>
 				<li>Using auto temp file wrapper in all places.</li>
