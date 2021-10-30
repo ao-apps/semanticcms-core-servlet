@@ -324,6 +324,8 @@ public class CapturePage {
 				try {
 					notCachedResults = SemanticCMS.getInstance(servletContext).getExecutors().getPerProcessor().callAll(tasks);
 				} catch(InterruptedException e) {
+					// Restore the interrupted status
+					Thread.currentThread().interrupt();
 					throw new ServletException(e);
 				} catch(ExecutionException e) {
 					// Maintain expected exception types while not losing stack trace
@@ -749,6 +751,8 @@ public class CapturePage {
 			// Traversal over, not found
 			return null;
 		} catch(InterruptedException e) {
+			// Restore the interrupted status
+			Thread.currentThread().interrupt();
 			throw new ServletException(e);
 		} catch(ExecutionException e) {
 			// Maintain expected exception types while not losing stack trace
