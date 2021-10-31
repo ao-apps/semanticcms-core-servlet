@@ -72,16 +72,28 @@ public final class PageContext {
 			if(newRequest != oldRequest) request.set(newRequest);
 			if(newResponse != oldResponse) {
 				response.set(newResponse);
-				out.set(null);
+				out.remove();
 			} else {
 				newOut = oldOut;
 			}
 			target.run();
 		} finally {
-			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
-			if(newRequest != oldRequest) request.set(oldRequest);
-			if(newResponse != oldResponse) response.set(oldResponse);
-			if(newOut != oldOut) out.set(oldOut);
+			if(newServletContext != oldServletContext) {
+				if(oldServletContext == null) servletContext.remove();
+				else servletContext.set(oldServletContext);
+			}
+			if(newRequest != oldRequest) {
+				if(oldRequest == null) request.remove();
+				else request.set(oldRequest);
+			}
+			if(newResponse != oldResponse) {
+				if(oldResponse == null) response.remove();
+				else response.set(oldResponse);
+			}
+			if(newOut != oldOut) {
+				if(oldOut == null) out.remove();
+				else out.set(oldOut);
+			}
 		}
 	}
 
@@ -102,16 +114,28 @@ public final class PageContext {
 			if(newRequest != oldRequest) request.set(newRequest);
 			if(newResponse != oldResponse) {
 				response.set(newResponse);
-				out.set(null);
+				out.remove();
 			} else {
 				newOut = oldOut;
 			}
 			return target.call();
 		} finally {
-			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
-			if(newRequest != oldRequest) request.set(oldRequest);
-			if(newResponse != oldResponse) response.set(oldResponse);
-			if(newOut != oldOut) out.set(oldOut);
+			if(newServletContext != oldServletContext) {
+				if(oldServletContext == null) servletContext.remove();
+				else servletContext.set(oldServletContext);
+			}
+			if(newRequest != oldRequest) {
+				if(oldRequest == null) request.remove();
+				else request.set(oldRequest);
+			}
+			if(newResponse != oldResponse) {
+				if(oldResponse == null) response.remove();
+				else response.set(oldResponse);
+			}
+			if(newOut != oldOut) {
+				if(oldOut == null) out.remove();
+				else out.set(oldOut);
+			}
 		}
 	}
 
@@ -141,16 +165,28 @@ public final class PageContext {
 			if(newRequest != oldRequest) request.set(newRequest);
 			if(newResponse != oldResponse) {
 				response.set(newResponse);
-				out.set(null);
+				out.remove();
 			} else {
 				newOut = oldOut;
 			}
 			target.run();
 		} finally {
-			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
-			if(newRequest != oldRequest) request.set(oldRequest);
-			if(newResponse != oldResponse) response.set(oldResponse);
-			if(newOut != oldOut) out.set(oldOut);
+			if(newServletContext != oldServletContext) {
+				if(oldServletContext == null) servletContext.remove();
+				else servletContext.set(oldServletContext);
+			}
+			if(newRequest != oldRequest) {
+				if(oldRequest == null) request.remove();
+				else request.set(oldRequest);
+			}
+			if(newResponse != oldResponse) {
+				if(oldResponse == null) response.remove();
+				else response.set(oldResponse);
+			}
+			if(newOut != oldOut) {
+				if(oldOut == null) out.remove();
+				else out.set(oldOut);
+			}
 		}
 	}
 
@@ -181,16 +217,28 @@ public final class PageContext {
 			if(newRequest != oldRequest) request.set(newRequest);
 			if(newResponse != oldResponse) {
 				response.set(newResponse);
-				out.set(null);
+				out.remove();
 			} else {
 				newOut = oldOut;
 			}
 			return target.call();
 		} finally {
-			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
-			if(newRequest != oldRequest) request.set(oldRequest);
-			if(newResponse != oldResponse) response.set(oldResponse);
-			if(newOut != oldOut) out.set(oldOut);
+			if(newServletContext != oldServletContext) {
+				if(oldServletContext == null) servletContext.remove();
+				else servletContext.set(oldServletContext);
+			}
+			if(newRequest != oldRequest) {
+				if(oldRequest == null) request.remove();
+				else request.set(oldRequest);
+			}
+			if(newResponse != oldResponse) {
+				if(oldResponse == null) response.remove();
+				else response.set(oldResponse);
+			}
+			if(newOut != oldOut) {
+				if(oldOut == null) out.remove();
+				else out.set(oldOut);
+			}
 		}
 	}
 
@@ -216,16 +264,28 @@ public final class PageContext {
 			if(newRequest != oldRequest) request.set(newRequest);
 			if(newResponse != oldResponse) {
 				response.set(newResponse);
-				out.set(null);
+				out.remove();
 			} else {
 				newOut = oldOut;
 			}
 			target.run();
 		} finally {
-			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
-			if(newRequest != oldRequest) request.set(oldRequest);
-			if(newResponse != oldResponse) response.set(oldResponse);
-			if(newOut != oldOut) out.set(oldOut);
+			if(newServletContext != oldServletContext) {
+				if(oldServletContext == null) servletContext.remove();
+				else servletContext.set(oldServletContext);
+			}
+			if(newRequest != oldRequest) {
+				if(oldRequest == null) request.remove();
+				else request.set(oldRequest);
+			}
+			if(newResponse != oldResponse) {
+				if(oldResponse == null) response.remove();
+				else response.set(oldResponse);
+			}
+			if(newOut != oldOut) {
+				if(oldOut == null) out.remove();
+				else out.set(oldOut);
+			}
 		}
 	}
 
@@ -254,25 +314,37 @@ public final class PageContext {
 			if(newRequest != oldRequest) request.set(newRequest);
 			if(newResponse != oldResponse) {
 				response.set(newResponse);
-				out.set(null);
+				out.remove();
 			} else {
 				newOut = oldOut;
 			}
 			return target.call();
 		} finally {
-			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
-			if(newRequest != oldRequest) request.set(oldRequest);
-			if(newResponse != oldResponse) response.set(oldResponse);
-			if(newOut != oldOut) out.set(oldOut);
+			if(newServletContext != oldServletContext) {
+				if(oldServletContext == null) servletContext.remove();
+				else servletContext.set(oldServletContext);
+			}
+			if(newRequest != oldRequest) {
+				if(oldRequest == null) request.remove();
+				else request.set(oldRequest);
+			}
+			if(newResponse != oldResponse) {
+				if(oldResponse == null) response.remove();
+				else response.set(oldResponse);
+			}
+			if(newOut != oldOut) {
+				if(oldOut == null) out.remove();
+				else out.set(oldOut);
+			}
 		}
 	}
 
 	@FunctionalInterface
-	public static interface PageContextRunnableSkipEE<E1 extends Throwable, E2 extends Throwable> {
-		void run() throws E1, E2, ServletException, IOException, SkipPageException;
+	public static interface PageContextRunnableSkipEE<Ex1 extends Throwable, Ex2 extends Throwable> {
+		void run() throws Ex1, Ex2, ServletException, IOException, SkipPageException;
 	}
 
-	public static <E1 extends Throwable, E2 extends Throwable> void newPageContextSkipEE(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextRunnableSkipEE<E1, E2> target) throws E1, E2, ServletException, IOException, SkipPageException {
+	public static <Ex1 extends Throwable, Ex2 extends Throwable> void newPageContextSkipEE(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextRunnableSkipEE<Ex1, Ex2> target) throws Ex1, Ex2, ServletException, IOException, SkipPageException {
 		final ServletContext oldServletContext = servletContext.get();
 		final HttpServletRequest oldRequest = request.get();
 		final HttpServletResponse oldResponse = response.get();
@@ -283,26 +355,38 @@ public final class PageContext {
 			if(newRequest != oldRequest) request.set(newRequest);
 			if(newResponse != oldResponse) {
 				response.set(newResponse);
-				out.set(null);
+				out.remove();
 			} else {
 				newOut = oldOut;
 			}
 			target.run();
 		} finally {
-			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
-			if(newRequest != oldRequest) request.set(oldRequest);
-			if(newResponse != oldResponse) response.set(oldResponse);
-			if(newOut != oldOut) out.set(oldOut);
+			if(newServletContext != oldServletContext) {
+				if(oldServletContext == null) servletContext.remove();
+				else servletContext.set(oldServletContext);
+			}
+			if(newRequest != oldRequest) {
+				if(oldRequest == null) request.remove();
+				else request.set(oldRequest);
+			}
+			if(newResponse != oldResponse) {
+				if(oldResponse == null) response.remove();
+				else response.set(oldResponse);
+			}
+			if(newOut != oldOut) {
+				if(oldOut == null) out.remove();
+				else out.set(oldOut);
+			}
 		}
 	}
 
 	@FunctionalInterface
-	public static interface PageContextCallableSkipEE<V, E1 extends Exception, E2 extends Exception> extends Callable<V> {
+	public static interface PageContextCallableSkipEE<V, Ex1 extends Exception, Ex2 extends Exception> extends Callable<V> {
 		@Override
-		V call() throws E1, E2, ServletException, IOException, SkipPageException;
+		V call() throws Ex1, Ex2, ServletException, IOException, SkipPageException;
 	}
 
-	public static <V, E1 extends Exception, E2 extends Exception> V newPageContextSkipEE(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallableSkipEE<V, E1, E2> target) throws E1, E2, ServletException, IOException, SkipPageException {
+	public static <V, Ex1 extends Exception, Ex2 extends Exception> V newPageContextSkipEE(ServletContext newServletContext, HttpServletRequest newRequest, HttpServletResponse newResponse, PageContextCallableSkipEE<V, Ex1, Ex2> target) throws Ex1, Ex2, ServletException, IOException, SkipPageException {
 		final ServletContext oldServletContext = servletContext.get();
 		final HttpServletRequest oldRequest = request.get();
 		final HttpServletResponse oldResponse = response.get();
@@ -313,16 +397,28 @@ public final class PageContext {
 			if(newRequest != oldRequest) request.set(newRequest);
 			if(newResponse != oldResponse) {
 				response.set(newResponse);
-				out.set(null);
+				out.remove();
 			} else {
 				newOut = oldOut;
 			}
 			return target.call();
 		} finally {
-			if(newServletContext != oldServletContext) servletContext.set(oldServletContext);
-			if(newRequest != oldRequest) request.set(oldRequest);
-			if(newResponse != oldResponse) response.set(oldResponse);
-			if(newOut != oldOut) out.set(oldOut);
+			if(newServletContext != oldServletContext) {
+				if(oldServletContext == null) servletContext.remove();
+				else servletContext.set(oldServletContext);
+			}
+			if(newRequest != oldRequest) {
+				if(oldRequest == null) request.remove();
+				else request.set(oldRequest);
+			}
+			if(newResponse != oldResponse) {
+				if(oldResponse == null) response.remove();
+				else response.set(oldResponse);
+			}
+			if(newOut != oldOut) {
+				if(oldOut == null) out.remove();
+				else out.set(oldOut);
+			}
 		}
 	}
 
