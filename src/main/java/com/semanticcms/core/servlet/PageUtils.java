@@ -72,7 +72,7 @@ public final class PageUtils {
 				response,
 				page,
 				CaptureLevel.META,
-				(Page page1) -> {
+				page1 -> {
 					for(Element element : page1.getElements()) {
 						if(elementType.isAssignableFrom(element.getClass())) {
 							return true;
@@ -82,7 +82,7 @@ public final class PageUtils {
 				},
 				Page::getChildRefs,
 				// Child not in missing book
-				(PageRef childPage) -> childPage.getBook() != null
+				childPage -> childPage.getBook() != null
 			) != null;
 		} else {
 			for(Element element : page.getElements()) {

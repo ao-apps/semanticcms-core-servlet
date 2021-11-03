@@ -31,8 +31,8 @@ import com.aoapps.encoding.servlet.SerializationEE;
 import com.aoapps.html.any.AnyDocument;
 import com.aoapps.lang.NullArgumentException;
 import com.aoapps.lang.concurrent.ExecutionExceptions;
-import com.aoapps.servlet.attribute.ScopeEE;
 import com.aoapps.servlet.ServletUtil;
+import com.aoapps.servlet.attribute.ScopeEE;
 import com.aoapps.servlet.http.Dispatcher;
 import com.aoapps.servlet.http.HttpServletUtil;
 import com.aoapps.servlet.http.NullHttpServletResponseWrapper;
@@ -972,7 +972,7 @@ public class CapturePage {
 			response,
 			page,
 			level,
-			new PageHandler<T>() {
+			new PageHandler<>() {
 				// All of the edges visited or already set as a next
 				final Set<PageRef> visited = new HashSet<>();
 				// The already resolved parents, used for postHandler

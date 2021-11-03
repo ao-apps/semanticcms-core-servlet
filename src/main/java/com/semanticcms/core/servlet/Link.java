@@ -234,22 +234,18 @@ public class Link {
 			body == null
 				? null
 				// Lamdba version not working with generic exceptions:
-				// discard -> body.doBody(request, discard ? new NullHttpServletResponseWrapper(response) : response)
-				: new LinkImpl.LinkImplBody<ServletException>() {
-					@Override
-					public void doBody(boolean discard) throws ServletException, IOException, SkipPageException {
-						if(discard) {
-							final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
-							// Set PageContext
-							PageContext.newPageContextSkip(
-								servletContext,
-								request,
-								newResponse,
-								() -> body.doBody(request, newResponse)
-							);
-						} else {
-							body.doBody(request, response);
-						}
+				: discard -> {
+					if(discard) {
+						final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+						// Set PageContext
+						PageContext.newPageContextSkip(
+							servletContext,
+							request,
+							newResponse,
+							() -> body.doBody(request, newResponse)
+						);
+					} else {
+						body.doBody(request, response);
 					}
 				}
 		);

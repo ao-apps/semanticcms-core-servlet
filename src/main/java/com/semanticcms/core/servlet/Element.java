@@ -150,7 +150,7 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
 	}
 
 	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Element.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Element.Body)
 	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
 		invoke((Body<? super E>)null);
@@ -162,19 +162,11 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
 	}
 
 	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Element.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Element.Body)
 	 */
 	public void invoke(final PageContextBody<? super E> body) throws ServletException, IOException, SkipPageException {
 		invoke(
-			body == null
-				? null
-				// Java 1.8: (req, resp, e) -> body.doBody(e)
-				: new Body<E>() {
-					@Override
-					public void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException {
-						body.doBody(element);
-					}
-				}
+			(body == null) ? null : (req, resp, e) -> body.doBody(e)
 		);
 	}
 
@@ -184,19 +176,11 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
 	}
 
 	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Element.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Element.Body)
 	 */
 	public void invoke(final PageContextNoElementBody body) throws ServletException, IOException, SkipPageException {
 		invoke(
-			body == null
-				? null
-				// Java 1.8: : (req, resp, e) -> body.doBody()
-				: new Body<E>() {
-					@Override
-					public void doBody(HttpServletRequest req, HttpServletResponse resp, E element) throws ServletException, IOException, SkipPageException {
-						body.doBody();
-					}
-				}
+			(body == null) ? null : (req, resp, e) -> body.doBody()
 		);
 	}
 

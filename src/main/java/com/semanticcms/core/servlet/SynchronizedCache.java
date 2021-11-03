@@ -24,12 +24,10 @@ package com.semanticcms.core.servlet;
 
 import com.aoapps.collections.AoCollections;
 import com.semanticcms.core.model.Page;
-import com.semanticcms.core.model.PageRef;
 import static com.semanticcms.core.servlet.Cache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.ServletException;
 
 /**
@@ -39,10 +37,10 @@ class SynchronizedCache extends MapCache {
 
 	SynchronizedCache() {
 		super(
-			new HashMap<CaptureKey, Page>(),
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef, Set<PageRef>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef, Set<PageRef>>() : null,
-			new HashMap<String, Object>()
+			new HashMap<>(),
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+			new HashMap<>()
 		);
 	}
 

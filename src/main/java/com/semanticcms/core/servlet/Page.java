@@ -25,7 +25,6 @@ package com.semanticcms.core.servlet;
 import com.aoapps.encoding.Doctype;
 import com.aoapps.encoding.Serialization;
 import com.aoapps.encoding.taglib.EncodingBufferedTag;
-import com.aoapps.io.buffer.BufferResult;
 import com.aoapps.io.buffer.BufferWriter;
 import com.aoapps.io.buffer.EmptyResult;
 import com.aoapps.lang.LocalizedIllegalStateException;
@@ -252,56 +251,51 @@ public class Page {
 			properties,
 			body == null
 				? null
-				// Lamdba version not working with generic exceptions:
-				// discard -> body.doBody(request, discard ? new NullHttpServletResponseWrapper(response) : response)
-				: new PageImpl.PageImplBody<ServletException>() {
-					@Override
-					public BufferResult doBody(boolean discard, final com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-						if(discard) {
-							final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
-							// Set PageContext
-							PageContext.newPageContextSkip(
-								servletContext,
-								request,
-								newResponse,
-								() -> body.doBody(request, newResponse, page)
-							);
-							return EmptyResult.getInstance();
-						} else {
-							BufferWriter capturedOut = EncodingBufferedTag.newBufferWriter(request);
-							try {
-								try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
-									final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
-										@Override
-										public PrintWriter getWriter() throws IOException {
-											return capturedPW;
-										}
-										@Override
-										public ServletOutputStream getOutputStream() {
-											throw new NotImplementedException("getOutputStream not expected");
-										}
-									};
-									// Set PageContext
-									PageContext.newPageContextSkip(
-										servletContext,
-										request,
-										newResponse,
-										() -> body.doBody(request, newResponse, page)
-									);
-									if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
-								}
-							} finally {
-								capturedOut.close();
+				: (discard, page) -> {
+					if(discard) {
+						final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+						// Set PageContext
+						PageContext.newPageContextSkip(
+							servletContext,
+							request,
+							newResponse,
+							() -> body.doBody(request, newResponse, page)
+						);
+						return EmptyResult.getInstance();
+					} else {
+						BufferWriter capturedOut = EncodingBufferedTag.newBufferWriter(request);
+						try {
+							try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
+								final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
+									@Override
+									public PrintWriter getWriter() throws IOException {
+										return capturedPW;
+									}
+									@Override
+									public ServletOutputStream getOutputStream() {
+										throw new NotImplementedException("getOutputStream not expected");
+									}
+								};
+								// Set PageContext
+								PageContext.newPageContextSkip(
+									servletContext,
+									request,
+									newResponse,
+									() -> body.doBody(request, newResponse, page)
+								);
+								if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
 							}
-							return capturedOut.getResult();
+						} finally {
+							capturedOut.close();
 						}
+						return capturedOut.getResult();
 					}
 				}
 		);
 	}
 
 	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
 	 */
 	public void invoke() throws ServletException, IOException, SkipPageException {
 		invoke((Body)null);
@@ -313,7 +307,7 @@ public class Page {
 	}
 
 	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
 	 */
 	public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
 		invoke(
@@ -335,7 +329,7 @@ public class Page {
 	}
 
 	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body) 
+	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
 	 */
 	public void invoke(final PageContextNoPageBody body) throws ServletException, IOException, SkipPageException {
 		invoke(

@@ -23,10 +23,8 @@
 package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Page;
-import com.semanticcms.core.model.PageRef;
 import static com.semanticcms.core.servlet.Cache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.servlet.ServletException;
@@ -42,10 +40,10 @@ class ConcurrentCache extends MapCache {
 
 	ConcurrentCache() {
 		super(
-			new ConcurrentHashMap<CaptureKey, Page>(),
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef, Set<PageRef>>() : null,
-			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<PageRef, Set<PageRef>>() : null,
-			new ConcurrentHashMap<String, Object>()
+			new ConcurrentHashMap<>(),
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+			VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+			new ConcurrentHashMap<>()
 		);
 		concurrentAttributes = (ConcurrentMap<String, Object>)attributes;
 	}

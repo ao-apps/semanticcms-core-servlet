@@ -58,7 +58,7 @@ public final class PageDags {
 			},
 			Page::getChildRefs,
 			// Child not in missing book
-			(PageRef childPage) -> childPage.getBook() != null,
+			childPage -> childPage.getBook() != null,
 			null
 		);
 		return Collections.unmodifiableList(list);
