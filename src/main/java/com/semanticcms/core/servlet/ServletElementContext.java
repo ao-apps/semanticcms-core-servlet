@@ -67,24 +67,22 @@ public class ServletElementContext implements ElementContext {
 			null,
 			null,
 			null,
-			() -> {
-				Dispatcher.include(
-					servletContext,
-					resource,
-					request,
-					new HttpServletResponseWrapper(response) {
-						@Override
-						public PrintWriter getWriter() {
-							return pw;
-						}
-						@Override
-						public ServletOutputStream getOutputStream() {
-							throw new NotImplementedException("getOutputStream not expected");
-						}
-					},
-					args
-				);
-			}
+			() -> Dispatcher.include(
+				servletContext,
+				resource,
+				request,
+				new HttpServletResponseWrapper(response) {
+					@Override
+					public PrintWriter getWriter() {
+						return pw;
+					}
+					@Override
+					public ServletOutputStream getOutputStream() {
+						throw new NotImplementedException("getOutputStream not expected");
+					}
+				},
+				args
+			)
 		);
 		if(pw.checkError()) throw new IOException("Error on include PrintWriter");
 	}
