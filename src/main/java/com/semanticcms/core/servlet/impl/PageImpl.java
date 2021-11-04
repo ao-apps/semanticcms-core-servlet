@@ -349,16 +349,16 @@ public final class PageImpl {
 							View view;
 							{
 								String viewName = request.getParameter(SemanticCMS.VIEW_PARAM);
-								Map<String, View> viewsByName = semanticCMS.getViewsByName();
+								Map<String, View> views = semanticCMS.getViewsByName();
 								if(viewName == null) {
 									view = null;
 								} else {
 									if(SemanticCMS.DEFAULT_VIEW_NAME.equals(viewName)) throw new ServletException(SemanticCMS.VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
-									view = viewsByName.get(viewName);
+									view = views.get(viewName);
 								}
 								if(view == null) {
 									// Find default
-									view = viewsByName.get(SemanticCMS.DEFAULT_VIEW_NAME);
+									view = views.get(SemanticCMS.DEFAULT_VIEW_NAME);
 									if(view == null) throw new ServletException("Default view not found: " + SemanticCMS.DEFAULT_VIEW_NAME);
 								}
 							}
