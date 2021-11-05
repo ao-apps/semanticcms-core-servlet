@@ -47,7 +47,10 @@ import org.joda.time.ReadableDateTime;
 /**
  * Utilities for working with pages.
  */
-public final class PageUtils {
+public abstract class PageUtils {
+
+	/** Make no instances. */
+	private PageUtils() {throw new AssertionError();}
 
 	public static boolean hasChild(Page page) {
 		for(ChildRef childRef : page.getChildRefs()) {
@@ -255,11 +258,5 @@ public final class PageUtils {
 			return null;
 		}
 		return new DateTime(o);
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private PageUtils() {
 	}
 }

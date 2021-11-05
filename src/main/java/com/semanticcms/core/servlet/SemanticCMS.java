@@ -125,6 +125,7 @@ public class SemanticCMS {
 	 * Called when the context is shutting down.
 	 */
 	protected void destroy() {
+		// Do nothing
 	}
 	// </editor-fold>
 
@@ -296,7 +297,7 @@ public class SemanticCMS {
 	 */
 	public static final String DEFAULT_VIEW_NAME = "content";
 
-	private static class ViewsLock {}
+	private static class ViewsLock {/* Empty lock class to help heap profile */}
 	private final ViewsLock viewsLock = new ViewsLock();
 
 	/**

@@ -49,7 +49,10 @@ import javax.servlet.jsp.SkipPageException;
 /**
  * Builds a tree, filtering for a specific element type.
  */
-public final class ElementFilterTreeImpl {
+public abstract class ElementFilterTreeImpl {
+
+	/** Make no instances. */
+	private ElementFilterTreeImpl() {throw new AssertionError();}
 
 	/**
 	 * A filter to select elements by arbitrary conditions.
@@ -76,7 +79,7 @@ public final class ElementFilterTreeImpl {
 
 		@Override
 		public boolean matches(Element e) {
-			return !e.isHidden() && elementType.isInstance(e);			
+			return !e.isHidden() && elementType.isInstance(e);
 		}
 	}
 
@@ -278,11 +281,5 @@ public final class ElementFilterTreeImpl {
 			root,
 			includeElements
 		);
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private ElementFilterTreeImpl() {
 	}
 }

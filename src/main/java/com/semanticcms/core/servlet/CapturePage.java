@@ -73,7 +73,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
-public class CapturePage {
+public final class CapturePage {
 
 	private static final ScopeEE.Request.Attribute<CapturePage> REQUEST_ATTRIBUTE =
 		ScopeEE.REQUEST.attribute(CapturePage.class.getName());
@@ -1109,6 +1109,7 @@ public class CapturePage {
 	}
 
 	private CapturePage() {
+		// Do nothing
 	}
 
 	private Page capturedPage;

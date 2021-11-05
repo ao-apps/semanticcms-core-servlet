@@ -55,7 +55,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 
-public final class LinkImpl {
+public abstract class LinkImpl {
+
+	/** Make no instances. */
+	private LinkImpl() {throw new AssertionError();}
 
 	/**
 	 * @param  <Ex>  An arbitrary exception type that may be thrown
@@ -540,11 +543,5 @@ public final class LinkImpl {
 			// Invoke body for any meta data, but discard any output
 			if(body != null) body.doBody(true);
 		}
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private LinkImpl() {
 	}
 }

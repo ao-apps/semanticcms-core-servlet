@@ -37,7 +37,10 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Copyright processing utilities.
  */
-public class CopyrightUtils {
+public abstract class CopyrightUtils {
+
+	/** Make no instances. */
+	private CopyrightUtils() {throw new AssertionError();}
 
 	/**
 	 * <p>
@@ -176,11 +179,5 @@ public class CopyrightUtils {
 		// Store in finished
 		finished.put(pageRef, pageCopyright);
 		return pageCopyright;
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private CopyrightUtils() {
 	}
 }

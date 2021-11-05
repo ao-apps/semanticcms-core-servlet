@@ -36,7 +36,10 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Utilities for working with directed acyclic graphs (DAGs) of pages.
  */
-public final class PageDags {
+public abstract class PageDags {
+
+	/** Make no instances. */
+	private PageDags() {throw new AssertionError();}
 
 	public static List<Page> convertPageDagToList(
 		ServletContext servletContext,
@@ -62,11 +65,5 @@ public final class PageDags {
 			null
 		);
 		return Collections.unmodifiableList(list);
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private PageDags() {
 	}
 }
