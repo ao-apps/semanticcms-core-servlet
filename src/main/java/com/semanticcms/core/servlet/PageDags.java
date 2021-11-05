@@ -23,7 +23,6 @@
 package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Page;
-import com.semanticcms.core.model.PageRef;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;

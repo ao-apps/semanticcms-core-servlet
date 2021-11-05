@@ -24,7 +24,6 @@ package com.semanticcms.core.servlet;
 
 import com.aoapps.collections.AoCollections;
 import com.semanticcms.core.model.Page;
-import static com.semanticcms.core.servlet.Cache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletException;

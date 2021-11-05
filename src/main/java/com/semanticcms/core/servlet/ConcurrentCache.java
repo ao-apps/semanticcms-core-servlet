@@ -23,7 +23,6 @@
 package com.semanticcms.core.servlet;
 
 import com.semanticcms.core.model.Page;
-import static com.semanticcms.core.servlet.Cache.VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
