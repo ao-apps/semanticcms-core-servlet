@@ -423,7 +423,7 @@ public class SemanticCMS {
 	 *
 	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	private final Map<String, Boolean> cssLinks = new LinkedHashMap<>();
 
 	/**
@@ -431,7 +431,7 @@ public class SemanticCMS {
 	 *
 	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public Set<String> getCssLinks() {
 		synchronized(cssLinks) {
 			// Not returning a copy since CSS links are normally only registered on app start-up.
@@ -458,7 +458,7 @@ public class SemanticCMS {
 	 *
 	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public void addCssLink(String cssLink) throws IllegalStateException {
 		synchronized(cssLinks) {
 			if(cssLinks.containsKey(cssLink)) throw new IllegalStateException("CSS link already registered: " + cssLink);
@@ -492,7 +492,7 @@ public class SemanticCMS {
 	 *
 	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	private final Map<String, Boolean> printCssLinks = new LinkedHashMap<>();
 
 	/**
@@ -500,7 +500,7 @@ public class SemanticCMS {
 	 *
 	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public Set<String> getPrintCssLinks() {
 		synchronized(printCssLinks) {
 			// Not returning a copy since CSS links are normally only registered on app start-up.
@@ -527,7 +527,7 @@ public class SemanticCMS {
 	 *
 	 * @deprecated  Please use {@link RegistryEE} directly.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public void addPrintCssLink(String printCssLink) throws IllegalStateException {
 		synchronized(printCssLinks) {
 			if(printCssLinks.containsKey(printCssLink)) throw new IllegalStateException("Print CSS link already registered: " + printCssLink);
