@@ -55,7 +55,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
 import org.joda.time.ReadableDateTime;
 
-public final class PageImpl {
+public abstract class PageImpl {
+
+	/** Make no instances. */
+	private PageImpl() {throw new AssertionError();}
 
 	/**
 	 * @param  <Ex>  An arbitrary exception type that may be thrown
@@ -314,11 +317,5 @@ public final class PageImpl {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Make no instances.
-	 */
-	private PageImpl() {
 	}
 }
