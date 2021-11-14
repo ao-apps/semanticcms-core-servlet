@@ -88,9 +88,15 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
 	</issueManagement>
 
 	<ciManagement>
+		<system>Jenkins</system>
+		<url>https://jenkins.aoindustries.com/job/ao/job/semanticcms-1.x/job/core/job/servlet/</url>
+	</ciManagement>
+	<!-- Only one allowed in POM:
+	<ciManagement>
 		<system>GitHub Actions</system>
 		<url>https://github.com/ao-apps/semanticcms-core-servlet/actions</url>
 	</ciManagement>
+	-->
 
 	<repositories>
 		<!-- Repository required here, too, so can find parent -->
@@ -242,9 +248,9 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
 											<includes>element-list, package-list</includes>
 											<outputDirectory>${project.build.directory}/offlineLinks/org.apache.commons/commons-lang3</outputDirectory>
 										</artifactItem>
-										<!-- ao-javadoc-offline: <groupId>javax.el</groupId><artifactId>javax.el-api</artifactId> -->
-										<!-- ao-javadoc-offline: <groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId> -->
-										<!-- ao-javadoc-offline: <groupId>javax.servlet.jsp</groupId><artifactId>javax.servlet.jsp-api</artifactId> -->
+										<!-- ao-javadoc-offline: <groupId>javax.el</groupId><artifactId>javax.el-api</artifactId><classifier>javadoc</classifier> -->
+										<!-- ao-javadoc-offline: <groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId><classifier>javadoc</classifier> -->
+										<!-- ao-javadoc-offline: <groupId>javax.servlet.jsp</groupId><artifactId>javax.servlet.jsp-api</artifactId><classifier>javadoc</classifier> -->
 										<artifactItem>
 											<groupId>joda-time</groupId><artifactId>joda-time</artifactId><classifier>javadoc</classifier>
 											<includes>element-list, package-list</includes>
@@ -345,9 +351,9 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
 									<url>https://javadoc.io/doc/org.apache.commons/commons-lang3/${commons-lang3.version}/</url>
 									<location>${project.build.directory}/offlineLinks/org.apache.commons/commons-lang3</location>
 								</offlineLink>
-								<!-- ao-javadoc-offline: <groupId>javax.el</groupId><artifactId>javax.el-api</artifactId> -->
-								<!-- ao-javadoc-offline: <groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId> -->
-								<!-- ao-javadoc-offline: <groupId>javax.servlet.jsp</groupId><artifactId>javax.servlet.jsp-api</artifactId> -->
+								<!-- ao-javadoc-offline: <groupId>javax.el</groupId><artifactId>javax.el-api</artifactId><classifier>javadoc</classifier> -->
+								<!-- ao-javadoc-offline: <groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId><classifier>javadoc</classifier> -->
+								<!-- ao-javadoc-offline: <groupId>javax.servlet.jsp</groupId><artifactId>javax.servlet.jsp-api</artifactId><classifier>javadoc</classifier> -->
 								<offlineLink>
 									<url>https://www.joda.org/joda-time/apidocs/</url>
 									<location>${project.build.directory}/offlineLinks/joda-time/joda-time</location>
