@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2021  AO Industries, Inc.
+ * Copyright (C) 2016, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -33,7 +33,7 @@ import java.io.PrintWriter;
  * @see  PageContext
  * @see  PrintWriter
  */
-public abstract class PageContextEncoder {
+public final class PageContextEncoder {
 
 	/** Make no instances. */
 	private PageContextEncoder() {throw new AssertionError();}

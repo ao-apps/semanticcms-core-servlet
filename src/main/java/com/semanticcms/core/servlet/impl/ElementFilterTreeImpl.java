@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2017, 2019, 2020, 2021  AO Industries, Inc.
+ * Copyright (C) 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -49,7 +49,7 @@ import javax.servlet.jsp.SkipPageException;
 /**
  * Builds a tree, filtering for a specific element type.
  */
-public abstract class ElementFilterTreeImpl {
+public final class ElementFilterTreeImpl {
 
 	/** Make no instances. */
 	private ElementFilterTreeImpl() {throw new AssertionError();}
