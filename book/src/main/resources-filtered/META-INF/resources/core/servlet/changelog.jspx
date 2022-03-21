@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
 		shortTitle="Changelog"
 		tocLevels="1"
 		datePublished="2016-10-30T18:16:13-05:00"
-		dateModified="2022-02-15T21:04:26-06:00"
+		dateModified="2022-03-21T05:50:15-05:00"
 	>
 		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
 			<changelog:release
@@ -53,6 +53,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
 						New module <core:link book="/core/controller" page="/" /> split from <code:link page="/" />, leaving
 						<code:link page="/" /> only to generate page content from servlets.
 					</li>
+					<li>Updated dependencies.</li>
 				</ul>
 			</changelog:release>
 		</c:if>
