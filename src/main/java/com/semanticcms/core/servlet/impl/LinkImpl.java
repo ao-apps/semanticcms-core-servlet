@@ -108,7 +108,7 @@ public final class LinkImpl {
 		return sb.toString();
 	}
 
-	public static String getBrokenPath(PageRef pageRef) throws IOException {
+	public static String getBrokenPath(PageRef pageRef) {
 		return getBrokenPath(pageRef, null);
 	}
 
