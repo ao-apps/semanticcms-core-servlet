@@ -22,512 +22,512 @@ You should have received a copy of the GNU Lesser General Public License
 along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <jsp:root
-	xmlns:ao="https://oss.aoapps.com/taglib/"
-	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:changelog="https://semanticcms.com/changelog/taglib/"
-	xmlns:core="https://semanticcms.com/core/taglib/"
-	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
-	xmlns:jsp="http://java.sun.com/JSP/Page"
-	version="2.1"
+  xmlns:ao="https://oss.aoapps.com/taglib/"
+  xmlns:c="http://java.sun.com/jsp/jstl/core"
+  xmlns:changelog="https://semanticcms.com/changelog/taglib/"
+  xmlns:core="https://semanticcms.com/core/taglib/"
+  xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+  xmlns:jsp="http://java.sun.com/JSP/Page"
+  version="2.1"
 >
-	<jsp:directive.page language="java" pageEncoding="UTF-8" />
-	<jsp:directive.page session="false" />
-	<core:page
-		title="@{documented.name} Changelog"
-		shortTitle="Changelog"
-		tocLevels="1"
-		datePublished="2016-10-30T18:16:13-05:00"
-		dateModified="2022-03-21T05:50:15-05:00"
-	>
-		<c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
-			<changelog:release
-				projectName="@{documented.name}"
-				version="@{project.version}"
-				groupId="@{project.groupId}"
-				artifactId="@{documented.artifactId}"
-				repository="@{nexusUrl}content/repositories/snapshots/"
-				scmUrl="@{project.scm.url}"
-			>
-				<ul>
-					<li>
-						New module <core:link book="/core/controller" page="/" /> split from <code:link page="/" />, leaving
-						<code:link page="/" /> only to generate page content from servlets.
-					</li>
-					<li>Updated dependencies.</li>
-				</ul>
-			</changelog:release>
-		</c:if>
+  <jsp:directive.page language="java" pageEncoding="UTF-8" />
+  <jsp:directive.page session="false" />
+  <core:page
+    title="@{documented.name} Changelog"
+    shortTitle="Changelog"
+    tocLevels="1"
+    datePublished="2016-10-30T18:16:13-05:00"
+    dateModified="2022-03-21T05:50:15-05:00"
+  >
+    <c:if test="${fn:endsWith('@{project.version}', '-SNAPSHOT') and !fn:endsWith('@{project.version}', '-POST-SNAPSHOT')}">
+      <changelog:release
+        projectName="@{documented.name}"
+        version="@{project.version}"
+        groupId="@{project.groupId}"
+        artifactId="@{documented.artifactId}"
+        repository="@{nexusUrl}content/repositories/snapshots/"
+        scmUrl="@{project.scm.url}"
+      >
+        <ul>
+          <li>
+            New module <core:link book="/core/controller" page="/" /> split from <code:link page="/" />, leaving
+            <code:link page="/" /> only to generate page content from servlets.
+          </li>
+          <li>Updated dependencies.</li>
+        </ul>
+      </changelog:release>
+    </c:if>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.18.2"
-			datePublished="2022-02-15T21:04:26-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Now properly restoring Thread interrupted state on <code>InterruptedException</code>.</li>
-				<li>
-					Cleaning-up ThreadLocal variables when no longer used,
-					see <ao:a href="https://rules.sonarsource.com/java/RSPEC-5164" />.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.18.2"
+      datePublished="2022-02-15T21:04:26-06:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Now properly restoring Thread interrupted state on <code>InterruptedException</code>.</li>
+        <li>
+          Cleaning-up ThreadLocal variables when no longer used,
+          see <ao:a href="https://rules.sonarsource.com/java/RSPEC-5164" />.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.18.1"
-			datePublished="2021-10-15T23:24:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Updated dependencies.</li>
-				<li>Improved XML parser security.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.18.1"
+      datePublished="2021-10-15T23:24:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Updated dependencies.</li>
+        <li>Improved XML parser security.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.18.0"
-			datePublished="2021-07-06T06:58:35-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Updated to <ao:a rel="nofollow" href="https://www.oracle.com/java/technologies/javaee/javaeetechnologies.html#javaee7">Java™ EE 7 Web Profile</ao:a> (Servlet 3.1, JSP 2.3, EL 3.0, and JSTL 1.2).</li>
-				<li>Minimum Java version changed from 1.8 to 11.</li>
-				<li>
-					Now supports Java 9+ modules.  Due to still having filename-based automatic module dependencies,
-					*-SNAPSHOT versions include <code>module-info.class</code> while releases include the
-					<code>Automatic-Module-Name</code> manifest entry.  To minimize the difference between these
-					modes, <code>module-info.java</code> does not perform any transitive requires.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.18.0"
+      datePublished="2021-07-06T06:58:35-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Updated to <ao:a rel="nofollow" href="https://www.oracle.com/java/technologies/javaee/javaeetechnologies.html#javaee7">Java™ EE 7 Web Profile</ao:a> (Servlet 3.1, JSP 2.3, EL 3.0, and JSTL 1.2).</li>
+        <li>Minimum Java version changed from 1.8 to 11.</li>
+        <li>
+          Now supports Java 9+ modules.  Due to still having filename-based automatic module dependencies,
+          *-SNAPSHOT versions include <code>module-info.class</code> while releases include the
+          <code>Automatic-Module-Name</code> manifest entry.  To minimize the difference between these
+          modes, <code>module-info.java</code> does not perform any transitive requires.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.17.1"
-			datePublished="2021-03-18T05:02:06-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Updated dependencies.</li>
-				<li>Implemented automatic newline and tab indentation.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.17.1"
+      datePublished="2021-03-18T05:02:06-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Updated dependencies.</li>
+        <li>Implemented automatic newline and tab indentation.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.17.0"
-			datePublished="2020-12-08T06:31:56-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					Split development-only classes into a new sub-project in <code>devel/</code>.  This
-					sub-project is used only for development and is never deployed to artifact repositories.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.17.0"
+      datePublished="2020-12-08T06:31:56-06:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Split development-only classes into a new sub-project in <code>devel/</code>.  This
+          sub-project is used only for development and is never deployed to artifact repositories.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.16.0"
-			datePublished="2020-11-25T03:16:18-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Updated dependencies.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.16.0"
+      datePublished="2020-11-25T03:16:18-06:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Updated dependencies.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.15.1"
-			datePublished="2020-06-30T01:51:42-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>
-					Fixed bug for absolute links to elements on the same page.
-					Previously, links to the same page were always written as
-					anchor-only, which would then prevent rewriting into absolute
-					form.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.15.1"
+      datePublished="2020-06-30T01:51:42-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>
+          Fixed bug for absolute links to elements on the same page.
+          Previously, links to the same page were always written as
+          anchor-only, which would then prevent rewriting into absolute
+          form.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.15.0"
-			datePublished="2020-03-27T14:15:03-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Minimum Java version changed from 1.7 to 1.8.</li>
-				<li>
-					Reduced use of property substitutions in <code>pom.xml</code>.
-					This is to help 3rd-party parsers that fail to perform full Maven-compatible substitutions.
-				</li>
-				<li>Now supports page attributes for <code>serialization</code> (default "auto") and <code>doctype</code> (default "HTML5").</li>
-				<li>Setting more values during captures:
-					<ol>
-						<li>Registering doctype with new methods <code>DoctypeEE.set(…)</code> and <code>DoctypeEE.get(…)</code>.</li>
-						<li>Setting response content type to match the default serialization (HTML / XHTML) that will be applied during final render.</li>
-						<li>Setting response character set to <code>UTF-8</code>.</li>
-						<li>Better shielding non-concurrency sub-requests during captures with request and response wrappers.</li>
-					</ol>
-				</li>
-				<li>Moved Servlet subrequest utilities to new <ao:a href="https://oss.aoapps.com/servlet-subrequest/">AO Servlet Subrequest</ao:a> project.</li>
-				<li>Using <ao:a href="https://oss.aoapps.com/fluent-html/">AO Fluent HTML</ao:a> for HTML generation.</li>
-				<li>Optimized ServletContext attribute initialization and concurrency.</li>
-				<li>
-					<ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/impl/PageImpl.html">PageImpl</ao:a> now establishes
-					a page context for <ao:a href="https://oss.aoapps.com/web-resources/">AO Web Resources</ao:a>.
-				</li>
-				<li>
-					Now configures <ao:a href="https://oss.aoapps.com/web-resources/">AO Web Resources</ao:a>
-					for <ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/Theme.html">Theme</ao:a>
-					and <ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/View.html">View</ao:a>.
-				</li>
-				<li>Removed <code>UrlUtils</code>, with the sole remaining method <code>writeHref</code> moved to <code>LinkImpl</code>.</li>
-				<li>Updated dependencies.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.15.0"
+      datePublished="2020-03-27T14:15:03-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Minimum Java version changed from 1.7 to 1.8.</li>
+        <li>
+          Reduced use of property substitutions in <code>pom.xml</code>.
+          This is to help 3rd-party parsers that fail to perform full Maven-compatible substitutions.
+        </li>
+        <li>Now supports page attributes for <code>serialization</code> (default "auto") and <code>doctype</code> (default "HTML5").</li>
+        <li>Setting more values during captures:
+          <ol>
+            <li>Registering doctype with new methods <code>DoctypeEE.set(…)</code> and <code>DoctypeEE.get(…)</code>.</li>
+            <li>Setting response content type to match the default serialization (HTML / XHTML) that will be applied during final render.</li>
+            <li>Setting response character set to <code>UTF-8</code>.</li>
+            <li>Better shielding non-concurrency sub-requests during captures with request and response wrappers.</li>
+          </ol>
+        </li>
+        <li>Moved Servlet subrequest utilities to new <ao:a href="https://oss.aoapps.com/servlet-subrequest/">AO Servlet Subrequest</ao:a> project.</li>
+        <li>Using <ao:a href="https://oss.aoapps.com/fluent-html/">AO Fluent HTML</ao:a> for HTML generation.</li>
+        <li>Optimized ServletContext attribute initialization and concurrency.</li>
+        <li>
+          <ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/impl/PageImpl.html">PageImpl</ao:a> now establishes
+          a page context for <ao:a href="https://oss.aoapps.com/web-resources/">AO Web Resources</ao:a>.
+        </li>
+        <li>
+          Now configures <ao:a href="https://oss.aoapps.com/web-resources/">AO Web Resources</ao:a>
+          for <ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/Theme.html">Theme</ao:a>
+          and <ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/View.html">View</ao:a>.
+        </li>
+        <li>Removed <code>UrlUtils</code>, with the sole remaining method <code>writeHref</code> moved to <code>LinkImpl</code>.</li>
+        <li>Updated dependencies.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.14.0"
-			datePublished="2019-10-11T17:18:51-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Element IDs may now contain the full range of <ao:a href="https://www.w3.org/TR/REC-xml/#id">valid XML identifiers</ao:a>.</li>
-				<li>Added absolute URL and <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/http/Canonical.html">Canonical URL</ao:a> support.</li>
-				<li>
-					Activated new filter <ao:a href="https://oss.aoapps.com/servlet-last-modified/apidocs/com.aoapps.servlet.lastmodified/com/aoapps/servlet/lastmodified/LastModifiedCacheControlFilter.html">LastModifiedCacheControlFilter</ao:a>
-					that adds a <ao:a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">cache-control</ao:a> header to any request with a
-					<ao:a href="https://oss.aoapps.com/servlet-last-modified/apidocs/com.aoapps.servlet.lastmodified/com/aoapps/servlet/lastmodified/LastModifiedServlet.html#LAST_MODIFIED_PARAMETER_NAME">LAST_MODIFIED_PARAMETER_NAME</ao:a>
-					parameter.  Defaults to a very aggressive setting of public, one-year, allowing stale, and immutable.
-				</li>
-				<li>Defined MIME types, with a <code>UTF-8</code> default, in shared <code>web-fragment.xml</code></li>
-				<li>
-					Changed <code>CountConcurrencyFilter</code> from a <code><![CDATA[&lt;filter&gt;]]></code>
-					to a <code><![CDATA[&lt;listener&gt;]]></code> named
-					<ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/CountConcurrencyListener.html">CountConcurrencyListener</ao:a>.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.14.0"
+      datePublished="2019-10-11T17:18:51-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Element IDs may now contain the full range of <ao:a href="https://www.w3.org/TR/REC-xml/#id">valid XML identifiers</ao:a>.</li>
+        <li>Added absolute URL and <ao:a href="https://oss.aoapps.com/servlet-util/apidocs/com.aoapps.servlet.util/com/aoapps/servlet/http/Canonical.html">Canonical URL</ao:a> support.</li>
+        <li>
+          Activated new filter <ao:a href="https://oss.aoapps.com/servlet-last-modified/apidocs/com.aoapps.servlet.lastmodified/com/aoapps/servlet/lastmodified/LastModifiedCacheControlFilter.html">LastModifiedCacheControlFilter</ao:a>
+          that adds a <ao:a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">cache-control</ao:a> header to any request with a
+          <ao:a href="https://oss.aoapps.com/servlet-last-modified/apidocs/com.aoapps.servlet.lastmodified/com/aoapps/servlet/lastmodified/LastModifiedServlet.html#LAST_MODIFIED_PARAMETER_NAME">LAST_MODIFIED_PARAMETER_NAME</ao:a>
+          parameter.  Defaults to a very aggressive setting of public, one-year, allowing stale, and immutable.
+        </li>
+        <li>Defined MIME types, with a <code>UTF-8</code> default, in shared <code>web-fragment.xml</code></li>
+        <li>
+          Changed <code>CountConcurrencyFilter</code> from a <code><![CDATA[&lt;filter&gt;]]></code>
+          to a <code><![CDATA[&lt;listener&gt;]]></code> named
+          <ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/CountConcurrencyListener.html">CountConcurrencyListener</ao:a>.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.13.0"
-			datePublished="2019-06-19T09:19:35-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Using managed dependencies:
-					<ol>
-						<li>This project uses managed dependencies.</li>
-						<li>This project's managed dependencies may also be imported by other projects.</li>
-					</ol>
-				</li>
-				<li>Now supporting media="print" stylesheets.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.13.0"
+      datePublished="2019-06-19T09:19:35-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Using managed dependencies:
+          <ol>
+            <li>This project uses managed dependencies.</li>
+            <li>This project's managed dependencies may also be imported by other projects.</li>
+          </ol>
+        </li>
+        <li>Now supporting media="print" stylesheets.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.12.0"
-			datePublished="2019-04-19T05:37:16-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Minimum Java version changed from 1.6 to 1.7.</li>
-				<li>
-					<code><ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/PageRefResolver.html">PageRefResolver</ao:a>.getCurrentPageRef(…)</code>
-					now accepts an optional parameter to optionally return <code>null</code> on missing book instead of throwing
-					<code><ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/ServletException.html">ServletException</ao:a></code>.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.12.0"
+      datePublished="2019-04-19T05:37:16-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Minimum Java version changed from 1.6 to 1.7.</li>
+        <li>
+          <code><ao:a href="apidocs/com.semanticcms.core.servlet/com/semanticcms/core/servlet/PageRefResolver.html">PageRefResolver</ao:a>.getCurrentPageRef(…)</code>
+          now accepts an optional parameter to optionally return <code>null</code> on missing book instead of throwing
+          <code><ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/ServletException.html">ServletException</ao:a></code>.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.11.0"
-			datePublished="2017-07-19T22:41:51-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>New release for bug fixes in underlying <ao:a href="https://oss.aoapps.com/encoding/">AO Encoding</ao:a> library.</li>
-				<li>Nodes, including both pages and elements, now have properties.</li>
-				<li>Updated dependencies.</li>
-				<li>May now specify <code>anchor</code> to link to non-SemanticCMS-element targets.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.11.0"
+      datePublished="2017-07-19T22:41:51-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>New release for bug fixes in underlying <ao:a href="https://oss.aoapps.com/encoding/">AO Encoding</ao:a> library.</li>
+        <li>Nodes, including both pages and elements, now have properties.</li>
+        <li>Updated dependencies.</li>
+        <li>May now specify <code>anchor</code> to link to non-SemanticCMS-element targets.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.10.0"
-			datePublished="2016-11-15T17:45:15-06:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>New <ao:a href="https://oss.aoapps.com/parent/">AO OSS Parent</ao:a> POM to simplify <code>pom.xml</code> files.</li>
-				<li>Added support for dateCreated, datePublished, dateModified, and dateReviewed.</li>
-				<li>Project documentation moved to per-project book in <core:link book="/" page="/" /> format.</li>
-				<li>Added changelog as top-level project link.</li>
-				<li><code>/WEB-INF/books.properties</code> changed to XML at <code>/WEB-INF/books.xml</code> with XML Schema defined at
-					<!-- TODO: file:file once cvsworkDirectory no longer required -->
-					<ao:a href="books-1.0.xsd">books-1.0.xsd</ao:a>.
-				</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.10.0"
+      datePublished="2016-11-15T17:45:15-06:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>New <ao:a href="https://oss.aoapps.com/parent/">AO OSS Parent</ao:a> POM to simplify <code>pom.xml</code> files.</li>
+        <li>Added support for dateCreated, datePublished, dateModified, and dateReviewed.</li>
+        <li>Project documentation moved to per-project book in <core:link book="/" page="/" /> format.</li>
+        <li>Added changelog as top-level project link.</li>
+        <li><code>/WEB-INF/books.properties</code> changed to XML at <code>/WEB-INF/books.xml</code> with XML Schema defined at
+          <!-- TODO: file:file once cvsworkDirectory no longer required -->
+          <ao:a href="books-1.0.xsd">books-1.0.xsd</ao:a>.
+        </li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.9.0"
-			datePublished="2016-10-20T18:20:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Improved Javadoc formatting.</li>
-				<li>Improved README formatting.</li>
-				<li>Added component registry.</li>
-				<li>shortTitle may now be specified on a per-parent basis,
-					for when the shortTitle only makes sense within the context of that specific parent.
-					This is useful for navigation items such as breadcrumbs or trees.</li>
-				<li>Clearer exception message on PageRef mismatch because page on same paths in different
-					books would give ambiguous and misleading message.</li>
-				<li>Book title is optional, view titles now taking that into consideration.</li>
-				<li>Including Google Analytics in error pages, too.</li>
-				<li>Added method to get all the applicable parents for a given view.</li>
-				<li>Response content type set on capture for more consistent capture states.
-					This also resolves issue where capture before content type set caused a NPE when trying to resolve MediaType.</li>
-				<li>View now determines the canonical URL for itself and a given page.</li>
-				<li>Canonical URL is now set on a per-book basis.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.9.0"
+      datePublished="2016-10-20T18:20:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Improved Javadoc formatting.</li>
+        <li>Improved README formatting.</li>
+        <li>Added component registry.</li>
+        <li>shortTitle may now be specified on a per-parent basis,
+          for when the shortTitle only makes sense within the context of that specific parent.
+          This is useful for navigation items such as breadcrumbs or trees.</li>
+        <li>Clearer exception message on PageRef mismatch because page on same paths in different
+          books would give ambiguous and misleading message.</li>
+        <li>Book title is optional, view titles now taking that into consideration.</li>
+        <li>Including Google Analytics in error pages, too.</li>
+        <li>Added method to get all the applicable parents for a given view.</li>
+        <li>Response content type set on capture for more consistent capture states.
+          This also resolves issue where capture before content type set caused a NPE when trying to resolve MediaType.</li>
+        <li>View now determines the canonical URL for itself and a given page.</li>
+        <li>Canonical URL is now set on a per-book basis.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.8.1"
-			datePublished="2016-10-10T19:37:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>display-name defined in web-fragment.xml was causing "The display name was defined in multiple fragments with different value"</li>
-				<li>Using latest releases of dependencies.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.8.1"
+      datePublished="2016-10-10T19:37:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>display-name defined in web-fragment.xml was causing "The display name was defined in multiple fragments with different value"</li>
+        <li>Using latest releases of dependencies.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.8.0"
-			datePublished="2016-10-04T20:39:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Improved Javadoc formatting.</li>
-				<li>Supporting concurrent subrequests to leverage multiple cores within a single request.
-					This is pushing the boundaries on the spec and has only been tested in Tomcat 7.0 and 8.5.
-					Off by default and should be considered experimental.  We use this for our internal
-					content-heavy documentation, but not on the public-facing sites.</li>
-				<li>Now automatically maintains some ThreadLocal values between caller and executor during concurrent processing, and provides wrapper hook for subclasses to extend.</li>
-				<li>Made accesses to cache thread safe by locking on cache Map.</li>
-				<li>Implemented a basic level of concurrency within depth first traversals.</li>
-				<li>Core taglib now supports deferred expressions.</li>
-				<li>Link class is now a deferred expression and only evaluated on body captures.</li>
-				<li>Avoiding calling writeTo when capturing.</li>
-				<li>Now looking in cache for already existing META capture to fulfill a PAGE request.</li>
-				<li>Moved page cache to a new PageCache class.</li>
-				<li>Made parent-child verification more thorough while also performing on par with verification completely disabled.</li>
-				<li>Concurrency choices are now delegated to the CountConcurrencyFIlter.</li>
-				<li>Now selects one of three page cache implementations based on if export enabled, if concurrent subrequests are allowed, and current request concurrency.</li>
-				<li>Always avoiding concurrent implementations on single-CPU systems.</li>
-				<li>Using page traversals in more places to allow for concurrent subrequests.</li>
-				<li>Each lock object now a small empty class to help identify lock contention.
-					<p>
-						The lock contention profiler in NetBeans is just showing "java.lang.Object" all over, and can't seem to
-						get from the lock object id to the actual object in the heap dump using OQL (id not found).
-					</p>
-				</li>
-				<li>Using ServletContextCache for more throughput on Tomcat.</li>
-				<li>Created concurrent depth first traversal.</li>
-				<li>Only writing element marker when needed now.</li>
-				<li>pageRef fields interned for great .equals performance during traversals.</li>
-				<li>Cache now exposed as public, and provides methods that use thread safety consistent with the caching and
-					concurrency strategy selected for the current request.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.8.0"
+      datePublished="2016-10-04T20:39:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Improved Javadoc formatting.</li>
+        <li>Supporting concurrent subrequests to leverage multiple cores within a single request.
+          This is pushing the boundaries on the spec and has only been tested in Tomcat 7.0 and 8.5.
+          Off by default and should be considered experimental.  We use this for our internal
+          content-heavy documentation, but not on the public-facing sites.</li>
+        <li>Now automatically maintains some ThreadLocal values between caller and executor during concurrent processing, and provides wrapper hook for subclasses to extend.</li>
+        <li>Made accesses to cache thread safe by locking on cache Map.</li>
+        <li>Implemented a basic level of concurrency within depth first traversals.</li>
+        <li>Core taglib now supports deferred expressions.</li>
+        <li>Link class is now a deferred expression and only evaluated on body captures.</li>
+        <li>Avoiding calling writeTo when capturing.</li>
+        <li>Now looking in cache for already existing META capture to fulfill a PAGE request.</li>
+        <li>Moved page cache to a new PageCache class.</li>
+        <li>Made parent-child verification more thorough while also performing on par with verification completely disabled.</li>
+        <li>Concurrency choices are now delegated to the CountConcurrencyFIlter.</li>
+        <li>Now selects one of three page cache implementations based on if export enabled, if concurrent subrequests are allowed, and current request concurrency.</li>
+        <li>Always avoiding concurrent implementations on single-CPU systems.</li>
+        <li>Using page traversals in more places to allow for concurrent subrequests.</li>
+        <li>Each lock object now a small empty class to help identify lock contention.
+          <p>
+            The lock contention profiler in NetBeans is just showing "java.lang.Object" all over, and can't seem to
+            get from the lock object id to the actual object in the heap dump using OQL (id not found).
+          </p>
+        </li>
+        <li>Using ServletContextCache for more throughput on Tomcat.</li>
+        <li>Created concurrent depth first traversal.</li>
+        <li>Only writing element marker when needed now.</li>
+        <li>pageRef fields interned for great .equals performance during traversals.</li>
+        <li>Cache now exposed as public, and provides methods that use thread safety consistent with the caching and
+          concurrency strategy selected for the current request.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.7"
-			datePublished="2016-09-11T15:34:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Use dependencyManagement instead of dependency for junit.</li>
-				<li>Default theme now used as fallback when none other registered.</li>
-				<li>Now supporting per-page allowRobots setting.</li>
-				<li>Now all types of elements may be hidden.</li>
-				<li>Views now provide general purpose links, not just specifically CSS links.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.7"
+      datePublished="2016-09-11T15:34:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Use dependencyManagement instead of dependency for junit.</li>
+        <li>Default theme now used as fallback when none other registered.</li>
+        <li>Now supporting per-page allowRobots setting.</li>
+        <li>Now all types of elements may be hidden.</li>
+        <li>Views now provide general purpose links, not just specifically CSS links.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.6"
-			datePublished="2016-09-03T21:48:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Improved Maven configuration for Java EE 6 dependencies.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.6"
+      datePublished="2016-09-03T21:48:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Improved Maven configuration for Java EE 6 dependencies.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.5"
-			datePublished="2016-08-28T20:33:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Making use of web-fragment.xml to remove common configuration from per-app web.xml.</li>
-				<li>Added headInclude registry.</li>
-				<li>Moved automatic Git to separate packages.</li>
-				<li>Moved exporting header to semanticcms namespace.</li>
-				<li>More view control over links to view.</li>
-				<li>Added global and per-view script registry.</li>
-				<li>Views may now use parameters.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.5"
+      datePublished="2016-08-28T20:33:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Making use of web-fragment.xml to remove common configuration from per-app web.xml.</li>
+        <li>Added headInclude registry.</li>
+        <li>Moved automatic Git to separate packages.</li>
+        <li>Moved exporting header to semanticcms namespace.</li>
+        <li>More view control over links to view.</li>
+        <li>Added global and per-view script registry.</li>
+        <li>Views may now use parameters.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.4"
-			datePublished="2016-08-21T16:57:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Moved styles to separate package.</li>
-				<li>Hyperlinks now optional on links.</li>
-				<li>Allowing "small" link instead of eliminating hyperlink altogether.</li>
-				<li>Created parent pom for all SemanticCMS components.</li>
-				<li>Requires latest version of aocode-public.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.4"
+      datePublished="2016-08-21T16:57:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Moved styles to separate package.</li>
+        <li>Hyperlinks now optional on links.</li>
+        <li>Allowing "small" link instead of eliminating hyperlink altogether.</li>
+        <li>Created parent pom for all SemanticCMS components.</li>
+        <li>Requires latest version of aocode-public.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.3"
-			datePublished="2016-08-19T14:39:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Now generating missing ids when first accesssed, not at the end of
-					the page. This fixes bug where IDs were missing from elements.</li>
-				<li>To avoid easily making broken links, may no longer link to generated element ids.</li>
-				<li>Application-scope variables combined into single "semanticCMS" variable.</li>
-				<li>Allowing links to generated IDs when specifically enabled.</li>
-				<li>Added view registry.</li>
-				<li>Require latest ao-servlet-filter dependency.</li>
-				<li>Now supporting *.jspx files.</li>
-				<li>Defined how themes and views interact.</li>
-				<li>May now exclude robots from specific views.</li>
-				<li>New tree view where filters for a given element type.</li>
-				<li>Now passing arguments through includes.</li>
-				<li>Passing args as <code><![CDATA[Map&lt;String, ?&gt;]]></code> instead of forcing <code><![CDATA[Map&lt;String, Object&gt;]]></code></li>
-				<li>Pulled files out of core and made files be elements.</li>
-				<li>May now filter elements by arbitrary conditions.</li>
-				<li>Using auto temp file wrapper in all places.</li>
-				<li>Views can now hide themselves when not relevant to a given page.</li>
-				<li>Navigation based on centrally registered views more.</li>
-				<li>Added demo mode.</li>
-				<li>CSS links may now be registered for global use.</li>
-				<li>Pulled openFile out of core.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.3"
+      datePublished="2016-08-19T14:39:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Now generating missing ids when first accesssed, not at the end of
+          the page. This fixes bug where IDs were missing from elements.</li>
+        <li>To avoid easily making broken links, may no longer link to generated element ids.</li>
+        <li>Application-scope variables combined into single "semanticCMS" variable.</li>
+        <li>Allowing links to generated IDs when specifically enabled.</li>
+        <li>Added view registry.</li>
+        <li>Require latest ao-servlet-filter dependency.</li>
+        <li>Now supporting *.jspx files.</li>
+        <li>Defined how themes and views interact.</li>
+        <li>May now exclude robots from specific views.</li>
+        <li>New tree view where filters for a given element type.</li>
+        <li>Now passing arguments through includes.</li>
+        <li>Passing args as <code><![CDATA[Map&lt;String, ?&gt;]]></code> instead of forcing <code><![CDATA[Map&lt;String, Object&gt;]]></code></li>
+        <li>Pulled files out of core and made files be elements.</li>
+        <li>May now filter elements by arbitrary conditions.</li>
+        <li>Using auto temp file wrapper in all places.</li>
+        <li>Views can now hide themselves when not relevant to a given page.</li>
+        <li>Navigation based on centrally registered views more.</li>
+        <li>Added demo mode.</li>
+        <li>CSS links may now be registered for global use.</li>
+        <li>Pulled openFile out of core.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.2"
-			datePublished="2016-08-09T22:22:00-05:00"
-			groupId="@{project.groupId}"
-			artifactId="@{documented.artifactId}"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Renamed project from ao-web-page-servlet to semanticcms-core-servlet.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.2"
+      datePublished="2016-08-09T22:22:00-05:00"
+      groupId="@{project.groupId}"
+      artifactId="@{documented.artifactId}"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Renamed project from ao-web-page-servlet to semanticcms-core-servlet.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.1"
-			datePublished="2016-08-07T23:39:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="ao-web-page-servlet"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Reverted to Java 1.6 for Android and Java EE 6 compatibility.</li>
-			</ul>
-		</changelog:release>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.1"
+      datePublished="2016-08-07T23:39:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="ao-web-page-servlet"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Reverted to Java 1.6 for Android and Java EE 6 compatibility.</li>
+      </ul>
+    </changelog:release>
 
-		<changelog:release
-			projectName="@{documented.name}"
-			version="1.0"
-			datePublished="2016-08-07T10:49:00-05:00"
-			groupId="com.aoindustries"
-			artifactId="ao-web-page-servlet"
-			scmUrl="@{project.scm.url}"
-		>
-			<ul>
-				<li>Project moved to GitHub and Maven.</li>
-			</ul>
-		</changelog:release>
-	</core:page>
+    <changelog:release
+      projectName="@{documented.name}"
+      version="1.0"
+      datePublished="2016-08-07T10:49:00-05:00"
+      groupId="com.aoindustries"
+      artifactId="ao-web-page-servlet"
+      scmUrl="@{project.scm.url}"
+    >
+      <ul>
+        <li>Project moved to GitHub and Maven.</li>
+      </ul>
+    </changelog:release>
+  </core:page>
 </jsp:root>

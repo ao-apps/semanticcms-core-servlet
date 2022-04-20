@@ -38,277 +38,277 @@ import javax.servlet.jsp.SkipPageException;
 
 public class Link extends Element<com.semanticcms.core.model.Link> {
 
-	public Link(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		com.semanticcms.core.model.Link element
-	) {
-		super(
-			servletContext,
-			request,
-			response,
-			element
-		);
-	}
+  public Link(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    com.semanticcms.core.model.Link element
+  ) {
+    super(
+      servletContext,
+      request,
+      response,
+      element
+    );
+  }
 
-	public Link(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response
-	) {
-		this(
-			servletContext,
-			request,
-			response,
-			new com.semanticcms.core.model.Link()
-		);
-	}
+  public Link(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response
+  ) {
+    this(
+      servletContext,
+      request,
+      response,
+      new com.semanticcms.core.model.Link()
+    );
+  }
 
-	public Link(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		com.semanticcms.core.model.Link element,
-		String page
-	) {
-		this(servletContext, request, response, element);
-		element.setPagePath(page);
-	}
+  public Link(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    com.semanticcms.core.model.Link element,
+    String page
+  ) {
+    this(servletContext, request, response, element);
+    element.setPagePath(page);
+  }
 
-	public Link(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String page
-	) {
-		this(servletContext, request, response);
-		element.setPagePath(page);
-	}
+  public Link(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    String page
+  ) {
+    this(servletContext, request, response);
+    element.setPagePath(page);
+  }
 
-	public Link(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		com.semanticcms.core.model.Link element,
-		Path book,
-		String page
-	) {
-		this(servletContext, request, response, element, page);
-		element.setBook(book);
-	}
+  public Link(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    com.semanticcms.core.model.Link element,
+    Path book,
+    String page
+  ) {
+    this(servletContext, request, response, element, page);
+    element.setBook(book);
+  }
 
-	public Link(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Path book,
-		String page
-	) {
-		this(servletContext, request, response, page);
-		element.setBook(book);
-	}
+  public Link(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    Path book,
+    String page
+  ) {
+    this(servletContext, request, response, page);
+    element.setBook(book);
+  }
 
-	public Link(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		com.semanticcms.core.model.Link element,
-		DomainName domain,
-		Path book,
-		String page
-	) {
-		this(servletContext, request, response, element, book, page);
-		element.setDomain(domain);
-	}
+  public Link(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    com.semanticcms.core.model.Link element,
+    DomainName domain,
+    Path book,
+    String page
+  ) {
+    this(servletContext, request, response, element, book, page);
+    element.setDomain(domain);
+  }
 
-	public Link(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		DomainName domain,
-		Path book,
-		String page
-	) {
-		this(servletContext, request, response, book, page);
-		element.setDomain(domain);
-	}
+  public Link(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    DomainName domain,
+    Path book,
+    String page
+  ) {
+    this(servletContext, request, response, book, page);
+    element.setDomain(domain);
+  }
 
-	/**
-	 * Creates a new link in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Link(com.semanticcms.core.model.Link element) {
-		this(
-			PageContext.getServletContext(),
-			PageContext.getRequest(),
-			PageContext.getResponse(),
-			element
-		);
-	}
+  /**
+   * Creates a new link in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Link(com.semanticcms.core.model.Link element) {
+    this(
+      PageContext.getServletContext(),
+      PageContext.getRequest(),
+      PageContext.getResponse(),
+      element
+    );
+  }
 
-	/**
-	 * Creates a new link in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Link() {
-		this(
-			PageContext.getServletContext(),
-			PageContext.getRequest(),
-			PageContext.getResponse()
-		);
-	}
+  /**
+   * Creates a new link in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Link() {
+    this(
+      PageContext.getServletContext(),
+      PageContext.getRequest(),
+      PageContext.getResponse()
+    );
+  }
 
-	/**
-	 * Creates a new link in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Link(
-		com.semanticcms.core.model.Link element,
-		String page
-	) {
-		this(element);
-		element.setPagePath(page);
-	}
+  /**
+   * Creates a new link in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Link(
+    com.semanticcms.core.model.Link element,
+    String page
+  ) {
+    this(element);
+    element.setPagePath(page);
+  }
 
-	/**
-	 * Creates a new link in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Link(String page) {
-		this();
-		element.setPagePath(page);
-	}
+  /**
+   * Creates a new link in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Link(String page) {
+    this();
+    element.setPagePath(page);
+  }
 
-	/**
-	 * Creates a new link in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Link(
-		com.semanticcms.core.model.Link element,
-		Path book,
-		String page
-	) {
-		this(element, page);
-		element.setBook(book);
-	}
+  /**
+   * Creates a new link in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Link(
+    com.semanticcms.core.model.Link element,
+    Path book,
+    String page
+  ) {
+    this(element, page);
+    element.setBook(book);
+  }
 
-	/**
-	 * Creates a new link in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Link(Path book, String page) {
-		this(page);
-		element.setBook(book);
-	}
+  /**
+   * Creates a new link in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Link(Path book, String page) {
+    this(page);
+    element.setBook(book);
+  }
 
-	/**
-	 * Creates a new link in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Link(
-		com.semanticcms.core.model.Link element,
-		DomainName domain,
-		Path book,
-		String page
-	) {
-		this(element, book, page);
-		element.setDomain(domain);
-	}
+  /**
+   * Creates a new link in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Link(
+    com.semanticcms.core.model.Link element,
+    DomainName domain,
+    Path book,
+    String page
+  ) {
+    this(element, book, page);
+    element.setDomain(domain);
+  }
 
-	/**
-	 * Creates a new link in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Link(DomainName domain, Path book, String page) {
-		this(book, page);
-		element.setDomain(domain);
-	}
+  /**
+   * Creates a new link in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Link(DomainName domain, Path book, String page) {
+    this(book, page);
+    element.setDomain(domain);
+  }
 
-	@Override
-	public Link id(String id) {
-		super.id(id);
-		return this;
-	}
+  @Override
+  public Link id(String id) {
+    super.id(id);
+    return this;
+  }
 
-	public Link domain(DomainName domain) {
-		element.setDomain(domain);
-		return this;
-	}
+  public Link domain(DomainName domain) {
+    element.setDomain(domain);
+    return this;
+  }
 
-	public Link book(Path book) {
-		element.setBook(book);
-		return this;
-	}
+  public Link book(Path book) {
+    element.setBook(book);
+    return this;
+  }
 
-	// TODO: Path page?
-	public Link page(String page) {
-		element.setPagePath(page);
-		return this;
-	}
+  // TODO: Path page?
+  public Link page(String page) {
+    element.setPagePath(page);
+    return this;
+  }
 
-	public Link element(String element) {
-		this.element.setElement(element);
-		return this;
-	}
+  public Link element(String element) {
+    this.element.setElement(element);
+    return this;
+  }
 
-	public Link allowGeneratedElement(boolean allowGeneratedElement) {
-		element.setAllowGeneratedElement(allowGeneratedElement);
-		return this;
-	}
+  public Link allowGeneratedElement(boolean allowGeneratedElement) {
+    element.setAllowGeneratedElement(allowGeneratedElement);
+    return this;
+  }
 
-	public Link anchor(String anchor) {
-		element.setAnchor(anchor);
-		return this;
-	}
+  public Link anchor(String anchor) {
+    element.setAnchor(anchor);
+    return this;
+  }
 
-	public Link view(String view) {
-		element.setView(view);
-		return this;
-	}
+  public Link view(String view) {
+    element.setView(view);
+    return this;
+  }
 
-	public Link small(boolean small) {
-		element.setSmall(small);
-		return this;
-	}
+  public Link small(boolean small) {
+    element.setSmall(small);
+    return this;
+  }
 
-	public Link params(URIParameters params) {
-		element.setParams(params);
-		return this;
-	}
+  public Link params(URIParameters params) {
+    element.setParams(params);
+    return this;
+  }
 
-	public Link absolute(boolean absolute) {
-		element.setAbsolute(absolute);
-		return this;
-	}
+  public Link absolute(boolean absolute) {
+    element.setAbsolute(absolute);
+    return this;
+  }
 
-	public Link canonical(boolean canonical) {
-		element.setCanonical(canonical);
-		return this;
-	}
+  public Link canonical(boolean canonical) {
+    element.setCanonical(canonical);
+    return this;
+  }
 
-	public Link clazz(String clazz) {
-		element.setClazz(clazz);
-		return this;
-	}
+  public Link clazz(String clazz) {
+    element.setClazz(clazz);
+    return this;
+  }
 
-	@Override
-	public void writeTo(Writer out, ElementContext context) throws IOException, ServletException, SkipPageException {
-		/* TODO: Move to renderer class
-		LinkRenderer.writeLinkImpl(
-			pageIndex,
-			out,
-			context,
-			element
-		);
-		 */
-	}
+  @Override
+  public void writeTo(Writer out, ElementContext context) throws IOException, ServletException, SkipPageException {
+    /* TODO: Move to renderer class
+    LinkRenderer.writeLinkImpl(
+      pageIndex,
+      out,
+      context,
+      element
+    );
+     */
+  }
 }
