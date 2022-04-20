@@ -38,32 +38,34 @@ import javax.servlet.http.HttpServletResponse;
  */
 public final class PageDags {
 
-	/** Make no instances. */
-	private PageDags() {throw new AssertionError();}
+  /** Make no instances. */
+  private PageDags() {
+    throw new AssertionError();
+  }
 
-	public static List<Page> convertPageDagToList(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Page rootPage,
-		CaptureLevel level
-	) throws ServletException, IOException {
-		final List<Page> list = new ArrayList<>();
-		CapturePage.traversePagesDepthFirst(
-			servletContext,
-			request,
-			response,
-			rootPage,
-			level,
-			(Page page, int depth) -> {
-				list.add(page);
-				return null;
-			},
-			Page::getChildRefs,
-			// Child not in missing book
-			childPage -> childPage.getBook() != null,
-			null
-		);
-		return Collections.unmodifiableList(list);
-	}
+  public static List<Page> convertPageDagToList(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    Page rootPage,
+    CaptureLevel level
+  ) throws ServletException, IOException {
+    final List<Page> list = new ArrayList<>();
+    CapturePage.traversePagesDepthFirst(
+      servletContext,
+      request,
+      response,
+      rootPage,
+      level,
+      (Page page, int depth) -> {
+        list.add(page);
+        return null;
+      },
+      Page::getChildRefs,
+      // Child not in missing book
+      childPage -> childPage.getBook() != null,
+      null
+    );
+    return Collections.unmodifiableList(list);
+  }
 }

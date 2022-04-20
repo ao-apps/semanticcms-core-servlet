@@ -44,157 +44,157 @@ import javax.servlet.jsp.SkipPageException;
  */
 public abstract class PageServlet extends HttpServlet {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	public static final Charset ENCODING = AnyDocument.ENCODING;
+  public static final Charset ENCODING = AnyDocument.ENCODING;
 
-	/**
-	 * @see  com.semanticcms.core.model.Page#getTitle()
-	 */
-	public abstract String getTitle();
+  /**
+   * @see  com.semanticcms.core.model.Page#getTitle()
+   */
+  public abstract String getTitle();
 
-	/**
-	 * @see  com.semanticcms.core.model.Page#getShortTitle()
-	 */
-	public String getShortTitle() {
-		return null;
-	}
+  /**
+   * @see  com.semanticcms.core.model.Page#getShortTitle()
+   */
+  public String getShortTitle() {
+    return null;
+  }
 
-	/**
-	 * @see  com.semanticcms.core.model.Page#getDescription()
-	 */
-	public String getDescription() {
-		return null;
-	}
+  /**
+   * @see  com.semanticcms.core.model.Page#getDescription()
+   */
+  public String getDescription() {
+    return null;
+  }
 
-	/**
-	 * @see  com.semanticcms.core.model.Page#getKeywords()
-	 */
-	public String getKeywords() {
-		return null;
-	}
+  /**
+   * @see  com.semanticcms.core.model.Page#getKeywords()
+   */
+  public String getKeywords() {
+    return null;
+  }
 
-	/**
-	 * Defaults to null for "auto".
-	 *
-	 * @see  com.semanticcms.core.model.Page#getToc()
-	 */
-	public Boolean getToc() {
-		return null;
-	}
+  /**
+   * Defaults to null for "auto".
+   *
+   * @see  com.semanticcms.core.model.Page#getToc()
+   */
+  public Boolean getToc() {
+    return null;
+  }
 
-	/**
-	 * @see  com.semanticcms.core.model.Page#getTocLevels()
-	 * @see  com.semanticcms.core.model.Page#DEFAULT_TOC_LEVELS
-	 */
-	public int getTocLevels() {
-		return com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
-	}
+  /**
+   * @see  com.semanticcms.core.model.Page#getTocLevels()
+   * @see  com.semanticcms.core.model.Page#DEFAULT_TOC_LEVELS
+   */
+  public int getTocLevels() {
+    return com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
+  }
 
-	private static interface DoMethodCallable {
-		void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
-	}
+  private static interface DoMethodCallable {
+    void doMethod(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
+  }
 
-	private void callInPage(HttpServletRequest req, HttpServletResponse resp, final DoMethodCallable method) throws ServletException, IOException {
-		try {
-			new Page(getServletContext(), req, resp, getTitle())
-				.shortTitle(getShortTitle())
-				.description(getDescription())
-				.keywords(getKeywords())
-				.toc(getToc())
-				.tocLevels(getTocLevels())
-				.invoke((HttpServletRequest req1, HttpServletResponse resp1, com.semanticcms.core.model.Page page) -> {
-					resp1.setContentType(ContentType.XHTML);
-					resp1.setCharacterEncoding(ENCODING.name());
-					method.doMethod(page);
-				});
-		} catch(SkipPageException e) {
-			Includer.setPageSkipped(req);
-		}
-	}
+  private void callInPage(HttpServletRequest req, HttpServletResponse resp, final DoMethodCallable method) throws ServletException, IOException {
+    try {
+      new Page(getServletContext(), req, resp, getTitle())
+        .shortTitle(getShortTitle())
+        .description(getDescription())
+        .keywords(getKeywords())
+        .toc(getToc())
+        .tocLevels(getTocLevels())
+        .invoke((HttpServletRequest req1, HttpServletResponse resp1, com.semanticcms.core.model.Page page) -> {
+          resp1.setContentType(ContentType.XHTML);
+          resp1.setCharacterEncoding(ENCODING.name());
+          method.doMethod(page);
+        });
+    } catch (SkipPageException e) {
+      Includer.setPageSkipped(req);
+    }
+  }
 
-	@Override
-	protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doGet);
-	}
+  @Override
+  protected final void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    callInPage(req, resp, this::doGet);
+  }
 
-	/**
-	 * Page and the PageContext are already setup.
-	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link #ENCODING}.
-	 */
-	protected void doGet(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		throw ServletUtil.SKIP_PAGE_EXCEPTION;
-	}
+  /**
+   * Page and the PageContext are already setup.
+   * The response content type has been set to application/xhtml+xml.
+   * The response character encoding has been set to {@link #ENCODING}.
+   */
+  protected void doGet(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
+    Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    throw ServletUtil.SKIP_PAGE_EXCEPTION;
+  }
 
-	@Override
-	protected final void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doPost);
-	}
+  @Override
+  protected final void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    callInPage(req, resp, this::doPost);
+  }
 
-	/**
-	 * Page and the PageContext are already setup.
-	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link #ENCODING}.
-	 */
-	protected void doPost(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		throw ServletUtil.SKIP_PAGE_EXCEPTION;
-	}
+  /**
+   * Page and the PageContext are already setup.
+   * The response content type has been set to application/xhtml+xml.
+   * The response character encoding has been set to {@link #ENCODING}.
+   */
+  protected void doPost(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
+    Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    throw ServletUtil.SKIP_PAGE_EXCEPTION;
+  }
 
-	@Override
-	protected final void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doPut);
-	}
+  @Override
+  protected final void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    callInPage(req, resp, this::doPut);
+  }
 
-	/**
-	 * Page and the PageContext are already setup.
-	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link #ENCODING}.
-	 */
-	protected void doPut(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		throw ServletUtil.SKIP_PAGE_EXCEPTION;
-	}
+  /**
+   * Page and the PageContext are already setup.
+   * The response content type has been set to application/xhtml+xml.
+   * The response character encoding has been set to {@link #ENCODING}.
+   */
+  protected void doPut(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
+    Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    throw ServletUtil.SKIP_PAGE_EXCEPTION;
+  }
 
-	@Override
-	protected final void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doDelete);
-	}
+  @Override
+  protected final void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    callInPage(req, resp, this::doDelete);
+  }
 
-	/**
-	 * Page and the PageContext are already setup.
-	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link #ENCODING}.
-	 */
-	protected void doDelete(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-		Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-		throw ServletUtil.SKIP_PAGE_EXCEPTION;
-	}
+  /**
+   * Page and the PageContext are already setup.
+   * The response content type has been set to application/xhtml+xml.
+   * The response character encoding has been set to {@link #ENCODING}.
+   */
+  protected void doDelete(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
+    Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+    throw ServletUtil.SKIP_PAGE_EXCEPTION;
+  }
 
-	@Override
-	protected final void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		callInPage(req, resp, this::doOptions);
-	}
+  @Override
+  protected final void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    callInPage(req, resp, this::doOptions);
+  }
 
-	/**
-	 * Page and the PageContext are already setup.
-	 * The response content type has been set to application/xhtml+xml.
-	 * The response character encoding has been set to {@link #ENCODING}.
-	 */
-	protected void doOptions(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-		HttpServletUtil.doOptions(
-			PageContext.getResponse(),
-			PageServlet.class,
-			this.getClass(),
-			"doGet",
-			"doPost",
-			"doPut",
-			"doDelete",
-			new Class<?>[] {
-				com.semanticcms.core.model.Page.class
-			}
-		);
-	}
+  /**
+   * Page and the PageContext are already setup.
+   * The response content type has been set to application/xhtml+xml.
+   * The response character encoding has been set to {@link #ENCODING}.
+   */
+  protected void doOptions(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
+    HttpServletUtil.doOptions(
+      PageContext.getResponse(),
+      PageServlet.class,
+      this.getClass(),
+      "doGet",
+      "doPost",
+      "doPut",
+      "doDelete",
+      new Class<?>[] {
+        com.semanticcms.core.model.Page.class
+      }
+    );
+  }
 }

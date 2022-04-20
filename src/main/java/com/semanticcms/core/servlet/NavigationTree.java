@@ -34,108 +34,108 @@ import javax.servlet.http.HttpServletResponse;
 
 public class NavigationTree {
 
-	private final ServletContext servletContext;
-	private final HttpServletRequest request;
-	private final HttpServletResponse response;
-	private final Page root;
+  private final ServletContext servletContext;
+  private final HttpServletRequest request;
+  private final HttpServletResponse response;
+  private final Page root;
 
-	private boolean skipRoot;
-	private boolean yuiConfig;
-	private boolean includeElements;
-	private String target;
-	private String thisBook;
-	private String thisPage;
-	private String linksToBook;
-	private String linksToPage;
-	private int maxDepth;
+  private boolean skipRoot;
+  private boolean yuiConfig;
+  private boolean includeElements;
+  private String target;
+  private String thisBook;
+  private String thisPage;
+  private String linksToBook;
+  private String linksToPage;
+  private int maxDepth;
 
-	public NavigationTree(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Page root
-	) {
-		this.servletContext = servletContext;
-		this.request = request;
-		this.response = response;
-		this.root = root;
-	}
+  public NavigationTree(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    Page root
+  ) {
+    this.servletContext = servletContext;
+    this.request = request;
+    this.response = response;
+    this.root = root;
+  }
 
-	/**
-	 * Creates a new navigation tree in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public NavigationTree(Page root) {
-		this(
-			PageContext.getServletContext(),
-			PageContext.getRequest(),
-			PageContext.getResponse(),
-			root
-		);
-	}
+  /**
+   * Creates a new navigation tree in the current page context.
+   *
+   * @see  PageContext
+   */
+  public NavigationTree(Page root) {
+    this(
+      PageContext.getServletContext(),
+      PageContext.getRequest(),
+      PageContext.getResponse(),
+      root
+    );
+  }
 
-	public NavigationTree skipRoot(boolean skipRoot) {
-		this.skipRoot = skipRoot;
-		return this;
-	}
+  public NavigationTree skipRoot(boolean skipRoot) {
+    this.skipRoot = skipRoot;
+    return this;
+  }
 
-	public NavigationTree yuiConfig(boolean yuiConfig) {
-		this.yuiConfig = yuiConfig;
-		return this;
-	}
+  public NavigationTree yuiConfig(boolean yuiConfig) {
+    this.yuiConfig = yuiConfig;
+    return this;
+  }
 
-	public NavigationTree includeElements(boolean includeElements) {
-		this.includeElements = includeElements;
-		return this;
-	}
+  public NavigationTree includeElements(boolean includeElements) {
+    this.includeElements = includeElements;
+    return this;
+  }
 
-	public NavigationTree target(String target) {
-		this.target = target;
-		return this;
-	}
+  public NavigationTree target(String target) {
+    this.target = target;
+    return this;
+  }
 
-	public NavigationTree thisBook(String thisBook) {
-		this.thisBook = thisBook;
-		return this;
-	}
+  public NavigationTree thisBook(String thisBook) {
+    this.thisBook = thisBook;
+    return this;
+  }
 
-	public NavigationTree thisPage(String thisPage) {
-		this.thisPage = thisPage;
-		return this;
-	}
+  public NavigationTree thisPage(String thisPage) {
+    this.thisPage = thisPage;
+    return this;
+  }
 
-	public NavigationTree linksToBook(String linksToBook) {
-		this.linksToBook = linksToBook;
-		return this;
-	}
+  public NavigationTree linksToBook(String linksToBook) {
+    this.linksToBook = linksToBook;
+    return this;
+  }
 
-	public NavigationTree linksToPage(String linksToPage) {
-		this.linksToPage = linksToPage;
-		return this;
-	}
+  public NavigationTree linksToPage(String linksToPage) {
+    this.linksToPage = linksToPage;
+    return this;
+  }
 
-	public NavigationTree maxDepth(int maxDepth) {
-		this.maxDepth = maxDepth;
-		return this;
-	}
+  public NavigationTree maxDepth(int maxDepth) {
+    this.maxDepth = maxDepth;
+    return this;
+  }
 
-	public void invoke() throws ServletException, IOException {
-		NavigationTreeImpl.writeNavigationTreeImpl(
-			servletContext,
-			request,
-			response,
-			new DocumentEE(servletContext, request, response),
-			root,
-			skipRoot,
-			yuiConfig,
-			includeElements,
-			target,
-			thisBook,
-			thisPage,
-			linksToBook,
-			linksToPage,
-			maxDepth
-		);
-	}
+  public void invoke() throws ServletException, IOException {
+    NavigationTreeImpl.writeNavigationTreeImpl(
+      servletContext,
+      request,
+      response,
+      new DocumentEE(servletContext, request, response),
+      root,
+      skipRoot,
+      yuiConfig,
+      includeElements,
+      target,
+      thisBook,
+      thisPage,
+      linksToBook,
+      linksToPage,
+      maxDepth
+    );
+  }
 }

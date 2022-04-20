@@ -31,32 +31,32 @@ import javax.servlet.ServletRequest;
  */
 public enum CaptureLevel {
 
-	/**
-	 * Captures page meta data only, such as title, copyright, authors, parents, and children.
-	 */
-	PAGE,
+  /**
+   * Captures page meta data only, such as title, copyright, authors, parents, and children.
+   */
+  PAGE,
 
-	/**
-	 * Captures both page and content meta data.
-	 */
-	META,
+  /**
+   * Captures both page and content meta data.
+   */
+  META,
 
-	/**
-	 * Captures everything: page meta data, content meta data, and all body HTML.
-	 */
-	BODY;
+  /**
+   * Captures everything: page meta data, content meta data, and all body HTML.
+   */
+  BODY;
 
-	private static final ScopeEE.Request.Attribute<CaptureLevel> CAPTURE_LEVEL_REQUEST_ATTRIBUTE =
-		ScopeEE.REQUEST.attribute(CaptureLevel.class.getName() + ".captureLevel");
+  private static final ScopeEE.Request.Attribute<CaptureLevel> CAPTURE_LEVEL_REQUEST_ATTRIBUTE =
+    ScopeEE.REQUEST.attribute(CaptureLevel.class.getName() + ".captureLevel");
 
-	/**
-	 * Gets the capture level or <code>BODY</code> if none occurring.
-	 */
-	public static CaptureLevel getCaptureLevel(ServletRequest request) {
-		return CAPTURE_LEVEL_REQUEST_ATTRIBUTE.context(request).getOrDefault(CaptureLevel.BODY);
-	}
+  /**
+   * Gets the capture level or <code>BODY</code> if none occurring.
+   */
+  public static CaptureLevel getCaptureLevel(ServletRequest request) {
+    return CAPTURE_LEVEL_REQUEST_ATTRIBUTE.context(request).getOrDefault(CaptureLevel.BODY);
+  }
 
-	static void setCaptureLevel(ServletRequest request, CaptureLevel level) {
-		CAPTURE_LEVEL_REQUEST_ATTRIBUTE.context(request).set(level);
-	}
+  static void setCaptureLevel(ServletRequest request, CaptureLevel level) {
+    CAPTURE_LEVEL_REQUEST_ATTRIBUTE.context(request).set(level);
+  }
 }

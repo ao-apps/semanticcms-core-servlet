@@ -30,23 +30,25 @@ import javax.servlet.http.HttpServletRequest;
  */
 public final class Headers {
 
-	/** Make no instances. */
-	private Headers() {throw new AssertionError();}
+  /** Make no instances. */
+  private Headers() {
+    throw new AssertionError();
+  }
 
-	/**
-	 * A client may include this header to indicate it is in export mode.
-	 */
-	private static final String EXPORTING_HEADER = "X-com-semanticcms-core-exporting";
+  /**
+   * A client may include this header to indicate it is in export mode.
+   */
+  private static final String EXPORTING_HEADER = "X-com-semanticcms-core-exporting";
 
-	/**
-	 * The value to pass in the header.
-	 */
-	private static final String EXPORTING_HEADER_VALUE = "true";
+  /**
+   * The value to pass in the header.
+   */
+  private static final String EXPORTING_HEADER_VALUE = "true";
 
-	/**
-	 * Checks if the request is for an export.
-	 */
-	public static boolean isExporting(HttpServletRequest request) {
-		return EXPORTING_HEADER_VALUE.equalsIgnoreCase(request.getHeader(EXPORTING_HEADER));
-	}
+  /**
+   * Checks if the request is for an export.
+   */
+  public static boolean isExporting(HttpServletRequest request) {
+    return EXPORTING_HEADER_VALUE.equalsIgnoreCase(request.getHeader(EXPORTING_HEADER));
+  }
 }

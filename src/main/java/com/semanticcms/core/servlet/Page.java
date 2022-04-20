@@ -49,300 +49,304 @@ import org.joda.time.ReadableDateTime;
 
 public class Page {
 
-	private final ServletContext servletContext;
-	private final HttpServletRequest request;
-	private final HttpServletResponse response;
+  private final ServletContext servletContext;
+  private final HttpServletRequest request;
+  private final HttpServletResponse response;
 
-	private PageRef pageRef;
+  private PageRef pageRef;
 
-	private ReadableDateTime dateCreated;
-	private ReadableDateTime datePublished;
-	private ReadableDateTime dateModified;
-	private ReadableDateTime dateReviewed;
+  private ReadableDateTime dateCreated;
+  private ReadableDateTime datePublished;
+  private ReadableDateTime dateModified;
+  private ReadableDateTime dateReviewed;
 
-	private Serialization serialization;
-	private Doctype doctype;
-	private Boolean autonli;
-	private Boolean indent;
+  private Serialization serialization;
+  private Doctype doctype;
+  private Boolean autonli;
+  private Boolean indent;
 
-	private final String title;
+  private final String title;
 
-	private String shortTitle;
-	private String description;
-	private String keywords;
-	private Boolean allowRobots;
-	private Boolean toc;
-	private int tocLevels = com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
-	private boolean allowParentMismatch;
-	private boolean allowChildMismatch;
-	private Map<String, Object> properties;
+  private String shortTitle;
+  private String description;
+  private String keywords;
+  private Boolean allowRobots;
+  private Boolean toc;
+  private int tocLevels = com.semanticcms.core.model.Page.DEFAULT_TOC_LEVELS;
+  private boolean allowParentMismatch;
+  private boolean allowChildMismatch;
+  private Map<String, Object> properties;
 
-	public Page(
-		ServletContext servletContext,
-		HttpServletRequest request,
-		HttpServletResponse response,
-		String title
-	) {
-		this.servletContext = servletContext;
-		this.request = request;
-		this.response = response;
-		this.title = title;
-	}
+  public Page(
+    ServletContext servletContext,
+    HttpServletRequest request,
+    HttpServletResponse response,
+    String title
+  ) {
+    this.servletContext = servletContext;
+    this.request = request;
+    this.response = response;
+    this.title = title;
+  }
 
-	/**
-	 * Creates a new page in the current page context.
-	 *
-	 * @see  PageContext
-	 */
-	public Page(String title) {
-		this(
-			PageContext.getServletContext(),
-			PageContext.getRequest(),
-			PageContext.getResponse(),
-			title
-		);
-	}
+  /**
+   * Creates a new page in the current page context.
+   *
+   * @see  PageContext
+   */
+  public Page(String title) {
+    this(
+      PageContext.getServletContext(),
+      PageContext.getRequest(),
+      PageContext.getResponse(),
+      title
+    );
+  }
 
-	public Page pageRef(PageRef pageRef) {
-		this.pageRef = pageRef;
-		return this;
-	}
+  public Page pageRef(PageRef pageRef) {
+    this.pageRef = pageRef;
+    return this;
+  }
 
-	public Page dateCreated(ReadableDateTime dateCreated) {
-		this.dateCreated = dateCreated;
-		return this;
-	}
+  public Page dateCreated(ReadableDateTime dateCreated) {
+    this.dateCreated = dateCreated;
+    return this;
+  }
 
-	public Page datePublished(ReadableDateTime datePublished) {
-		this.datePublished = datePublished;
-		return this;
-	}
+  public Page datePublished(ReadableDateTime datePublished) {
+    this.datePublished = datePublished;
+    return this;
+  }
 
-	public Page dateModified(ReadableDateTime dateModified) {
-		this.dateModified = dateModified;
-		return this;
-	}
+  public Page dateModified(ReadableDateTime dateModified) {
+    this.dateModified = dateModified;
+    return this;
+  }
 
-	public Page dateReviewed(ReadableDateTime dateReviewed) {
-		this.dateReviewed = dateReviewed;
-		return this;
-	}
+  public Page dateReviewed(ReadableDateTime dateReviewed) {
+    this.dateReviewed = dateReviewed;
+    return this;
+  }
 
-	public Page serialization(Serialization serialization) {
-		this.serialization = serialization;
-		return this;
-	}
+  public Page serialization(Serialization serialization) {
+    this.serialization = serialization;
+    return this;
+  }
 
-	public Page doctype(Doctype doctype) {
-		this.doctype = doctype;
-		return this;
-	}
+  public Page doctype(Doctype doctype) {
+    this.doctype = doctype;
+    return this;
+  }
 
-	public Page autonli(Boolean autonli) {
-		this.autonli = autonli;
-		return this;
-	}
+  public Page autonli(Boolean autonli) {
+    this.autonli = autonli;
+    return this;
+  }
 
-	public Page indent(Boolean indent) {
-		this.indent = indent;
-		return this;
-	}
+  public Page indent(Boolean indent) {
+    this.indent = indent;
+    return this;
+  }
 
-	public Page shortTitle(String shortTitle) {
-		this.shortTitle = shortTitle;
-		return this;
-	}
+  public Page shortTitle(String shortTitle) {
+    this.shortTitle = shortTitle;
+    return this;
+  }
 
-	public Page description(String description) {
-		this.description = description;
-		return this;
-	}
+  public Page description(String description) {
+    this.description = description;
+    return this;
+  }
 
-	public Page keywords(String keywords) {
-		this.keywords = keywords;
-		return this;
-	}
+  public Page keywords(String keywords) {
+    this.keywords = keywords;
+    return this;
+  }
 
-	public Page allowRobots(Boolean allowRobots) {
-		this.allowRobots = allowRobots;
-		return this;
-	}
+  public Page allowRobots(Boolean allowRobots) {
+    this.allowRobots = allowRobots;
+    return this;
+  }
 
-	public Page toc(Boolean toc) {
-		this.toc = toc;
-		return this;
-	}
+  public Page toc(Boolean toc) {
+    this.toc = toc;
+    return this;
+  }
 
-	public Page tocLevels(int tocLevels) {
-		this.tocLevels = tocLevels;
-		return this;
-	}
+  public Page tocLevels(int tocLevels) {
+    this.tocLevels = tocLevels;
+    return this;
+  }
 
-	public Page allowParentMismatch(boolean allowParentMismatch) {
-		this.allowParentMismatch = allowParentMismatch;
-		return this;
-	}
+  public Page allowParentMismatch(boolean allowParentMismatch) {
+    this.allowParentMismatch = allowParentMismatch;
+    return this;
+  }
 
-	public Page allowChildMismatch(boolean allowChildMismatch) {
-		this.allowChildMismatch = allowChildMismatch;
-		return this;
-	}
+  public Page allowChildMismatch(boolean allowChildMismatch) {
+    this.allowChildMismatch = allowChildMismatch;
+    return this;
+  }
 
-	/**
-	 * Adds a property to the page.
-	 *
-	 * @throws  IllegalStateException  if the property with the given name has already been set
-	 */
-	public Page property(String name, Object value) throws IllegalStateException {
-		if(properties == null) {
-			properties = new LinkedHashMap<>();
-		} else if(properties.containsKey(name)) {
-			throw new LocalizedIllegalStateException(
-				PACKAGE_RESOURCES,
-				"error.duplicatePageProperty",
-				name
-			);
-		}
-		properties.put(name, value);
-		return this;
-	}
+  /**
+   * Adds a property to the page.
+   *
+   * @throws  IllegalStateException  if the property with the given name has already been set
+   */
+  public Page property(String name, Object value) throws IllegalStateException {
+    if (properties == null) {
+      properties = new LinkedHashMap<>();
+    } else if (properties.containsKey(name)) {
+      throw new LocalizedIllegalStateException(
+        PACKAGE_RESOURCES,
+        "error.duplicatePageProperty",
+        name
+      );
+    }
+    properties.put(name, value);
+    return this;
+  }
 
-	@FunctionalInterface
-	public static interface Body {
-		void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
-	}
+  @FunctionalInterface
+  public static interface Body {
+    void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
+  }
 
-	/**
-	 * <p>
-	 * Sets request attribute "page" to the current page, and restores the previous "page"
-	 * attribute once completed.
-	 * </p>
-	 * <p>
-	 * Also establishes a new {@link PageContext}.
-	 * </p>
-	 *
-	 * @see  PageContext
-	 * @see  CurrentPage#REQUEST_ATTRIBUTE
-	 */
-	public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
-		PageRef pr = pageRef;
-		if(pr == null) pr = PageRefResolver.getCurrentPageRef(servletContext, request);
-		PageImpl.doPageImpl(
-			servletContext,
-			request,
-			response,
-			pr,
-			dateCreated,
-			datePublished,
-			dateModified,
-			dateReviewed,
-			serialization,
-			doctype,
-			autonli,
-			indent,
-			title,
-			shortTitle,
-			description,
-			keywords,
-			allowRobots,
-			toc,
-			tocLevels,
-			allowParentMismatch,
-			allowChildMismatch,
-			properties,
-			body == null
-				? null
-				: (discard, page) -> {
-					if(discard) {
-						final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
-						// Set PageContext
-						PageContext.newPageContextSkip(
-							servletContext,
-							request,
-							newResponse,
-							() -> body.doBody(request, newResponse, page)
-						);
-						return EmptyResult.getInstance();
-					} else {
-						BufferWriter capturedOut = EncodingBufferedTag.newBufferWriter(request);
-						try {
-							try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
-								final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
-									@Override
-									public PrintWriter getWriter() throws IOException {
-										return capturedPW;
-									}
-									@Override
-									public ServletOutputStream getOutputStream() {
-										throw new NotImplementedException("getOutputStream not expected");
-									}
-								};
-								// Set PageContext
-								PageContext.newPageContextSkip(
-									servletContext,
-									request,
-									newResponse,
-									() -> body.doBody(request, newResponse, page)
-								);
-								if(capturedPW.checkError()) throw new IOException("Error on capturing PrintWriter");
-							}
-						} finally {
-							capturedOut.close();
-						}
-						return capturedOut.getResult();
-					}
-				}
-		);
-	}
+  /**
+   * <p>
+   * Sets request attribute "page" to the current page, and restores the previous "page"
+   * attribute once completed.
+   * </p>
+   * <p>
+   * Also establishes a new {@link PageContext}.
+   * </p>
+   *
+   * @see  PageContext
+   * @see  CurrentPage#REQUEST_ATTRIBUTE
+   */
+  public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
+    PageRef pr = pageRef;
+    if (pr == null) {
+      pr = PageRefResolver.getCurrentPageRef(servletContext, request);
+    }
+    PageImpl.doPageImpl(
+      servletContext,
+      request,
+      response,
+      pr,
+      dateCreated,
+      datePublished,
+      dateModified,
+      dateReviewed,
+      serialization,
+      doctype,
+      autonli,
+      indent,
+      title,
+      shortTitle,
+      description,
+      keywords,
+      allowRobots,
+      toc,
+      tocLevels,
+      allowParentMismatch,
+      allowChildMismatch,
+      properties,
+      body == null
+        ? null
+        : (discard, page) -> {
+          if (discard) {
+            final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
+            // Set PageContext
+            PageContext.newPageContextSkip(
+              servletContext,
+              request,
+              newResponse,
+              () -> body.doBody(request, newResponse, page)
+            );
+            return EmptyResult.getInstance();
+          } else {
+            BufferWriter capturedOut = EncodingBufferedTag.newBufferWriter(request);
+            try {
+              try (PrintWriter capturedPW = new PrintWriter(capturedOut)) {
+                final HttpServletResponse newResponse = new HttpServletResponseWrapper(response) {
+                  @Override
+                  public PrintWriter getWriter() throws IOException {
+                    return capturedPW;
+                  }
+                  @Override
+                  public ServletOutputStream getOutputStream() {
+                    throw new NotImplementedException("getOutputStream not expected");
+                  }
+                };
+                // Set PageContext
+                PageContext.newPageContextSkip(
+                  servletContext,
+                  request,
+                  newResponse,
+                  () -> body.doBody(request, newResponse, page)
+                );
+                if (capturedPW.checkError()) {
+                  throw new IOException("Error on capturing PrintWriter");
+                }
+              }
+            } finally {
+              capturedOut.close();
+            }
+            return capturedOut.getResult();
+          }
+        }
+    );
+  }
 
-	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
-	 */
-	public void invoke() throws ServletException, IOException, SkipPageException {
-		invoke((Body)null);
-	}
+  /**
+   * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
+   */
+  public void invoke() throws ServletException, IOException, SkipPageException {
+    invoke((Body)null);
+  }
 
-	@FunctionalInterface
-	public static interface PageContextBody {
-		void doBody(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
-	}
+  @FunctionalInterface
+  public static interface PageContextBody {
+    void doBody(com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException;
+  }
 
-	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
-	 */
-	public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
-		invoke(
-			body == null
-				? null
-				// Java 1.8: (req, resp, page) -> body.doBody(page)
-				: new Body() {
-					@Override
-					public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-						body.doBody(page);
-					}
-				}
-		);
-	}
+  /**
+   * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
+   */
+  public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
+    invoke(
+      body == null
+        ? null
+        // Java 1.8: (req, resp, page) -> body.doBody(page)
+        : new Body() {
+          @Override
+          public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
+            body.doBody(page);
+          }
+        }
+    );
+  }
 
-	@FunctionalInterface
-	public static interface PageContextNoPageBody {
-		void doBody() throws ServletException, IOException, SkipPageException;
-	}
+  @FunctionalInterface
+  public static interface PageContextNoPageBody {
+    void doBody() throws ServletException, IOException, SkipPageException;
+  }
 
-	/**
-	 * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
-	 */
-	public void invoke(final PageContextNoPageBody body) throws ServletException, IOException, SkipPageException {
-		invoke(
-			body == null
-				? null
-				// Java 1.8: (req, resp, page) -> body.doBody()
-				: new Body() {
-					@Override
-					public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-						body.doBody();
-					}
-				}
-		);
-	}
+  /**
+   * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
+   */
+  public void invoke(final PageContextNoPageBody body) throws ServletException, IOException, SkipPageException {
+    invoke(
+      body == null
+        ? null
+        // Java 1.8: (req, resp, page) -> body.doBody()
+        : new Body() {
+          @Override
+          public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
+            body.doBody();
+          }
+        }
+    );
+  }
 }
