@@ -49,9 +49,9 @@ public class ServletElementContext implements ElementContext {
   private final HttpServletResponse response;
 
   public ServletElementContext(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response
   ) {
     this.servletContext = servletContext;
     this.request = request;
@@ -62,31 +62,31 @@ public class ServletElementContext implements ElementContext {
   public void include(final String resource, Writer out, final Map<String, ?> args) throws IOException, ServletException, SkipPageException {
     final PrintWriter pw;
     if (out instanceof PrintWriter) {
-      pw = (PrintWriter)out;
+      pw = (PrintWriter) out;
     } else {
       pw = new PrintWriter(out);
     }
     // Clear PageContext on include
     PageContext.newPageContextSkip(
-      null,
-      null,
-      null,
-      () -> Dispatcher.include(
-        servletContext,
-        resource,
-        request,
-        new HttpServletResponseWrapper(response) {
-          @Override
-          public PrintWriter getWriter() {
-            return pw;
-          }
-          @Override
-          public ServletOutputStream getOutputStream() {
-            throw new NotImplementedException("getOutputStream not expected");
-          }
-        },
-        args
-      )
+        null,
+        null,
+        null,
+        () -> Dispatcher.include(
+            servletContext,
+            resource,
+            request,
+            new HttpServletResponseWrapper(response) {
+              @Override
+              public PrintWriter getWriter() {
+                return pw;
+              }
+              @Override
+              public ServletOutputStream getOutputStream() {
+                throw new NotImplementedException("getOutputStream not expected");
+              }
+            },
+            args
+        )
     );
     if (pw.checkError()) {
       throw new IOException("Error on include PrintWriter");

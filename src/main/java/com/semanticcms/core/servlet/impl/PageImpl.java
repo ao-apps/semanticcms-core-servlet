@@ -82,30 +82,30 @@ public final class PageImpl {
   // TODO: All theme/layout/skin support both HTML 4 and 5?
   // TODO: Fall-back to div without semantic tags?
   public static <Ex extends Throwable> void doPageImpl(
-    final ServletContext servletContext,
-    final HttpServletRequest request,
-    final HttpServletResponse response,
-    CaptureContext capture,
-    PageRef pageRef,
-    ReadableDateTime dateCreated,
-    ReadableDateTime datePublished,
-    ReadableDateTime dateModified,
-    ReadableDateTime dateReviewed,
-    Serialization serialization,
-    Doctype doctype,
-    Boolean autonli,
-    Boolean indent,
-    String title,
-    String shortTitle,
-    String description,
-    String keywords,
-    Boolean allowRobots,
-    Boolean toc,
-    int tocLevels,
-    boolean allowParentMismatch,
-    boolean allowChildMismatch,
-    Map<String, Object> properties,
-    PageImplBody<Ex> body
+      final ServletContext servletContext,
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      CaptureContext capture,
+      PageRef pageRef,
+      ReadableDateTime dateCreated,
+      ReadableDateTime datePublished,
+      ReadableDateTime dateModified,
+      ReadableDateTime dateReviewed,
+      Serialization serialization,
+      Doctype doctype,
+      Boolean autonli,
+      Boolean indent,
+      String title,
+      String shortTitle,
+      String description,
+      String keywords,
+      Boolean allowRobots,
+      Boolean toc,
+      int tocLevels,
+      boolean allowParentMismatch,
+      boolean allowChildMismatch,
+      Map<String, Object> properties,
+      PageImplBody<Ex> body
   ) throws Ex, ServletException, IOException, SkipPageException {
     final Page page = new Page();
     page.setPageRef(pageRef);
@@ -136,9 +136,9 @@ public final class PageImpl {
         String name = entry.getKey();
         if (!page.setProperty(name, entry.getValue())) {
           throw new LocalizedServletException(
-            PACKAGE_RESOURCES,
-            "error.duplicatePageProperty",
-            name
+              PACKAGE_RESOURCES,
+              "error.duplicatePageProperty",
+              name
           );
         }
       }
@@ -220,10 +220,10 @@ public final class PageImpl {
                       PageRef newPageRef = page.getPageRef();
                       if (!newPageRef.getBookRef().equals(pageRef.getBookRef())) {
                         throw new ServletException(
-                          "Page may not move itself into a different book.  pageRef="
-                            + pageRef
-                            + ", newPageRef="
-                            + newPageRef
+                            "Page may not move itself into a different book.  pageRef="
+                                + pageRef
+                                + ", newPageRef="
+                                + newPageRef
                         );
                       }
                     } finally {
@@ -301,19 +301,19 @@ public final class PageImpl {
           if (lastSlash == -1) {
             throw new AssertionError();
           }
-          int nextLastSlash = pagePath.lastIndexOf('/', lastSlash-1);
+          int nextLastSlash = pagePath.lastIndexOf('/', lastSlash - 1);
           if (nextLastSlash == -1) {
             throw new ServletException("Auto parent of page would be outside book: " + pageRef);
           }
           Path endSlashPath = pageRef.getPath().prefix(nextLastSlash + 1);
           page.addParentRef(
-            new ParentRef(
-              new PageRef(
-                pageBookRef,
-                endSlashPath
-              ),
-              null
-            )
+              new ParentRef(
+                  new PageRef(
+                      pageBookRef,
+                      endSlashPath
+                  ),
+                  null
+              )
           );
         } else {
           // Assume "./".
@@ -323,13 +323,13 @@ public final class PageImpl {
           }
           Path endSlashPath = pageRef.getPath().prefix(lastSlash + 1);
           page.addParentRef(
-            new ParentRef(
-              new PageRef(
-                pageBookRef,
-                endSlashPath
-              ),
-              null
-            )
+              new ParentRef(
+                  new PageRef(
+                      pageBookRef,
+                      endSlashPath
+                  ),
+                  null
+              )
           );
         }
       }

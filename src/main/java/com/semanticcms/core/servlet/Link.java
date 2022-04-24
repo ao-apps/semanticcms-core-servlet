@@ -39,96 +39,96 @@ import javax.servlet.jsp.SkipPageException;
 public class Link extends Element<com.semanticcms.core.model.Link> {
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    com.semanticcms.core.model.Link element
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      com.semanticcms.core.model.Link element
   ) {
     super(
-      servletContext,
-      request,
-      response,
-      element
+        servletContext,
+        request,
+        response,
+        element
     );
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response
   ) {
     this(
-      servletContext,
-      request,
-      response,
-      new com.semanticcms.core.model.Link()
+        servletContext,
+        request,
+        response,
+        new com.semanticcms.core.model.Link()
     );
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    com.semanticcms.core.model.Link element,
-    String page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      com.semanticcms.core.model.Link element,
+      String page
   ) {
     this(servletContext, request, response, element);
     element.setPagePath(page);
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    String page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      String page
   ) {
     this(servletContext, request, response);
     element.setPagePath(page);
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    com.semanticcms.core.model.Link element,
-    Path book,
-    String page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      com.semanticcms.core.model.Link element,
+      Path book,
+      String page
   ) {
     this(servletContext, request, response, element, page);
     element.setBook(book);
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Path book,
-    String page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Path book,
+      String page
   ) {
     this(servletContext, request, response, page);
     element.setBook(book);
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    com.semanticcms.core.model.Link element,
-    DomainName domain,
-    Path book,
-    String page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      com.semanticcms.core.model.Link element,
+      DomainName domain,
+      Path book,
+      String page
   ) {
     this(servletContext, request, response, element, book, page);
     element.setDomain(domain);
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    DomainName domain,
-    Path book,
-    String page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      DomainName domain,
+      Path book,
+      String page
   ) {
     this(servletContext, request, response, book, page);
     element.setDomain(domain);
@@ -141,10 +141,10 @@ public class Link extends Element<com.semanticcms.core.model.Link> {
    */
   public Link(com.semanticcms.core.model.Link element) {
     this(
-      PageContext.getServletContext(),
-      PageContext.getRequest(),
-      PageContext.getResponse(),
-      element
+        PageContext.getServletContext(),
+        PageContext.getRequest(),
+        PageContext.getResponse(),
+        element
     );
   }
 
@@ -155,9 +155,9 @@ public class Link extends Element<com.semanticcms.core.model.Link> {
    */
   public Link() {
     this(
-      PageContext.getServletContext(),
-      PageContext.getRequest(),
-      PageContext.getResponse()
+        PageContext.getServletContext(),
+        PageContext.getRequest(),
+        PageContext.getResponse()
     );
   }
 
@@ -167,8 +167,8 @@ public class Link extends Element<com.semanticcms.core.model.Link> {
    * @see  PageContext
    */
   public Link(
-    com.semanticcms.core.model.Link element,
-    String page
+      com.semanticcms.core.model.Link element,
+      String page
   ) {
     this(element);
     element.setPagePath(page);
@@ -190,9 +190,9 @@ public class Link extends Element<com.semanticcms.core.model.Link> {
    * @see  PageContext
    */
   public Link(
-    com.semanticcms.core.model.Link element,
-    Path book,
-    String page
+      com.semanticcms.core.model.Link element,
+      Path book,
+      String page
   ) {
     this(element, page);
     element.setBook(book);
@@ -214,10 +214,10 @@ public class Link extends Element<com.semanticcms.core.model.Link> {
    * @see  PageContext
    */
   public Link(
-    com.semanticcms.core.model.Link element,
-    DomainName domain,
-    Path book,
-    String page
+      com.semanticcms.core.model.Link element,
+      DomainName domain,
+      Path book,
+      String page
   ) {
     this(element, book, page);
     element.setDomain(domain);

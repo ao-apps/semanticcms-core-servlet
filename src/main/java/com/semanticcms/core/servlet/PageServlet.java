@@ -100,16 +100,16 @@ public abstract class PageServlet extends HttpServlet {
   private void callInPage(HttpServletRequest req, HttpServletResponse resp, final DoMethodCallable method) throws ServletException, IOException {
     try {
       new com.semanticcms.core.servlet.Page(getServletContext(), req, resp, getTitle())
-        .shortTitle(getShortTitle())
-        .description(getDescription())
-        .keywords(getKeywords())
-        .toc(getToc())
-        .tocLevels(getTocLevels())
-        .invoke((HttpServletRequest req1, HttpServletResponse resp1, Page page) -> {
-          resp1.setContentType(ContentType.XHTML);
-          resp1.setCharacterEncoding(ENCODING.name());
-          method.doMethod(page);
-        });
+          .shortTitle(getShortTitle())
+          .description(getDescription())
+          .keywords(getKeywords())
+          .toc(getToc())
+          .tocLevels(getTocLevels())
+          .invoke((HttpServletRequest req1, HttpServletResponse resp1, Page page) -> {
+            resp1.setContentType(ContentType.XHTML);
+            resp1.setCharacterEncoding(ENCODING.name());
+            method.doMethod(page);
+          });
     } catch (SkipPageException e) {
       Includer.setPageSkipped(req);
     }
@@ -187,16 +187,16 @@ public abstract class PageServlet extends HttpServlet {
    */
   protected void doOptions(Page page) throws ServletException, IOException, SkipPageException {
     HttpServletUtil.doOptions(
-      PageContext.getResponse(),
-      PageServlet.class,
-      this.getClass(),
-      "doGet",
-      "doPost",
-      "doPut",
-      "doDelete",
-      new Class<?>[] {
-        Page.class
-      }
+        PageContext.getResponse(),
+        PageServlet.class,
+        this.getClass(),
+        "doGet",
+        "doPost",
+        "doPut",
+        "doDelete",
+        new Class<?>[]{
+            Page.class
+        }
     );
   }
 }
