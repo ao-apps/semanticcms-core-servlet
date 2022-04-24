@@ -87,18 +87,18 @@ public final class ElementFilterTreeImpl {
   }
 
   private static boolean findElements(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    ElementFilter elementFilter,
-    Set<Node> nodesWithMatches,
-    Node node,
-    boolean includeElements
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      ElementFilter elementFilter,
+      Set<Node> nodesWithMatches,
+      Node node,
+      boolean includeElements
   ) throws ServletException, IOException {
     List<Element> childElements = node.getChildElements();
     boolean hasMatch;
     // Add self if is the target type
-    if ((node instanceof Element) && elementFilter.matches((Element)node)) {
+    if ((node instanceof Element) && elementFilter.matches((Element) node)) {
       hasMatch = true;
     } else {
       hasMatch = false;
@@ -119,7 +119,7 @@ public final class ElementFilterTreeImpl {
       assert (node instanceof Page);
       if (!hasMatch) {
         // Not including elements, so any match from an element must be considered a match from the page the element is on
-        Page page = (Page)node;
+        Page page = (Page) node;
         for (Element e : page.getElements()) {
           if (elementFilter.matches(e)) {
             hasMatch = true;
@@ -129,7 +129,7 @@ public final class ElementFilterTreeImpl {
       }
     }
     if (node instanceof Page) {
-      for (ChildRef childRef : ((Page)node).getChildRefs()) {
+      for (ChildRef childRef : ((Page) node).getChildRefs()) {
         PageRef childPageRef = childRef.getPageRef();
         // Child not in missing book
         if (childPageRef.getBook() != null) {
@@ -147,24 +147,24 @@ public final class ElementFilterTreeImpl {
   }
 
   private static void writeNode(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Node currentNode,
-    Set<Node> nodesWithMatches,
-    PageIndex pageIndex,
-    AnyUL_c<?, ?, ?> ul__,
-    Node node,
-    boolean includeElements
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Node currentNode,
+      Set<Node> nodesWithMatches,
+      PageIndex pageIndex,
+      AnyUL_c<?, ?, ?> ul__,
+      Node node,
+      boolean includeElements
   ) throws ServletException, IOException, SkipPageException {
     final Page page;
     final Element element;
     if (node instanceof Page) {
-      page = (Page)node;
+      page = (Page) node;
       element = null;
     } else if (node instanceof Element) {
       assert includeElements;
-      element = (Element)node;
+      element = (Element) node;
       page = element.getPage();
     } else {
       throw new AssertionError();
@@ -181,11 +181,11 @@ public final class ElementFilterTreeImpl {
       if (index != null) {
         url.append('#');
         URIEncoder.encodeURIComponent(
-          PageIndex.getRefId(
-            index,
-            element == null ? null : element.getId()
-          ),
-          url
+            PageIndex.getRefId(
+                index,
+                element == null ? null : element.getId()
+            ),
+            url
         );
       } else {
         URIEncoder.encodeURI(request.getContextPath(), url);
@@ -198,13 +198,13 @@ public final class ElementFilterTreeImpl {
         }
       }
       li_c = ul__.li()
-        .clazz(SemanticCMS.getInstance(servletContext).getListItemCssClass(node))
-        ._c();
+          .clazz(SemanticCMS.getInstance(servletContext).getListItemCssClass(node))
+          ._c();
       li_c.a(response.encodeURL(url.toString())).__(a -> {
         a.text(node);
         if (index != null) {
           a.sup__any(sup -> sup
-            .text('[').text(index + 1).text(']')
+                  .text('[').text(index + 1).text(']')
           );
         }
       });
@@ -231,13 +231,13 @@ public final class ElementFilterTreeImpl {
   // look ahead to know which elements to show.
   // TODO: Caching?
   public static void writeElementFilterTreeImpl(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    AnyPalpableContent<?, ?> content,
-    ElementFilter elementFilter,
-    Node root,
-    boolean includeElements
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      AnyPalpableContent<?, ?> content,
+      ElementFilter elementFilter,
+      Node root,
+      boolean includeElements
   ) throws ServletException, IOException, SkipPageException {
     // Get the current capture state
     final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
@@ -246,25 +246,25 @@ public final class ElementFilterTreeImpl {
       // Filter by has files
       final Set<Node> nodesWithMatches = new HashSet<>();
       findElements(
-        servletContext,
-        request,
-        response,
-        elementFilter,
-        nodesWithMatches,
-        root,
-        includeElements
+          servletContext,
+          request,
+          response,
+          elementFilter,
+          nodesWithMatches,
+          root,
+          includeElements
       );
       AnyUL_c<?, ?, ?> ul_c = (captureLevel == CaptureLevel.BODY) ? content.ul_c() : null;
       writeNode(
-        servletContext,
-        request,
-        response,
-        currentNode,
-        nodesWithMatches,
-        PageIndex.getCurrentPageIndex(request),
-        ul_c,
-        root,
-        includeElements
+          servletContext,
+          request,
+          response,
+          currentNode,
+          nodesWithMatches,
+          PageIndex.getCurrentPageIndex(request),
+          ul_c,
+          root,
+          includeElements
       );
       if (ul_c != null) {
         ul_c.__();
@@ -273,22 +273,22 @@ public final class ElementFilterTreeImpl {
   }
 
   public static void writeElementFilterTreeImpl(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    AnyPalpableContent<?, ?> content,
-    Class<? extends Element> elementType,
-    Node root,
-    boolean includeElements
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      AnyPalpableContent<?, ?> content,
+      Class<? extends Element> elementType,
+      Node root,
+      boolean includeElements
   ) throws ServletException, IOException, SkipPageException {
     writeElementFilterTreeImpl(
-      servletContext,
-      request,
-      response,
-      content,
-      new ClassFilter(elementType),
-      root,
-      includeElements
+        servletContext,
+        request,
+        response,
+        content,
+        new ClassFilter(elementType),
+        root,
+        includeElements
     );
   }
 }

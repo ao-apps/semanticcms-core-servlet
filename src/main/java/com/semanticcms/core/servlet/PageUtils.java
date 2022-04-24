@@ -66,31 +66,31 @@ public final class PageUtils {
 
   // TODO: Cache result per class per page?
   public static boolean hasElement(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page,
-    Class<? extends Element> elementType,
-    boolean recursive
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page,
+      Class<? extends Element> elementType,
+      boolean recursive
   ) throws ServletException, IOException {
     if (recursive) {
       return CapturePage.traversePagesAnyOrder(
-        servletContext,
-        request,
-        response,
-        page,
-        CaptureLevel.META,
-        page1 -> {
-          for (Element element : page1.getElements()) {
-            if (elementType.isAssignableFrom(element.getClass())) {
-              return true;
+          servletContext,
+          request,
+          response,
+          page,
+          CaptureLevel.META,
+          page1 -> {
+            for (Element element : page1.getElements()) {
+              if (elementType.isAssignableFrom(element.getClass())) {
+                return true;
+              }
             }
-          }
-          return null;
-        },
-        Page::getChildRefs,
-        // Child not in missing book
-        childPage -> childPage.getBook() != null
+            return null;
+          },
+          Page::getChildRefs,
+          // Child not in missing book
+          childPage -> childPage.getBook() != null
       ) != null;
     } else {
       for (Element element : page.getElements()) {
@@ -119,27 +119,27 @@ public final class PageUtils {
    * </p>
    */
   public static boolean findAllowRobots(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    com.semanticcms.core.model.Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      com.semanticcms.core.model.Page page
   ) throws ServletException, IOException {
     // TODO: Traversal
     return findAllowRobotsRecursive(
-      servletContext,
-      request,
-      response,
-      page,
-      new HashMap<>()
+        servletContext,
+        request,
+        response,
+        page,
+        new HashMap<>()
     );
   }
 
   private static boolean findAllowRobotsRecursive(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    com.semanticcms.core.model.Page page,
-    Map<PageRef, Boolean> finished
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      com.semanticcms.core.model.Page page,
+      Map<PageRef, Boolean> finished
   ) throws ServletException, IOException {
     PageRef pageRef = page.getPageRef();
     assert !finished.containsKey(pageRef);
@@ -156,11 +156,11 @@ public final class PageUtils {
           if (parentAllowRobots == null) {
             // Capture parent and find its allowRobots
             parentAllowRobots = findAllowRobotsRecursive(
-              servletContext,
-              request,
-              response,
-              CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
-              finished
+                servletContext,
+                request,
+                response,
+                CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
+                finished
             );
           }
           if (pageAllowRobots == null) {
@@ -237,18 +237,18 @@ public final class PageUtils {
    * @return  The filtered set of parents, in the order declared by the page.
    */
   public static Set<Page> getApplicableParents(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    View view,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      View view,
+      Page page
   ) throws ServletException, IOException {
     Collection<Page> parents = CapturePage.capturePages(
-      servletContext,
-      request,
-      response,
-      filterNotMissingBook(page.getParentRefs()),
-      CaptureLevel.META // TODO: View provide capture level required for isApplicable check, might be PAGE or (null for none) for some views.
+        servletContext,
+        request,
+        response,
+        filterNotMissingBook(page.getParentRefs()),
+        CaptureLevel.META // TODO: View provide capture level required for isApplicable check, might be PAGE or (null for none) for some views.
     ).values();
     Set<Page> applicableParents = AoCollections.newLinkedHashSet(parents.size());
     for (Page parent : parents) {
@@ -261,10 +261,10 @@ public final class PageUtils {
 
   public static ReadableDateTime toDateTime(Object o) throws IOException {
     if (o instanceof ReadableDateTime) {
-      return (ReadableDateTime)o;
+      return (ReadableDateTime) o;
     }
     if (o instanceof Long) {
-      long l = (Long)o;
+      long l = (Long) o;
       return l == -1 || l == 0 ? null : new DateTime(l);
     }
     if (Coercion.isEmpty(o)) {

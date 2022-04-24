@@ -54,10 +54,10 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
   protected final E element;
 
   protected Element(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    E element
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      E element
   ) {
     this.servletContext = servletContext;
     this.request = request;
@@ -78,9 +78,9 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
   public Element<E> property(String name, Object value) throws IllegalStateException {
     if (!this.element.setProperty(name, value)) {
       throw new LocalizedIllegalStateException(
-        PACKAGE_RESOURCES,
-        "error.duplicateElementProperty",
-        name
+          PACKAGE_RESOURCES,
+          "error.duplicateElementProperty",
+          name
       );
     }
     return this;
@@ -161,7 +161,7 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
    * @see  #invoke(com.semanticcms.core.servlet.Element.Body)
    */
   public void invoke() throws ServletException, IOException, SkipPageException {
-    invoke((Body<? super E>)null);
+    invoke((Body<? super E>) null);
   }
 
   @FunctionalInterface
@@ -174,7 +174,7 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
    */
   public void invoke(final PageContextBody<? super E> body) throws ServletException, IOException, SkipPageException {
     invoke(
-      (body == null) ? null : (req, resp, e) -> body.doBody(e)
+        (body == null) ? null : (req, resp, e) -> body.doBody(e)
     );
   }
 
@@ -188,7 +188,7 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
    */
   public void invoke(final PageContextNoElementBody body) throws ServletException, IOException, SkipPageException {
     invoke(
-      (body == null) ? null : (req, resp, e) -> body.doBody()
+        (body == null) ? null : (req, resp, e) -> body.doBody()
     );
   }
 
@@ -214,10 +214,10 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
             };
             // Set PageContext
             PageContext.newPageContextSkip(
-              servletContext,
-              request,
-              newResponse,
-              () -> body.doBody(request, newResponse, element)
+                servletContext,
+                request,
+                newResponse,
+                () -> body.doBody(request, newResponse, element)
             );
             if (capturedPW.checkError()) {
               throw new IOException("Error on capturing PrintWriter");
@@ -232,10 +232,10 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
         final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
         // Set PageContext
         PageContext.newPageContextSkip(
-          servletContext,
-          request,
-          newResponse,
-          () -> body.doBody(request, newResponse, element)
+            servletContext,
+            request,
+            newResponse,
+            () -> body.doBody(request, newResponse, element)
         );
       } else {
         throw new AssertionError();

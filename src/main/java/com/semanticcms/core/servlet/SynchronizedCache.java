@@ -37,10 +37,10 @@ class SynchronizedCache extends MapCache {
 
   SynchronizedCache() {
     super(
-      new HashMap<>(),
-      VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
-      VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
-      new HashMap<>()
+        new HashMap<>(),
+        VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+        VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+        new HashMap<>()
     );
   }
 

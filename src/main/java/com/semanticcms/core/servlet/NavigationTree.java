@@ -50,10 +50,10 @@ public class NavigationTree {
   private int maxDepth;
 
   public NavigationTree(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page root
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page root
   ) {
     this.servletContext = servletContext;
     this.request = request;
@@ -68,10 +68,10 @@ public class NavigationTree {
    */
   public NavigationTree(Page root) {
     this(
-      PageContext.getServletContext(),
-      PageContext.getRequest(),
-      PageContext.getResponse(),
-      root
+        PageContext.getServletContext(),
+        PageContext.getRequest(),
+        PageContext.getResponse(),
+        root
     );
   }
 
@@ -122,20 +122,20 @@ public class NavigationTree {
 
   public void invoke() throws ServletException, IOException {
     NavigationTreeImpl.writeNavigationTreeImpl(
-      servletContext,
-      request,
-      response,
-      new DocumentEE(servletContext, request, response),
-      root,
-      skipRoot,
-      yuiConfig,
-      includeElements,
-      target,
-      thisBook,
-      thisPage,
-      linksToBook,
-      linksToPage,
-      maxDepth
+        servletContext,
+        request,
+        response,
+        new DocumentEE(servletContext, request, response),
+        root,
+        skipRoot,
+        yuiConfig,
+        includeElements,
+        target,
+        thisBook,
+        thisPage,
+        linksToBook,
+        linksToPage,
+        maxDepth
     );
   }
 }

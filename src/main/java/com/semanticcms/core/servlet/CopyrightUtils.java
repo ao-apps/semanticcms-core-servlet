@@ -65,29 +65,29 @@ public final class CopyrightUtils {
    * </p>
    */
   public static Copyright findCopyright(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    com.semanticcms.core.model.Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      com.semanticcms.core.model.Page page
   ) throws ServletException, IOException {
     // TODO: Implemented as depth-first traversel from page up through parents
     Copyright copyright = findCopyrightRecursive(
-      servletContext,
-      request,
-      response,
-      page,
-      new HashMap<>()
+        servletContext,
+        request,
+        response,
+        page,
+        new HashMap<>()
     );
     assert copyright == null || !copyright.isEmpty();
     return copyright;
   }
 
   private static Copyright findCopyrightRecursive(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    com.semanticcms.core.model.Page page,
-    Map<PageRef, Copyright> finished
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      com.semanticcms.core.model.Page page,
+      Map<PageRef, Copyright> finished
   ) throws ServletException, IOException {
     PageRef pageRef = page.getPageRef();
     assert !finished.containsKey(pageRef);
@@ -120,11 +120,11 @@ public final class CopyrightUtils {
           if (!finished.containsKey(parentPageRef)) {
             // Capture parent and find its authors
             parentCopyright = findCopyrightRecursive(
-              servletContext,
-              request,
-              response,
-              CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
-              finished
+                servletContext,
+                request,
+                response,
+                CapturePage.capturePage(servletContext, request, response, parentPageRef, CaptureLevel.PAGE),
+                finished
             );
           }
           if (pageRightsHolder == null) {

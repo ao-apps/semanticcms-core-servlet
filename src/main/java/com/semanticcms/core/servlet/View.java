@@ -103,7 +103,7 @@ public abstract class View implements Comparable<View> {
     if (!(obj instanceof View)) {
       return false;
     }
-    View o = (View)obj;
+    View o = (View) obj;
     return getName().equals(o.getName());
   }
 
@@ -171,10 +171,10 @@ public abstract class View implements Comparable<View> {
    * </p>
    */
   public boolean isApplicable(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page
   ) throws ServletException, IOException {
     return true;
   }
@@ -202,9 +202,9 @@ public abstract class View implements Comparable<View> {
    * @return  the CSS class or null for none
    */
   public String getLinkCssClass(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response
   ) {
     return null;
   }
@@ -232,10 +232,10 @@ public abstract class View implements Comparable<View> {
    * @see  BookUtils#getCanonicalBase(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.model.Book)
    */
   public String getCanonicalUrl(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page
   ) throws ServletException, IOException {
     PageRef pageRef = page.getPageRef();
     // TODO: Should we use servletPath here, then remove the book prefix?
@@ -266,9 +266,9 @@ public abstract class View implements Comparable<View> {
       }
     }
     return BookUtils.getCanonicalBase(
-      servletContext,
-      request,
-      pageRef.getBook()
+        servletContext,
+        request,
+        pageRef.getBook()
     ) + encodedBookPath;
   }
 
@@ -283,10 +283,10 @@ public abstract class View implements Comparable<View> {
    * @return  The effective last modified time or {@code null} if unknown or not applicable.
    */
   public ReadableInstant getLastModified(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page
   ) throws ServletException, IOException {
     return null;
   }
@@ -297,10 +297,10 @@ public abstract class View implements Comparable<View> {
    * @see  CopyrightUtils#findCopyright(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page)
    */
   public Copyright getCopyright(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page
   ) throws ServletException, IOException {
     return CopyrightUtils.findCopyright(servletContext, request, response, page);
   }
@@ -311,10 +311,10 @@ public abstract class View implements Comparable<View> {
    * @see  AuthorUtils#findAuthors(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page)
    */
   public Set<Author> getAuthors(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page
   ) throws ServletException, IOException {
     return AuthorUtils.findAuthors(servletContext, request, response, page);
   }
@@ -325,10 +325,10 @@ public abstract class View implements Comparable<View> {
    * Defaults to: "view.display - page.title[ - page.pageRef.book.title]"
    */
   public String getTitle(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page
   ) {
     String bookTitle = page.getPageRef().getBook().getTitle();
     if (bookTitle != null && !bookTitle.isEmpty()) {
@@ -370,11 +370,11 @@ public abstract class View implements Comparable<View> {
    * @see  #configureResources(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.servlet.Theme, com.semanticcms.core.model.Page, com.aoapps.web.resources.registry.Registry)
    */
   public Collection<Link> getLinks(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    // TODO: Theme here, too?
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      // TODO: Theme here, too?
+      Page page
   ) throws ServletException, IOException {
     return Collections.emptySet();
   }
@@ -398,10 +398,10 @@ public abstract class View implements Comparable<View> {
    * "noindex, nofollow" in the head and put "nofollow" on links to this view.
    */
   public abstract boolean getAllowRobots(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page
   ) throws ServletException, IOException;
 
   /**
@@ -410,10 +410,10 @@ public abstract class View implements Comparable<View> {
    * TODO: Is SkipPageException acceptable at the view rendering stage?
    */
   public abstract <__ extends FlowContent<__>> void doView(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    __ flow,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      __ flow,
+      Page page
   ) throws ServletException, IOException, SkipPageException;
 }

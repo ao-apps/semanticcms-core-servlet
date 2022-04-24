@@ -77,7 +77,7 @@ import javax.servlet.jsp.SkipPageException;
 public final class CapturePage {
 
   private static final ScopeEE.Request.Attribute<CapturePage> REQUEST_ATTRIBUTE =
-    ScopeEE.REQUEST.attribute(CapturePage.class.getName());
+      ScopeEE.REQUEST.attribute(CapturePage.class.getName());
 
   private static final boolean CONCURRENT_TRAVERSALS_ENABLED = true;
 
@@ -101,19 +101,19 @@ public final class CapturePage {
    * @param level  The minimum page capture level, note that a higher level might be substituted, such as a META capture in place of a PAGE request.
    */
   public static Page capturePage(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    PageReferrer pageReferrer,
-    CaptureLevel level
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      PageReferrer pageReferrer,
+      CaptureLevel level
   ) throws ServletException, IOException {
     return capturePage(
-      servletContext,
-      request,
-      response,
-      pageReferrer,
-      level,
-      CacheFilter.getCache(request)
+        servletContext,
+        request,
+        response,
+        pageReferrer,
+        level,
+        CacheFilter.getCache(request)
     );
   }
 
@@ -121,33 +121,33 @@ public final class CapturePage {
    * @param cache  See {@link CacheFilter#getCache(javax.servlet.ServletRequest)}
    */
   public static Page capturePage(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    PageReferrer pageReferrer,
-    CaptureLevel level,
-    Cache cache
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      PageReferrer pageReferrer,
+      CaptureLevel level,
+      Cache cache
   ) throws ServletException, IOException {
     return capturePage(servletContext,
-      request,
-      response,
-      new HttpServletSubRequestWrapper(request),
-      new HttpServletSubResponseWrapper(response, TempFileContextEE.get(request)),
-      pageReferrer,
-      level,
-      cache
+        request,
+        response,
+        new HttpServletSubRequestWrapper(request),
+        new HttpServletSubResponseWrapper(response, TempFileContextEE.get(request)),
+        pageReferrer,
+        level,
+        cache
     );
   }
 
   private static Page capturePage(
-    final ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    final IHttpServletSubRequest subRequest,
-    final IHttpServletSubResponse subResponse,
-    PageReferrer pageReferrer,
-    final CaptureLevel level,
-    Cache cache
+      final ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      final IHttpServletSubRequest subRequest,
+      final IHttpServletSubResponse subResponse,
+      PageReferrer pageReferrer,
+      final CaptureLevel level,
+      Cache cache
   ) throws ServletException, IOException {
     NullArgumentException.checkNotNull(level, "level");
     PageRef pageRef = pageReferrer.getPageRef();
@@ -190,16 +190,16 @@ public final class CapturePage {
       try {
         // Clear PageContext on include
         PageContext.newPageContextSkip(
-          null,
-          null,
-          null,
-          () -> Dispatcher.include(
-            servletContext,
-            capturePath,
-            subRequest,
-            // Discard all output
-            new NullHttpServletResponseWrapper(subResponse)
-          )
+            null,
+            null,
+            null,
+            () -> Dispatcher.include(
+                servletContext,
+                capturePath,
+                subRequest,
+                // Discard all output
+                new NullHttpServletResponseWrapper(subResponse)
+            )
         );
       } catch (SkipPageException e) {
         // An individual page may throw SkipPageException which only terminates
@@ -212,11 +212,11 @@ public final class CapturePage {
       PageRef capturedPageRef = capturedPage.getPageRef();
       if (!capturedPageRef.equals(pageRef)) {
         throw new ServletException(
-          "Captured page has unexpected pageRef.  Expected ("
-            + pageRef.getBookName() + ", " + pageRef.getPath()
-            + ") but got ("
-            + capturedPageRef.getBookName() + ", " + capturedPageRef.getPath()
-            + ')'
+            "Captured page has unexpected pageRef.  Expected ("
+                + pageRef.getBookName() + ", " + pageRef.getPath()
+                + ") but got ("
+                + capturedPageRef.getBookName() + ", " + capturedPageRef.getPath()
+                + ')'
         );
       }
     }
@@ -241,15 +241,15 @@ public final class CapturePage {
    * @see  PageContext
    */
   public static Page capturePage(
-    PageReferrer pageReferrer,
-    CaptureLevel level
+      PageReferrer pageReferrer,
+      CaptureLevel level
   ) throws ServletException, IOException {
     return capturePage(
-      PageContext.getServletContext(),
-      PageContext.getRequest(),
-      PageContext.getResponse(),
-      pageReferrer,
-      level
+        PageContext.getServletContext(),
+        PageContext.getRequest(),
+        PageContext.getResponse(),
+        pageReferrer,
+        level
     );
   }
 
@@ -263,11 +263,11 @@ public final class CapturePage {
    * @see  #capturePage(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.PageReferrer, com.semanticcms.core.servlet.CaptureLevel)
    */
   public static Map<PageRef, Page> capturePages(
-    final ServletContext servletContext,
-    final HttpServletRequest request,
-    final HttpServletResponse response,
-    Set<? extends PageReferrer> pageReferrers,
-    final CaptureLevel level
+      final ServletContext servletContext,
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      Set<? extends PageReferrer> pageReferrers,
+      final CaptureLevel level
   ) throws ServletException, IOException {
     int size = pageReferrers.size();
     if (size == 0) {
@@ -275,8 +275,8 @@ public final class CapturePage {
     } else if (size == 1) {
       PageRef pageRef = pageReferrers.iterator().next().getPageRef();
       return Collections.singletonMap(
-        pageRef,
-        capturePage(servletContext, request, response, pageRef, level)
+          pageRef,
+          capturePage(servletContext, request, response, pageRef, level)
       );
     } else {
       final Cache cache = CacheFilter.getCache(request);
@@ -301,8 +301,8 @@ public final class CapturePage {
 
       int notCachedSize = notCachedList.size();
       if (
-        notCachedSize > 1
-        && ConcurrencyCoordinator.useConcurrentSubrequests(request)
+          notCachedSize > 1
+              && ConcurrencyCoordinator.useConcurrentSubrequests(request)
       ) {
         // Concurrent implementation
         final TempFileContext tempFileContext = TempFileContextEE.get(request);
@@ -310,19 +310,19 @@ public final class CapturePage {
         final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
         // Create the tasks
         List<Callable<Page>> tasks = new ArrayList<>(notCachedSize);
-        for (int i=0; i<notCachedSize; i++) {
+        for (int i = 0; i < notCachedSize; i++) {
           final PageRef pageRef = notCachedList.get(i).getPageRef();
           tasks.add(
-            () -> capturePage(
-              servletContext,
-              threadSafeReq,
-              threadSafeResp,
-              new HttpServletSubRequest(threadSafeReq),
-              new HttpServletSubResponse(threadSafeResp, tempFileContext),
-              pageRef,
-              level,
-              cache
-            )
+              () -> capturePage(
+                  servletContext,
+                  threadSafeReq,
+                  threadSafeResp,
+                  new HttpServletSubRequest(threadSafeReq),
+                  new HttpServletSubResponse(threadSafeResp, tempFileContext),
+                  pageRef,
+                  level,
+                  cache
+              )
           );
         }
         List<Page> notCachedResults;
@@ -337,10 +337,10 @@ public final class CapturePage {
           ExecutionExceptions.wrapAndThrow(e, IOException.class, IOException::new);
           throw new ServletException(e);
         }
-        for (int i=0; i<notCachedSize; i++) {
+        for (int i = 0; i < notCachedSize; i++) {
           results.put(
-            notCachedList.get(i).getPageRef(),
-            notCachedResults.get(i)
+              notCachedList.get(i).getPageRef(),
+              notCachedResults.get(i)
           );
         }
       } else {
@@ -348,8 +348,8 @@ public final class CapturePage {
         for (PageReferrer pageReferrer : notCachedList) {
           PageRef pageRef = pageReferrer.getPageRef();
           results.put(
-            pageRef,
-            capturePage(servletContext, request, response, pageRef, level, cache)
+              pageRef,
+              capturePage(servletContext, request, response, pageRef, level, cache)
           );
         }
       }
@@ -364,15 +364,15 @@ public final class CapturePage {
    * @see  PageContext
    */
   public static Map<PageRef, Page> capturePages(
-    Set<? extends PageReferrer> pageReferrers,
-    CaptureLevel level
+      Set<? extends PageReferrer> pageReferrers,
+      CaptureLevel level
   ) throws ServletException, IOException {
     return capturePages(
-      PageContext.getServletContext(),
-      PageContext.getRequest(),
-      PageContext.getResponse(),
-      pageReferrers,
-      level
+        PageContext.getServletContext(),
+        PageContext.getRequest(),
+        PageContext.getResponse(),
+        pageReferrers,
+        level
     );
   }
 
@@ -424,30 +424,30 @@ public final class CapturePage {
    * @see  #traversePagesAnyOrder(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page, com.semanticcms.core.servlet.CaptureLevel, com.semanticcms.core.servlet.CapturePage.PageHandler, com.semanticcms.core.servlet.CapturePage.TraversalEdges, com.semanticcms.core.servlet.CapturePage.EdgeFilter)
    */
   public static <T> T traversePagesAnyOrder(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    PageReferrer rootReferrer,
-    CaptureLevel level,
-    PageHandler<? extends T> pageHandler,
-    TraversalEdges edges,
-    EdgeFilter edgeFilter
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      PageReferrer rootReferrer,
+      CaptureLevel level,
+      PageHandler<? extends T> pageHandler,
+      TraversalEdges edges,
+      EdgeFilter edgeFilter
   ) throws ServletException, IOException {
     return traversePagesAnyOrder(
-      servletContext,
-      request,
-      response,
-      CapturePage.capturePage(
         servletContext,
         request,
         response,
-        rootReferrer,
-        level
-      ),
-      level,
-      pageHandler,
-      edges,
-      edgeFilter
+        CapturePage.capturePage(
+            servletContext,
+            request,
+            response,
+            rootReferrer,
+            level
+        ),
+        level,
+        pageHandler,
+        edges,
+        edgeFilter
     );
   }
 
@@ -492,46 +492,46 @@ public final class CapturePage {
    * @param edgeFilter   Optional, null when not needed and will match all edges.
    */
   public static <T> T traversePagesAnyOrder(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page root,
-    CaptureLevel level,
-    final PageHandler<? extends T> pageHandler,
-    TraversalEdges edges,
-    EdgeFilter edgeFilter
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page root,
+      CaptureLevel level,
+      final PageHandler<? extends T> pageHandler,
+      TraversalEdges edges,
+      EdgeFilter edgeFilter
   ) throws ServletException, IOException {
     Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
     if (
-      CONCURRENT_TRAVERSALS_ENABLED
-      && ConcurrencyCoordinator.useConcurrentSubrequests(request)
+        CONCURRENT_TRAVERSALS_ENABLED
+            && ConcurrencyCoordinator.useConcurrentSubrequests(request)
     ) {
       return traversePagesAnyOrderConcurrent(
-        servletContext,
-        request,
-        response,
-        root,
-        level,
-        pageHandler,
-        edges,
-        edgeFilter,
-        cache,
-        null
+          servletContext,
+          request,
+          response,
+          root,
+          level,
+          pageHandler,
+          edges,
+          edgeFilter,
+          cache,
+          null
       );
     } else {
       return traversePagesDepthFirstRecurseSequential(servletContext,
-        request,
-        response,
-        root,
-        0,
-        level,
-        (Page page, int depth) -> pageHandler.handlePage(page),
-        edges,
-        edgeFilter,
-        null,
-        TempFileContextEE.get(request),
-        cache,
-        new HashSet<>()
+          request,
+          response,
+          root,
+          0,
+          level,
+          (Page page, int depth) -> pageHandler.handlePage(page),
+          edges,
+          edgeFilter,
+          null,
+          TempFileContextEE.get(request),
+          cache,
+          new HashSet<>()
       );
     }
   }
@@ -548,16 +548,16 @@ public final class CapturePage {
    *                  TODO: Once we get a result matching nextHint, move its children to the top of the stack so we get them first, let first child of nextHint occupy last slot.
    */
   private static <T> T traversePagesAnyOrderConcurrent(
-    final ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page,
-    final CaptureLevel level,
-    PageHandler<? extends T> pageHandler,
-    TraversalEdges edges,
-    EdgeFilter edgeFilter,
-    final Cache cache,
-    PageRef[] nextHint
+      final ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page,
+      final CaptureLevel level,
+      PageHandler<? extends T> pageHandler,
+      TraversalEdges edges,
+      EdgeFilter edgeFilter,
+      final Cache cache,
+      PageRef[] nextHint
   ) throws ServletException, IOException {
     // Created when first needed to avoid the overhead when fully operating from cache
     HttpServletRequest threadSafeReq = null;
@@ -602,10 +602,10 @@ public final class CapturePage {
           if (next != null) {
             // Search readyPages for "next", searching backwards assuming depth-first
             // TODO: This is sequential search
-            for (int i=readyPages.size()-1; i >= 0; i--) {
+            for (int i = readyPages.size() - 1; i >= 0; i--) {
               Page rp = readyPages.get(i);
               if (rp.getPageRef().equals(next)) {
-                if (DEBUG_NOW && i != (readyPages.size()-1)) {
+                if (DEBUG_NOW && i != (readyPages.size() - 1)) {
                   System.err.println("Found next in readyPages at index " + i + ", size = " + readyPages.size());
                 }
                 readyPage = rp;
@@ -630,11 +630,11 @@ public final class CapturePage {
           for (PageReferrer edgeRef : edges.getEdges(readyPage)) {
             PageRef edge = edgeRef.getPageRef();
             if (
-              !visited.contains(edge)
-              && (
-                edgeFilter == null
-                || edgeFilter.applyEdge(edge)
-              )
+                !visited.contains(edge)
+                    && (
+                    edgeFilter == null
+                        || edgeFilter.applyEdge(edge)
+                )
             ) {
               visited.add(edge);
               // Check cache before going to concurrency
@@ -653,12 +653,12 @@ public final class CapturePage {
           }
           // Add to readyPages in backwards order, so they pop off the top in correct traversal order
           while (!newReadyPages.isEmpty()) {
-            readyPages.add(newReadyPages.remove(newReadyPages.size()-1));
+            readyPages.add(newReadyPages.remove(newReadyPages.size() - 1));
           }
         }
         // Add to edgesToAdd in backwards order, so they pop off the top in correct traversal order
         while (!newEdgesToAdd.isEmpty()) {
-          edgesToAdd.add(newEdgesToAdd.remove(newEdgesToAdd.size()-1));
+          edgesToAdd.add(newEdgesToAdd.remove(newEdgesToAdd.size() - 1));
         }
 
         // Run on this thread if there is only one
@@ -667,14 +667,14 @@ public final class CapturePage {
             System.err.println("There is only one, running on current thread");
           }
           readyPages.add(
-            capturePage(
-              servletContext,
-              request,
-              response,
-              edgesToAdd.remove(0),
-              level,
-              cache
-            )
+              capturePage(
+                  servletContext,
+                  request,
+                  response,
+                  edgesToAdd.remove(0),
+                  level,
+                  cache
+              )
           );
         } else {
           if (!edgesToAdd.isEmpty()) {
@@ -689,7 +689,7 @@ public final class CapturePage {
               // TODO: This is sequential search
               int i = edgesToAdd.lastIndexOf(next);
               if (i != -1) {
-                if (DEBUG_NOW && i != (edgesToAdd.size()-1)) {
+                if (DEBUG_NOW && i != (edgesToAdd.size() - 1)) {
                   System.err.println("Found next in edgesToAdd at index " + i + ", size = " + edgesToAdd.size());
                 }
                 edgesToAdd.add(edgesToAdd.remove(i));
@@ -697,30 +697,30 @@ public final class CapturePage {
             }
             // Submit to the futures, but only up to preferredConcurrency
             while (
-              futures.size() < preferredConcurrency
-              && !edgesToAdd.isEmpty()
+                futures.size() < preferredConcurrency
+                    && !edgesToAdd.isEmpty()
             ) {
               final PageRef edge = edgesToAdd.remove(edgesToAdd.size() - 1);
               futures.put(
-                edge,
-                concurrentSubrequestExecutor.submit(() -> {
-                  try {
-                    return capturePage(
-                      servletContext,
-                      finalThreadSafeReq,
-                      finalThreadSafeResp,
-                      new HttpServletSubRequest(finalThreadSafeReq),
-                      new HttpServletSubResponse(finalThreadSafeResp, tempFileContext),
-                      edge,
-                      level,
-                      cache
-                    );
-                  } finally {
-                    // This one is ready now
-                    // There should always be enough room in the queue since the futures are limited going in
-                    finishedFutures.add(edge);
-                  }
-                })
+                  edge,
+                  concurrentSubrequestExecutor.submit(() -> {
+                    try {
+                      return capturePage(
+                          servletContext,
+                          finalThreadSafeReq,
+                          finalThreadSafeResp,
+                          new HttpServletSubRequest(finalThreadSafeReq),
+                          new HttpServletSubResponse(finalThreadSafeResp, tempFileContext),
+                          edge,
+                          level,
+                          cache
+                      );
+                    } finally {
+                      // This one is ready now
+                      // There should always be enough room in the queue since the futures are limited going in
+                      finishedFutures.add(edge);
+                    }
+                  })
               );
             }
             if (DEBUG) {
@@ -745,7 +745,7 @@ public final class CapturePage {
                 if (DEBUG_NOW) {
                   PageRef nextFinished = finishedFutures.peek();
                   if (!nextFinished.equals(next)) {
-                    System.err.println("Found nextHint done early in futures: " + next +", nextFinished = " + nextFinished);
+                    System.err.println("Found nextHint done early in futures: " + next + ", nextFinished = " + nextFinished);
                   }
                 }
                 if (!finishedFutures.remove(next)) {
@@ -790,32 +790,32 @@ public final class CapturePage {
    * @see  #traversePagesDepthFirst(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, com.semanticcms.core.model.Page, com.semanticcms.core.servlet.CaptureLevel, com.semanticcms.core.servlet.CapturePage.PageDepthHandler, com.semanticcms.core.servlet.CapturePage.TraversalEdges, com.semanticcms.core.servlet.CapturePage.EdgeFilter, com.semanticcms.core.servlet.CapturePage.PageDepthHandler)
    */
   public static <T> T traversePagesDepthFirst(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    PageReferrer rootReferrer,
-    CaptureLevel level,
-    PageDepthHandler<? extends T> preHandler,
-    TraversalEdges edges,
-    EdgeFilter edgeFilter,
-    PageDepthHandler<? extends T> postHandler
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      PageReferrer rootReferrer,
+      CaptureLevel level,
+      PageDepthHandler<? extends T> preHandler,
+      TraversalEdges edges,
+      EdgeFilter edgeFilter,
+      PageDepthHandler<? extends T> postHandler
   ) throws ServletException, IOException {
     return traversePagesDepthFirst(
-      servletContext,
-      request,
-      response,
-      CapturePage.capturePage(
         servletContext,
         request,
         response,
-        rootReferrer,
-        level
-      ),
-      level,
-      preHandler,
-      edges,
-      edgeFilter,
-      postHandler
+        CapturePage.capturePage(
+            servletContext,
+            request,
+            response,
+            rootReferrer,
+            level
+        ),
+        level,
+        preHandler,
+        edges,
+        edgeFilter,
+        postHandler
     );
   }
 
@@ -858,47 +858,47 @@ public final class CapturePage {
    *                     is returned.
    */
   public static <T> T traversePagesDepthFirst(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page root,
-    CaptureLevel level,
-    PageDepthHandler<? extends T> preHandler,
-    TraversalEdges edges,
-    EdgeFilter edgeFilter,
-    PageDepthHandler<? extends T> postHandler
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page root,
+      CaptureLevel level,
+      PageDepthHandler<? extends T> preHandler,
+      TraversalEdges edges,
+      EdgeFilter edgeFilter,
+      PageDepthHandler<? extends T> postHandler
   ) throws ServletException, IOException {
     Cache cache = level == CaptureLevel.BODY ? null : CacheFilter.getCache(request);
     if (
-      CONCURRENT_TRAVERSALS_ENABLED
-      && ConcurrencyCoordinator.useConcurrentSubrequests(request)
+        CONCURRENT_TRAVERSALS_ENABLED
+            && ConcurrencyCoordinator.useConcurrentSubrequests(request)
     ) {
       return traversePagesDepthFirstConcurrent(
-        servletContext,
-        request,
-        response,
-        root,
-        level,
-        preHandler,
-        edges,
-        edgeFilter,
-        postHandler,
-        cache
+          servletContext,
+          request,
+          response,
+          root,
+          level,
+          preHandler,
+          edges,
+          edgeFilter,
+          postHandler,
+          cache
       );
     } else {
       return traversePagesDepthFirstRecurseSequential(servletContext,
-        request,
-        response,
-        root,
-        0,
-        level,
-        preHandler,
-        edges,
-        edgeFilter,
-        postHandler,
-        TempFileContextEE.get(request),
-        cache,
-        new HashSet<>()
+          request,
+          response,
+          root,
+          0,
+          level,
+          preHandler,
+          edges,
+          edgeFilter,
+          postHandler,
+          TempFileContextEE.get(request),
+          cache,
+          new HashSet<>()
       );
     }
   }
@@ -907,19 +907,19 @@ public final class CapturePage {
    * Simple sequential implementation.
    */
   private static <T> T traversePagesDepthFirstRecurseSequential(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page,
-    int depth,
-    CaptureLevel level,
-    PageDepthHandler<? extends T> preHandler,
-    TraversalEdges edges,
-    EdgeFilter edgeFilter,
-    PageDepthHandler<? extends T> postHandler,
-    TempFileContext tempFileContext,
-    Cache cache,
-    Set<PageRef> visited
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page,
+      int depth,
+      CaptureLevel level,
+      PageDepthHandler<? extends T> preHandler,
+      TraversalEdges edges,
+      EdgeFilter edgeFilter,
+      PageDepthHandler<? extends T> postHandler,
+      TempFileContext tempFileContext,
+      Cache cache,
+      Set<PageRef> visited
   ) throws ServletException, IOException {
     if (!visited.add(page.getPageRef())) {
       throw new AssertionError();
@@ -933,33 +933,33 @@ public final class CapturePage {
     for (PageReferrer edgeRef : edges.getEdges(page)) {
       PageRef edge = edgeRef.getPageRef();
       if (
-        !visited.contains(edge)
-        && (
-          edgeFilter == null
-          || edgeFilter.applyEdge(edge)
-        )
+          !visited.contains(edge)
+              && (
+              edgeFilter == null
+                  || edgeFilter.applyEdge(edge)
+          )
       ) {
         T result = traversePagesDepthFirstRecurseSequential(
-          servletContext,
-          request,
-          response,
-          CapturePage.capturePage(
             servletContext,
             request,
             response,
-            edge,
+            CapturePage.capturePage(
+                servletContext,
+                request,
+                response,
+                edge,
+                level,
+                cache
+            ),
+            depth + 1,
             level,
-            cache
-          ),
-          depth + 1,
-          level,
-          preHandler,
-          edges,
-          edgeFilter,
-          postHandler,
-          tempFileContext,
-          cache,
-          visited
+            preHandler,
+            edges,
+            edgeFilter,
+            postHandler,
+            tempFileContext,
+            cache,
+            visited
         );
         if (result != null) {
           return result;
@@ -976,169 +976,169 @@ public final class CapturePage {
   }
 
   private static <T> T traversePagesDepthFirstConcurrent(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    final Page page,
-    CaptureLevel level,
-    final PageDepthHandler<? extends T> preHandler,
-    final TraversalEdges edges,
-    final EdgeFilter edgeFilter,
-    final PageDepthHandler<? extends T> postHandler,
-    Cache cache
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      final Page page,
+      CaptureLevel level,
+      final PageDepthHandler<? extends T> preHandler,
+      final TraversalEdges edges,
+      final EdgeFilter edgeFilter,
+      final PageDepthHandler<? extends T> postHandler,
+      Cache cache
   ) throws ServletException, IOException {
     // Caches the results of edges call, to fit within specification that it will only be called once per page.
     // This also prevents the chance that caller can give different results or change the collection during traversal.
     // The next item is desired is shared with the underlying traversal
-    final PageRef[] nextHint = new PageRef[] {page.getPageRef()};
+    final PageRef[] nextHint = new PageRef[]{page.getPageRef()};
     T result = traversePagesAnyOrderConcurrent(
-      servletContext,
-      request,
-      response,
-      page,
-      level,
-      new PageHandler<>() {
-        // All of the edges visited or already set as a next
-        final Set<PageRef> visited = new HashSet<>();
-        // The already resolved parents, used for postHandler
-        final List<Page> parents = new ArrayList<>();
-        // The next node that is to be processed, highest on list is active
-        final List<PageRef> nexts = new ArrayList<>();
-        // Those that are to be done after what is next
-        final List<Iterator<? extends PageReferrer>> afters = new ArrayList<>();
-        // The set of nodes we've received but are not yet ready to process
-        Map<PageRef, Page> received = null;
+        servletContext,
+        request,
+        response,
+        page,
+        level,
+        new PageHandler<>() {
+          // All of the edges visited or already set as a next
+          final Set<PageRef> visited = new HashSet<>();
+          // The already resolved parents, used for postHandler
+          final List<Page> parents = new ArrayList<>();
+          // The next node that is to be processed, highest on list is active
+          final List<PageRef> nexts = new ArrayList<>();
+          // Those that are to be done after what is next
+          final List<Iterator<? extends PageReferrer>> afters = new ArrayList<>();
+          // The set of nodes we've received but are not yet ready to process
+          Map<PageRef, Page> received = null;
 
-        // Kick it off
-        {
-          PageRef pageRef = page.getPageRef();
-          visited.add(pageRef);
-          nexts.add(pageRef);
-          Iterator<? extends PageReferrer> empty = Collections.emptyIterator();
-          afters.add(empty);
-        }
-
-        private PageRef findNext(Iterator<? extends PageReferrer> after) {
-          while (after.hasNext()) {
-            PageRef possNext = after.next().getPageRef();
-            if (
-              !visited.contains(possNext)
-              && (
-                edgeFilter == null
-                || edgeFilter.applyEdge(possNext)
-              )
-            ) {
-              return possNext;
-            }
+          // Kick it off
+          {
+            PageRef pageRef = page.getPageRef();
+            visited.add(pageRef);
+            nexts.add(pageRef);
+            Iterator<? extends PageReferrer> empty = Collections.emptyIterator();
+            afters.add(empty);
           }
-          return null;
-        }
 
-        @Override
-        public T handlePage(Page page) throws ServletException, IOException {
-          PageRef pageRef = page.getPageRef();
-          // page and pageRef match, but sometimes we have a pageRef with a null page (indicating unknown)
-          int index = nexts.size() - 1;
-          if (DEBUG_NOW) {
-            if (pageRef.equals(nextHint[0])) {
-              System.err.println("Got nextHint from underlying traversal: " + pageRef);
+          private PageRef findNext(Iterator<? extends PageReferrer> after) {
+            while (after.hasNext()) {
+              PageRef possNext = after.next().getPageRef();
+              if (
+                  !visited.contains(possNext)
+                      && (
+                      edgeFilter == null
+                          || edgeFilter.applyEdge(possNext)
+                  )
+              ) {
+                return possNext;
+              }
             }
+            return null;
           }
-          if (pageRef.equals(nexts.get(index))) {
-            do {
-              if (DEBUG) {
-                System.err.println("pre.: " + pageRef);
+
+          @Override
+          public T handlePage(Page page) throws ServletException, IOException {
+            PageRef pageRef = page.getPageRef();
+            // page and pageRef match, but sometimes we have a pageRef with a null page (indicating unknown)
+            int index = nexts.size() - 1;
+            if (DEBUG_NOW) {
+              if (pageRef.equals(nextHint[0])) {
+                System.err.println("Got nextHint from underlying traversal: " + pageRef);
               }
-              if (preHandler != null) {
-                T preResult = preHandler.handlePage(page, parents.size());
-                if (preResult != null) {
-                  return preResult;
-                }
-              }
-              // Find the first edge that we still need, if any
-              Iterator<? extends PageReferrer> after = edges.getEdges(page).iterator();
-              PageRef next = findNext(after);
-              if (next != null) {
+            }
+            if (pageRef.equals(nexts.get(index))) {
+              do {
                 if (DEBUG) {
-                  System.err.println("next: " + next);
+                  System.err.println("pre.: " + pageRef);
                 }
-                // Have at least one child, not ready for our postHandler yet
-                // Make sure we only look for a given edge once
-                visited.add(next);
-                // Push child
-                parents.add(page);
-                nexts.add(next);
-                afters.add(after);
-                nextHint[0] = next;
-                index++;
-                page = null;
-                pageRef = next;
-              } else {
-                // No children to wait for, run postHandlers and move to next
-                while (true) {
+                if (preHandler != null) {
+                  T preResult = preHandler.handlePage(page, parents.size());
+                  if (preResult != null) {
+                    return preResult;
+                  }
+                }
+                // Find the first edge that we still need, if any
+                Iterator<? extends PageReferrer> after = edges.getEdges(page).iterator();
+                PageRef next = findNext(after);
+                if (next != null) {
                   if (DEBUG) {
-                    System.err.println("post: " + pageRef);
+                    System.err.println("next: " + next);
                   }
-                  if (postHandler != null) {
-                    T postResult = postHandler.handlePage(page, parents.size());
-                    if (postResult != null) {
-                      return postResult;
-                    }
-                  }
-                  next = findNext(afters.get(index));
-                  if (next != null) {
+                  // Have at least one child, not ready for our postHandler yet
+                  // Make sure we only look for a given edge once
+                  visited.add(next);
+                  // Push child
+                  parents.add(page);
+                  nexts.add(next);
+                  afters.add(after);
+                  nextHint[0] = next;
+                  index++;
+                  page = null;
+                  pageRef = next;
+                } else {
+                  // No children to wait for, run postHandlers and move to next
+                  while (true) {
                     if (DEBUG) {
-                      System.err.println("next: " + next);
+                      System.err.println("post: " + pageRef);
                     }
-                    // Make sure we only look for a given edge once
-                    visited.add(next);
-                    nexts.set(index, next);
-                    nextHint[0] = next;
-                    page = null;
-                    pageRef = next;
-                    break;
-                  } else {
-                    // Pop parent
-                    afters.remove(index);
-                    nexts.remove(index);
-                    index--;
-                    if (index < 0) {
-                      // Nothing left to check, all postHandlers done
-                      nextHint[0] = null;
-                      return null;
+                    if (postHandler != null) {
+                      T postResult = postHandler.handlePage(page, parents.size());
+                      if (postResult != null) {
+                        return postResult;
+                      }
+                    }
+                    next = findNext(afters.get(index));
+                    if (next != null) {
+                      if (DEBUG) {
+                        System.err.println("next: " + next);
+                      }
+                      // Make sure we only look for a given edge once
+                      visited.add(next);
+                      nexts.set(index, next);
+                      nextHint[0] = next;
+                      page = null;
+                      pageRef = next;
+                      break;
                     } else {
-                      page = parents.remove(index);
-                      pageRef = page.getPageRef();
+                      // Pop parent
+                      afters.remove(index);
+                      nexts.remove(index);
+                      index--;
+                      if (index < 0) {
+                        // Nothing left to check, all postHandlers done
+                        nextHint[0] = null;
+                        return null;
+                      } else {
+                        page = parents.remove(index);
+                        pageRef = page.getPageRef();
+                      }
                     }
                   }
                 }
+              } while (
+                  page != null
+                      || (
+                      received != null
+                          && (page = received.remove(pageRef)) != null
+                  )
+              );
+              if (DEBUG_NOW) {
+                System.err.println("nextHint now: " + nextHint[0]);
               }
-            } while (
-              page != null
-              || (
-                received != null
-                && (page = received.remove(pageRef)) != null
-              )
-            );
-            if (DEBUG_NOW) {
-              System.err.println("nextHint now: " + nextHint[0]);
+            } else {
+              if (received == null) {
+                received = new HashMap<>();
+              }
+              received.put(pageRef, page);
+              if (DEBUG_NOW) {
+                System.err.println("Received " + pageRef + ", size = " + received.size() + ", next = " + nextHint[0]);
+              }
             }
-          } else {
-            if (received == null) {
-              received = new HashMap<>();
-            }
-            received.put(pageRef, page);
-            if (DEBUG_NOW) {
-              System.err.println("Received " + pageRef + ", size = " + received.size() + ", next = " + nextHint[0]);
-            }
+            return null;
           }
-          return null;
-        }
-      },
-      edges,
-      edgeFilter,
-      cache,
-      nextHint
+        },
+        edges,
+        edgeFilter,
+        cache,
+        nextHint
     );
     /* TODO
     assert result != null || parents.isEmpty();
@@ -1154,13 +1154,14 @@ public final class CapturePage {
   }
 
   private Page capturedPage;
+
   public void setCapturedPage(Page capturedPage) {
     NullArgumentException.checkNotNull(capturedPage, "page");
     if (this.capturedPage != null) {
       throw new IllegalStateException(
-        "Cannot capture more than one page: first page="
-        + this.capturedPage.getPageRef()
-        + ", second page=" + capturedPage.getPageRef()
+          "Cannot capture more than one page: first page="
+              + this.capturedPage.getPageRef()
+              + ", second page=" + capturedPage.getPageRef()
       );
     }
     this.capturedPage = capturedPage;

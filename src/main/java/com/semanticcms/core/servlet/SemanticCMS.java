@@ -92,7 +92,7 @@ public class SemanticCMS {
   private static final String APPLICATION_ATTRIBUTE_NAME = "semanticCMS";
 
   public static final ScopeEE.Application.Attribute<SemanticCMS> APPLICATION_ATTRIBUTE =
-    ScopeEE.APPLICATION.attribute(APPLICATION_ATTRIBUTE_NAME);
+      ScopeEE.APPLICATION.attribute(APPLICATION_ATTRIBUTE_NAME);
 
   /**
    * Gets the SemanticCMS instance, creating it if necessary.
@@ -115,8 +115,8 @@ public class SemanticCMS {
     this.demoMode = Boolean.parseBoolean(servletContext.getInitParameter(DEMO_MODE_INIT_PARAM));
     int numProcessors = Runtime.getRuntime().availableProcessors();
     this.concurrentSubrequests =
-      numProcessors > 1
-      && Boolean.parseBoolean(servletContext.getInitParameter(CONCURRENT_SUBREQUESTS_INIT_PARAM))
+        numProcessors > 1
+            && Boolean.parseBoolean(servletContext.getInitParameter(CONCURRENT_SUBREQUESTS_INIT_PARAM))
     ;
     this.rootBook = initBooks();
     this.executors = new Executors();
@@ -198,7 +198,7 @@ public class SemanticCMS {
     for (org.w3c.dom.Element missingBookElem : XmlUtils.iterableChildElementsByTagName(booksElem, MISSING_BOOK_TAG)) {
       String name = missingBookElem.getAttribute("name");
       if (!missingBooks.add(name)) {
-        throw new IllegalStateException(BOOKS_XML_RESOURCE+ ": Duplicate value for \"" + MISSING_BOOK_TAG + "\": " + name);
+        throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Duplicate value for \"" + MISSING_BOOK_TAG + "\": " + name);
       }
     }
     // Load books
@@ -209,7 +209,7 @@ public class SemanticCMS {
     for (org.w3c.dom.Element bookElem : XmlUtils.iterableChildElementsByTagName(booksElem, BOOK_TAG)) {
       String name = bookElem.getAttribute("name");
       if (missingBooks.contains(name)) {
-        throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Book also listed in \"" + MISSING_BOOK_TAG+ "\": " + name);
+        throw new IllegalStateException(BOOKS_XML_RESOURCE + ": Book also listed in \"" + MISSING_BOOK_TAG + "\": " + name);
       }
       Set<ParentRef> parentRefs = new LinkedHashSet<>();
       for (org.w3c.dom.Element parentElem : XmlUtils.iterableChildElementsByTagName(bookElem, PARENT_TAG)) {
@@ -232,14 +232,14 @@ public class SemanticCMS {
         }
       }
       books.put(
-        name,
-        new Book(
           name,
-          bookElem.getAttribute("cvsworkDirectory"),
-          Boolean.valueOf(bookElem.getAttribute("allowRobots")),
-          parentRefs,
-          PropertiesUtils.loadFromResource(servletContext, ("/".equals(name) ? "" : name) + "/book.properties")
-        )
+          new Book(
+              name,
+              bookElem.getAttribute("cvsworkDirectory"),
+              Boolean.valueOf(bookElem.getAttribute("allowRobots")),
+              parentRefs,
+              PropertiesUtils.loadFromResource(servletContext, ("/".equals(name) ? "" : name) + "/book.properties")
+          )
       );
     }
 
@@ -283,8 +283,8 @@ public class SemanticCMS {
       String prefix = book.getPathPrefix();
       int prefixLen = prefix.length();
       if (
-        prefixLen > longestPrefixLen
-        && servletPath.startsWith(prefix)
+          prefixLen > longestPrefixLen
+              && servletPath.startsWith(prefix)
       ) {
         longestPrefixBook = book;
         longestPrefixLen = prefixLen;
@@ -312,7 +312,9 @@ public class SemanticCMS {
    */
   public static final String DEFAULT_VIEW_NAME = "content";
 
-  private static class ViewsLock {/* Empty lock class to help heap profile */}
+  private static class ViewsLock {
+    // Empty lock class to help heap profile
+  }
   private final ViewsLock viewsLock = new ViewsLock();
 
   /**
@@ -392,8 +394,8 @@ public class SemanticCMS {
     // Order the components by classname, just to have a consistent output
     // independent of the order components happened to be registered.
     Collections.sort(
-      components,
-      (o1, o2) -> o1.getClass().getName().compareTo(o2.getClass().getName())
+        components,
+        (o1, o2) -> o1.getClass().getName().compareTo(o2.getClass().getName())
     );
   }
   // </editor-fold>
@@ -615,10 +617,10 @@ public class SemanticCMS {
       if (existingSrc != null) {
         if (!src.equals(existingSrc)) {
           throw new IllegalStateException(
-            "Script already registered but with a different src:"
-            + " name=" + name
-            + " src=" + src
-            + " existingSrc=" + existingSrc
+              "Script already registered but with a different src:"
+                  + " name=" + name
+                  + " src=" + src
+                  + " existingSrc=" + existingSrc
           );
         }
       } else {
@@ -662,6 +664,7 @@ public class SemanticCMS {
       }
     }
   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="Links to Elements">
@@ -701,7 +704,7 @@ public class SemanticCMS {
     synchronized (linkCssClassResolverByElementType) {
       while (true) {
         @SuppressWarnings("unchecked")
-        LinkCssClassResolver<? super E> linkCssClassResolver = (LinkCssClassResolver<? super E>)linkCssClassResolverByElementType.get(elementType);
+        LinkCssClassResolver<? super E> linkCssClassResolver = (LinkCssClassResolver<? super E>) linkCssClassResolverByElementType.get(elementType);
         if (linkCssClassResolver != null) {
           String linkCssClass = linkCssClassResolver.getCssLinkClass(element);
           if (linkCssClass != null) {
@@ -722,8 +725,8 @@ public class SemanticCMS {
    * @throws  IllegalStateException  if the element type is already registered.
    */
   public <E extends com.semanticcms.core.model.Element> void addLinkCssClassResolver(
-    Class<E> elementType,
-    LinkCssClassResolver<? super E> cssLinkClassResolver
+      Class<E> elementType,
+      LinkCssClassResolver<? super E> cssLinkClassResolver
   ) throws IllegalStateException {
     synchronized (linkCssClassResolverByElementType) {
       if (linkCssClassResolverByElementType.containsKey(elementType)) {
@@ -742,11 +745,12 @@ public class SemanticCMS {
    */
   // TODO: Take a set of Group.Name activations, too
   public <E extends com.semanticcms.core.model.Element> void addLinkCssClass(
-    Class<E> elementType,
-    String cssLinkClass
+      Class<E> elementType,
+      String cssLinkClass
   ) throws IllegalStateException {
     addLinkCssClassResolver(elementType, element -> cssLinkClass);
   }
+
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="Lists of Nodes">
@@ -786,7 +790,7 @@ public class SemanticCMS {
     synchronized (listItemCssClassResolverByNodeType) {
       while (true) {
         @SuppressWarnings("unchecked")
-        ListItemCssClassResolver<? super N> listItemCssClassResolver = (ListItemCssClassResolver<? super N>)listItemCssClassResolverByNodeType.get(nodeType);
+        ListItemCssClassResolver<? super N> listItemCssClassResolver = (ListItemCssClassResolver<? super N>) listItemCssClassResolverByNodeType.get(nodeType);
         if (listItemCssClassResolver != null) {
           String listItemCssClass = listItemCssClassResolver.getListItemCssClass(node);
           if (listItemCssClass != null) {
@@ -807,8 +811,8 @@ public class SemanticCMS {
    * @throws  IllegalStateException  if the node type is already registered.
    */
   public <N extends com.semanticcms.core.model.Node> void addListItemCssClassResolver(
-    Class<N> nodeType,
-    ListItemCssClassResolver<? super N> listItemCssClassResolver
+      Class<N> nodeType,
+      ListItemCssClassResolver<? super N> listItemCssClassResolver
   ) throws IllegalStateException {
     synchronized (listItemCssClassResolverByNodeType) {
       if (listItemCssClassResolverByNodeType.containsKey(nodeType)) {
@@ -827,8 +831,8 @@ public class SemanticCMS {
    */
   // TODO: Take a set of Group.Name activations, too
   public <N extends com.semanticcms.core.model.Node> void addListItemCssClass(
-    Class<N> nodeType,
-    String listItemCssClass
+      Class<N> nodeType,
+      String listItemCssClass
   ) throws IllegalStateException {
     addListItemCssClassResolver(nodeType, node -> listItemCssClass);
   }

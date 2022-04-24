@@ -84,12 +84,12 @@ public final class PageImpl {
   public static void verifyChildToParent(ChildRef childRef, PageRef parentPageRef, Set<ChildRef> childRefs) throws ServletException {
     if (!childRefs.contains(childRef)) {
       throw new ServletException(
-        "The parent page does not have this as a child.  this="
-          + childRef
-          + ", parent="
-          + parentPageRef
-          + ", parent.children="
-          + childRefs
+          "The parent page does not have this as a child.  this="
+              + childRef
+              + ", parent="
+              + parentPageRef
+              + ", parent.children="
+              + childRefs
       );
     }
   }
@@ -111,12 +111,12 @@ public final class PageImpl {
   public static void verifyParentToChild(ParentRef parentRef, PageRef childPageRef, Set<ParentRef> parentRefs) throws ServletException {
     if (!parentRefs.contains(parentRef)) {
       throw new ServletException(
-        "The child page does not have this as a parent.  this="
-          + parentRef
-          + ", child="
-          + childPageRef
-          + ", child.parents="
-          + parentRefs
+          "The child page does not have this as a parent.  this="
+              + parentRef
+              + ", child="
+              + childPageRef
+              + ", child.parents="
+              + parentRefs
       );
     }
   }
@@ -139,19 +139,19 @@ public final class PageImpl {
    * @throws  ServletException  if verification failed
    */
   public static void fullVerifyParentChild(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Page page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page
   ) throws ServletException, IOException {
     // Verify parents
     if (!page.getAllowParentMismatch()) {
       Map<PageRef, Page> notMissingParents = CapturePage.capturePages(
-        servletContext,
-        request,
-        response,
-        PageUtils.filterNotMissingBook(page.getParentRefs()),
-        CaptureLevel.PAGE
+          servletContext,
+          request,
+          response,
+          PageUtils.filterNotMissingBook(page.getParentRefs()),
+          CaptureLevel.PAGE
       );
       PageRef pageRef = page.getPageRef();
       for (Map.Entry<PageRef, Page> entry : notMissingParents.entrySet()) {
@@ -161,11 +161,11 @@ public final class PageImpl {
     // Verify children
     if (!page.getAllowChildMismatch()) {
       Map<PageRef, Page> notMissingChildren = CapturePage.capturePages(
-        servletContext,
-        request,
-        response,
-        PageUtils.filterNotMissingBook(page.getChildRefs()),
-        CaptureLevel.PAGE
+          servletContext,
+          request,
+          response,
+          PageUtils.filterNotMissingBook(page.getChildRefs()),
+          CaptureLevel.PAGE
       );
       PageRef pageRef = page.getPageRef();
       for (Map.Entry<PageRef, Page> entry : notMissingChildren.entrySet()) {
@@ -185,29 +185,29 @@ public final class PageImpl {
   // TODO: All theme/layout/skin support both HTML 4 and 5?
   // TODO: Fall-back to div without semantic tags?
   public static <Ex extends Throwable> void doPageImpl(
-    final ServletContext servletContext,
-    final HttpServletRequest request,
-    final HttpServletResponse response,
-    PageRef pageRef,
-    ReadableDateTime dateCreated,
-    ReadableDateTime datePublished,
-    ReadableDateTime dateModified,
-    ReadableDateTime dateReviewed,
-    Serialization serialization,
-    Doctype doctype,
-    Boolean autonli,
-    Boolean indent,
-    String title,
-    String shortTitle,
-    String description,
-    String keywords,
-    Boolean allowRobots,
-    Boolean toc,
-    int tocLevels,
-    boolean allowParentMismatch,
-    boolean allowChildMismatch,
-    Map<String, Object> properties,
-    PageImplBody<Ex> body
+      final ServletContext servletContext,
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      PageRef pageRef,
+      ReadableDateTime dateCreated,
+      ReadableDateTime datePublished,
+      ReadableDateTime dateModified,
+      ReadableDateTime dateReviewed,
+      Serialization serialization,
+      Doctype doctype,
+      Boolean autonli,
+      Boolean indent,
+      String title,
+      String shortTitle,
+      String description,
+      String keywords,
+      Boolean allowRobots,
+      Boolean toc,
+      int tocLevels,
+      boolean allowParentMismatch,
+      boolean allowChildMismatch,
+      Map<String, Object> properties,
+      PageImplBody<Ex> body
   ) throws Ex, ServletException, IOException, SkipPageException {
     final Page page = new Page();
     page.setPageRef(pageRef);
@@ -238,9 +238,9 @@ public final class PageImpl {
         String name = entry.getKey();
         if (!page.setProperty(name, entry.getValue())) {
           throw new LocalizedServletException(
-            PACKAGE_RESOURCES,
-            "error.duplicatePageProperty",
-            name
+              PACKAGE_RESOURCES,
+              "error.duplicatePageProperty",
+              name
           );
         }
       }
@@ -322,10 +322,10 @@ public final class PageImpl {
                       PageRef newPageRef = page.getPageRef();
                       if (!newPageRef.getBook().equals(pageRef.getBook())) {
                         throw new ServletException(
-                          "Page may not move itself into a different book.  pageRef="
-                            + pageRef
-                            + ", newPageRef="
-                            + newPageRef
+                            "Page may not move itself into a different book.  pageRef="
+                                + pageRef
+                                + ", newPageRef="
+                                + newPageRef
                         );
                       }
                     } finally {
@@ -412,22 +412,22 @@ public final class PageImpl {
 
                 // Configure the theme resources
                 theme.configureResources(
-                  servletContext,
-                  request,
-                  response,
-                  view,
-                  page,
-                  RegistryEE.Request.get(servletContext, request)
+                    servletContext,
+                    request,
+                    response,
+                    view,
+                    page,
+                    RegistryEE.Request.get(servletContext, request)
                 );
 
                 // Configure the view resources
                 view.configureResources(
-                  servletContext,
-                  request,
-                  response,
-                  theme,
-                  page,
-                  RegistryEE.Request.get(servletContext, request)
+                    servletContext,
+                    request,
+                    response,
+                    theme,
+                    page,
+                    RegistryEE.Request.get(servletContext, request)
                 );
 
                 // TODO: Configure the page resources here or within view?
@@ -491,16 +491,16 @@ public final class PageImpl {
         assert pageBook != null;
         String pagePath = pageRef.getPath();
         if (
-          pagePath.endsWith("/")
-          || pagePath.endsWith("/index.jspx")
-          || pagePath.endsWith("/index.jsp")
+            pagePath.endsWith("/")
+                || pagePath.endsWith("/index.jspx")
+                || pagePath.endsWith("/index.jsp")
         ) {
           // If this page URL ends in "/", "/index.jspx" or "/index.jsp", look for JSP page at "../index.jspx" or "../index.jsp" then asssume "../", error if outside book.
           int lastSlash = pagePath.lastIndexOf('/');
           if (lastSlash == -1) {
             throw new AssertionError();
           }
-          int nextLastSlash = pagePath.lastIndexOf('/', lastSlash-1);
+          int nextLastSlash = pagePath.lastIndexOf('/', lastSlash - 1);
           if (nextLastSlash == -1) {
             throw new ServletException("Auto parent of page would be outside book: " + pageRef);
           }

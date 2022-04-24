@@ -62,8 +62,8 @@ public final class BookUtils {
     if (canonicalBase == null) {
       String autoCanonical = URIDecoder.decodeURI(HttpServletUtil.getAbsoluteURL(request, book.getPathPrefix()));
       if (
-        // Logger checked first, so if warnings enabled mid-run, will get first warning still
-        logger.isLoggable(Level.WARNING)
+          // Logger checked first, so if warnings enabled mid-run, will get first warning still
+          logger.isLoggable(Level.WARNING)
       ) {
         String bookName = book.getName();
         String warningAttribute = CANONICAL_BASE_WARNED_ATTRIBUTE + bookName;

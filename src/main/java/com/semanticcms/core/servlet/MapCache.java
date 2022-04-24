@@ -65,10 +65,10 @@ abstract class MapCache extends Cache {
   protected final Map<String, Object> attributes;
 
   MapCache(
-    Map<CaptureKey, Page> pageCache,
-    Map<PageRef, Set<PageRef>> unverifiedParentsByPageRef,
-    Map<PageRef, Set<PageRef>> unverifiedChildrenByPageRef,
-    Map<String, Object> attributes
+      Map<CaptureKey, Page> pageCache,
+      Map<PageRef, Set<PageRef>> unverifiedParentsByPageRef,
+      Map<PageRef, Set<PageRef>> unverifiedChildrenByPageRef,
+      Map<String, Object> attributes
   ) {
     this.pageCache = pageCache;
     this.unverifiedParentsByPageRef = unverifiedParentsByPageRef;
@@ -103,7 +103,7 @@ abstract class MapCache extends Cache {
   void put(CaptureKey key, Page page) throws ServletException {
     // Check if found in other level, this is used to avoid verifying twice
     Page otherLevelPage = pageCache.get(
-      new CaptureKey(key.pageRef, key.level == CaptureLevel.PAGE ? CaptureLevel.META : CaptureLevel.PAGE)
+        new CaptureKey(key.pageRef, key.level == CaptureLevel.PAGE ? CaptureLevel.META : CaptureLevel.PAGE)
     );
     // Add to cache, verify if this page not yet put into cache
     if (pageCache.put(key, page) == null) {
@@ -199,9 +199,9 @@ abstract class MapCache extends Cache {
   @Override
   // TODO: Ex extends Throwable
   public <V, Ex extends Exception> V getAttribute(
-    String key,
-    Class<V> clazz,
-    Callable<? extends V, Ex> callable
+      String key,
+      Class<V> clazz,
+      Callable<? extends V, Ex> callable
   ) throws Ex {
     V attribute = getAttribute(key, clazz);
     if (attribute == null) {

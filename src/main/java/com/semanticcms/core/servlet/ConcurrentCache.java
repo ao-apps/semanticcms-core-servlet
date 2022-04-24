@@ -40,12 +40,12 @@ class ConcurrentCache extends MapCache {
 
   ConcurrentCache() {
     super(
-      new ConcurrentHashMap<>(),
-      VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
-      VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
-      new ConcurrentHashMap<>()
+        new ConcurrentHashMap<>(),
+        VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+        VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+        new ConcurrentHashMap<>()
     );
-    concurrentAttributes = (ConcurrentMap<String, Object>)attributes;
+    concurrentAttributes = (ConcurrentMap<String, Object>) attributes;
   }
 
   /**
@@ -72,9 +72,9 @@ class ConcurrentCache extends MapCache {
   @Override
   // TODO: Ex extends Throwable
   public <V, Ex extends Exception> V getAttribute(
-    String key,
-    Class<V> clazz,
-    Callable<? extends V, Ex> callable
+      String key,
+      Class<V> clazz,
+      Callable<? extends V, Ex> callable
   ) throws Ex {
     V attribute = getAttribute(key, clazz);
     if (attribute == null) {

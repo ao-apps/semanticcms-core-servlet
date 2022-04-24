@@ -47,7 +47,7 @@ public enum CaptureLevel {
   BODY;
 
   private static final ScopeEE.Request.Attribute<CaptureLevel> CAPTURE_LEVEL_REQUEST_ATTRIBUTE =
-    ScopeEE.REQUEST.attribute(CaptureLevel.class.getName() + ".captureLevel");
+      ScopeEE.REQUEST.attribute(CaptureLevel.class.getName() + ".captureLevel");
 
   /**
    * Gets the capture level or <code>BODY</code> if none occurring.

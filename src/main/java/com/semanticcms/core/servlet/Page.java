@@ -78,10 +78,10 @@ public class Page {
   private Map<String, Object> properties;
 
   public Page(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    String title
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      String title
   ) {
     this.servletContext = servletContext;
     this.request = request;
@@ -96,10 +96,10 @@ public class Page {
    */
   public Page(String title) {
     this(
-      PageContext.getServletContext(),
-      PageContext.getRequest(),
-      PageContext.getResponse(),
-      title
+        PageContext.getServletContext(),
+        PageContext.getRequest(),
+        PageContext.getResponse(),
+        title
     );
   }
 
@@ -198,9 +198,9 @@ public class Page {
       properties = new LinkedHashMap<>();
     } else if (properties.containsKey(name)) {
       throw new LocalizedIllegalStateException(
-        PACKAGE_RESOURCES,
-        "error.duplicatePageProperty",
-        name
+          PACKAGE_RESOURCES,
+          "error.duplicatePageProperty",
+          name
       );
     }
     properties.put(name, value);
@@ -230,39 +230,39 @@ public class Page {
       pr = PageRefResolver.getCurrentPageRef(servletContext, request);
     }
     PageImpl.doPageImpl(
-      servletContext,
-      request,
-      response,
-      pr,
-      dateCreated,
-      datePublished,
-      dateModified,
-      dateReviewed,
-      serialization,
-      doctype,
-      autonli,
-      indent,
-      title,
-      shortTitle,
-      description,
-      keywords,
-      allowRobots,
-      toc,
-      tocLevels,
-      allowParentMismatch,
-      allowChildMismatch,
-      properties,
-      body == null
-        ? null
-        : (discard, page) -> {
+        servletContext,
+        request,
+        response,
+        pr,
+        dateCreated,
+        datePublished,
+        dateModified,
+        dateReviewed,
+        serialization,
+        doctype,
+        autonli,
+        indent,
+        title,
+        shortTitle,
+        description,
+        keywords,
+        allowRobots,
+        toc,
+        tocLevels,
+        allowParentMismatch,
+        allowChildMismatch,
+        properties,
+        body == null
+            ? null
+            : (discard, page) -> {
           if (discard) {
             final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
             // Set PageContext
             PageContext.newPageContextSkip(
-              servletContext,
-              request,
-              newResponse,
-              () -> body.doBody(request, newResponse, page)
+                servletContext,
+                request,
+                newResponse,
+                () -> body.doBody(request, newResponse, page)
             );
             return EmptyResult.getInstance();
           } else {
@@ -281,10 +281,10 @@ public class Page {
                 };
                 // Set PageContext
                 PageContext.newPageContextSkip(
-                  servletContext,
-                  request,
-                  newResponse,
-                  () -> body.doBody(request, newResponse, page)
+                    servletContext,
+                    request,
+                    newResponse,
+                    () -> body.doBody(request, newResponse, page)
                 );
                 if (capturedPW.checkError()) {
                   throw new IOException("Error on capturing PrintWriter");
@@ -303,7 +303,7 @@ public class Page {
    * @see  #invoke(com.semanticcms.core.servlet.Page.Body)
    */
   public void invoke() throws ServletException, IOException, SkipPageException {
-    invoke((Body)null);
+    invoke((Body) null);
   }
 
   @FunctionalInterface
@@ -316,10 +316,10 @@ public class Page {
    */
   public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
     invoke(
-      body == null
-        ? null
-        // Java 1.8: (req, resp, page) -> body.doBody(page)
-        : new Body() {
+        body == null
+            ? null
+            // Java 1.8: (req, resp, page) -> body.doBody(page)
+            : new Body() {
           @Override
           public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
             body.doBody(page);
@@ -338,10 +338,10 @@ public class Page {
    */
   public void invoke(final PageContextNoPageBody body) throws ServletException, IOException, SkipPageException {
     invoke(
-      body == null
-        ? null
-        // Java 1.8: (req, resp, page) -> body.doBody()
-        : new Body() {
+        body == null
+            ? null
+            // Java 1.8: (req, resp, page) -> body.doBody()
+            : new Body() {
           @Override
           public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
             body.doBody();

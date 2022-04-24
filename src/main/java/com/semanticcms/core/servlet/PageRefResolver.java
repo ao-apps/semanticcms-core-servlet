@@ -111,11 +111,11 @@ public final class PageRefResolver {
         throw new ServletException("book attribute required when not in a book's content");
       }
       return new PageRef(
-        currentBook,
-        URIResolver.getAbsolutePath(
-          currentPagePath.substring(currentBook.getPathPrefix().length()),
-          path
-        )
+          currentBook,
+          URIResolver.getAbsolutePath(
+              currentPagePath.substring(currentBook.getPathPrefix().length()),
+              path
+          )
       );
     } else {
       if (!path.startsWith("/")) {
@@ -143,10 +143,10 @@ public final class PageRefResolver {
    */
   public static PageRef getPageRef(String book, String path) throws ServletException, MalformedURLException {
     return getPageRef(
-      PageContext.getServletContext(),
-      PageContext.getRequest(),
-      book,
-      path
+        PageContext.getServletContext(),
+        PageContext.getRequest(),
+        book,
+        path
     );
   }
 }

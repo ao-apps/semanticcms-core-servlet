@@ -53,9 +53,9 @@ public class Link {
   private Object clazz;
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response
   ) {
     this.servletContext = servletContext;
     this.request = request;
@@ -63,33 +63,33 @@ public class Link {
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    String page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      String page
   ) {
     this(servletContext, request, response);
     this.page = page;
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    String book,
-    String page
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      String book,
+      String page
   ) {
     this(servletContext, request, response, page);
     this.book = book;
   }
 
   public Link(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    String book,
-    String page,
-    String element
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      String book,
+      String page,
+      String element
   ) {
     this(servletContext, request, response, book, page);
     this.element = element;
@@ -102,9 +102,9 @@ public class Link {
    */
   public Link() {
     this(
-      PageContext.getServletContext(),
-      PageContext.getRequest(),
-      PageContext.getResponse()
+        PageContext.getServletContext(),
+        PageContext.getRequest(),
+        PageContext.getResponse()
     );
   }
 
@@ -218,32 +218,32 @@ public class Link {
    */
   public void invoke(final Body body) throws ServletException, IOException, SkipPageException {
     LinkImpl.writeLinkImpl(servletContext,
-      request,
-      response,
-      new DocumentEE(servletContext, request, response),
-      book,
-      page,
-      element,
-      allowGeneratedElement,
-      anchor,
-      view,
-      small,
-      params,
-      absolute,
-      canonical,
-      clazz,
-      body == null
-        ? null
-        // Lamdba version not working with generic exceptions:
-        : discard -> {
+        request,
+        response,
+        new DocumentEE(servletContext, request, response),
+        book,
+        page,
+        element,
+        allowGeneratedElement,
+        anchor,
+        view,
+        small,
+        params,
+        absolute,
+        canonical,
+        clazz,
+        body == null
+            ? null
+            // Lamdba version not working with generic exceptions:
+            : discard -> {
           if (discard) {
             final HttpServletResponse newResponse = new NullHttpServletResponseWrapper(response);
             // Set PageContext
             PageContext.newPageContextSkip(
-              servletContext,
-              request,
-              newResponse,
-              () -> body.doBody(request, newResponse)
+                servletContext,
+                request,
+                newResponse,
+                () -> body.doBody(request, newResponse)
             );
           } else {
             body.doBody(request, response);
@@ -256,7 +256,7 @@ public class Link {
    * @see  #invoke(com.semanticcms.core.servlet.Link.Body)
    */
   public void invoke() throws ServletException, IOException, SkipPageException {
-    invoke((Body)null);
+    invoke((Body) null);
   }
 
   @FunctionalInterface
@@ -269,10 +269,10 @@ public class Link {
    */
   public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
     invoke(
-      body == null
-        ? null
-        // Java 1.8: (req, resp) -> body.doBody()
-        : new Body() {
+        body == null
+            ? null
+            // Java 1.8: (req, resp) -> body.doBody()
+            : new Body() {
           @Override
           public void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException {
             body.doBody();

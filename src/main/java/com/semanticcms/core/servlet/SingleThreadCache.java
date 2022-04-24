@@ -40,10 +40,10 @@ class SingleThreadCache extends MapCache {
   @SuppressWarnings("AssertWithSideEffects")
   SingleThreadCache() {
     super(
-      new HashMap<>(),
-      VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
-      VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
-      new HashMap<>()
+        new HashMap<>(),
+        VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+        VERIFY_CACHE_PARENT_CHILD_RELATIONSHIPS ? new HashMap<>() : null,
+        new HashMap<>()
     );
     Thread t = null;
     // Intentional side-effect from assert

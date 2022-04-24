@@ -93,12 +93,12 @@ public final class LinkImpl {
 
   public static String getBrokenPath(PageRef pageRef, String targetId) {
     int sbLen =
-      1 // '¿'
-      + pageRef.getServletPath().length();
+        1 // '¿'
+            + pageRef.getServletPath().length();
     if (targetId != null) {
       sbLen +=
-        1 // '#'
-        + targetId.length();
+          1 // '#'
+              + targetId.length();
     }
     sbLen++; // '?'
     StringBuilder sb = new StringBuilder(sbLen);
@@ -151,26 +151,26 @@ public final class LinkImpl {
    * Encodes the URL.
    */
   public static void writeHref(
-    HttpServletRequest request,
-    HttpServletResponse response,
-    Appendable out,
-    String href,
-    URIParameters params,
-    boolean absolute,
-    boolean canonical
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Appendable out,
+      String href,
+      URIParameters params,
+      boolean absolute,
+      boolean canonical
   ) throws ServletException, IOException {
     if (href != null) {
       out.append(" href=\"");
       encodeTextInXhtmlAttribute(
-        HttpServletUtil.buildURL(
-          request,
-          response,
-          href,
-          params,
-          absolute,
-          canonical
-        ),
-        out
+          HttpServletUtil.buildURL(
+              request,
+              response,
+              href,
+              params,
+              absolute,
+              canonical
+          ),
+          out
       );
       out.append('"');
     } else {
@@ -184,44 +184,44 @@ public final class LinkImpl {
    * @param  <Ex>  An arbitrary exception type that may be thrown
    */
   public static <Ex extends Throwable> void writeLinkImpl(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    AnyUnion_Palpable_Phrasing<?, ?> content,
-    String book,
-    String page,
-    String element,
-    boolean allowGeneratedElement,
-    String anchor,
-    String viewName,
-    boolean small,
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      AnyUnion_Palpable_Phrasing<?, ?> content,
+      String book,
+      String page,
+      String element,
+      boolean allowGeneratedElement,
+      String anchor,
+      String viewName,
+      boolean small,
       URIParameters params,
-    boolean absolute,
-    boolean canonical,
-    Object clazz,
-    LinkImplBody<Ex> body
+      boolean absolute,
+      boolean canonical,
+      Object clazz,
+      LinkImplBody<Ex> body
   ) throws Ex, ServletException, IOException, SkipPageException {
     // Get the current capture state
     final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
     if (captureLevel.compareTo(CaptureLevel.META) >= 0) {
       writeLinkImpl(
-        servletContext,
-        request,
-        response,
-        content,
-        book,
-        page,
-        element,
-        allowGeneratedElement,
-        anchor,
-        viewName,
-        small,
-        params,
-        absolute,
-        canonical,
-        clazz,
-        body,
-        captureLevel
+          servletContext,
+          request,
+          response,
+          content,
+          book,
+          page,
+          element,
+          allowGeneratedElement,
+          anchor,
+          viewName,
+          small,
+          params,
+          absolute,
+          canonical,
+          clazz,
+          body,
+          captureLevel
       );
     }
   }
@@ -238,23 +238,23 @@ public final class LinkImpl {
    * @param clazz  ValueExpression that returns Object, evaluated at {@link CaptureLevel#BODY} only
    */
   public static <Ex extends Throwable> void writeLinkImpl(
-    ServletContext servletContext,
-    ELContext elContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    AnyUnion_Palpable_Phrasing<?, ?> content,
-    ValueExpression book,
-    ValueExpression page,
-    ValueExpression element,
-    boolean allowGeneratedElement,
-    ValueExpression anchor,
-    ValueExpression viewName,
-    boolean small,
+      ServletContext servletContext,
+      ELContext elContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      AnyUnion_Palpable_Phrasing<?, ?> content,
+      ValueExpression book,
+      ValueExpression page,
+      ValueExpression element,
+      boolean allowGeneratedElement,
+      ValueExpression anchor,
+      ValueExpression viewName,
+      boolean small,
       URIParameters params,
-    boolean absolute,
-    boolean canonical,
-    ValueExpression clazz,
-    LinkImplBody<Ex> body
+      boolean absolute,
+      boolean canonical,
+      ValueExpression clazz,
+      LinkImplBody<Ex> body
   ) throws Ex, ServletException, IOException, SkipPageException {
     // Get the current capture state
     final CaptureLevel captureLevel = CaptureLevel.getCaptureLevel(request);
@@ -278,23 +278,23 @@ public final class LinkImpl {
         clazzObj = null;
       }
       writeLinkImpl(
-        servletContext,
-        request,
-        response,
-        content,
-        bookStr,
-        pageStr,
-        elementStr,
-        allowGeneratedElement,
-        anchorStr,
-        viewNameStr,
-        small,
-        params,
-        absolute,
-        canonical,
-        clazzObj,
-        body,
-        captureLevel
+          servletContext,
+          request,
+          response,
+          content,
+          bookStr,
+          pageStr,
+          elementStr,
+          allowGeneratedElement,
+          anchorStr,
+          viewNameStr,
+          small,
+          params,
+          absolute,
+          canonical,
+          clazzObj,
+          body,
+          captureLevel
       );
     }
   }
@@ -304,23 +304,23 @@ public final class LinkImpl {
    * @param  <Ex>  An arbitrary exception type that may be thrown
    */
   private static <Ex extends Throwable> void writeLinkImpl(
-    ServletContext servletContext,
-    HttpServletRequest request,
-    HttpServletResponse response,
-    AnyUnion_Palpable_Phrasing<?, ?> content,
-    String book,
-    String page,
-    String element,
-    boolean allowGeneratedElement,
-    String anchor,
-    String viewName,
-    boolean small,
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      AnyUnion_Palpable_Phrasing<?, ?> content,
+      String book,
+      String page,
+      String element,
+      boolean allowGeneratedElement,
+      String anchor,
+      String viewName,
+      boolean small,
       URIParameters params,
-    boolean absolute,
-    boolean canonical,
-    Object clazz,
-    LinkImplBody<Ex> body,
-    CaptureLevel captureLevel
+      boolean absolute,
+      boolean canonical,
+      Object clazz,
+      LinkImplBody<Ex> body,
+      CaptureLevel captureLevel
   ) throws Ex, ServletException, IOException, SkipPageException {
     assert captureLevel.compareTo(CaptureLevel.META) >= 0;
 
@@ -372,23 +372,23 @@ public final class LinkImpl {
       if (targetPageRef.getBook() == null) {
         targetPage = null;
       } else if (
-        // Short-cut for element already added above within current page
-        currentPage != null
-        && targetPageRef.equals(currentPage.getPageRef())
-        && (
-          element == null
-          || currentPage.getElementsById().containsKey(element)
-        )
+          // Short-cut for element already added above within current page
+          currentPage != null
+              && targetPageRef.equals(currentPage.getPageRef())
+              && (
+              element == null
+                  || currentPage.getElementsById().containsKey(element)
+          )
       ) {
         targetPage = currentPage;
       } else {
         // Capture required, even if capturing self
         targetPage = CapturePage.capturePage(
-          servletContext,
-          request,
-          response,
-          targetPageRef,
-          element == null ? CaptureLevel.PAGE : CaptureLevel.META
+            servletContext,
+            request,
+            response,
+            targetPageRef,
+            element == null ? CaptureLevel.PAGE : CaptureLevel.META
         );
       }
 
@@ -496,42 +496,42 @@ public final class LinkImpl {
             }
             if (index != null) {
               span__.sup__any(sup -> sup
-                .text('[').text(index + 1).text(']')
+                      .text('[').text(index + 1).text(']')
               );
             }
           } else {
             body.doBody(false);
           }
           span__.sup__any(sup -> sup
-            .a()
-              .href(
-                HttpServletUtil.buildURL(
-                  request,
-                  response,
-                  href.toString(),
-                  params,
-                  absolute,
-                  canonical
-                )
-              )
-              .rel(nofollow ? AnyA.Rel.NOFOLLOW : null)
-            .__(
-              // TODO: Make [link] not copied during select/copy/paste, to not corrupt semantic meaning (and make more useful in copy/pasted code and scripts)?
-              // TODO: https://stackoverflow.com/questions/3271231/how-to-exclude-portions-of-text-when-copying
-              "[link]"
-            )
+                  .a()
+                  .href(
+                      HttpServletUtil.buildURL(
+                          request,
+                          response,
+                          href.toString(),
+                          params,
+                          absolute,
+                          canonical
+                      )
+                  )
+                  .rel(nofollow ? AnyA.Rel.NOFOLLOW : null)
+                  .__(
+                      // TODO: Make [link] not copied during select/copy/paste, to not corrupt semantic meaning (and make more useful in copy/pasted code and scripts)?
+                      // TODO: https://stackoverflow.com/questions/3271231/how-to-exclude-portions-of-text-when-copying
+                      "[link]"
+                  )
           );
         }
       } else {
         AnyA<?, ? extends AnyUnion_Palpable_Phrasing<?, ?>, ?, ?> a = content.a(
-          HttpServletUtil.buildURL(
-            request,
-            response,
-            href.toString(),
-            params,
-            absolute,
-            canonical
-          )
+            HttpServletUtil.buildURL(
+                request,
+                response,
+                href.toString(),
+                params,
+                absolute,
+                canonical
+            )
         );
         if (clazz != null) {
           a.clazz(clazz);
@@ -554,7 +554,7 @@ public final class LinkImpl {
             }
             if (index != null) {
               a_c.pc().sup__any(sup -> sup
-                .text('[').text(index + 1).text(']')
+                      .text('[').text(index + 1).text(']')
               );
             }
           } else {
