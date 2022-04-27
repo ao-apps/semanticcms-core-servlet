@@ -174,7 +174,7 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
    */
   public void invoke(final PageContextBody<? super E> body) throws ServletException, IOException, SkipPageException {
     invoke(
-        (body == null) ? null : (req, resp, e) -> body.doBody(e)
+        (body == null) ? null : (HttpServletRequest req, HttpServletResponse resp, E e) -> body.doBody(e)
     );
   }
 
@@ -188,7 +188,7 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
    */
   public void invoke(final PageContextNoElementBody body) throws ServletException, IOException, SkipPageException {
     invoke(
-        (body == null) ? null : (req, resp, e) -> body.doBody()
+        (body == null) ? null : (HttpServletRequest req, HttpServletResponse resp, E e) -> body.doBody()
     );
   }
 
