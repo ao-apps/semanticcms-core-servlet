@@ -88,6 +88,8 @@ class SingleThreadCache extends MapCache {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @param  <Ex>  An arbitrary exception type that may be thrown
    */
   @Override

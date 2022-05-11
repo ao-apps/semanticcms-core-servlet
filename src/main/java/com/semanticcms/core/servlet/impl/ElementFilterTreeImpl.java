@@ -204,7 +204,7 @@ public final class ElementFilterTreeImpl {
         a.text(node);
         if (index != null) {
           a.sup__any(sup -> sup
-                  .text('[').text(index + 1).text(']')
+              .text('[').text(index + 1).text(']')
           );
         }
       });

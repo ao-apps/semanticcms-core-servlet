@@ -267,17 +267,11 @@ public class Link {
   /**
    * @see  #invoke(com.semanticcms.core.servlet.Link.Body)
    */
-  public void invoke(final PageContextBody body) throws ServletException, IOException, SkipPageException {
+  public void invoke(PageContextBody body) throws ServletException, IOException, SkipPageException {
     invoke(
         body == null
             ? null
-            // Java 1.8: (req, resp) -> body.doBody()
-            : new Body() {
-          @Override
-          public void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException {
-            body.doBody();
-          }
-        }
+            : (HttpServletRequest req, HttpServletResponse resp) -> body.doBody()
     );
   }
 }

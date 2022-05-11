@@ -62,13 +62,19 @@ import org.xml.sax.SAXException;
 
 /**
  * The SemanticCMS application context.
- *
- * TODO: Consider custom EL resolver for this variable: http://stackoverflow.com/questions/5016965/how-to-add-a-custom-variableresolver-in-pure-jsp
+ * <p>
+ * TODO: Consider custom EL resolver for this variable.
+ * http://stackoverflow.com/questions/5016965/how-to-add-a-custom-variableresolver-in-pure-jsp
+ * </p>
  */
 public class SemanticCMS {
 
   // <editor-fold defaultstate="collapsed" desc="Singleton Instance (per application)">
 
+  /**
+   * Exposes the application context as an application-scope {@link SemanticCMS} instance named
+   * "{@link #APPLICATION_ATTRIBUTE_NAME}".
+   */
   @WebListener("Exposes the application context as an application-scope SemanticCMS instance named \"" + APPLICATION_ATTRIBUTE_NAME + "\".")
   public static class Initializer implements ServletContextListener {
 
@@ -85,27 +91,40 @@ public class SemanticCMS {
         instance.destroy();
         instance = null;
       }
-      APPLICATION_ATTRIBUTE.context(event.getServletContext()).remove();
+      ServletContext servletContext = event.getServletContext();
+      APPLICATION_ATTRIBUTE.context(servletContext).remove();
+      APPLICATION_ATTRIBUTE_OLD.context(servletContext).remove();
     }
   }
 
-  private static final String APPLICATION_ATTRIBUTE_NAME = "semanticCMS";
+  private static final String APPLICATION_ATTRIBUTE_NAME = "semanticCms";
 
   public static final ScopeEE.Application.Attribute<SemanticCMS> APPLICATION_ATTRIBUTE =
       ScopeEE.APPLICATION.attribute(APPLICATION_ATTRIBUTE_NAME);
+
+  private static final String APPLICATION_ATTRIBUTE_OLD_NAME = "semanticCMS";
+
+  public static final ScopeEE.Application.Attribute<SemanticCMS> APPLICATION_ATTRIBUTE_OLD =
+      ScopeEE.APPLICATION.attribute(APPLICATION_ATTRIBUTE_OLD_NAME);
 
   /**
    * Gets the SemanticCMS instance, creating it if necessary.
    */
   public static SemanticCMS getInstance(ServletContext servletContext) {
-    return APPLICATION_ATTRIBUTE.context(servletContext).computeIfAbsent(__ -> {
+    boolean[] computed = {false};
+    SemanticCMS semanticCms = APPLICATION_ATTRIBUTE.context(servletContext).computeIfAbsent(name -> {
       try {
+        computed[0] = true;
         // TODO: Support custom implementations via context-param?
         return new SemanticCMS(servletContext);
       } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
         throw new WrappedException(e);
       }
     });
+    if (computed[0]) {
+      APPLICATION_ATTRIBUTE_OLD.context(servletContext).set(semanticCms);
+    }
+    return semanticCms;
   }
 
   private final ServletContext servletContext;
@@ -116,8 +135,7 @@ public class SemanticCMS {
     int numProcessors = Runtime.getRuntime().availableProcessors();
     this.concurrentSubrequests =
         numProcessors > 1
-            && Boolean.parseBoolean(servletContext.getInitParameter(CONCURRENT_SUBREQUESTS_INIT_PARAM))
-    ;
+            && Boolean.parseBoolean(servletContext.getInitParameter(CONCURRENT_SUBREQUESTS_INIT_PARAM));
     this.rootBook = initBooks();
     this.executors = new Executors();
   }
@@ -159,40 +177,40 @@ public class SemanticCMS {
 
   private Book initBooks() throws IOException, SAXException, ParserConfigurationException {
     Document booksXml;
-    {
-      InputStream schemaIn = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_RESOURCE);
-      if (schemaIn == null) {
-        throw new IOException("Schema not found: " + BOOKS_XML_SCHEMA_RESOURCE);
-      }
-      try {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-          dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        } catch (ParserConfigurationException e) {
-          throw new AssertionError("All implementations are required to support the javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING feature.", e);
-        }
-        // See https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.md#java
-        // See https://rules.sonarsource.com/java/RSPEC-2755
-        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "https"); // TODO: How can avoid this while schema included in JAR?
-        dbf.setNamespaceAware(true);
-        dbf.setValidating(true);
-        dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", schemaIn);
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        InputStream booksXmlIn = servletContext.getResource(BOOKS_XML_RESOURCE).openStream();
-        if (booksXmlIn == null) {
-          throw new IOException(BOOKS_XML_RESOURCE + " not found");
+      {
+        InputStream schemaIn = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_RESOURCE);
+        if (schemaIn == null) {
+          throw new IOException("Schema not found: " + BOOKS_XML_SCHEMA_RESOURCE);
         }
         try {
-          booksXml = db.parse(booksXmlIn);
+          DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+          try {
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+          } catch (ParserConfigurationException e) {
+            throw new AssertionError("All implementations are required to support the javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING feature.", e);
+          }
+          // See https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.md#java
+          // See https://rules.sonarsource.com/java/RSPEC-2755
+          dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+          dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "https"); // TODO: How can avoid this while schema included in JAR?
+          dbf.setNamespaceAware(true);
+          dbf.setValidating(true);
+          dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
+          dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", schemaIn);
+          DocumentBuilder db = dbf.newDocumentBuilder();
+          InputStream booksXmlIn = servletContext.getResource(BOOKS_XML_RESOURCE).openStream();
+          if (booksXmlIn == null) {
+            throw new IOException(BOOKS_XML_RESOURCE + " not found");
+          }
+          try {
+            booksXml = db.parse(booksXmlIn);
+          } finally {
+            booksXmlIn.close();
+          }
         } finally {
-          booksXmlIn.close();
+          schemaIn.close();
         }
-      } finally {
-        schemaIn.close();
       }
-    }
     org.w3c.dom.Element booksElem = booksXml.getDocumentElement();
     // Load missingBooks
     for (org.w3c.dom.Element missingBookElem : XmlUtils.iterableChildElementsByTagName(booksElem, MISSING_BOOK_TAG)) {
@@ -315,6 +333,7 @@ public class SemanticCMS {
   private static class ViewsLock {
     // Empty lock class to help heap profile
   }
+
   private final ViewsLock viewsLock = new ViewsLock();
 
   /**
@@ -864,6 +883,7 @@ public class SemanticCMS {
    * Consider selecting concurrent or sequential implementations based on overall system load.
    * See {@link ConcurrencyCoordinator#isConcurrentProcessingRecommended(javax.servlet.ServletRequest)}.
    * </p>
+   *
    * @see  ConcurrencyCoordinator#isConcurrentProcessingRecommended(javax.servlet.ServletRequest)
    */
   public Executors getExecutors() {

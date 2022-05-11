@@ -71,8 +71,9 @@ public class CacheFilter implements Filter {
    * To speed up an export, the elements are cached between requests.
    * The first non-exporting request will clear this cache, and it will also
    * be removed after a given number of seconds.
-   *
+   * <p>
    * TODO: Consider consequences of caching once we have a security model applied
+   * </p>
    */
   private static class ExportPageCache {
 
@@ -141,6 +142,7 @@ public class CacheFilter implements Filter {
   private static class ExportCacheLock {
     // Empty lock class to help heap profile
   }
+
   private final ExportCacheLock exportCacheLock = new ExportCacheLock();
 
   @Override

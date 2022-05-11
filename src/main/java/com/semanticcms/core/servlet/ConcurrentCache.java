@@ -31,8 +31,9 @@ import javax.servlet.ServletException;
 
 /**
  * A page cache that is thread safe through concurrent collections.
- *
+ * <p>
  * Is currently still synchronized on parent-child verifications, which only occurs on put.
+ * </p>
  */
 class ConcurrentCache extends MapCache {
 
@@ -67,6 +68,8 @@ class ConcurrentCache extends MapCache {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @param  <Ex>  An arbitrary exception type that may be thrown
    */
   @Override

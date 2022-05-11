@@ -79,6 +79,7 @@ public class ServletElementContext implements ElementContext {
               public PrintWriter getWriter() {
                 return pw;
               }
+
               @Override
               public ServletOutputStream getOutputStream() {
                 throw new NotImplementedException("getOutputStream not expected");

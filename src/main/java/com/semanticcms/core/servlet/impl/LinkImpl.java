@@ -25,16 +25,17 @@ package com.semanticcms.core.servlet.impl;
 
 import static com.aoapps.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
 import static com.aoapps.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
+import static com.aoapps.lang.Strings.nullIfEmpty;
+import static com.aoapps.taglib.AttributeUtils.resolveValue;
+
 import com.aoapps.html.any.AnyA;
 import com.aoapps.html.any.AnyA_c;
 import com.aoapps.html.any.AnySPAN;
 import com.aoapps.html.any.AnySPAN_c;
 import com.aoapps.html.any.AnyUnion_Palpable_Phrasing;
-import static com.aoapps.lang.Strings.nullIfEmpty;
 import com.aoapps.net.URIEncoder;
 import com.aoapps.net.URIParameters;
 import com.aoapps.servlet.http.HttpServletUtil;
-import static com.aoapps.taglib.AttributeUtils.resolveValue;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
 import com.semanticcms.core.model.Page;
@@ -360,8 +361,8 @@ public final class LinkImpl {
       }
 
       // Find the view
-      final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
-      final View view = semanticCMS.getViewsByName().get(viewName);
+      final SemanticCMS semanticCms = SemanticCMS.getInstance(servletContext);
+      final View view = semanticCms.getViewsByName().get(viewName);
       if (view == null) {
         throw new ServletException("View not found: " + viewName);
       }
@@ -482,7 +483,7 @@ public final class LinkImpl {
           span.clazz(clazz);
         } else {
           if (targetElement != null) {
-            span.clazz(semanticCMS.getLinkCssClass(targetElement));
+            span.clazz(semanticCms.getLinkCssClass(targetElement));
           }
         }
         try (AnySPAN_c<?, ?, ?> span__ = span._c()) {
@@ -496,30 +497,30 @@ public final class LinkImpl {
             }
             if (index != null) {
               span__.sup__any(sup -> sup
-                      .text('[').text(index + 1).text(']')
+                  .text('[').text(index + 1).text(']')
               );
             }
           } else {
             body.doBody(false);
           }
           span__.sup__any(sup -> sup
-                  .a()
-                  .href(
-                      HttpServletUtil.buildURL(
-                          request,
-                          response,
-                          href.toString(),
-                          params,
-                          absolute,
-                          canonical
-                      )
+              .a()
+              .href(
+                  HttpServletUtil.buildURL(
+                      request,
+                      response,
+                      href.toString(),
+                      params,
+                      absolute,
+                      canonical
                   )
-                  .rel(nofollow ? AnyA.Rel.NOFOLLOW : null)
-                  .__(
-                      // TODO: Make [link] not copied during select/copy/paste, to not corrupt semantic meaning (and make more useful in copy/pasted code and scripts)?
-                      // TODO: https://stackoverflow.com/questions/3271231/how-to-exclude-portions-of-text-when-copying
-                      "[link]"
-                  )
+              )
+              .rel(nofollow ? AnyA.Rel.NOFOLLOW : null)
+              .__(
+                  // TODO: Make [link] not copied during select/copy/paste, to not corrupt semantic meaning (and make more useful in copy/pasted code and scripts)?
+                  // TODO: https://stackoverflow.com/questions/3271231/how-to-exclude-portions-of-text-when-copying
+                  "[link]"
+              )
           );
         }
       } else {
@@ -537,7 +538,7 @@ public final class LinkImpl {
           a.clazz(clazz);
         } else {
           if (targetElement != null) {
-            a.clazz(semanticCMS.getLinkCssClass(targetElement));
+            a.clazz(semanticCms.getLinkCssClass(targetElement));
           }
         }
         if (nofollow) {
@@ -554,7 +555,7 @@ public final class LinkImpl {
             }
             if (index != null) {
               a_c.pc().sup__any(sup -> sup
-                      .text('[').text(index + 1).text(']')
+                  .text('[').text(index + 1).text(']')
               );
             }
           } else {

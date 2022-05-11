@@ -23,6 +23,9 @@
 
 package com.semanticcms.core.servlet.impl;
 
+import static com.aoapps.lang.Strings.nullIfEmpty;
+import static com.aoapps.taglib.AttributeUtils.resolveValue;
+
 import com.aoapps.html.any.AnyA;
 import com.aoapps.html.any.AnyLI;
 import com.aoapps.html.any.AnyLI_c;
@@ -30,10 +33,8 @@ import com.aoapps.html.any.AnyPalpableContent;
 import com.aoapps.html.any.AnyUL_c;
 import com.aoapps.html.any.AnyUnion_Palpable_Phrasing;
 import com.aoapps.lang.Strings;
-import static com.aoapps.lang.Strings.nullIfEmpty;
 import com.aoapps.net.URIDecoder;
 import com.aoapps.net.URIEncoder;
-import static com.aoapps.taglib.AttributeUtils.resolveValue;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
 import com.semanticcms.core.model.Node;
@@ -482,7 +483,7 @@ public final class NavigationTreeImpl {
       AnyLI<?, ?, ?, ?, ?> li = ul__.li();
       if (yuiConfig) {
         li.attribute("yuiConfig", attr -> attr
-                .append("{\"data\":\"").append(encodeHexData(servletPath)).append("\"}")
+            .append("{\"data\":\"").append(encodeHexData(servletPath)).append("\"}")
         );
       }
       li.clazz(
@@ -546,7 +547,7 @@ public final class NavigationTreeImpl {
         }
         if (index != null) {
           a__.sup__any(sup -> sup
-                  .text('[').text(index + 1).text(']')
+              .text('[').text(index + 1).text(']')
           );
         }
       });

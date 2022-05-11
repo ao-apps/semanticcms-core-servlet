@@ -23,8 +23,9 @@
 
 package com.semanticcms.core.servlet;
 
-import com.aoapps.lang.NullArgumentException;
 import static com.aoapps.lang.Strings.nullIfEmpty;
+
+import com.aoapps.lang.NullArgumentException;
 import com.aoapps.net.URIResolver;
 import com.aoapps.servlet.http.Dispatcher;
 import com.semanticcms.core.model.Book;
@@ -102,11 +103,11 @@ public final class PageRefResolver {
     if (path.isEmpty()) {
       throw new IllegalArgumentException("path is empty");
     }
-    SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+    SemanticCMS semanticCms = SemanticCMS.getInstance(servletContext);
     if (book == null) {
       // When book not provided, path is relative to current page
       String currentPagePath = Dispatcher.getCurrentPagePath(request);
-      Book currentBook = semanticCMS.getBook(currentPagePath);
+      Book currentBook = semanticCms.getBook(currentPagePath);
       if (currentBook == null) {
         throw new ServletException("book attribute required when not in a book's content");
       }
@@ -121,13 +122,13 @@ public final class PageRefResolver {
       if (!path.startsWith("/")) {
         throw new ServletException("When book provided, path must begin with a slash (/): " + path);
       }
-      Book foundBook = semanticCMS.getBooks().get(book);
+      Book foundBook = semanticCms.getBooks().get(book);
       if (foundBook != null) {
         return new PageRef(foundBook, path);
       } else {
         // Missing book
         // TODO: missingBooks intered, too?  Then can take it's interned copy for "book"
-        if (!semanticCMS.getMissingBooks().contains(book)) {
+        if (!semanticCms.getMissingBooks().contains(book)) {
           throw new ServletException("Reference to missing book not allowed: " + book);
         }
         return new PageRef(book, path);

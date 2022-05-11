@@ -23,6 +23,8 @@
 
 package com.semanticcms.core.servlet.impl;
 
+import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
+
 import com.aoapps.encoding.Doctype;
 import com.aoapps.encoding.Serialization;
 import com.aoapps.encoding.servlet.DoctypeEE;
@@ -46,7 +48,6 @@ import com.semanticcms.core.servlet.CapturePage;
 import com.semanticcms.core.servlet.CurrentNode;
 import com.semanticcms.core.servlet.CurrentPage;
 import com.semanticcms.core.servlet.PageUtils;
-import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
 import com.semanticcms.core.servlet.SemanticCMS;
 import com.semanticcms.core.servlet.Theme;
 import com.semanticcms.core.servlet.View;
@@ -211,14 +212,14 @@ public final class PageImpl {
   ) throws Ex, ServletException, IOException, SkipPageException {
     final Page page = new Page();
     page.setPageRef(pageRef);
-    {
-      // Pages may not be nested within any kind of node
-      Node parentNode = CurrentNode.getCurrentNode(request);
-      if (parentNode != null) {
-        throw new ServletException("Pages may not be nested within other nodes: " + page.getPageRef() + " not allowed inside of " + parentNode);
+      {
+        // Pages may not be nested within any kind of node
+        Node parentNode = CurrentNode.getCurrentNode(request);
+        if (parentNode != null) {
+          throw new ServletException("Pages may not be nested within other nodes: " + page.getPageRef() + " not allowed inside of " + parentNode);
+        }
+        assert CurrentPage.getCurrentPage(request) == null : "When no parent node, cannot have a parent page";
       }
-      assert CurrentPage.getCurrentPage(request) == null : "When no parent node, cannot have a parent page";
-    }
 
     page.setDateCreated(dateCreated);
     page.setDatePublished(datePublished);
@@ -353,52 +354,52 @@ public final class PageImpl {
               fullVerifyParentChild(servletContext, request, response, page);
 
               // Resolve the view
-              SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
+              SemanticCMS semanticCms = SemanticCMS.getInstance(servletContext);
               View view;
-              {
-                String viewName = request.getParameter(SemanticCMS.VIEW_PARAM);
-                Map<String, View> viewsMap = semanticCMS.getViewsByName();
-                if (viewName == null) {
-                  view = null;
-                } else {
-                  if (SemanticCMS.DEFAULT_VIEW_NAME.equals(viewName)) {
-                    throw new ServletException(SemanticCMS.VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
+                {
+                  String viewName = request.getParameter(SemanticCMS.VIEW_PARAM);
+                  Map<String, View> viewsMap = semanticCms.getViewsByName();
+                  if (viewName == null) {
+                    view = null;
+                  } else {
+                    if (SemanticCMS.DEFAULT_VIEW_NAME.equals(viewName)) {
+                      throw new ServletException(SemanticCMS.VIEW_PARAM + " paramater may not be sent for default view: " + viewName);
+                    }
+                    view = viewsMap.get(viewName);
                   }
-                  view = viewsMap.get(viewName);
-                }
-                if (view == null) {
-                  // Find default
-                  view = viewsMap.get(SemanticCMS.DEFAULT_VIEW_NAME);
                   if (view == null) {
-                    throw new ServletException("Default view not found: " + SemanticCMS.DEFAULT_VIEW_NAME);
+                    // Find default
+                    view = viewsMap.get(SemanticCMS.DEFAULT_VIEW_NAME);
+                    if (view == null) {
+                      throw new ServletException("Default view not found: " + SemanticCMS.DEFAULT_VIEW_NAME);
+                    }
                   }
                 }
-              }
 
               // Find the theme
               Theme theme = null;
-              {
-                // Currently just picks the first non-default theme registered, the uses default
-                Theme defaultTheme = null;
-                for (Theme t : semanticCMS.getThemes().values()) {
-                  if (t.isDefault()) {
-                    assert defaultTheme == null : "More than one default theme registered";
-                    defaultTheme = t;
-                  } else {
-                    // Use first non-default
-                    theme = t;
-                    break;
+                {
+                  // Currently just picks the first non-default theme registered, the uses default
+                  Theme defaultTheme = null;
+                  for (Theme t : semanticCms.getThemes().values()) {
+                    if (t.isDefault()) {
+                      assert defaultTheme == null : "More than one default theme registered";
+                      defaultTheme = t;
+                    } else {
+                      // Use first non-default
+                      theme = t;
+                      break;
+                    }
                   }
-                }
-                if (theme == null) {
-                  // Use default
-                  if (defaultTheme == null) {
-                    throw new ServletException("No themes registered");
+                  if (theme == null) {
+                    // Use default
+                    if (defaultTheme == null) {
+                      throw new ServletException("No themes registered");
+                    }
+                    theme = defaultTheme;
                   }
-                  theme = defaultTheme;
+                  assert theme != null;
                 }
-                assert theme != null;
-              }
 
               // Clear the output buffer
               response.resetBuffer();

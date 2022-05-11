@@ -116,6 +116,8 @@ public abstract class View implements Comparable<View> {
   }
 
   /**
+   * {@inheritDoc}
+   *
    * @see  #getDisplay()
    */
   @Override
@@ -229,6 +231,7 @@ public abstract class View implements Comparable<View> {
    * <p>
    * This URL is absolute and has already been response encoded.
    * </p>
+   *
    * @see  BookUtils#getCanonicalBase(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest, com.semanticcms.core.model.Book)
    */
   public String getCanonicalUrl(
@@ -242,29 +245,29 @@ public abstract class View implements Comparable<View> {
     //       We're passing a partial path to response.encodeURL
     String encodedBookPrefix = URIEncoder.encodeURI(pageRef.getBookPrefix());
     String encodedServletPath;
-    {
-      StringBuilder servletPath = new StringBuilder();
-      servletPath.append(encodedBookPrefix);
-      URIEncoder.encodeURI(pageRef.getPath(), servletPath);
-      if (!isDefault()) {
-        servletPath.append("?view=");
-        URIEncoder.encodeURIComponent(getName(), servletPath);
+      {
+        StringBuilder servletPath = new StringBuilder();
+        servletPath.append(encodedBookPrefix);
+        URIEncoder.encodeURI(pageRef.getPath(), servletPath);
+        if (!isDefault()) {
+          servletPath.append("?view=");
+          URIEncoder.encodeURIComponent(getName(), servletPath);
+        }
+        encodedServletPath = Canonical.encodeCanonicalURL(response, servletPath.toString());
       }
-      encodedServletPath = Canonical.encodeCanonicalURL(response, servletPath.toString());
-    }
     // To be safe, we're encoding the servletPath, then picking it back into a bookPath
     // TODO: How would this interact with things like PrettyUrlFilter?
     String encodedBookPath;
-    {
-      if (encodedBookPrefix.isEmpty()) {
-        encodedBookPath = encodedServletPath;
-      } else {
-        if (!encodedServletPath.startsWith(encodedBookPrefix)) {
-          throw new IllegalStateException("Encoded servlet path is outside this book, unable to canonicalize: encodedServletPath = " + encodedServletPath);
+      {
+        if (encodedBookPrefix.isEmpty()) {
+          encodedBookPath = encodedServletPath;
+        } else {
+          if (!encodedServletPath.startsWith(encodedBookPrefix)) {
+            throw new IllegalStateException("Encoded servlet path is outside this book, unable to canonicalize: encodedServletPath = " + encodedServletPath);
+          }
+          encodedBookPath = encodedServletPath.substring(encodedBookPrefix.length());
         }
-        encodedBookPath = encodedServletPath.substring(encodedBookPrefix.length());
       }
-    }
     return BookUtils.getCanonicalBase(
         servletContext,
         request,
@@ -321,8 +324,9 @@ public abstract class View implements Comparable<View> {
 
   /**
    * Gets the page title for the view on the given page.
-   *
+   * <p>
    * Defaults to: "view.display - page.title[ - page.pageRef.book.title]"
+   * </p>
    */
   public String getTitle(
       ServletContext servletContext,
@@ -406,8 +410,9 @@ public abstract class View implements Comparable<View> {
 
   /**
    * Renders the view.  This is called by the template to fill-out the main content area.
-   *
+   * <p>
    * TODO: Is SkipPageException acceptable at the view rendering stage?
+   * </p>
    */
   public abstract <__ extends FlowContent<__>> void doView(
       ServletContext servletContext,

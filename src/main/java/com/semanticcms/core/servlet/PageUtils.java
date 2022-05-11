@@ -186,20 +186,20 @@ public final class PageUtils {
   /**
    * Filters for all pageRefs that are present (not missing books).
    */
-  public static <PR extends PageReferrer> Set<PR> filterNotMissingBook(Set<PR> pageReferrers) {
+  public static <R extends PageReferrer> Set<R> filterNotMissingBook(Set<R> pageReferrers) {
     int size = pageReferrers.size();
     if (size == 0) {
       return Collections.emptySet();
     } else if (size == 1) {
-      PR pageReferrer = pageReferrers.iterator().next();
+      R pageReferrer = pageReferrers.iterator().next();
       if (pageReferrer.getPageRef().getBook() != null) {
         return Collections.singleton(pageReferrer);
       } else {
         return Collections.emptySet();
       }
     } else {
-      Set<PR> notMissingBooks = AoCollections.newLinkedHashSet(size);
-      for (PR pageReferrer : pageReferrers) {
+      Set<R> notMissingBooks = AoCollections.newLinkedHashSet(size);
+      for (R pageReferrer : pageReferrers) {
         if (pageReferrer.getPageRef().getBook() != null) {
           if (!notMissingBooks.add(pageReferrer)) {
             throw new AssertionError();
