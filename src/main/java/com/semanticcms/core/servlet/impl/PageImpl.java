@@ -23,6 +23,8 @@
 
 package com.semanticcms.core.servlet.impl;
 
+import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
+
 import com.aoapps.encoding.Doctype;
 import com.aoapps.encoding.Serialization;
 import com.aoapps.encoding.servlet.DoctypeEE;
@@ -45,7 +47,6 @@ import com.semanticcms.core.pages.local.CaptureContext;
 import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
-import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
@@ -109,14 +110,14 @@ public final class PageImpl {
   ) throws Ex, ServletException, IOException, SkipPageException {
     final Page page = new Page();
     page.setPageRef(pageRef);
-    {
-      // Pages may not be nested within any kind of node
-      Node parentNode = CurrentNode.getCurrentNode(request);
-      if (parentNode != null) {
-        throw new ServletException("Pages may not be nested within other nodes: " + page.getPageRef() + " not allowed inside of " + parentNode);
+      {
+        // Pages may not be nested within any kind of node
+        Node parentNode = CurrentNode.getCurrentNode(request);
+        if (parentNode != null) {
+          throw new ServletException("Pages may not be nested within other nodes: " + page.getPageRef() + " not allowed inside of " + parentNode);
+        }
+        assert CurrentPage.getCurrentPage(request) == null : "When no parent node, cannot have a parent page";
       }
-      assert CurrentPage.getCurrentPage(request) == null : "When no parent node, cannot have a parent page";
-    }
 
     page.setDateCreated(dateCreated);
     page.setDatePublished(datePublished);
@@ -292,8 +293,8 @@ public final class PageImpl {
       } else {
         // Otherwise, try auto parents
         BookRef pageBookRef = pageRef.getBookRef();
-        SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
-        Book pageBook = semanticCMS.getBook(pageBookRef);
+        SemanticCMS semanticCms = SemanticCMS.getInstance(servletContext);
+        Book pageBook = semanticCms.getBook(pageBookRef);
         final String pagePath = pageRef.getPath().toString();
         if (pagePath.endsWith("/")) {
           // If this page URL ends in "/", look for page at "../", error if outside book.

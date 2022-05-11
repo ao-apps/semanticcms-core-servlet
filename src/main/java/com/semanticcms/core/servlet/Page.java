@@ -23,6 +23,8 @@
 
 package com.semanticcms.core.servlet;
 
+import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
+
 import com.aoapps.encoding.Doctype;
 import com.aoapps.encoding.Serialization;
 import com.aoapps.encoding.taglib.EncodingBufferedTag;
@@ -34,7 +36,6 @@ import com.semanticcms.core.controller.PageRefResolver;
 import com.semanticcms.core.model.PageRef;
 import com.semanticcms.core.pages.local.CaptureContext;
 import com.semanticcms.core.pages.local.PageContext;
-import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
 import com.semanticcms.core.servlet.impl.PageImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -283,6 +284,7 @@ public class Page {
                   public PrintWriter getWriter() throws IOException {
                     return capturedPW;
                   }
+
                   @Override
                   public ServletOutputStream getOutputStream() {
                     throw new NotImplementedException("getOutputStream not expected");
@@ -327,13 +329,7 @@ public class Page {
     invoke(
         body == null
             ? null
-            // Java 1.8: (req, resp, page) -> body.doBody(page)
-            : new Body() {
-          @Override
-          public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-            body.doBody(page);
-          }
-        }
+            : (HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) -> body.doBody(page)
     );
   }
 
@@ -349,13 +345,7 @@ public class Page {
     invoke(
         body == null
             ? null
-            // Java 1.8: (req, resp, page) -> body.doBody()
-            : new Body() {
-          @Override
-          public void doBody(HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) throws ServletException, IOException, SkipPageException {
-            body.doBody();
-          }
-        }
+            : (HttpServletRequest req, HttpServletResponse resp, com.semanticcms.core.model.Page page) -> body.doBody()
     );
   }
 }

@@ -23,6 +23,8 @@
 
 package com.semanticcms.core.servlet;
 
+import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
+
 import com.aoapps.encoding.taglib.EncodingBufferedTag;
 import com.aoapps.io.buffer.BufferWriter;
 import com.aoapps.lang.LocalizedIllegalStateException;
@@ -36,7 +38,6 @@ import com.semanticcms.core.pages.local.CurrentCaptureLevel;
 import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
 import com.semanticcms.core.pages.local.PageContext;
-import static com.semanticcms.core.servlet.Resources.PACKAGE_RESOURCES;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletContext;
@@ -212,6 +213,7 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
               public PrintWriter getWriter() throws IOException {
                 return capturedPW;
               }
+
               @Override
               public ServletOutputStream getOutputStream() {
                 throw new NotImplementedException("getOutputStream not expected");
