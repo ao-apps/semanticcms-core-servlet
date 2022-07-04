@@ -47,7 +47,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     <commons-lang3.version>3.12.0</commons-lang3.version>
   </properties>
 
-  <name>SemanticCMS Core Servlet²</name>
+  <name>SemanticCMS Core Servlet</name>
   <url>https://semanticcms.com/core/servlet/</url>
   <description>Java API for modeling web page content and relationships in a Servlet environment.</description>
   <inceptionYear>2013</inceptionYear>

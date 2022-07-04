@@ -36,9 +36,9 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     <module.name>com.semanticcms.core.servlet.devel</module.name>
   </properties>
 
-  <name>SemanticCMS Core Servlet² Devel</name>
+  <name>SemanticCMS Core Servlet Devel</name>
   <url>https://semanticcms.com/core/servlet/</url>
-  <description>Development-only components of SemanticCMS Core Servlet².</description>
+  <description>Development-only components of SemanticCMS Core Servlet.</description>
   <inceptionYear>2020</inceptionYear>
 
   <licenses>
