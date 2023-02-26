@@ -23,7 +23,7 @@ Java API for modeling web page content and relationships in a Servlet environmen
 * [Project Home](https://semanticcms.com/core/servlet/)
 * [Changelog](https://semanticcms.com/core/servlet/changelog)
 * [API Docs](https://semanticcms.com/core/servlet/apidocs/)
-* [Maven Central Repository](https://search.maven.org/artifact/com.semanticcms/semanticcms-core-servlet)
+* [Maven Central Repository](https://central.sonatype.com/search?namespace=com.semanticcms&q=a%3Asemanticcms-core-servlet)
 * [GitHub](https://github.com/ao-apps/semanticcms-core-servlet)
 
 ## Contact Us
