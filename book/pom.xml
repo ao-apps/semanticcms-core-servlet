@@ -29,11 +29,11 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     <relativePath>../../../parent/pom.xml</relativePath>
   </parent>
 
-  <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet-book</artifactId><version>1.18.3-POST-SNAPSHOT</version>
+  <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet-book</artifactId><version>1.18.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <properties>
-    <project.build.outputTimestamp>2023-02-08T21:06:04Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2023-03-13T21:23:58Z</project.build.outputTimestamp>
     <module.name>com.semanticcms.core.servlet.book</module.name>
     <!-- These values are copied from the project being documented -->
     <documented.artifactId>semanticcms-core-servlet</documented.artifactId>
@@ -141,7 +141,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.18.3${POST-SNAPSHOT}</version>
+                  <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.18.4-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
                   <type>jar</type>
                   <includes>com/semanticcms/core/servlet/books-1.0.xsd</includes>
                 </artifactItem>
@@ -151,7 +151,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
         </executions>
         <dependencies>
           <dependency>
-            <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.18.3${POST-SNAPSHOT}</version>
+            <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.18.4-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
             <type>jar</type>
             <exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions>
           </dependency>
@@ -216,7 +216,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
         <groupId>com.aoapps</groupId><artifactId>ao-servlet-util</artifactId><version>5.2.0${POST-SNAPSHOT}</version>
       </dependency>
       <dependency>
-        <groupId>com.aoapps</groupId><artifactId>ao-taglib</artifactId><version>7.2.1${POST-SNAPSHOT}</version>
+        <groupId>com.aoapps</groupId><artifactId>ao-taglib</artifactId><version>7.2.2-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
       </dependency>
       <!-- javaee-web-api-bom: <groupId>javax.servlet</groupId><artifactId>javax.servlet-api</artifactId> -->
       <!-- javaee-web-api-bom: <groupId>javax.servlet.jsp</groupId><artifactId>javax.servlet.jsp-api</artifactId> -->
@@ -299,7 +299,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
         <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-model</artifactId><version>1.14.1${POST-SNAPSHOT}</version>
       </dependency>
       <dependency>
-        <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.18.3${POST-SNAPSHOT}</version>
+        <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.18.4-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
       </dependency>
       <dependency>
         <groupId>com.semanticcms</groupId><artifactId>semanticcms-news-model</artifactId><version>1.2.0${POST-SNAPSHOT}</version>

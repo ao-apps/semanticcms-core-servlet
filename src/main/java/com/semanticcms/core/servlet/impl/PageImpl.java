@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -434,6 +434,9 @@ public final class PageImpl {
                 // TODO: Configure the page resources here or within view?
 
                 // Forward to theme
+                if (response.isCommitted()) {
+                  throw new SkipPageException("Response already committed, unable to forward to theme");
+                }
                 theme.doTheme(servletContext, request, response, view, page);
               } finally {
                 Theme.setTheme(request, oldTheme);

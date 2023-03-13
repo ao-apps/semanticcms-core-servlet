@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2016, 2017, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -34,6 +34,7 @@ import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
@@ -128,7 +129,8 @@ public abstract class Theme {
    * on the request, and these must be considered in the HTML generation.
    * </p>
    * <p>
-   * TODO: Is SkipPageException acceptable at the view rendering stage?
+   * When {@link ServletResponse#isCommitted() response is committed}, this theme method is never called and
+   * {@link SkipPageException} is thrown instead.
    * </p>
    *
    * @see SerializationEE#get(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest)
