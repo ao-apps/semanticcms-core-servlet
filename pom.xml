@@ -29,11 +29,11 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     <relativePath>../../parent/pom.xml</relativePath>
   </parent>
 
-  <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.18.4-SNAPSHOT</version>
+  <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-servlet</artifactId><version>1.18.4</version>
   <packaging>bundle</packaging>
 
   <properties>
-    <project.build.outputTimestamp>2023-03-13T21:23:58Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2023-03-14T04:31:00Z</project.build.outputTimestamp>
     <module.name>com.semanticcms.core.servlet</module.name>
     <javadoc.breadcrumbs><![CDATA[<a target="${javadoc.target}" href="https://semanticcms.com/">SemanticCMS</a>
 / <a target="${javadoc.target}" href="https://semanticcms.com/core/">Core</a>
@@ -80,7 +80,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     <connection>scm:git:git://github.com/ao-apps/semanticcms-core-servlet.git</connection>
     <developerConnection>scm:git:git@github.com:ao-apps/semanticcms-core-servlet.git</developerConnection>
     <url>https://github.com/ao-apps/semanticcms-core-servlet</url>
-    <tag>HEAD</tag>
+    <tag>semanticcms-core-servlet-1.18.4</tag>
   </scm>
 
   <issueManagement>
