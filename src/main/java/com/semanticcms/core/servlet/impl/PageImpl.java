@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +65,8 @@ import javax.servlet.jsp.SkipPageException;
 import org.joda.time.ReadableDateTime;
 
 public final class PageImpl {
+
+  private static final Logger logger = Logger.getLogger(PageImpl.class.getName());
 
   /** Make no instances. */
   private PageImpl() {
@@ -434,10 +438,13 @@ public final class PageImpl {
                 // TODO: Configure the page resources here or within view?
 
                 // Forward to theme
-                if (response.isCommitted()) {
+                if (!response.isCommitted()) {
+                  theme.doTheme(servletContext, request, response, view, page);
+                } else {
+                  logger.log(Level.FINE, "Not forwarding to theme due to response already committed: request.servletPath = {0}, theme = {1}",
+                      new Object[] {request.getServletPath(), theme});
                   throw new SkipPageException("Response already committed, unable to forward to theme");
                 }
-                theme.doTheme(servletContext, request, response, view, page);
               } finally {
                 Theme.setTheme(request, oldTheme);
               }
