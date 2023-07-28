@@ -41,7 +41,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     <!-- TODO: Implement tests -->
     <sonar.coverage.exclusions>**.*</sonar.coverage.exclusions>
     <!-- Dependencies -->
-    <commons-lang3.version>3.12.0</commons-lang3.version>
+    <commons-lang3.version>3.13.0</commons-lang3.version>
   </properties>
 
   <name>SemanticCMS Core Servlet</name>
