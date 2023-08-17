@@ -33,7 +33,6 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
   <packaging>bundle</packaging>
 
   <properties>
-    <project.build.outputTimestamp>2023-03-13T21:23:58Z</project.build.outputTimestamp>
     <module.name>com.semanticcms.core.servlet.devel</module.name>
   </properties>
 
