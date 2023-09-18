@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-30T18:16:13-05:00"
-    dateModified="2023-03-14T11:36:35Z"
+    dateModified="2023-09-18T03:16:04Z"
   >
     <c:set var="latestRelease" value="1.18.4" />
     <c:if test="${
@@ -62,6 +62,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
             Log FINE-level notice when not forwarding to theme due to the
             <ao:a rel="nofollow" href="@{javadoc.link.javaee}javax/servlet/ServletResponse.html#isCommitted--">response already being committed</ao:a>.
           </li>
+          <li>Additional element filtering methods in <code>PageUtils</code>.</li>
         </ul>
       </changelog:release>
     </c:if>
