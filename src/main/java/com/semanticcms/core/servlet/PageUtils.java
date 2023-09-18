@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -25,6 +25,7 @@ package com.semanticcms.core.servlet;
 
 import com.aoapps.collections.AoCollections;
 import com.aoapps.lang.Coercion;
+import com.aoapps.lang.io.function.IOPredicateE;
 import com.semanticcms.core.model.Book;
 import com.semanticcms.core.model.ChildRef;
 import com.semanticcms.core.model.Element;
@@ -64,14 +65,14 @@ public final class PageUtils {
     return false;
   }
 
-  // TODO: Cache result per class per page?
-  public static boolean hasElement(
+  public static <E extends Element> boolean hasElement(
       ServletContext servletContext,
       HttpServletRequest request,
       HttpServletResponse response,
       Page page,
-      Class<? extends Element> elementType,
-      boolean recursive
+      Class<E> elementType,
+      boolean recursive,
+      IOPredicateE<? super E, ? extends ServletException> filter
   ) throws ServletException, IOException {
     if (recursive) {
       return CapturePage.traversePagesAnyOrder(
@@ -82,7 +83,7 @@ public final class PageUtils {
           CaptureLevel.META,
           page1 -> {
             for (Element element : page1.getElements()) {
-              if (elementType.isAssignableFrom(element.getClass())) {
+              if (elementType.isAssignableFrom(element.getClass()) && filter.test(elementType.cast(element))) {
                 return true;
               }
             }
@@ -94,12 +95,24 @@ public final class PageUtils {
       ) != null;
     } else {
       for (Element element : page.getElements()) {
-        if (elementType.isAssignableFrom(element.getClass())) {
+        if (elementType.isAssignableFrom(element.getClass()) && filter.test(elementType.cast(element))) {
           return true;
         }
       }
       return false;
     }
+  }
+
+  // TODO: Cache result per class per page?
+  public static boolean hasElement(
+      ServletContext servletContext,
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Page page,
+      Class<? extends Element> elementType,
+      boolean recursive
+  ) throws ServletException, IOException {
+    return hasElement(servletContext, request, response, page, elementType, recursive, element -> true);
   }
 
   /**
