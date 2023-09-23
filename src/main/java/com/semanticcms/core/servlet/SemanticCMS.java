@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -56,7 +56,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -117,7 +116,7 @@ public class SemanticCMS {
         computed[0] = true;
         // TODO: Support custom implementations via context-param?
         return new SemanticCMS(servletContext);
-      } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
+      } catch (IOException | SAXException | ParserConfigurationException e) {
         throw new WrappedException(e);
       }
     });
@@ -129,7 +128,7 @@ public class SemanticCMS {
 
   private final ServletContext servletContext;
 
-  protected SemanticCMS(ServletContext servletContext) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
+  protected SemanticCMS(ServletContext servletContext) throws IOException, SAXException, ParserConfigurationException {
     this.servletContext = servletContext;
     this.demoMode = Boolean.parseBoolean(servletContext.getInitParameter(DEMO_MODE_INIT_PARAM));
     int numProcessors = Runtime.getRuntime().availableProcessors();
