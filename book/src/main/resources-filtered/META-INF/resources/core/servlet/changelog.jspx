@@ -37,7 +37,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     shortTitle="Changelog"
     tocLevels="1"
     datePublished="2016-10-30T18:16:13-05:00"
-    dateModified="2023-09-24T03:44:34Z"
+    dateModified="2023-09-26T19:00:16Z"
   >
     <c:set var="latestRelease" value="1.19.1" />
     <c:if test="${
@@ -58,6 +58,7 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
             New module <core:link book="/core/controller" page="/" /> split from <code:link page="/" />, leaving
             <code:link page="/" /> only to generate page content from servlets.
           </li>
+          <li>Added script support for <ao:a href="https://oss.aoapps.com/web-resources/">AO Web Resources</ao:a>.</li>
         </ul>
       </changelog:release>
     </c:if>
