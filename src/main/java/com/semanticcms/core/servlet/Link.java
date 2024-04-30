@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021, 2022, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -209,6 +209,11 @@ public class Link {
     void doBody(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, SkipPageException;
   }
 
+  @FunctionalInterface
+  public static interface PageContextBody {
+    void doBody() throws ServletException, IOException, SkipPageException;
+  }
+
   /**
    * <p>
    * Also establishes a new {@link PageContext}.
@@ -257,11 +262,6 @@ public class Link {
    */
   public void invoke() throws ServletException, IOException, SkipPageException {
     invoke((Body) null);
-  }
-
-  @FunctionalInterface
-  public static interface PageContextBody {
-    void doBody() throws ServletException, IOException, SkipPageException;
   }
 
   /**
