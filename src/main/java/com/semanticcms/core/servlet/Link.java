@@ -169,15 +169,12 @@ public class Link {
   }
 
   /**
-   * <p>
    * When false, the default, will generate a &lt;a&gt; tag around the entire body.
    * Otherwise, will generate a &lt;span&gt; instead, with a small link added to
    * the end of the body.
-   * </p>
-   * <p>
-   * Use of a small link can be helpful for usability, such as when the body is
-   * a piece of information intended for quick copy/paste by the user.
-   * </p>
+   *
+   * <p>Use of a small link can be helpful for usability, such as when the body is
+   * a piece of information intended for quick copy/paste by the user.</p>
    */
   public Link small(boolean small) {
     this.small = small;
@@ -215,9 +212,7 @@ public class Link {
   }
 
   /**
-   * <p>
    * Also establishes a new {@link PageContext}.
-   * </p>
    *
    * @see  PageContext
    */

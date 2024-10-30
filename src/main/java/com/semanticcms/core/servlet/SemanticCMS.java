@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023  AO Industries, Inc.
+ * Copyright (C) 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -61,10 +61,9 @@ import org.xml.sax.SAXException;
 
 /**
  * The SemanticCMS application context.
- * <p>
- * TODO: Consider custom EL resolver for this variable.
- * http://stackoverflow.com/questions/5016965/how-to-add-a-custom-variableresolver-in-pure-jsp
- * </p>
+ *
+ * <p>TODO: Consider custom EL resolver for this variable.
+ * http://stackoverflow.com/questions/5016965/how-to-add-a-custom-variableresolver-in-pure-jsp</p>
  */
 public class SemanticCMS {
 
@@ -460,11 +459,10 @@ public class SemanticCMS {
   // <editor-fold defaultstate="collapsed" desc="CSS Links">
   /**
    * The CSS links in the order added.
-   * <p>
-   * The value stores if the style was registered with {@link RegistryEE}.
+   *
+   * <p>The value stores if the style was registered with {@link RegistryEE}.
    * When true, if the style is removed, it should also be removed from the
-   * registry. (There is currently no way to remove CSS links from here anyway).
-   * </p>
+   * registry. (There is currently no way to remove CSS links from here anyway).</p>
    *
    * @deprecated  Please use {@link RegistryEE} directly.
    */
@@ -531,11 +529,10 @@ public class SemanticCMS {
   // <editor-fold defaultstate="collapsed" desc="Print CSS Links">
   /**
    * The print CSS links in the order added.
-   * <p>
-   * The value stores if the style was registered with {@link RegistryEE}.
+   *
+   * <p>The value stores if the style was registered with {@link RegistryEE}.
    * When true, if the style is removed, it should also be removed from the
-   * registry. (There is currently no way to remove CSS links from here anyway).
-   * </p>
+   * registry. (There is currently no way to remove CSS links from here anyway).</p>
    *
    * @deprecated  Please use {@link RegistryEE} directly.
    */
@@ -878,10 +875,9 @@ public class SemanticCMS {
 
   /**
    * A shared executor available to all components.
-   * <p>
-   * Consider selecting concurrent or sequential implementations based on overall system load.
-   * See {@link ConcurrencyCoordinator#isConcurrentProcessingRecommended(javax.servlet.ServletRequest)}.
-   * </p>
+   *
+   * <p>Consider selecting concurrent or sequential implementations based on overall system load.
+   * See {@link ConcurrencyCoordinator#isConcurrentProcessingRecommended(javax.servlet.ServletRequest)}.</p>
    *
    * @see  ConcurrencyCoordinator#isConcurrentProcessingRecommended(javax.servlet.ServletRequest)
    */
