@@ -108,14 +108,11 @@ public abstract class Element<E extends com.semanticcms.core.model.Element> impl
   }
 
   /**
-   * <p>
    * Adds this element to the current page, if part of a page.
    * Sets this element as the current element.
    * Then, if not capturing or capturing META or higher, calls {@link #doBody}
-   * </p>
-   * <p>
-   * Also establishes a new {@link PageContext}.
-   * </p>
+   *
+   * <p>Also establishes a new {@link PageContext}.</p>
    *
    * @see  PageContext
    */

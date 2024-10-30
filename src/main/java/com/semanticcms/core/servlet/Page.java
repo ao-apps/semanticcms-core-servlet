@@ -227,13 +227,10 @@ public class Page {
   }
 
   /**
-   * <p>
    * Sets request attribute "page" to the current page, and restores the previous "page"
    * attribute once completed.
-   * </p>
-   * <p>
-   * Also establishes a new {@link PageContext}.
-   * </p>
+   *
+   * <p>Also establishes a new {@link PageContext}.</p>
    *
    * @see  PageContext
    * @see  CaptureContext#REQUEST_ATTRIBUTE
