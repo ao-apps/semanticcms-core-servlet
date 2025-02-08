@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024  AO Industries, Inc.
+ * Copyright (C) 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -285,28 +285,39 @@ public class SemanticCMS {
   }
 
   /**
-   * Gets the book for the provided context-relative servlet path or <code>null</code> if no book configured at that path.
-   * The book with the longest prefix match is used.
+   * Gets the book for the provided context-relative servlet path or {@code null} if no book configured at that path.
+   * The book with the longest prefix match is used, matched along segments only (along '/' boundaries).
+   * For example, a book at "/api" does not contain the servlet at the path "/apidocs/index.html".
    * The servlet path must begin with a slash (/).
+   *
+   * <p>This does not match a book with an exact servletPath without a slash separator.  Every path within a book is
+   * contained after a slash separator, including the top-most index at "/", "/index.jsp", or "/index.jspx".
+   * For example, a book at "/api" does not contain the servlet at the path "/api", but does contain every servlet
+   * starting with "/api/" (unless a more specific book matches).</p>
    */
   public Book getBook(String servletPath) {
-    if (servletPath.charAt(0) != '/') {
-      throw new IllegalArgumentException("Invalid servletPath: " + servletPath);
+    // TODO: Was the old iterative search through all books actually faster?  Worth benchmarking?
+    final int originalLen = servletPath.length();
+    int len = originalLen;
+    // Quick path for initial trailing slash: avoid map lookup that will never match
+    if (servletPath.charAt(len - 1) == '/') {
+      len -= 1;
     }
-    Book longestPrefixBook = null;
-    int longestPrefixLen = -1;
-    for (Book book : getBooks().values()) {
-      String prefix = book.getPathPrefix();
-      int prefixLen = prefix.length();
-      if (
-          prefixLen > longestPrefixLen
-              && servletPath.startsWith(prefix)
-      ) {
-        longestPrefixBook = book;
-        longestPrefixLen = prefixLen;
+    while (len > 0) {
+      servletPath = servletPath.substring(0, len);
+      assert servletPath.charAt(len - 1) != '/' : "Should not end in slash: " + servletPath;
+      // Do not match the full servletPath as a book
+      if (len < originalLen) {
+        Book book = books.get(servletPath);
+        if (book != null) {
+          return book;
+        }
       }
+      int lastSlash = servletPath.lastIndexOf('/');
+      assert lastSlash != -1 : "Starts with slash, so should always find one when len > 0";
+      len = lastSlash;
     }
-    return longestPrefixBook;
+    return books.get("/"); // TODO: Book.ROOT constant
   }
 
   /**
