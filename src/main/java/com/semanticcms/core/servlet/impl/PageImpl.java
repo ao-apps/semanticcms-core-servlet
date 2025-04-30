@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2025  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -110,14 +110,14 @@ public final class PageImpl {
   ) throws Ex, ServletException, IOException, SkipPageException {
     final Page page = new Page();
     page.setPageRef(pageRef);
-      {
-        // Pages may not be nested within any kind of node
-        Node parentNode = CurrentNode.getCurrentNode(request);
-        if (parentNode != null) {
-          throw new ServletException("Pages may not be nested within other nodes: " + page.getPageRef() + " not allowed inside of " + parentNode);
-        }
-        assert CurrentPage.getCurrentPage(request) == null : "When no parent node, cannot have a parent page";
+    {
+      // Pages may not be nested within any kind of node
+      Node parentNode = CurrentNode.getCurrentNode(request);
+      if (parentNode != null) {
+        throw new ServletException("Pages may not be nested within other nodes: " + page.getPageRef() + " not allowed inside of " + parentNode);
       }
+      assert CurrentPage.getCurrentPage(request) == null : "When no parent node, cannot have a parent page";
+    }
 
     page.setDateCreated(dateCreated);
     page.setDatePublished(datePublished);
