@@ -175,40 +175,40 @@ public class SemanticCMS {
 
   private Book initBooks() throws IOException, SAXException, ParserConfigurationException {
     Document booksXml;
-      {
-        InputStream schemaIn = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_RESOURCE);
-        if (schemaIn == null) {
-          throw new IOException("Schema not found: " + BOOKS_XML_SCHEMA_RESOURCE);
+    {
+      InputStream schemaIn = SemanticCMS.class.getResourceAsStream(BOOKS_XML_SCHEMA_RESOURCE);
+      if (schemaIn == null) {
+        throw new IOException("Schema not found: " + BOOKS_XML_SCHEMA_RESOURCE);
+      }
+      try {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+          dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (ParserConfigurationException e) {
+          throw new AssertionError("All implementations are required to support the javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING feature.", e);
+        }
+        // See https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.md#java
+        // See https://rules.sonarsource.com/java/RSPEC-2755
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "https"); // TODO: How can avoid this while schema included in JAR?
+        dbf.setNamespaceAware(true);
+        dbf.setValidating(true);
+        dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", schemaIn);
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        InputStream booksXmlIn = servletContext.getResource(BOOKS_XML_RESOURCE).openStream();
+        if (booksXmlIn == null) {
+          throw new IOException(BOOKS_XML_RESOURCE + " not found");
         }
         try {
-          DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-          try {
-            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-          } catch (ParserConfigurationException e) {
-            throw new AssertionError("All implementations are required to support the javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING feature.", e);
-          }
-          // See https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.md#java
-          // See https://rules.sonarsource.com/java/RSPEC-2755
-          dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-          dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "https"); // TODO: How can avoid this while schema included in JAR?
-          dbf.setNamespaceAware(true);
-          dbf.setValidating(true);
-          dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", XMLConstants.W3C_XML_SCHEMA_NS_URI);
-          dbf.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", schemaIn);
-          DocumentBuilder db = dbf.newDocumentBuilder();
-          InputStream booksXmlIn = servletContext.getResource(BOOKS_XML_RESOURCE).openStream();
-          if (booksXmlIn == null) {
-            throw new IOException(BOOKS_XML_RESOURCE + " not found");
-          }
-          try {
-            booksXml = db.parse(booksXmlIn);
-          } finally {
-            booksXmlIn.close();
-          }
+          booksXml = db.parse(booksXmlIn);
         } finally {
-          schemaIn.close();
+          booksXmlIn.close();
         }
+      } finally {
+        schemaIn.close();
       }
+    }
     org.w3c.dom.Element booksElem = booksXml.getDocumentElement();
     // Load missingBooks
     for (org.w3c.dom.Element missingBookElem : XmlUtils.iterableChildElementsByTagName(booksElem, MISSING_BOOK_TAG)) {
