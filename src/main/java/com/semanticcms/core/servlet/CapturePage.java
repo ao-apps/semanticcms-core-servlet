@@ -635,7 +635,7 @@ public final class CapturePage {
                     && (
                     edgeFilter == null
                         || edgeFilter.applyEdge(edge)
-                )
+                  )
             ) {
               visited.add(edge);
               // Check cache before going to concurrency
@@ -933,7 +933,7 @@ public final class CapturePage {
               && (
               edgeFilter == null
                   || edgeFilter.applyEdge(edge)
-          )
+            )
       ) {
         T result = traversePagesDepthFirstRecurseSequential(
             servletContext,
