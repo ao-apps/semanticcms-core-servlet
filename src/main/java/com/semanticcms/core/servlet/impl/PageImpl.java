@@ -49,13 +49,13 @@ import com.semanticcms.core.pages.local.CurrentNode;
 import com.semanticcms.core.pages.local.CurrentPage;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.SkipPageException;
-import org.joda.time.ReadableDateTime;
 
 public final class PageImpl {
 
@@ -88,10 +88,10 @@ public final class PageImpl {
       final HttpServletResponse response,
       CaptureContext capture,
       PageRef pageRef,
-      ReadableDateTime dateCreated,
-      ReadableDateTime datePublished,
-      ReadableDateTime dateModified,
-      ReadableDateTime dateReviewed,
+      ZonedDateTime dateCreated,
+      ZonedDateTime datePublished,
+      ZonedDateTime dateModified,
+      ZonedDateTime dateReviewed,
       Serialization serialization,
       Doctype doctype,
       Boolean autonli,
