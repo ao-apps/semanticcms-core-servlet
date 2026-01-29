@@ -123,7 +123,7 @@ public abstract class PageServlet extends HttpServlet {
   /**
    * Page and the PageContext are already setup.
    * The response content type has been set to application/xhtml+xml.
-   * The response character encoding has been set to {@link #ENCODING}.
+   * The response character encoding has been set to {@link PageServlet#ENCODING}.
    */
   protected void doGet(Page page) throws ServletException, IOException, SkipPageException {
     Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -138,7 +138,7 @@ public abstract class PageServlet extends HttpServlet {
   /**
    * Page and the PageContext are already setup.
    * The response content type has been set to application/xhtml+xml.
-   * The response character encoding has been set to {@link #ENCODING}.
+   * The response character encoding has been set to {@link PageServlet#ENCODING}.
    */
   protected void doPost(Page page) throws ServletException, IOException, SkipPageException {
     Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -153,7 +153,7 @@ public abstract class PageServlet extends HttpServlet {
   /**
    * Page and the PageContext are already setup.
    * The response content type has been set to application/xhtml+xml.
-   * The response character encoding has been set to {@link #ENCODING}.
+   * The response character encoding has been set to {@link PageServlet#ENCODING}.
    */
   protected void doPut(Page page) throws ServletException, IOException, SkipPageException {
     Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -168,7 +168,7 @@ public abstract class PageServlet extends HttpServlet {
   /**
    * Page and the PageContext are already setup.
    * The response content type has been set to application/xhtml+xml.
-   * The response character encoding has been set to {@link #ENCODING}.
+   * The response character encoding has been set to {@link PageServlet#ENCODING}.
    */
   protected void doDelete(Page page) throws ServletException, IOException, SkipPageException {
     Includer.sendError(PageContext.getRequest(), PageContext.getResponse(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -183,7 +183,7 @@ public abstract class PageServlet extends HttpServlet {
   /**
    * Page and the PageContext are already setup.
    * The response content type has been set to application/xhtml+xml.
-   * The response character encoding has been set to {@link #ENCODING}.
+   * The response character encoding has been set to {@link PageServlet#ENCODING}.
    */
   protected void doOptions(Page page) throws ServletException, IOException, SkipPageException {
     HttpServletUtil.doOptions(
