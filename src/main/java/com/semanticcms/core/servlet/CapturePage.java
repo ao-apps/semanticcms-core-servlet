@@ -125,7 +125,8 @@ public class CapturePage {
 		CaptureLevel level,
 		Cache cache
 	) throws ServletException, IOException {
-		return capturePage(servletContext,
+		return capturePage(
+			servletContext,
 			request,
 			response,
 			new HttpServletSubRequestWrapper(request),
@@ -136,6 +137,7 @@ public class CapturePage {
 		);
 	}
 
+	// TODO: Don't throw IOException since capturing into a buffer and/or discarding output?
 	private static Page capturePage(
 		final ServletContext servletContext,
 		HttpServletRequest request,
