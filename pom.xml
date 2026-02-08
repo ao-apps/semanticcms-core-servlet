@@ -39,9 +39,6 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     <javadoc.breadcrumbs><![CDATA[<a target="${javadoc.target}" href="https://semanticcms.com/">SemanticCMS</a>
 / <a target="${javadoc.target}" href="https://semanticcms.com/core/">Core</a>
 / <a target="${javadoc.target}" href="${project.url}">Servlet</a>]]></javadoc.breadcrumbs>
-
-    <!-- TODO: Implement tests -->
-    <sonar.coverage.exclusions>**.*</sonar.coverage.exclusions>
   </properties>
 
   <name>SemanticCMS Core Servlet</name>
@@ -112,6 +109,22 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <ignoredNonTestScopedDependencies>
+            <!-- Can't declare test scope since is required as a transitive dependency: -->
+            <dependency>com.aoapps:ao-fluent-html-any</dependency>
+          </ignoredNonTestScopedDependencies>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- Cannot use module path due to additional test dependencies -->
+          <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId><artifactId>maven-bundle-plugin</artifactId>
         <configuration>
@@ -225,6 +238,12 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
                       <includes>element-list, package-list</includes>
                       <outputDirectory>${project.build.directory}/offlineLinks/com.semanticcms/semanticcms-core-pages-local</outputDirectory>
                     </artifactItem>
+                    <!-- Test Direct -->
+                    <artifactItem>
+                      <groupId>junit</groupId><artifactId>junit</artifactId><classifier>javadoc</classifier>
+                      <includes>element-list, package-list</includes>
+                      <outputDirectory>${project.build.directory}/offlineLinks/junit/junit</outputDirectory>
+                    </artifactItem>
                   </artifactItems>
                 </configuration>
               </execution>
@@ -300,6 +319,11 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
                 <offlineLink>
                   <url>https://semanticcms.com/core/pages/local/apidocs/</url>
                   <location>${project.build.directory}/offlineLinks/com.semanticcms/semanticcms-core-pages-local</location>
+                </offlineLink>
+                <!-- Test Direct -->
+                <offlineLink>
+                  <url>https://junit.org/junit4/javadoc/latest/</url>
+                  <location>${project.build.directory}/offlineLinks/junit/junit</location>
                 </offlineLink>
               </offlineLinks>
             </configuration>
@@ -397,6 +421,18 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
       <dependency>
         <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-resources</artifactId><version>3.0.0-SNAPSHOT<!-- ${POST-SNAPSHOT} --></version>
       </dependency>
+      <!-- Test Direct -->
+      <dependency>
+        <groupId>junit</groupId><artifactId>junit</artifactId><version>4.13.2</version>
+      </dependency>
+      <!-- Test Transitive -->
+      <dependency>
+        <groupId>org.hamcrest</groupId><artifactId>hamcrest</artifactId><version>3.0</version>
+      </dependency>
+      <dependency>
+        <!-- Shim for junit 4.13.2 -->
+        <groupId>org.hamcrest</groupId><artifactId>hamcrest-core</artifactId><version>3.0</version>
+      </dependency>
       <!-- Imports -->
       <dependency>
         <groupId>com.aoapps</groupId><artifactId>jakartaee-web-profile-bom</artifactId><version>10.0.0${POST-SNAPSHOT}</version>
@@ -419,6 +455,9 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     </dependency>
     <dependency>
       <groupId>com.aoapps</groupId><artifactId>ao-fluent-html-any</artifactId>
+      <!-- Can't declare test scope since is required as a transitive dependency:
+      <scope>test</scope>
+      -->
     </dependency>
     <dependency>
       <groupId>com.aoapps</groupId><artifactId>ao-fluent-html-servlet</artifactId>
@@ -461,6 +500,11 @@ along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/
     </dependency>
     <dependency>
       <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-pages-local</artifactId>
+    </dependency>
+    <!-- Test Direct -->
+    <dependency>
+      <groupId>junit</groupId><artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

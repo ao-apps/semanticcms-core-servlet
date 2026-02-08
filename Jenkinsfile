@@ -47,6 +47,9 @@ binding.setVariable('upstreamProjects', [
   'pages', // <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-pages</artifactId>
   'pages-local', // <groupId>com.semanticcms</groupId><artifactId>semanticcms-core-pages-local</artifactId>
 
+  // Test Direct
+  // No Jenkins: <groupId>junit</groupId><artifactId>junit</artifactId>
+
   // BOM
   '../../oss/jakartaee-web-profile-bom', // <groupId>com.aoapps</groupId><artifactId>jakartaee-web-profile-bom</artifactId>
 ])
