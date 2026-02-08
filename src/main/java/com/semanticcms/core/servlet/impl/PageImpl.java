@@ -29,7 +29,6 @@ import com.aoapps.encoding.Doctype;
 import com.aoapps.encoding.Serialization;
 import com.aoapps.encoding.servlet.DoctypeEE;
 import com.aoapps.encoding.servlet.SerializationEE;
-import com.aoapps.html.servlet.DocumentEE;
 import com.aoapps.io.buffer.BufferResult;
 import com.aoapps.net.Path;
 import com.aoapps.servlet.LocalizedServletException;
@@ -62,6 +61,26 @@ public final class PageImpl {
   /** Make no instances. */
   private PageImpl() {
     throw new AssertionError();
+  }
+
+  /**
+   * The dependency for {@code com.aoapps.html.servlet.DocumentEE} is optional.
+   */
+  private static final boolean DOCUMENT_EE_PRESENT;
+
+  static {
+    boolean present;
+    try {
+      Class.forName(
+          "com.aoapps.html.servlet.DocumentEE",
+          false,
+          PageImpl.class.getClassLoader()
+      );
+      present = true;
+    } catch (ClassNotFoundException | LinkageError e) {
+      present = false;
+    }
+    DOCUMENT_EE_PRESENT = present;
   }
 
   /**
@@ -170,27 +189,37 @@ public final class PageImpl {
       try {
         Boolean oldAutonli;
         boolean setAutonli;
-        if (autonli == null) {
-          autonli = DocumentEE.getAutonli(servletContext, request);
+        if (DOCUMENT_EE_PRESENT) {
+          if (autonli == null) {
+            autonli = OptionalDocumentEE.getAutonli(servletContext, request);
+            oldAutonli = null;
+            setAutonli = false;
+          } else {
+            oldAutonli = OptionalDocumentEE.replaceAutonli(request, autonli);
+            setAutonli = true;
+          }
+          assert autonli != null;
+        } else {
           oldAutonli = null;
           setAutonli = false;
-        } else {
-          oldAutonli = DocumentEE.replaceAutonli(request, autonli);
-          setAutonli = true;
         }
-        assert autonli != null;
         try {
           Boolean oldIndent;
           boolean setIndent;
-          if (indent == null) {
-            indent = DocumentEE.getIndent(servletContext, request);
+          if (DOCUMENT_EE_PRESENT) {
+            if (indent == null) {
+              indent = OptionalDocumentEE.getIndent(servletContext, request);
+              oldIndent = null;
+              setIndent = false;
+            } else {
+              oldIndent = OptionalDocumentEE.replaceIndent(request, indent);
+              setIndent = true;
+            }
+            assert indent != null;
+          } else {
             oldIndent = null;
             setIndent = false;
-          } else {
-            oldIndent = DocumentEE.replaceIndent(request, indent);
-            setIndent = true;
           }
-          assert indent != null;
           try {
             // Freeze page once body done
             try {
@@ -246,13 +275,13 @@ public final class PageImpl {
             // Capturing, add to capture
             capture.setCapturedPage(page);
           } finally {
-            if (setIndent) {
-              DocumentEE.setIndent(request, oldIndent);
+            if (DOCUMENT_EE_PRESENT && setIndent) {
+              OptionalDocumentEE.setIndent(request, oldIndent);
             }
           }
         } finally {
-          if (setAutonli) {
-            DocumentEE.setAutonli(request, oldAutonli);
+          if (DOCUMENT_EE_PRESENT && setAutonli) {
+            OptionalDocumentEE.setAutonli(request, oldAutonli);
           }
         }
       } finally {
