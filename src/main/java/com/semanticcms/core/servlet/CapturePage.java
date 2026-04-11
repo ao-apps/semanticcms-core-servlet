@@ -72,6 +72,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+// TODO: When a higher level cached result is returned, such as META for a PAGE capture, remove the higher level data.
+//       This would prevent accidentally relying on information not guaranteed to be there, such as using META-level
+//       information on a PAGE-level capture.  Could store back into cache at the correct level once the conversion
+//       is done.
 @SuppressWarnings("UseOfSystemOutOrSystemErr")
 public final class CapturePage {
 
