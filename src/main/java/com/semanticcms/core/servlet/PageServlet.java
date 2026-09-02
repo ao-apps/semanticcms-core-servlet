@@ -196,7 +196,7 @@ public abstract class PageServlet extends HttpServlet {
         "doPost",
         "doPut",
         "doDelete",
-        new Class<?>[]{
+        new Class<?>[] {
             Page.class
         }
     );

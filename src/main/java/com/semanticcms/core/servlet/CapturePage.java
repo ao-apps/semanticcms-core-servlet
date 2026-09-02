@@ -989,7 +989,7 @@ public final class CapturePage {
     // Caches the results of edges call, to fit within specification that it will only be called once per page.
     // This also prevents the chance that caller can give different results or change the collection during traversal.
     // The next item is desired is shared with the underlying traversal
-    final PageRef[] nextHint = new PageRef[]{page.getPageRef()};
+    final PageRef[] nextHint = new PageRef[] {page.getPageRef()};
     T result = traversePagesAnyOrderConcurrent(
         servletContext,
         request,
@@ -1139,12 +1139,11 @@ public final class CapturePage {
         cache,
         nextHint
     );
-    /* TODO:
-    assert result != null || parents.isEmpty();
-    assert result != null || nexts.isEmpty();
-    assert result != null || afters.isEmpty();
-    assert result != null || received.isEmpty();
-     */
+    // TODO:
+    // assert result != null || parents.isEmpty();
+    // assert result != null || nexts.isEmpty();
+    // assert result != null || afters.isEmpty();
+    // assert result != null || received.isEmpty();
     return result;
   }
 

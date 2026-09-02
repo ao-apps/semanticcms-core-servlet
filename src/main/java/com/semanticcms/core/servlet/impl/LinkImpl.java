@@ -476,7 +476,7 @@ public final class LinkImpl {
       // Add nofollow consistent with view and page settings.
       boolean nofollow = targetPage != null && !view.getAllowRobots(servletContext, request, response, targetPage);
 
-      final String element_ = element;
+      final String finalElement = element;
       if (small) {
         AnySPAN<?, ?, ?, ?, ?> span = content.span();
         if (clazz != null) {
@@ -493,7 +493,7 @@ public final class LinkImpl {
             } else if (targetPage != null) {
               span__.text(targetPage.getTitle());
             } else {
-              span__.text(text -> writeBrokenPath(targetPageRef, element_, text));
+              span__.text(text -> writeBrokenPath(targetPageRef, finalElement, text));
             }
             if (index != null) {
               span__.sup__any(sup -> sup
@@ -551,7 +551,7 @@ public final class LinkImpl {
             } else if (targetPage != null) {
               a_c.pc().text(targetPage.getTitle());
             } else {
-              a_c.pc().text(text -> writeBrokenPath(targetPageRef, element_, text));
+              a_c.pc().text(text -> writeBrokenPath(targetPageRef, finalElement, text));
             }
             if (index != null) {
               a_c.pc().sup__any(sup -> sup
