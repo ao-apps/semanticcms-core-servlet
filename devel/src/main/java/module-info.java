@@ -1,6 +1,6 @@
 /*
  * semanticcms-core-servlet - Java API for modeling web page content and relationships in a Servlet environment.
- * Copyright (C) 2021, 2022  AO Industries, Inc.
+ * Copyright (C) 2021, 2022, 2026  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -21,10 +21,11 @@
  * along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/>.
  */
 module com.semanticcms.core.servlet.devel {
-  exports com.semanticcms.core.servlet.i18n;
   // Direct
   requires com.aoapps.hodgepodge; // <groupId>com.aoapps</groupId><artifactId>ao-hodgepodge</artifactId>
   requires static jsr305; // <groupId>com.google.code.findbugs</groupId><artifactId>jsr305</artifactId>
   // Java SE
   requires java.logging;
+
+  exports com.semanticcms.core.servlet.i18n;
 }

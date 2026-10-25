@@ -21,8 +21,6 @@
  * along with semanticcms-core-servlet.  If not, see <https://www.gnu.org/licenses/>.
  */
 module com.semanticcms.core.servlet {
-  exports com.semanticcms.core.servlet;
-  exports com.semanticcms.core.servlet.impl;
   // Direct
   requires com.aoapps.collections; // <groupId>com.aoapps</groupId><artifactId>ao-collections</artifactId>
   requires com.aoapps.concurrent; // <groupId>com.aoapps</groupId><artifactId>ao-concurrent</artifactId>
@@ -51,4 +49,7 @@ module com.semanticcms.core.servlet {
   // Java SE
   requires java.logging;
   requires java.xml;
+
+  exports com.semanticcms.core.servlet;
+  exports com.semanticcms.core.servlet.impl;
 }
